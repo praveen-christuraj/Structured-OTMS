@@ -1,0 +1,182 @@
+
+OTMS-Rebuild — Working Notes & Developer Guide (up to Tank Transactions: Entry Calculations)
+==========================================================================================
+
+Scope of this document
+----------------------
+This file captures where we are **right now** and how things are wired:
+• App skeleton & navigation (glass-style sidebar with role/location header + logout confirm)
+• Authentication (first-run Admin-Operations seed, session user object, 30‑min timeout target)
+• Location-aware behavior (Home selection → session_state.active_location_id)
+• Role-based page access stubs (PermissionManager hooks + UI filters)
+• Location Settings (per‑location page toggles, now also **tab-level** toggles for Tank Transactions)
+• Asset Management scaffolding (Tanks/Vessels/Tankers with calibration & ASTM Table 11 import stubs)
+• Tank Transactions page — **Entry-side calculations** foundation (no DB writes yet)
+• View Transactions split into a separate page (read‑only, date range, export)
+
+Project structure (current, simplified)
+--------------------------------------
+D:\Project OTMS-Rebuild├─ main_app.py                              # Streamlit entry; builds sidebar, routes pages
+├─ models.py                                # ORM entities (Location, Users, CalibrationTank, Table11, etc.)
+├─ db.py                                    # get_session() context manager
+├─ security.py                              # SecurityManager (audit logging hooks, 2FA reset placeholder)
+├─ permission_manager.py (optional)         # can_access_operational_pages(user) etc. (defense‑in‑depth)
+├─ location_config.py                       # get_location_page_visibility(), save_page_visibility()
+├─ utils_calc.py                            # All stock-calculation utilities (TOV/FW/GOV, API60, VCF, GSV, NSV, LT, MT…)
+├─ app_pages│  ├─ home.py                               # Select Active Location + summary cards
+│  ├─ login.py                              # Login window (glass button), first-run seed
+│  ├─ audit_log.py                          # (placeholder) will display SecurityManager entries
+│  ├─ my_tasks.py                           # (placeholder) task list
+│  ├─ manage_locations.py                   # CRUD locations (glass UI) — created earlier
+│  ├─ manage_users.py                       # CRUD users, role changes, 2FA reset, activate/deactivate
+│  ├─ location_settings.py                  # Per-location page & tab toggles (role & location aware)
+│  ├─ asset_management.py                   # Tanks/Vessels/Tankers + calibration upload + ASTM Table 11 import
+│  ├─ tank_transactions.py                  # Operational hub (tabs: Tank Entry/Meter/Condensate/PW/Production)
+│  └─ tank_transactions_view.py             # Read-only viewer (date range + CSV/XLSX export; PDFs next)
+└─ assets   └─ app_logo.png                          # Used in sidebar header
+
+Navigation & Sidebar
+--------------------
+• Sidebar uses a “glass” style. Top area shows:
+  – App logo
+  – Username, Role (with emoji), and Active Location
+  – Logout button (with confirmation prompt)
+• Single‑click navigation buttons (no radio buttons).
+• Sidebar options are filtered by:
+  – User role (via PermissionManager hooks, if present)
+  – Location Settings toggles (per‑location hide/show of pages)
+
+Authentication
+--------------
+• First-run credentials seeded for Admin-Operations (in login.py setup).
+• After login, a user dict is stored (e.g., username, role, id, location_id).
+• Session timeout target is 30 minutes (timer hook belongs in security/session utilities).
+
+Location Settings (page & tab toggles)
+--------------------------------------
+• location_config.py provides get_location_page_visibility() and save_page_visibility().
+• location_settings.py UI lets Admins control:
+  – Page-level access (e.g., Tank Transactions visible?)
+  – Tab-level access for Tank Transactions (Tank Entry, Meter, Condensate, Produced Water, Production).
+• Tank Transactions page double-checks these toggles (defense-in-depth) before rendering a tab.
+
+Asset Management
+----------------
+• One combined page: add/manage Tanks, Vessels (assign to location), Tankers.
+• Calibration upload (on the same creation screen) for tanks/yade/tankers.
+• ASTM Table 11 import tab (used later for LT factors, NSV→LT/MT conversions).
+
+Tank Transactions — Entry Calculations (current)
+------------------------------------------------
+Status: Live calculations wired; no DB WRITE yet (by design).
+The page shows five tabs (visibility controlled per-location):
+  1) Tank Entry
+  2) Meter Records
+  3) Condensate Records
+  4) Produced Water Records
+  5) Production
+
+For Tank Entry (so far):
+• Inputs: dip_cm, water_cm, sample temperature (°C/°F), API or density (pick one), tank temperature (°C/°F), BS&W %.
+• Calculations are centralized in utils_calc.py and surfaced in the page as **live** computed labels.
+• The page uses only st.form + st.form_submit_button for proper submission (no st.button inside forms).
+
+Core calculation chain (utils_calc.py)
+-------------------------------------
+Interpolation:
+• tank_volume_from_dip_cm(sess, tank_name, dip_cm) → TOV (bbl)
+• free_water_from_water_cm(sess, tank_name, water_cm) → FW (bbl)
+• GOV = max(TOV - FW, 0)
+
+API @60°F (two routes):
+• api60_from_api_obs(api_obs, sample_temp, unit)  → uses api_observed_to_api60(...)
+• api60_from_density_obs(density_obs, sample_temp, unit) → uses density_obs_to_api60(...)
+(Compatibility functions ensure older calls still work.)
+
+VCF:
+• vcf_from_api60_and_tank_temp(api60, tank_temp, unit) → calls calculate_vcf(...)
+• calculate_vcf(api60, temp_f): alpha = 341.0957 / rho60²; vcf = exp(-alpha ΔT − 0.8 α² ΔT²)
+
+Volumes:
+• gsv_from_gov_vcf(GOV, VCF) → GSV (rounded 0 dp)
+• bsw_volume_from_gsv_pct(GSV, BSW%) → BSW volume
+• nsv_from_gsv_bsw(GSV, BSW_bbl) → NSV (rounded, clamped ≥ 0)
+(Convenience: nsv_from_gsv_bsw_pct(GSV, BSW%) if enabled)
+
+LT / MT:
+• get_lt_factor(sess, api60) → interpolate Table 11
+• lt_from_nsv_api(sess, NSV, api60) → (LT, lt_factor)
+• mt_from_lt(LT) and mass_lt_from_mt(MT)
+• mass_mt_from_gsv_api60(GSV, api60) → direct MT (via Table 11 then 1.01605)
+
+Small converters:
+• density_from_api(api) and api_from_density(density)
+• normalize_temp_unit(), c_to_f(), f_to_c(), bounded_temp()
+
+Viewer page (read-only)
+-----------------------
+• tank_transactions_view.py shows a date‑ranged query with CSV/XLSX download.
+• Audit log hook: SecurityManager.log_audit(...) is called on view.
+• PDF export scaffolding exists; conventional A4 portrait with 0.5 cm margins is planned.
+
+Audit logging
+-------------
+• SecurityManager.log_audit(user/session, action, resource_type, resource_id, details, location_id) is called on viewer.
+• We will hook CREATE/UPDATE/DELETE on Tank Transactions entries in the next steps, including deletion‑approval flow.
+
+What to verify before continuing
+--------------------------------
+1) Table11 data loaded (Asset Management → ASTM Table 11 import).
+2) Tank calibration loaded for the sample tank(s).
+3) Location toggles set to show Tank Transactions + the tabs you need.
+4) utils_calc.py available and importable in app_pages.tank_transactions and others.
+5) No st.button within st.form anywhere (use st.form_submit_button).
+
+Recommended plan (my POV)
+-------------------------
+Given your intent to finish **all entry tabs** first, we’ll do it in this order to maximize reuse and minimize regression:
+A) Finalize Tank Entry tab (WRITE path + audit + delete approval + PDF)
+   • Save flow (ORM write), edit flow (row-by-row updates), guarded delete flow with approval & audit
+   • Standardized PDF print: “Daily Tank Entry” (A4 portrait, 0.5 cm margins) + CSV/XLSX
+   • Unit tests: calculation drift checks (spot values), validation ranges, negative clamps
+
+B) Implement Meter Records tab (Entry UX + calculations if any + write path + audit + PDF)
+   • Reuse tank selectors + calibration where relevant
+   • Common components: date pickers, glass buttons, export
+
+C) Implement Condensate Records tab (Entry UX + write path + audit + PDF)
+   • Leverage common validators; reuse GSV/VCF pipeline if applicable
+
+D) Implement Produced Water Records tab (Entry UX + write path + audit + PDF)
+   • Separate validation (may not need API/VCF; mostly volumes + disposal/export references)
+
+E) Implement Production tab (Entry UX + write path + audit + summary cards + PDF)
+   • Per-location behavior hooks where the logic diverges (e.g., Beneku nuances)
+   • Common reporting blocks and exports
+
+F) Only after (A–E): Build **View Transactions (All)** page
+   • Single viewer with tabs: Tank / Meter / Condensate / Produced Water / Production
+   • Shared date range header + unified export bar (CSV/XLSX/PDF)
+   • Consistent column conventions; audit on queries
+
+Why this order?
+• It keeps the data model and write-paths stable before we build the “single pane of glass” viewer.
+• It avoids reworking the viewer multiple times as schemas firm up from each entry tab.
+• It ensures the audit trail is complete from day one for every type of entry.
+
+Next action checklist
+---------------------
+1) Tank Entry tab — add WRITE path with validations (min/max, required fields) and audit logging.
+2) Add deletion approval mini-flow (operator cannot delete; supervisor/manager/Admin can; audit + soft-delete).
+3) Add “Conventional PDF” generator for Tank Entry (A4 portrait, 0.5 cm margins; same design as other reports).
+4) Lock down Role & Location checks (PermissionManager + per-location tab toggles) for all five tabs.
+5) Commit and tag as “TankTx-Entry-v1”. Then proceed to Meter Records entry.
+
+Appendix — Common validation ranges (suggested)
+-----------------------------------------------
+• Dip/Water: 0–(tank reference height) cm (use tank’s calibration bounds if available)
+• Sample Temp: °C 0–60, °F 32–120 (bounded_temp())
+• Tank Temp: °C 0–60, °F 32–120 (bounded_temp())
+• API Obs: > 0 (prefer 8–50 typical range)
+• Density Obs: > 0 (typical 650–1050 kg/m³)
+• BS&W %: 0–100 (bounded and integer rounding for volumes)

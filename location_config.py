@@ -1,0 +1,444 @@
+# location_config.py
+"""
+Location-specific configuration management.
+Allows each location to have customized settings for operations, validations, etc.
+"""
+
+from typing import Dict, Any, List, Optional
+import json
+from sqlalchemy.orm import Session
+
+
+# ==================== DEFAULT CONFIGURATION ====================
+DEFAULT_CONFIG = {
+    "page_visibility": {
+        "show_tank_transactions": True,
+        "show_tanker_transactions": False,  # Enabled only for specific locations
+        "show_yade_transactions": False,    # Enabled only for specific locations
+        "show_toa_yade": False,             # Enabled only for specific locations
+    },
+    "page_access": {
+        "Tank Transactions": True,
+        "Yade Transactions": True,
+        "Tanker Transactions": True,
+        "Yade Tracking": True,
+        "Yade-Vessel Mapping": True,
+        "Convoy Status": True,
+        "OTR-Vessel": True,
+        "FSO-Operations": True,
+        "TOA-Yade": True,
+        "OTR": True,
+        "BCCR": True,
+        "Material Balance": True,
+        "Reporting": True,
+    },
+    # NOTE: We will use the nested "tabs_access" -> "Tank Transactions" for per-tab toggles.
+    # Keys below are defaults only; they are merged with stored JSON.
+    "tabs_access": {
+        "Tank Transactions": {
+            # New canonical tab names (exactly as shown in UI)
+            "Tank Entry": True,
+            "Meter Records": False,
+            "Condensate Records": False,
+            "Produced Water Records": False,
+            "Production": False,
+        },
+        "FSO-Operations": {
+            "📊 OTR": True,
+            "📈 Material Balance": True
+        },
+        "BCCR": {
+            "Mapping": True,
+            "BCCR Report": True
+        },
+        "Yade-Vessel Mapping": {
+            "Mapping": True,
+            "Comparison": True
+        }
+    },
+    "tank_transactions": {
+        "enabled_operations": [
+            "Opening Stock",
+            "Receipt",
+            "Receipt from Agu",
+            "Receipt from OFS",
+            "OKW Receipt",
+            "ANZ Receipt",
+            "Other Receipts",
+            "ITT - Receipt",
+            "Dispatch to barge",
+            "Other Dispatch",
+            "ITT - Dispatch",
+            "Settling",
+            "Draining"
+        ],
+        "product_types": [
+            "CRUDE",
+            "CONDENSATE",
+            "DPK",
+            "AGO",
+            "PMS"
+        ],
+        "max_days_backward": 30,
+        "allow_future_dates": False,
+        "auto_generate_ticket_id": True,
+        "ticket_id_prefix": ""
+    },
+    "yade_transactions": {
+        "enabled_cargo_types": ["OKW", "ANZ", "CONDENSATE", "CRUDE"],
+        "enabled_destinations": [
+            "NEMBE CK", "BONNY", "BRASS", "FORCADOS",
+            "ESCRAVOS", "WARRI", "PORT HARCOURT"
+        ],
+        "enabled_loading_berths": ["BERTH 1", "BERTH 2", "BERTH 3"],
+        "enable_seal_tracking": True,
+        "auto_generate_voyage_no": False
+    },
+    "otr": {
+        "auto_calculate_volumes": True,
+        "require_calibration_data": True,
+        "enable_temperature_correction": True,
+        "decimal_precision": 2,
+        "volume_unit": "BBL",
+        "temperature_unit": "C"
+    },
+    "otr_vessel": {
+        "preferred_vessel_ids": []
+    },
+    "ui_customization": {
+        "show_quick_entry_mode": True,
+        "enable_bulk_upload": False,
+        "default_date": "today"
+    }
+}
+
+
+# ==================== LocationConfig CLASS ====================
+class LocationConfig:
+    """Manage location-specific configurations"""
+
+    @staticmethod
+    def get_config(session: Session, location_id: int) -> Dict[str, Any]:
+        """
+        Get configuration for a specific location.
+        Applies location-specific overrides based on location code.
+        """
+        from models import Location, LocationConfiguration
+
+        # Start with default config (deep-copy nested dicts to avoid mutation)
+        config = DEFAULT_CONFIG.copy()
+        config["page_visibility"] = DEFAULT_CONFIG["page_visibility"].copy()
+        config["tank_transactions"] = DEFAULT_CONFIG["tank_transactions"].copy()
+        config["yade_transactions"] = DEFAULT_CONFIG["yade_transactions"].copy()
+        config["otr"] = DEFAULT_CONFIG["otr"].copy()
+        config["otr_vessel"] = DEFAULT_CONFIG["otr_vessel"].copy()
+        config["ui_customization"] = DEFAULT_CONFIG["ui_customization"].copy()
+        config["tabs_access"] = {
+            k: (v.copy() if isinstance(v, dict) else v)
+            for k, v in DEFAULT_CONFIG.get("tabs_access", {}).items()
+        }
+
+        # Load from database if exists
+        db_config = session.query(LocationConfiguration).filter(
+            LocationConfiguration.location_id == location_id
+        ).one_or_none()
+
+        if db_config and db_config.config_json:
+            try:
+                stored_config = json.loads(db_config.config_json)
+                # Deep merge stored config into default
+                for key, value in stored_config.items():
+                    if isinstance(value, dict) and key in config:
+                        # nested deep-merge
+                        if key == "tabs_access":
+                            tabs_def = config["tabs_access"]
+                            for page_name, tab_dict in value.items():
+                                if isinstance(tab_dict, dict):
+                                    tabs_def.setdefault(page_name, {})
+                                    tabs_def[page_name].update(tab_dict)
+                                else:
+                                    tabs_def[page_name] = tab_dict
+                        else:
+                            config[key].update(value)
+                    else:
+                        config[key] = value
+            except Exception:
+                pass  # Use default if parsing fails
+
+        # Location-specific overrides (by code)
+        loc = session.query(Location).filter(Location.id == location_id).one_or_none()
+        if loc:
+            code = (loc.code or "").upper()
+
+            # TANKER LOCATIONS (Ndoni, Aggu, Oguali, Ogini)
+            if code in ["NDONI", "AGGU", "OGUALI", "OGINI"]:
+                config["page_visibility"]["show_tanker_transactions"] = True
+
+            # YADE LOCATIONS (Ndoni only for now)
+            if code == "NDONI":
+                config["page_visibility"]["show_yade_transactions"] = True
+                config["page_visibility"]["show_toa_yade"] = True
+            else:
+                config["page_visibility"]["show_yade_transactions"] = False
+                config["page_visibility"]["show_toa_yade"] = False
+
+            # Tank transactions (enabled for all locations by default)
+            config["page_visibility"]["show_tank_transactions"] = True
+
+        return config
+
+    @staticmethod
+    def save_config(session: Session, location_id: int, config: Dict[str, Any]) -> bool:
+        """Save configuration for a location"""
+        from models import LocationConfiguration
+
+        try:
+            db_config = session.query(LocationConfiguration).filter(
+                LocationConfiguration.location_id == location_id
+            ).one_or_none()
+
+            config_json = json.dumps(config)
+
+            if db_config:
+                db_config.config_json = config_json
+            else:
+                db_config = LocationConfiguration(
+                    location_id=location_id,
+                    config_json=config_json
+                )
+                session.add(db_config)
+
+            session.commit()
+            return True
+        except Exception as e:
+            session.rollback()
+            raise e
+
+    @staticmethod
+    def reset_to_default(session: Session, location_id: int) -> bool:
+        """Reset location configuration to default"""
+        from models import LocationConfiguration
+
+        try:
+            db_config = session.query(LocationConfiguration).filter(
+                LocationConfiguration.location_id == location_id
+            ).one_or_none()
+
+            if db_config:
+                session.delete(db_config)
+                session.commit()
+
+            return True
+        except Exception as e:
+            session.rollback()
+            raise e
+
+    @staticmethod
+    def get_enabled_operations(session: Session, location_id: int) -> list:
+        """Get list of enabled operations for a location"""
+        config = LocationConfig.get_config(session, location_id)
+        return config.get("tank_transactions", {}).get("enabled_operations", [])
+
+    @staticmethod
+    def is_operation_enabled(session: Session, location_id: int, operation: str) -> bool:
+        """Check if a specific operation is enabled for a location"""
+        enabled_ops = LocationConfig.get_enabled_operations(session, location_id)
+        return operation in enabled_ops
+
+    @staticmethod
+    def enable_tanker_transactions_for_location(session: Session, location_code: str) -> bool:
+        """
+        Enable tanker transactions for a specific location.
+        Helper method for one-time setup.
+        """
+        from models import Location
+
+        loc = session.query(Location).filter(Location.code == location_code).one_or_none()
+        if not loc:
+            return False
+
+        config = LocationConfig.get_config(session, loc.id)
+
+        # Enable tanker transactions
+        config["page_visibility"]["show_tanker_transactions"] = True
+
+        LocationConfig.save_config(session, loc.id, config)
+        return True
+
+
+# ==================== ONE-TIME SETUP UTILITY ====================
+def setup_tanker_locations():
+    """
+    One-time setup to enable tanker transactions for the 4 locations.
+    Run this once after adding locations (or it will auto-enable via get_config).
+    """
+    from db import get_session
+
+    tanker_locations = ["NDONI", "AGGU", "OGUALI", "OGINI"]
+
+    with get_session() as s:
+        for code in tanker_locations:
+            result = LocationConfig.enable_tanker_transactions_for_location(s, code)
+            if result:
+                print(f"✅ Enabled tanker transactions for {code}")
+            else:
+                print(f"⚠️ Location {code} not found")
+        s.commit()
+
+
+# ==================== SIMPLE PAGE VISIBILITY HELPERS ====================
+def get_location_page_visibility(session: Session, location_id: int) -> Dict[str, bool]:
+    """
+    Quick helper to get page visibility settings for a location.
+    Returns: {"show_tank_transactions": bool, "show_tanker_transactions": bool, ...}
+    """
+    config = LocationConfig.get_config(session, location_id)
+    return config.get("page_visibility", {})
+
+
+# ==================== TANK TRANSACTIONS TAB VISIBILITY ====================
+# Canonical labels for the 5 tabs as shown in UI
+_TT_TAB_LABELS = [
+    "Tank Entry",
+    "Meter Records",
+    "Condensate Records",
+    "Produced Water Records",
+    "Production",
+]
+
+def get_tank_transactions_tab_visibility(session: Session, location_id: int) -> Dict[str, bool]:
+    """
+    Return per-tab visibility for 'Tank Transactions' page for a location.
+    Keys are friendly labels exactly as shown in UI (see _TT_TAB_LABELS).
+    """
+    cfg = LocationConfig.get_config(session, location_id)
+    tabs_access = cfg.get("tabs_access", {})
+    tt_tabs = tabs_access.get("Tank Transactions", {}) or {}
+
+    # Merge defaults with stored
+    defaults = {
+        "Tank Entry": True,
+        "Meter Records": False,
+        "Condensate Records": False,
+        "Produced Water Records": False,
+        "Production": False,
+    }
+    out = defaults.copy()
+    out.update({k: bool(v) for k, v in tt_tabs.items() if k in defaults})
+    return out
+
+def save_tank_transactions_tab_visibility(session: Session, location_id: int, new_flags: Dict[str, bool]) -> None:
+    """
+    Persist per-tab visibility for 'Tank Transactions' under cfg['tabs_access']['Tank Transactions'].
+    Only recognized tab names are stored.
+    """
+    cfg = LocationConfig.get_config(session, location_id)
+    tabs_access = cfg.get("tabs_access", {})
+    current = tabs_access.get("Tank Transactions", {}) or {}
+
+    sanitized = {}
+    for label in _TT_TAB_LABELS:
+        if label in new_flags:
+            sanitized[label] = bool(new_flags[label])
+        else:
+            # keep existing or fall back to default if not present
+            sanitized[label] = bool(current.get(label, {
+                "Tank Entry": True,
+                "Meter Records": False,
+                "Condensate Records": False,
+                "Produced Water Records": False,
+                "Production": False,
+            }[label]))
+
+    tabs_access["Tank Transactions"] = sanitized
+    cfg["tabs_access"] = tabs_access
+    LocationConfig.save_config(session, location_id, cfg)
+
+
+# ==================== NEW: METERS (ASSET) & ASSIGNMENT ====================
+def get_all_meters(session: Session):
+    """Return all meter assets (ordered by name)."""
+    from models import Meter
+    return session.query(Meter).order_by(Meter.name.asc()).all()
+
+def create_meter(session: Session, code: str, name: str, status: str = "active") -> int:
+    """Create a meter asset and return its ID."""
+    from models import Meter
+    m = Meter(code=code.strip(), name=name.strip(), status=(status or "active"))
+    session.add(m)
+    session.commit()
+    return int(m.id)
+
+def delete_meter(session: Session, meter_id: int) -> None:
+    """
+    Delete a meter asset and any location mappings referencing it.
+    Safe to call even if meter_id does not exist.
+    """
+    from models import Meter, LocationMeter
+    session.query(LocationMeter).filter(LocationMeter.meter_id == int(meter_id)).delete()
+    session.query(Meter).filter(Meter.id == int(meter_id)).delete()
+    session.commit()
+
+def get_location_meters(session: Session, location_id: int):
+    """Return meter assets assigned to a location (as Meter rows)."""
+    from models import Meter, LocationMeter
+    q = (
+        session.query(Meter)
+        .join(LocationMeter, LocationMeter.meter_id == Meter.id)
+        .filter(LocationMeter.location_id == int(location_id))
+        .order_by(Meter.name.asc())
+    )
+    return q.all()
+
+def set_location_meters(session: Session, location_id: int, meter_ids: List[int]) -> None:
+    """Replace all meter assignments for a location."""
+    from models import LocationMeter
+    session.query(LocationMeter).filter(LocationMeter.location_id == int(location_id)).delete()
+    for mid in (meter_ids or []):
+        session.add(LocationMeter(location_id=int(location_id), meter_id=int(mid)))
+    session.commit()
+
+
+# ==================== NEW: GENERIC PER-PAGE SECTION CONFIG ====================
+# Used to store JSON configs per location/page/section (e.g., condensate streams, labels, etc.)
+def _get_cfg_row(session: Session, location_id: int, page: str, section: str):
+    from models import LocationPageConfig
+    return (
+        session.query(LocationPageConfig)
+        .filter(LocationPageConfig.location_id == int(location_id))
+        .filter(LocationPageConfig.page == str(page))
+        .filter(LocationPageConfig.section == str(section))
+        .one_or_none()
+    )
+
+def get_page_section_config(session: Session, location_id: int, page: str, section: str) -> Dict[str, Any]:
+    """
+    Read a JSON config for a location/page/section.
+    Returns {} if not found or JSON invalid.
+    """
+    row = _get_cfg_row(session, location_id, page, section)
+    if not row or not getattr(row, "config_json", None):
+        return {}
+    try:
+        return json.loads(row.config_json)
+    except Exception:
+        return {}
+
+def set_page_section_config(session: Session, location_id: int, page: str, section: str, cfg: Dict[str, Any]) -> None:
+    """
+    Upsert a JSON config for a location/page/section.
+    """
+    from models import LocationPageConfig
+    row = _get_cfg_row(session, location_id, page, section)
+    cfg_str = json.dumps(cfg or {}, ensure_ascii=False)
+    if row:
+        row.config_json = cfg_str
+    else:
+        row = LocationPageConfig(
+            location_id=int(location_id),
+            page=str(page),
+            section=str(section),
+            config_json=cfg_str,
+        )
+        session.add(row)
+    session.commit()

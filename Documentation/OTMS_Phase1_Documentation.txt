@@ -1,0 +1,260 @@
+
+OTMS – PHASE 1 DOCUMENTATION (Structure & Working Guide)
+========================================================
+
+Version: Phase 1 (Security & Navigation Shell)
+Date: Generated automatically
+
+--------------------------------------------------------
+1) PURPOSE
+--------------------------------------------------------
+This document explains the structure and behavior of the OTMS application after completing Phase 1:
+- Authentication (Login/Logout), session timeout, and audit logging
+- Role-based page access
+- Location-aware behavior hooks
+- Core pages in Phase 1: Home, My Tasks, Manage Locations, Manage Users, Audit Log
+- Light/glass UI theme and single-click sidebar navigation
+This matches the old application’s security/navigation behavior while preparing for Phase 2/3 operational pages.
+
+
+--------------------------------------------------------
+2) FOLDER & FILE STRUCTURE (Top-level)
+--------------------------------------------------------
+Project Root
+├─ main_app.py                    # Entry point (routing, session, nav, theme)
+├─ Launch_OTMS.bat                # Windows launcher (optional)
+├─ assets/                        # Logos, images, icons
+│   ├─ app_logo.png              # Application logo (used in sidebar)
+│   └─ ...                       # Other assets
+├─ app_pages/                     # Page files (each page = separate module)
+│   ├─ __init__.py
+│   ├─ login.py                  # Login UI and authentication submission
+│   ├─ home.py                   # Home page (location selector + summary cards)
+│   ├─ my_tasks.py               # Tasks assigned to current user
+│   ├─ manage_locations.py       # Create + list locations (Phase 1)
+│   ├─ manage_users.py           # Create + edit users (role/location/pwd/2FA/active/delete)
+│   └─ audit_log.py              # Audit trail viewer (admin/manager)
+├─ db.py                          # DB engine+session helpers, init_db()
+├─ models.py                      # SQLAlchemy ORM models (User, Location, AuditLog, etc.)
+├─ auth.py                        # AuthManager: create_user, authenticate, update_password, etc.
+├─ security.py                    # SecurityManager: session timeout, audit logging, last_activity
+├─ permission_manager.py          # Role-based checks
+├─ location_manager.py            # Location CRUD/select helpers
+├─ location_config.py             # Per-location page visibility (Phase 2/3 hooks)
+├─ dashboard_utils.py             # Summary card metrics for Home
+├─ task_manager.py                # Task fetch/update (My Tasks)
+├─ twofa.py                       # 2FA enable/disable (reset)
+├─ logger.py                      # Optional app logging helpers
+└─ ... other helpers (utils_calc, material_balance_calculator, etc.)
+
+
+--------------------------------------------------------
+3) APPLICATION FLOW (HIGH-LEVEL)
+--------------------------------------------------------
+1. main_app.py boots:
+   - init_db() ensures tables exist.
+   - ensure_default_admin_user() seeds the first admin if there are no users (username=admin, password=Admin@123, role=admin-operations).
+   - Session defaults are created.
+
+2. If NOT logged in:
+   - Only the Login page is shown (app_pages/login.py).
+   - Successful login stores user dict in st.session_state["auth_user"].
+   - Audit entries are recorded for login (success/failure).
+
+3. If logged in:
+   - Session timeout check runs:
+     * Timeout: 30 minutes of inactivity (SecurityManager.SESSION_TIMEOUT_MINUTES = 30).
+     * When <5 minutes remaining, a sidebar warning is shown.
+     * If expired: log SESSION_EXPIRED, clear session, show Login.
+   - Last activity timestamp is refreshed in DB and in session (sliding timeout).
+   - Sidebar pages are computed with get_pages(user, active_location_id):
+     * Role-based: uses PermissionManager (Phase 1 pages: Home/My Tasks for all; Manage Locations/Users/Audit Log only for admin roles).
+     * Location-aware: hooks are present to read per-location visibility flags (for Phase 2/3 operational pages).
+   - Single-click navigation updates st.session_state["current_page"] and calls st.rerun().
+
+4. Pages (Phase 1):
+   - Home: location selector + summary (DashboardMetrics). Non-admins are locked to their assigned location; admins can switch.
+   - My Tasks: list & act on tasks assigned to user (TaskManager).
+   - Manage Locations: create & list locations; audit CREATE.
+   - Manage Users: create, edit role/location/name, reset password, toggle active, reset 2FA, delete; audits for all actions.
+   - Audit Log: filter & view audit entries (admin-operations/admin-it/manager).
+
+
+--------------------------------------------------------
+4) ROLE-BASED ACCESS (PHASE 1)
+--------------------------------------------------------
+Roles:
+- operator
+- supervisor
+- manager
+- admin-it
+- admin-operations
+
+Sidebar Pages by Role (Phase 1):
+- All roles: Home, My Tasks
+- Admin roles (admin-operations, admin-it): Manage Locations, Manage Users, Audit Log
+- Manager: Home, My Tasks, Audit Log (read-only)
+- Supervisor/Operator: Home, My Tasks
+
+PermissionManager is used to decide visibility of management pages.
+(When operational pages are added in later phases, PermissionManager.can_access_operational_pages(user) + Location Settings will also be applied.)
+
+
+--------------------------------------------------------
+5) LOCATION-AWARE BEHAVIOR
+--------------------------------------------------------
+- On login, st.session_state["active_location_id"] defaults to the user’s assigned location_id when present.
+- Home page behavior:
+  * Admins (admin-operations, admin-it): can choose any location from the selector.
+  * Non-admins with assigned location: selector is locked to their assigned location.
+  * Non-admins without assigned location: free selection (admin must assign later).
+- Location Settings (Phase 2/3):
+  * location_config.get_location_page_visibility(session, location_id) returns a dict of visibility flags:
+    - show_tank_transactions
+    - show_yade_transactions
+    - show_fso_operations
+    - show_reports
+  * get_pages(user, active_location_id) reads these flags to populate sidebar with operational pages (when those pages exist).
+
+
+--------------------------------------------------------
+6) SESSION TIMEOUT (30 MIN) & WARNINGS
+--------------------------------------------------------
+- SecurityManager.SESSION_TIMEOUT_MINUTES = 30 (set in main_app.py).
+- SecurityManager.is_session_expired(user_dict) checks session inactivity.
+- When time left < 5 minutes:
+  * Sidebar shows: “Session expires in ~N minute(s). Any activity will keep you logged in.”
+- On expiration:
+  * Audit: action=SESSION_EXPIRED, resource_type=User, success=False
+  * App clears auth_user, active_location_id, current_page, logout_confirm, and shows Login again.
+- Each request (rerun), the app updates last_activity:
+  * DB: SecurityManager.update_last_activity(session, user_id)
+  * Session: user["last_activity"] = datetime.utcnow().isoformat()
+
+
+--------------------------------------------------------
+7) AUDIT LOGGING (WHAT GETS LOGGED IN PHASE 1)
+--------------------------------------------------------
+- Login success/failure (AuthManager.authenticate → SecurityManager.log_audit)
+- Logout (sidebar button with confirmation)
+- Session expired (main_app checks; logs SESSION_EXPIRED)
+- Manage Locations (CREATE)
+- Manage Users (CREATE, UPDATE details, PASSWORD_RESET, ACTIVATE, DEACTIVATE, 2FA_RESET, DELETE)
+- Tasks (status changes) via TaskManager.update_status (APPROVED/REJECTED/COMPLETED)
+
+Audit fields typically include:
+- timestamp, username, action, resource_type, resource_id, location_id, details, ip_address, success
+
+
+--------------------------------------------------------
+8) UI/UX CONVENTIONS (PHASE 1)
+--------------------------------------------------------
+- Light theme with glass-style buttons.
+- Sidebar:
+  * Logo at the top (assets/app_logo.png preferred; fallback to other paths).
+  * User info lines with emojis:
+    - 🧑‍💼 Username: <username>
+    - <role_icon> Role: <role>
+    - 📍 Location: <location_name or “Not assigned”>
+  * “🚪 Logout” shows a confirmation prompt before logging out.
+  * “📋 Navigation”: single-click icons for pages.
+- Emoji roles (shared mapping in manage_users.py; reused in main_app.py):
+  * operator: 👷
+  * supervisor: 👤
+  * manager: 👔
+  * admin-it: 💻
+  * admin-operations: 🏢
+
+
+--------------------------------------------------------
+9) CONFIGURATION POINTS
+--------------------------------------------------------
+- Default Admin Seeding:
+  * ensure_default_admin_user() in main_app.py creates the default admin if the users table is empty:
+    - username: admin
+    - password: Admin@123
+    - role: admin-operations
+  * Change immediately after first login.
+
+- Sidebar Logo:
+  * Place your logo in assets/app_logo.png (preferred).
+  * Fallback paths tried automatically: assets/logo.png, assets/logos/otms_logo.png.
+
+- Session Timeout:
+  * SecurityManager.SESSION_TIMEOUT_MINUTES = 30
+
+- Role Icons:
+  * Defined in app_pages/manage_users.py as ROLE_ICONS. main_app.py imports and reuses them.
+
+
+--------------------------------------------------------
+10) HOW TO RUN
+--------------------------------------------------------
+Option A — Console:
+    cd <project_root>
+    streamlit run main_app.py
+
+Option B — Batch File (Windows):
+    Double-click Launch_OTMS.bat
+    (Edit .venv activation inside the .bat if needed)
+
+First login credentials (only when DB is empty on first run):
+    username: admin
+    password: Admin@123
+
+After logging in:
+- Go to Manage Users to change the admin password and create other users.
+- Go to Manage Locations to create the first location.
+
+
+--------------------------------------------------------
+11) HOOKS FOR PHASE 2/3 (OPERATIONAL PAGES)
+--------------------------------------------------------
+- get_pages(user, active_location_id) already includes location-based visibility hooks.
+- When adding:
+  * Tank Transactions (app_pages/tank_transactions.py)
+  * YADE Transactions (app_pages/yade_transactions.py)
+  * FSO Operations (app_pages/fso_operations.py)
+  * Reports (app_pages/reports.py)
+  …just enable the commented section in get_pages and honor page_visibility flags:
+     show_tank_transactions / show_yade_transactions / show_fso_operations / show_reports
+- Each page should:
+  * Accept (active_location_id, user)
+  * Check PermissionManager.can_access_feature(session, active_location_id, "<feature>", role)
+  * Log CREATE/UPDATE/DELETE events with SecurityManager.log_audit
+  * Use TaskManager for approval-based deletions/sensitive actions
+
+
+--------------------------------------------------------
+12) TROUBLESHOOTING (PHASE 1)
+--------------------------------------------------------
+- “No locations found” on Home:
+  * Create the first location in Manage Locations.
+- Can’t see Manage Users / Manage Locations / Audit Log:
+  * Log in as admin-operations or admin-it.
+- Buttons require two clicks:
+  * Ensure sidebar nav uses st.rerun() on click (already implemented in _render_sidebar_nav).
+- experimental_rerun error:
+  * Use st.rerun() instead of st.experimental_rerun().
+- Role icons not showing in sidebar:
+  * Confirm main_app imports ROLE_ICONS from app_pages.manage_users:
+      from app_pages.manage_users import ROLE_ICONS as USER_ROLE_ICONS
+      ROLE_ICONS = USER_ROLE_ICONS
+- Logo not displayed:
+  * Place logo at assets/app_logo.png or update the fallback paths.
+
+
+--------------------------------------------------------
+13) CHANGELOG (Phase 1)
+--------------------------------------------------------
+- Implemented Login/Logout with audit logs
+- Implemented 30-minute session timeout with warning and SESSION_EXPIRED audit
+- Implemented role-based page visibility
+- Implemented location-aware behavior (admin vs non-admin)
+- Implemented My Tasks + Manage Locations + Manage Users + Audit Log
+- Implemented glass-style theme and single-click sidebar nav
+- Seeded default admin on first run
+
+--------------------------------------------------------
+END OF DOCUMENT
+--------------------------------------------------------

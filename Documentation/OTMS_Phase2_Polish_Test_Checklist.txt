@@ -1,0 +1,100 @@
+
+OTMS – PHASE 2 (Location Settings) – Step 4
+Polish & Test Checklist
+====================================================
+
+Scope of Phase 2:
+- Location Settings page (per-location page visibility toggles)
+- Sidebar reacts to toggles (with role gating + module presence)
+- Home shows “Location Access Overview” preview for the selected location
+
+Use this checklist after wiring Phase 2 Steps 1–3.
+
+----------------------------------------------------
+A) QUICK POLISH (UI/UX & Consistency)
+----------------------------------------------------
+[ ] Sidebar: Confirm “Location Settings” only shows for admin-operations and admin-it
+[ ] Location Settings: Page title uses compass emoji (🧭) and toggles use emojis
+[ ] Location Settings: Save button uses 💾 and shows success or error feedback
+[ ] Home: “Location Access Overview” shows four lines with emojis and ✅/⛔ states
+[ ] Home: If user role has NO operational access, caption explains that even enabled pages won’t appear
+[ ] Sidebar logo: visible on top; user info lines show Username, Role (with emoji), Location
+[ ] Single click nav: switching pages reruns immediately (no double-click feel)
+
+Optional polish:
+[ ] After saving Location Settings, display a small “Last saved at <time>” caption
+[ ] Add a short help tooltip on each toggle describing what the page contains (future)
+
+----------------------------------------------------
+B) PERMISSION GATING (ROLES)
+----------------------------------------------------
+Create users with roles: admin-operations, admin-it, manager, supervisor, operator
+
+Login as each and verify sidebar pages:
+- admin-operations / admin-it → Home, My Tasks, Manage Locations, Manage Users, Audit Log, Location Settings
+- manager → Home, My Tasks, (Audit Log if you allow it; read-only)
+- supervisor → Home, My Tasks
+- operator → Home, My Tasks
+
+[ ] Confirm that only admins can open Location Settings
+[ ] Confirm non-admins see Home location selector locked to their assigned location (if assigned)
+[ ] Confirm managers can see Audit Log only if permitted per your PermissionManager rules
+
+----------------------------------------------------
+C) LOCATION SETTINGS → SIDEBAR REACTIVITY
+----------------------------------------------------
+Assuming operational pages exist later as modules (tank, yade, fso, reports):
+- For now, this verifies the logic without breaking behavior when modules are missing.
+
+For each location L:
+1) Open Location Settings → select L
+2) Flip one toggle OFF (e.g., “YADE Transactions”)
+3) Save → Success toast appears
+4) Go to Home → Confirm “Location Access Overview” shows YADE as Disabled
+5) If the YADE page module exists, verify the sidebar hides YADE for users whose role has operational access
+6) Flip back to ON and repeat
+
+[ ] Loc A: Tank ON, YADE OFF, FSO ON, Reports ON
+[ ] Loc B: Tank OFF, YADE ON, FSO OFF, Reports ON
+[ ] Switch locations on Home and confirm the overview matches the toggles
+
+Edge cases:
+[ ] If the module file for a page is NOT present, the page should not appear even if toggle is ON (no error)
+[ ] If there are no locations in DB, Home instructs to add a location in Manage Locations
+
+----------------------------------------------------
+D) HOME – LOCATION BEHAVIOR
+----------------------------------------------------
+[ ] Admin users: can select any location from the dropdown
+[ ] Non-admin with assigned location: dropdown is disabled and locked to that location
+[ ] Non-admin with assigned location not active in system: warning + allow fallback selection
+[ ] Switching location updates the “Location Access Overview” panel
+[ ] Summary metrics still render without error (values can be zero with empty test DB)
+
+----------------------------------------------------
+E) SESSION & AUDIT CROSS-CHECK
+----------------------------------------------------
+[ ] Session timeout remains 30 minutes (no interference from Phase 2 changes)
+[ ] Audit Log entries exist for updating Location Settings (action=UPDATE, resource=LocationSettings)
+[ ] Login / Logout / Session expired entries still appear correctly
+[ ] Manage Users / Manage Locations actions still generate audit logs
+
+----------------------------------------------------
+F) CODE SAFETY & ROLLBACK
+----------------------------------------------------
+[ ] get_pages(user, active_location_id) includes “Location Settings” only for admin roles
+[ ] get_pages checks location flags via get_location_page_visibility()
+[ ] get_pages uses module existence check to avoid errors when ops pages aren’t added yet
+[ ] Home’s _render_location_access_overview() handles missing helpers gracefully (no crash)
+
+----------------------------------------------------
+G) HANDOVER NOTES
+----------------------------------------------------
+- The toggles in Location Settings only control visibility; they do not override deeper permission checks within pages.
+- When operational pages are implemented, ensure each page:
+  * Accepts (active_location_id, user)
+  * Verifies PermissionManager.can_access_feature() before rendering
+  * Logs all sensitive CREATE/UPDATE/DELETE actions
+- Keep the ROLE_ICONS mapping in a single source (manage_users.py) and import into main_app.py to avoid drift.
+
+END OF CHECKLIST
