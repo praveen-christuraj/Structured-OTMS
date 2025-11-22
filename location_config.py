@@ -7,6 +7,7 @@ Allows each location to have customized settings for operations, validations, et
 from typing import Dict, Any, List, Optional
 import json
 from sqlalchemy.orm import Session
+import uuid
 
 
 # ==================== DEFAULT CONFIGURATION ====================
@@ -16,6 +17,9 @@ DEFAULT_CONFIG = {
         "show_tanker_transactions": False,  # Enabled only for specific locations
         "show_yade_transactions": False,    # Enabled only for specific locations
         "show_toa_yade": False,             # Enabled only for specific locations
+        # Optional flags some code paths may read
+        "show_fso_operations": True,
+        "show_reports": True,
     },
     "page_access": {
         "Tank Transactions": True,
@@ -33,10 +37,9 @@ DEFAULT_CONFIG = {
         "Reporting": True,
     },
     # NOTE: We will use the nested "tabs_access" -> "Tank Transactions" for per-tab toggles.
-    # Keys below are defaults only; they are merged with stored JSON.
     "tabs_access": {
         "Tank Transactions": {
-            # New canonical tab names (exactly as shown in UI)
+            # Canonical tab labels (exactly as shown in UI)
             "Tank Entry": True,
             "Meter Records": False,
             "Condensate Records": False,
@@ -57,6 +60,7 @@ DEFAULT_CONFIG = {
         }
     },
     "tank_transactions": {
+        # Legacy list (kept for backward compatibility with older code paths)
         "enabled_operations": [
             "Opening Stock",
             "Receipt",
@@ -72,13 +76,7 @@ DEFAULT_CONFIG = {
             "Settling",
             "Draining"
         ],
-        "product_types": [
-            "CRUDE",
-            "CONDENSATE",
-            "DPK",
-            "AGO",
-            "PMS"
-        ],
+        "product_types": ["CRUDE", "CONDENSATE", "DPK", "AGO", "PMS"],
         "max_days_backward": 30,
         "allow_future_dates": False,
         "auto_generate_ticket_id": True,
@@ -163,7 +161,8 @@ class LocationConfig:
                     else:
                         config[key] = value
             except Exception:
-                pass  # Use default if parsing fails
+                # Use default if parsing fails
+                pass
 
         # Location-specific overrides (by code)
         loc = session.query(Location).filter(Location.id == location_id).one_or_none()
@@ -235,13 +234,13 @@ class LocationConfig:
 
     @staticmethod
     def get_enabled_operations(session: Session, location_id: int) -> list:
-        """Get list of enabled operations for a location"""
+        """Legacy helper for old code paths (tank_transactions.enabled_operations)."""
         config = LocationConfig.get_config(session, location_id)
         return config.get("tank_transactions", {}).get("enabled_operations", [])
 
     @staticmethod
     def is_operation_enabled(session: Session, location_id: int, operation: str) -> bool:
-        """Check if a specific operation is enabled for a location"""
+        """Check if a specific legacy operation is enabled for a location."""
         enabled_ops = LocationConfig.get_enabled_operations(session, location_id)
         return operation in enabled_ops
 
@@ -258,10 +257,7 @@ class LocationConfig:
             return False
 
         config = LocationConfig.get_config(session, loc.id)
-
-        # Enable tanker transactions
         config["page_visibility"]["show_tanker_transactions"] = True
-
         LocationConfig.save_config(session, loc.id, config)
         return True
 
@@ -355,7 +351,7 @@ def save_tank_transactions_tab_visibility(session: Session, location_id: int, ne
     LocationConfig.save_config(session, location_id, cfg)
 
 
-# ==================== NEW: METERS (ASSET) & ASSIGNMENT ====================
+# ==================== METERS (ASSET) & ASSIGNMENT ====================
 def get_all_meters(session: Session):
     """Return all meter assets (ordered by name)."""
     from models import Meter
@@ -399,8 +395,10 @@ def set_location_meters(session: Session, location_id: int, meter_ids: List[int]
     session.commit()
 
 
-# ==================== NEW: GENERIC PER-PAGE SECTION CONFIG ====================
-# Used to store JSON configs per location/page/section (e.g., condensate streams, labels, etc.)
+# ==================== GENERIC PER-PAGE SECTION CONFIG ====================
+# Used to store JSON configs per location/page/section (e.g., meters config, condensate meters,
+# produced-water dynamic columns, production dynamic columns, etc.)
+
 def _get_cfg_row(session: Session, location_id: int, page: str, section: str):
     from models import LocationPageConfig
     return (
@@ -442,8 +440,9 @@ def set_page_section_config(session: Session, location_id: int, page: str, secti
         )
         session.add(row)
     session.commit()
-# -------------------- Soft-table helpers (Produced Water / Production) --------------------
 
+
+# ==================== Soft-table helpers (Produced Water / Production) ====================
 def get_dynamic_table_def(session: Session, location_id: int, page: str, section: str) -> Dict[str, Any]:
     """
     Returns definition dict:
@@ -460,10 +459,8 @@ def get_dynamic_table_def(session: Session, location_id: int, page: str, section
     pc = cfg.setdefault("page_customization", {})
     page_bucket = pc.setdefault(page, {})
     section_bucket = page_bucket.setdefault(section, {})
-    # Normalize
     cols = section_bucket.get("columns") or []
     return {"columns": cols}
-
 
 def set_dynamic_table_def(session: Session, location_id: int, page: str, section: str, new_def: Dict[str, Any]) -> None:
     """
@@ -506,10 +503,8 @@ def set_dynamic_table_def(session: Session, location_id: int, page: str, section
 
     LocationConfig.save_config(session, location_id, cfg)
 
-# ===== Soft-coded Operations (per-location / per-asset / per-category) =====
-import uuid
-from typing import List, Optional
 
+# ==================== Soft-coded Operations (per-location / per-asset / per-category) ====================
 OP_ASSETS = ["tank", "yade", "tanker", "vessel"]
 OP_CATEGORIES = ["Opening", "Closing", "Receipt", "Dispatch", "Draining", "Others"]
 
