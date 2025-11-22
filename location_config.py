@@ -442,3 +442,187 @@ def set_page_section_config(session: Session, location_id: int, page: str, secti
         )
         session.add(row)
     session.commit()
+# -------------------- Soft-table helpers (Produced Water / Production) --------------------
+
+def get_dynamic_table_def(session: Session, location_id: int, page: str, section: str) -> Dict[str, Any]:
+    """
+    Returns definition dict:
+      {
+        "columns": [
+            {"name": "date", "label": "Date", "type": "date", "required": True},
+            {"name": "stream_a", "label": "Stream A (bbl)", "type": "number"},
+            {"name": "remarks", "label": "Remarks", "type": "text"}
+        ]
+      }
+    If not configured, returns {"columns": []}.
+    """
+    cfg = LocationConfig.get_config(session, location_id)
+    pc = cfg.setdefault("page_customization", {})
+    page_bucket = pc.setdefault(page, {})
+    section_bucket = page_bucket.setdefault(section, {})
+    # Normalize
+    cols = section_bucket.get("columns") or []
+    return {"columns": cols}
+
+
+def set_dynamic_table_def(session: Session, location_id: int, page: str, section: str, new_def: Dict[str, Any]) -> None:
+    """
+    Save the dynamic table definition under:
+      cfg["page_customization"][page][section] = {"columns": [...]}
+    Only allows text/number/date types; ensures at most one 'date' column.
+    """
+    allowed_types = {"text", "number", "date"}
+
+    columns = list(new_def.get("columns") or [])
+    # sanitize
+    cleaned = []
+    seen_date = False
+    for c in columns:
+        name = (c.get("name") or "").strip()
+        label = (c.get("label") or name or "").strip()
+        ctype = (c.get("type") or "text").lower()
+        required = bool(c.get("required", False))
+        if not name:
+            continue
+        if ctype not in allowed_types:
+            ctype = "text"
+        if ctype == "date":
+            if seen_date:
+                # ignore extra date columns
+                ctype = "text"
+            else:
+                seen_date = True
+        cleaned.append({
+            "name": name,
+            "label": label or name,
+            "type": ctype,
+            "required": required,
+        })
+
+    cfg = LocationConfig.get_config(session, location_id)
+    pc = cfg.setdefault("page_customization", {})
+    page_bucket = pc.setdefault(page, {})
+    page_bucket[section] = {"columns": cleaned}
+
+    LocationConfig.save_config(session, location_id, cfg)
+
+# ===== Soft-coded Operations (per-location / per-asset / per-category) =====
+import uuid
+from typing import List, Optional
+
+OP_ASSETS = ["tank", "yade", "tanker", "vessel"]
+OP_CATEGORIES = ["Opening", "Closing", "Receipt", "Dispatch", "Draining", "Others"]
+
+def _ensure_ops_root(cfg: Dict[str, Any]) -> Dict[str, Any]:
+    ops = cfg.setdefault("operations", {})
+    for asset in OP_ASSETS:
+        ops.setdefault(asset, {})
+        for cat in OP_CATEGORIES:
+            ops[asset].setdefault(cat, [])  # list of dicts: {id,name,active}
+    return ops
+
+def list_operations(
+    session: Session,
+    location_id: int,
+    *,
+    asset: Optional[str] = None,
+    category: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """Return operations defined for this location (optionally filtered)."""
+    cfg = LocationConfig.get_config(session, location_id)
+    ops = _ensure_ops_root(cfg)
+
+    out = []
+    assets = [asset] if asset in OP_ASSETS else OP_ASSETS
+    for a in assets:
+        cats = [category] if category in OP_CATEGORIES else OP_CATEGORIES
+        for c in cats:
+            for item in (ops[a][c] or []):
+                if not isinstance(item, dict):
+                    # backward compatibility (list of names)
+                    item = {"id": str(uuid.uuid4()), "name": str(item), "active": True}
+                out.append({"asset": a, "category": c, **item})
+    return out
+
+def add_operation(
+    session: Session,
+    location_id: int,
+    *,
+    asset: str,
+    category: str,
+    name: str,
+    active: bool = True,
+) -> Dict[str, Any]:
+    """Add a new operation entry (id, name, active) to config."""
+    assert asset in OP_ASSETS, "Invalid asset"
+    assert category in OP_CATEGORIES, "Invalid category"
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("Operation name required")
+
+    cfg = LocationConfig.get_config(session, location_id)
+    ops = _ensure_ops_root(cfg)
+
+    # prevent duplicates (case-insensitive) within same asset/category
+    exists = any((i.get("name","").strip().lower() == name.lower()) for i in ops[asset][category])
+    if exists:
+        raise ValueError("Operation already exists in this category")
+
+    new_item = {"id": str(uuid.uuid4()), "name": name, "active": bool(active)}
+    ops[asset][category].append(new_item)
+
+    cfg["operations"] = ops
+    LocationConfig.save_config(session, location_id, cfg)
+    return new_item
+
+def set_operation_active(
+    session: Session,
+    location_id: int,
+    *,
+    op_id: str,
+    active: bool,
+) -> bool:
+    cfg = LocationConfig.get_config(session, location_id)
+    ops = _ensure_ops_root(cfg)
+    changed = False
+    for a in OP_ASSETS:
+        for c in OP_CATEGORIES:
+            for i in ops[a][c]:
+                if i.get("id") == op_id:
+                    i["active"] = bool(active)
+                    changed = True
+                    break
+    if changed:
+        cfg["operations"] = ops
+        LocationConfig.save_config(session, location_id, cfg)
+    return changed
+
+def delete_operation(
+    session: Session,
+    location_id: int,
+    *,
+    op_id: str,
+) -> bool:
+    cfg = LocationConfig.get_config(session, location_id)
+    ops = _ensure_ops_root(cfg)
+    changed = False
+    for a in OP_ASSETS:
+        for c in OP_CATEGORIES:
+            before = len(ops[a][c])
+            ops[a][c] = [i for i in ops[a][c] if i.get("id") != op_id]
+            if len(ops[a][c]) != before:
+                changed = True
+    if changed:
+        cfg["operations"] = ops
+        LocationConfig.save_config(session, location_id, cfg)
+    return changed
+
+def get_active_operation_names(
+    session: Session,
+    location_id: int,
+    *,
+    asset: str,
+) -> List[str]:
+    """Flatten active operation names for a given asset (all categories)."""
+    ops = list_operations(session, location_id, asset=asset)
+    return [o["name"] for o in ops if o.get("active", True)]

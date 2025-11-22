@@ -158,3 +158,125 @@ def render_location_settings_page(active_location_id, user):
             st.success("Tank Transactions tab visibility saved for this location.")
         except Exception as ex:
             st.error(f"Failed to save tab visibility: {ex}")
+
+# --- Operations Configuration (per location / asset / category) ---
+def _render_operations_config(active_location_id, user):
+    import streamlit as st
+    from db import get_session
+    from location_config import (
+        OP_ASSETS, OP_CATEGORIES,
+        list_operations, add_operation,
+        set_operation_active, delete_operation,
+    )
+    from security import SecurityManager
+
+    st.markdown("### 🧩 Operations (per Location / Asset / Category)")
+
+    if not active_location_id:
+        st.info("Select a location on **Home** to configure operations.")
+        return
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        asset = st.selectbox("Asset", OP_ASSETS, format_func=lambda x: x.title())
+    with col2:
+        category = st.selectbox("Category", OP_CATEGORIES)
+    with col3:
+        st.write("")  # spacer
+
+    op_name = st.text_input("Operation name (e.g., 'Receipt from Agu')", key="op_name_input")
+
+    c1, c2 = st.columns([0.25, 0.75])
+    with c1:
+        if st.button("➕ Add Operation", type="primary"):
+            try:
+                with get_session() as s:
+                    item = add_operation(s, active_location_id, asset=asset, category=category, name=op_name, active=True)
+                    # audit
+                    try:
+                        SecurityManager.log_audit(
+                            s,
+                            (user or {}).get("username", "system"),
+                            "CREATE",
+                            resource_type="LocationOperation",
+                            resource_id=item["id"],
+                            details=f"Add op '{item['name']}' under {asset}/{category}",
+                            user_id=(user or {}).get("id"),
+                            location_id=active_location_id,
+                            ip_address=st.session_state.get("client_ip"),
+                            success=True,
+                        )
+                    except Exception:
+                        pass
+                st.success("Operation added.")
+                st.rerun()
+            except Exception as ex:
+                st.error(f"Failed: {ex}")
+
+    st.markdown("---")
+    st.markdown("#### Existing Operations")
+
+    with get_session() as s:
+        ops = list_operations(s, active_location_id)
+
+    if not ops:
+        st.info("No operations configured yet.")
+        return
+
+    # Filter by current selection (optional UX)
+    show_filtered = st.checkbox("Show only selected Asset/Category", value=True)
+    if show_filtered:
+        ops = [o for o in ops if o["asset"] == asset and o["category"] == category]
+
+    for o in ops:
+        colA, colB, colC, colD = st.columns([0.38, 0.22, 0.18, 0.22])
+        with colA:
+            st.write(f"**{o['name']}**")
+            st.caption(f"{o['asset'].title()} · {o['category']}")
+        with colB:
+            on = st.toggle("Active", value=o.get("active", True), key=f"op_active_{o['id']}")
+        with colC:
+            if st.button("💾 Save", key=f"op_save_{o['id']}"):
+                with get_session() as s:
+                    set_operation_active(s, active_location_id, op_id=o["id"], active=on)
+                    # audit
+                    try:
+                        SecurityManager.log_audit(
+                            s, (user or {}).get("username", "system"),
+                            "UPDATE",
+                            resource_type="LocationOperation",
+                            resource_id=o["id"],
+                            details=f"Set active={on} for '{o['name']}'",
+                            user_id=(user or {}).get("id"),
+                            location_id=active_location_id,
+                            ip_address=st.session_state.get("client_ip"),
+                            success=True,
+                        )
+                    except Exception:
+                        pass
+                st.success("Saved")
+        with colD:
+            if st.button("🗑️ Delete", key=f"op_del_{o['id']}"):
+                if st.session_state.get(f"confirm_del_{o['id']}", False) is False:
+                    st.session_state[f"confirm_del_{o['id']}"] = True
+                    st.warning("Click delete again to confirm.")
+                else:
+                    with get_session() as s:
+                        delete_operation(s, active_location_id, op_id=o["id"])
+                        # audit
+                        try:
+                            SecurityManager.log_audit(
+                                s, (user or {}).get("username", "system"),
+                                "DELETE",
+                                resource_type="LocationOperation",
+                                resource_id=o["id"],
+                                details=f"Deleted '{o['name']}'",
+                                user_id=(user or {}).get("id"),
+                                location_id=active_location_id,
+                                ip_address=st.session_state.get("client_ip"),
+                                success=True,
+                            )
+                        except Exception:
+                            pass
+                    st.success("Deleted")
+                    st.rerun()

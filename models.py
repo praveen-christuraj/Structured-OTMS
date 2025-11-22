@@ -16,6 +16,9 @@ from sqlalchemy.sql import func
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, UniqueConstraint, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from sqlalchemy import Column, Integer, String, Date, Text, DateTime, ForeignKey, func
+from sqlalchemy.orm import relationship
+
 try:
     from db import engine
 except Exception:
@@ -26,6 +29,19 @@ Base = declarative_base()
 # ============================================================================
 # ENUMS
 # ============================================================================
+
+class FlexibleRecord(Base):
+    __tablename__ = "flexible_records"
+    id = Column(Integer, primary_key=True)
+    location_id = Column(Integer, ForeignKey("locations.id"), nullable=False)
+    page = Column(String(64), nullable=False)       # e.g., "tank_transactions"
+    section = Column(String(64), nullable=False)    # e.g., "produced_water", "production"
+    tx_date = Column(Date, nullable=True)           # optional date for filtering
+    data_json = Column(Text, nullable=False)        # raw row as JSON
+    created_by = Column(String(64), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    location = relationship("Location", backref="flexible_records")
 
 class TankStatus(enum.Enum):
     ACTIVE = "ACTIVE"

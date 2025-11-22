@@ -1,9 +1,11 @@
-# app_pages/tank_transactions.py
 import streamlit as st
 from datetime import datetime, date, time as dt_time
+from typing import Optional
+import json
+import re
 
 from db import get_session
-from models import Location, Tank, TankTransaction, Operation, CalibrationTank
+from models import Location, Tank, TankTransaction, CalibrationTank
 from security import SecurityManager
 from utils_calc import (
     normalize_temp_unit, temp_bounds, bounded_temp,
@@ -16,48 +18,28 @@ from utils_calc import (
     lt_from_nsv_api, mt_from_lt,
     mass_mt_from_gsv_api60, mass_lt_from_mt
 )
-from location_config import get_location_meters
-from location_config import get_page_section_config  # for dynamic condensate config
-from typing import Optional
-from location_config import get_page_section_config
+from location_config import (
+    get_location_page_visibility,
+    get_tank_transactions_tab_visibility,
+    get_page_section_config,
+    get_dynamic_table_def,
+    get_location_meters,
+    get_active_operation_names,
+)
 
-# Optional helpers
+# ----- Optional helpers -----
 try:
     from permission_manager import PermissionManager
 except Exception:
     PermissionManager = None
 
-try:
-    from location_config import get_location_page_visibility, get_tank_transactions_tab_visibility
-except Exception:
-    get_location_page_visibility = None
-    get_tank_transactions_tab_visibility = None
 
-# ---- Compatibility shims so old calls keep working ----
-from utils_calc import (
-    api_observed_to_api60, density_obs_to_api60,
-    c_to_f, f_to_c, normalize_temp_unit
-)
-
-def api60_from_api_obs(api_obs: float, sample_temp: float, sample_unit: str) -> float:
-    unit = normalize_temp_unit(sample_unit)
-    temp_f = float(sample_temp or 0.0) if unit == "F" else c_to_f(float(sample_temp or 0.0))
-    return api_observed_to_api60(float(api_obs or 0.0), temp_f)
-
-def api60_from_density_obs(density_obs: float, sample_temp: float, sample_unit: str) -> float:
-    unit = normalize_temp_unit(sample_unit)
-    temp_c = float(sample_temp or 0.0) if unit == "C" else f_to_c(float(sample_temp or 0.0))
-    api60, _ = density_obs_to_api60(float(density_obs or 0.0), temp_c)
-    return api60
-
-
-# -------- small utils --------
+# ---------------- small utils ----------------
 def _get_client_ip() -> str:
-    """Return client IP if captured somewhere (e.g., via a small JS snippet into session_state)."""
     return str(st.session_state.get("client_ip") or "N/A")
 
 
-# -------- guards / loaders --------
+# ---------------- guards / loaders ----------------
 def _guard_location(active_location_id):
     if not active_location_id:
         st.warning("No active location is selected. Go to **Home** and select a location first.")
@@ -95,12 +77,6 @@ def _load_tanks(session, location_id: int):
         q = q.order_by(Tank.name.asc())
     return q.all()
 
-def _get_operation_choices():
-    choices = []
-    for op in Operation:
-        choices.append((op.value, op))
-    return choices
-
 def _generate_ticket_id(session, location_code: str) -> str:
     today = datetime.utcnow().strftime("%Y%m%d")
     prefix = f"{location_code.upper()}-{today}"
@@ -120,35 +96,31 @@ def _generate_ticket_id(session, location_code: str) -> str:
         seq = max(seqs) + 1 if seqs else 1
     return f"{prefix}-{seq:04d}"
 
-def _get_client_ip() -> str:
-    return str(st.session_state.get("client_ip", "unknown"))
+
+# ---------------- messages ----------------
+def _no_meters_message(kind_label: str, user):
+    is_admin = False
+    try:
+        if PermissionManager and user:
+            is_admin = PermissionManager.can_access_management_pages(user)
+        else:
+            is_admin = (user or {}).get("role") in ("admin-it", "admin-operations")
+    except Exception:
+        is_admin = (user or {}).get("role") in ("admin-it", "admin-operations")
+
+    if is_admin:
+        st.info(
+            f"No {kind_label} configured for this location. "
+            "Go to **Settings → Page Customization** to add meters."
+        )
+    else:
+        st.info(
+            f"No {kind_label} configured for this location. "
+            "Please contact an admin to add meters in **Settings → Page Customization**."
+        )
 
 
-def _get_condensate_model():
-    import models as db_models
-    for name in ("CondensateTransaction", "CondensateRecord", "CondensateLog"):
-        m = getattr(db_models, name, None)
-        if m is not None:
-            return m
-    return None
-
-def _get_produced_water_model():
-    import models as db_models
-    for name in ("ProducedWaterRecord", "ProducedWaterTransaction", "ProducedWaterLog"):
-        m = getattr(db_models, name, None)
-        if m is not None:
-            return m
-    return None
-
-def _get_production_model():
-    import models as db_models
-    for name in ("ProductionRecord", "DailyProduction", "ProductionLog"):
-        m = getattr(db_models, name, None)
-        if m is not None:
-            return m
-    return None
-
-# -------- calibration interpolation --------
+# ---------------- calibration helpers ----------------
 def _interp_vol_bbl(session, tank_id: int, dip_cm_val: float) -> float:
     rows = (
         session.query(CalibrationTank)
@@ -169,8 +141,58 @@ def _interp_vol_bbl(session, tank_id: int, dip_cm_val: float) -> float:
     if x1 == x0: return y0
     return y0 + (y1 - y0) * ((dip_cm_val - x0) / (x1 - x0))
 
+def _get_calibration_min_max(session, tank_id: int) -> tuple[float, float]:
+    """Return (min_dip_cm, max_dip_cm) for the tank’s calibration (or (0.0, 0.0) if none)."""
+    q = (
+        session.query(CalibrationTank)
+        .filter(CalibrationTank.tank_id == tank_id)
+        .order_by(CalibrationTank.dip_cm.asc())
+    )
+    rows = q.all()
+    if not rows:
+        return (0.0, 0.0)
+    return float(rows[0].dip_cm or 0.0), float(rows[-1].dip_cm or 0.0)
 
-# -------- TAB: Tank Entry (kept as you provided) --------
+
+# ======================= TAB: Tank Entry =======================
+def _get_operation_labels_for_tank(location_id: int) -> list[str]:
+    try:
+        with get_session() as s:
+            names = get_active_operation_names(s, location_id, asset="tank")
+        return names or []
+    except Exception:
+        return []
+
+def _set_operation_text_on_tx(tx: TankTransaction, op_text: Optional[str], remarks: Optional[str]):
+    op_text = (op_text or "").strip() or None
+    if not op_text:
+        return remarks
+
+    try:
+        setattr(tx, "operation", op_text)
+        return remarks
+    except Exception:
+        pass
+    try:
+        setattr(tx, "operation_text", op_text)
+        return remarks
+    except Exception:
+        pass
+    base = (remarks or "").strip()
+    return (f"[OP:{op_text}] " + base) if op_text else base
+
+_TIME_RE = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
+
+def _parse_hhmm(text: str) -> Optional[dt_time]:
+    """Parse 'HH:MM' → time or None."""
+    if not text:
+        return None
+    m = _TIME_RE.match(text.strip())
+    if not m:
+        return None
+    hh, mm = int(m.group(1)), int(m.group(2))
+    return dt_time(hour=hh, minute=mm)
+
 def _render_tab_tank_entry(loc, loc_label, user):
     st.markdown("#### 📝 Tank Entry")
 
@@ -179,9 +201,11 @@ def _render_tab_tank_entry(loc, loc_label, user):
     tank_labels = [f"{t.name}" for t in tanks]
     tank_by_label = {lbl: t for lbl, t in zip(tank_labels, tanks)}
 
-    op_choices = _get_operation_choices()
-    op_labels = [lbl for lbl, _ in op_choices]
-    op_map = {lbl: op for lbl, op in op_choices}
+    # Soft-coded operations for asset='tank'
+    op_labels = _get_operation_labels_for_tank(loc.id)
+    if not op_labels:
+        st.warning("No Tank operations configured. Go to **Location Settings → Operations** to create operations.")
+        op_labels = ["N/A (configure in Location Settings)"]
 
     if not tanks:
         st.info("No tanks found for this location. Please add tanks in **Asset Management → Tanks**.")
@@ -192,22 +216,54 @@ def _render_tab_tank_entry(loc, loc_label, user):
     with c1:
         tx_date = st.date_input("📅 Date", value=date.today(), key="tx_date")
     with c2:
-        now = datetime.now().time().replace(microsecond=0)
-        tx_time = st.time_input("⏰ Time", value=now, key="tx_time")
+        # Manual HH:MM (no dropdown) — strict validation
+        now_txt = datetime.now().strftime("%H:%M")
+        tx_time_txt = st.text_input("⏰ Time (HH:MM)", value=now_txt, key="tx_time_txt", help="Enter time in 24-hour format HH:MM")
+        tx_time = _parse_hhmm(tx_time_txt)
+        if tx_time is None:
+            st.warning("Please enter time in HH:MM (24-hour) format, e.g., 07:30 or 18:05.")
     with c3:
         selected_tank_label = st.selectbox("🛢️ Tank", tank_labels, key="tx_tank_sel")
 
+    # Calibration-bound Dip/Water inputs
+    with get_session() as _s:
+        tnk = tank_by_label.get(selected_tank_label)
+        tnk_id = tnk.id if tnk else None
+        if tnk_id:
+            min_dip, max_dip = _get_calibration_min_max(_s, tnk_id)
+        else:
+            min_dip, max_dip = (0.0, 0.0)
+
     c4, c5, c6 = st.columns(3)
     with c4:
-        default_idx = max(0, op_labels.index("Receipt") if "Receipt" in op_labels else 0)
-        selected_op_label = st.selectbox("🔁 Operation", op_labels, index=default_idx, key="tx_op")
+        selected_op_label = st.selectbox("🔁 Operation", op_labels, index=0, key="tx_op")
     with c5:
-        dip_cm = st.number_input("📏 Dip (cm) *", min_value=0.0, step=0.1, format="%.1f", key="tx_dip")
+        # Clamp to calibration; if no calibration, allow any ≥0 (but we’ll still compute with 0 range)
+        dip_cm = st.number_input(
+            f"📏 Dip (cm) *  (max {max_dip:.1f})" if max_dip > 0 else "📏 Dip (cm) *",
+            min_value=0.0,
+            max_value=max_dip if max_dip > 0 else None,
+            step=0.1,
+            format="%.1f",
+            key="tx_dip",
+        )
     with c6:
-        water_cm = st.number_input("💧 Water Level (cm) *", min_value=0.0, step=0.1, format="%.1f", key="tx_water")
+        water_cm = st.number_input(
+            f"💧 Water Level (cm) *  (max {max_dip:.1f})" if max_dip > 0 else "💧 Water Level (cm) *",
+            min_value=0.0,
+            max_value=max_dip if max_dip > 0 else None,
+            step=0.1,
+            format="%.1f",
+            key="tx_water",
+        )
 
+    # Explicit validation if user bypasses UI max (or no calibration exists)
+    if max_dip > 0 and (float(dip_cm or 0.0) > max_dip or float(water_cm or 0.0) > max_dip):
+        st.error(f"Entered Dip/Water exceeds calibration maximum ({max_dip:.1f} cm) for this tank.")
+        return
+
+    # Live TOV/FW/GOV from calibration
     with get_session() as _s:
-        tnk_id = tank_by_label[selected_tank_label].id if selected_tank_label in tank_by_label else None
         if tnk_id:
             tov_bbl = _interp_vol_bbl(_s, tnk_id, float(dip_cm or 0.0))
             fw_bbl  = _interp_vol_bbl(_s, tnk_id, float(water_cm or 0.0)) if float(water_cm or 0.0) > 0 else 0.0
@@ -276,14 +332,19 @@ def _render_tab_tank_entry(loc, loc_label, user):
     except Exception:
         st.info("ℹ️ Ticket ID will be generated upon save")
 
+    # Save button
     if st.button("💾 Save to DB", type="primary", key="tx_save_btn"):
         errs = []
         if selected_tank_label not in tank_by_label:
             errs.append("Please select a valid tank.")
         if not tx_date:
             errs.append("Date is required.")
-        if not tx_time:
-            errs.append("Time is required.")
+        if tx_time is None:
+            errs.append("Time is invalid. Enter in HH:MM 24-hour format.")
+        if not op_labels or selected_op_label.startswith("N/A"):
+            errs.append("Operation not configured. Please configure operations in Location Settings → Operations.")
+        if max_dip > 0 and (float(dip_cm or 0.0) > max_dip or float(water_cm or 0.0) > max_dip):
+            errs.append(f"Dip/Water exceeds calibration maximum ({max_dip:.1f} cm) for this tank.")
         if api60_val <= 0:
             errs.append("Computed API @ 60°F is invalid. Please check observed inputs.")
         if vcf_val <= 0:
@@ -301,40 +362,39 @@ def _render_tab_tank_entry(loc, loc_label, user):
                 tx = TankTransaction(
                     location_id=loc.id,
                     ticket_id=ticket_id,
-                    operation=op_map.get(selected_op_label),
                     tank_id=tnk.id,
                     tank_name=tnk.name,
                     date=tx_date,
-                    time=tx_time if isinstance(tx_time, dt_time) else dt_time(hour=tx_time.hour, minute=tx_time.minute),
-
+                    time=tx_time,  # parsed manual HH:MM
                     dip_cm=float(dip_cm or 0.0),
                     water_cm=float(water_cm or 0.0),
-
                     tank_temp_c=None,
                     tank_temp_f=None,
-
                     api_observed=float(api_obs_val or 0.0),
                     density_observed=float(dens_obs_val or 0.0),
                     api_at60=float(api60_val or 0.0),
                     vcf=float(vcf_val or 1.0),
-
                     tov_bbl=float(tov_bbl or 0.0),
                     fw_bbl=float(fw_bbl or 0.0),
                     gov_bbl=float(gov_bbl or 0.0),
                     gsv_bbl=float(gsv_bbl or 0.0),
                     bsw_pct=float(bsw_pct or 0.0),
                     bsw_bbl=float((gsv_bbl - nsv_bbl) if gsv_bbl >= nsv_bbl else 0.0),
-                    qty_bbls=float(nsv_bbl or 0.0),   # NSV as stored qty
+                    qty_bbls=float(nsv_bbl or 0.0),
                     mt=float(mt or 0.0),
                     lt=float(lt or 0.0),
-
                     remarks=(remarks.strip() or None),
                     created_by=(user or {}).get("username", "system"),
                 )
+
+                # Store operation text safely
+                new_remarks = _set_operation_text_on_tx(tx, selected_op_label, remarks)
+                if new_remarks != remarks:
+                    tx.remarks = new_remarks
+
                 session.add(tx)
                 session.commit()
 
-                # Audit with IP for CREATE
                 try:
                     SecurityManager.log_audit(
                         None,
@@ -342,7 +402,7 @@ def _render_tab_tank_entry(loc, loc_label, user):
                         "CREATE",
                         resource_type="TankTransaction",
                         resource_id=str(getattr(tx, "id", "")),
-                        details=f"Created tank tx {ticket_id} ({selected_op_label}) for tank {tnk.name}; "
+                        details=f"Created tank tx {ticket_id} (op='{selected_op_label}') for tank {tnk.name}; "
                                 f"NSV {nsv_bbl:.2f} bbl, MT {mt:.3f}; ip={_get_client_ip()}",
                         user_id=(user or {}).get("id"),
                         location_id=loc.id,
@@ -356,12 +416,8 @@ def _render_tab_tank_entry(loc, loc_label, user):
             st.error(f"Failed to save transaction: {ex}")
 
 
-# -------- METER RECORDS helpers --------
+# ======================= TAB: Meter Records =======================
 def _get_meter_model():
-    """
-    Resolve the meter ORM class by common names.
-    Adjust if your class name differs.
-    """
     import models as db_models
     for name in ("MeterTransaction", "MeterTransactions", "MeterTxn", "Meter_Record"):
         model = getattr(db_models, name, None)
@@ -403,18 +459,117 @@ def _meter_row_to_dict(r):
         "Created At": get("created_at", default=None),
     }
 
-# -------- CONDENSATE & PRODUCED WATER helpers --------
+def _render_tab_meter_records(loc, user):
+    st.markdown("#### 🧮 Meter Records")
+
+    try:
+        with get_session() as s:
+            meters_cfg = get_page_section_config(s, loc.id, page="tank_transactions", section="meters") or {}
+    except Exception:
+        meters_cfg = {}
+
+    meters = [m for m in (meters_cfg.get("meters") or []) if m.get("active", True)]
+
+    if not meters:
+        _no_meters_message("meter(s)", user)
+        return
+
+    st.caption(
+        "Enter readings for the configured meter(s). Net quantity is computed per meter and summed. "
+        "If a meter’s unit is m³, its net is converted to bbls using 6.289811."
+    )
+
+    tx_date = st.date_input("📅 Date", value=date.today(), key=f"meter_txdate_{loc.id}")
+
+    net_total_bbl = 0.0
+    rows_payload = []
+
+    for i, m in enumerate(meters):
+        label = m.get("label") or f"Meter {i+1}"
+        factor = float(m.get("factor") or 1.0)
+        unit = (m.get("unit") or "bbls").lower()
+
+        c1, c2, c3, c4, c5 = st.columns([0.26, 0.18, 0.18, 0.18, 0.20])
+        with c1:
+            st.caption(f"**{label}** ({'bbls' if unit=='bbls' else 'm³'})")
+        with c2:
+            open_v = st.number_input("Opening", value=0.0, step=0.001, format="%.3f", key=f"meter_open_{loc.id}_{i}")
+        with c3:
+            close_v = st.number_input("Closing", value=0.0, step=0.001, format="%.3f", key=f"meter_close_{loc.id}_{i}")
+        with c4:
+            factor_v = st.number_input("Factor", value=factor, step=0.0001, format="%.4f", key=f"meter_factor_{loc.id}_{i}")
+        with c5:
+            net_native = (float(close_v) - float(open_v)) * float(factor_v)
+            net_bbl = net_native if unit == "bbls" else net_native * 6.289811
+            net_total_bbl += net_bbl
+            st.caption(f"Net: **{net_bbl:,.2f} bbl**")
+
+        rows_payload.append({
+            "label": label,
+            "unit": unit,
+            "opening": float(open_v or 0.0),
+            "closing": float(close_v or 0.0),
+            "factor": float(factor_v or factor),
+            "net_bbl": float(net_bbl),
+        })
+
+    st.caption(f"📊 **Net Receipt/Dispatch (sum): {net_total_bbl:,.2f} bbl**")
+
+    remarks = st.text_input("📝 Remarks", value="", max_chars=250, key=f"meter_remarks_{loc.id}")
+
+    if st.button("💾 Save Meter Record", type="primary", key=f"meter_save_{loc.id}"):
+        if net_total_bbl <= 0:
+            st.error("Net total is zero or negative. Please check your inputs.")
+            return
+
+        payload = {
+            "date": str(tx_date),
+            "meters": rows_payload,
+            "net_total_bbl": float(net_total_bbl),
+            "remarks": (remarks.strip() or None),
+        }
+
+        try:
+            from models import FlexibleRecord
+            with get_session() as s:
+                rec = FlexibleRecord(
+                    location_id=loc.id,
+                    page="tank_transactions",
+                    section="meters",
+                    tx_date=tx_date,
+                    data_json=json.dumps(payload),
+                    created_by=(user or {}).get("username", "system"),
+                )
+                s.add(rec)
+                s.commit()
+
+                try:
+                    SecurityManager.log_audit(
+                        s,
+                        (user or {}).get("username", "system"),
+                        "CREATE",
+                        resource_type="TankTx:MeterRecord",
+                        resource_id=str(getattr(rec, "id", "")),
+                        details=f"Saved meter record; total {net_total_bbl:.2f} bbl",
+                        user_id=(user or {}).get("id"),
+                        location_id=loc.id,
+                        ip_address=_get_client_ip(),
+                        success=True,
+                    )
+                except Exception:
+                    pass
+
+            st.success("Meter record saved.")
+            st.rerun()
+        except Exception as ex:
+            st.info("Generic model `FlexibleRecord` not found. Add it to models.py to persist this row.")
+            st.error(f"(Developer hint) Save failed: {ex}")
+
+
+# ======================= TAB: Condensate Records =======================
 def _get_condensate_model():
     import models as db_models
     for name in ("CondensateRecord", "CondensateTransaction", "CondensateTxn", "Condensate_Log"):
-        model = getattr(db_models, name, None)
-        if model is not None:
-            return model
-    return None
-
-def _get_pw_model():
-    import models as db_models
-    for name in ("ProducedWaterRecord", "ProducedWaterTransaction", "ProducedWaterTxn", "PW_Record"):
         model = getattr(db_models, name, None)
         if model is not None:
             return model
@@ -431,407 +586,281 @@ def _fetch_cond_rows(session, location_id: int, limit: int = 1000):
         pass
     return q.limit(limit).all(), None
 
-def _fetch_pw_rows(session, location_id: int, limit: int = 1000):
-    Pw = _get_pw_model()
-    if Pw is None:
-        return [], "ProducedWater model not found in models.py."
-    q = session.query(Pw).filter(getattr(Pw, "location_id") == location_id)
+def _render_tab_condensate(loc, user):
+    st.markdown("#### 🧪 Condensate Records")
+
     try:
-        q = q.order_by(getattr(Pw, "date").desc(), getattr(Pw, "id").desc())
+        with get_session() as s:
+            meters_cfg = get_page_section_config(s, loc.id, page="tank_transactions", section="condensate_meters") or {}
     except Exception:
-        pass
-    return q.limit(limit).all(), None
+        meters_cfg = {}
 
-def _cond_row_to_dict(r):
-    get = lambda *names, default=None: next((getattr(r, n) for n in names if hasattr(r, n)), default)
-    om = float(get("opening_reading", "opening_meter", default=0.0) or 0.0)
-    cm = float(get("closing_reading", "closing_meter", default=0.0) or 0.0)
-    net = get("net_qty", default=None)
-    if net is None:
-        net = cm - om
-    return {
-        "ID": get("id"),
-        "Date": get("date"),
-        "Opening": om,
-        "Closing": cm,
-        "Net Qty": net,
-        "Remarks": get("remarks", default=""),
-        "Created By": get("created_by", default=""),
-        "Created At": get("created_at", default=None),
-    }
-
-def _pw_row_to_dict(r):
-    get = lambda *names, default=None: next((getattr(r, n) for n in names if hasattr(r, n)), default)
-    om = float(get("opening_reading", "opening_meter", default=0.0) or 0.0)
-    cm = float(get("closing_reading", "closing_meter", default=0.0) or 0.0)
-    net = get("net_qty", default=None)
-    if net is None:
-        net = cm - om
-    return {
-        "ID": get("id"),
-        "Date": get("date"),
-        "Opening": om,
-        "Closing": cm,
-        "Net Qty": net,
-        "Remarks": get("remarks", default=""),
-        "Created By": get("created_by", default=""),
-        "Created At": get("created_at", default=None),
-    }
-
-
-# -------- TAB: Meter Records (entry + list + edit/delete) --------
-def _render_tab_meter_records(loc, user):
-    st.markdown("#### ⛽ Meter Records")
-
-    # 1) Load meters assigned to this location
-    with get_session() as s:
-        meters = get_location_meters(s, loc.id)
+    meters = [m for m in (meters_cfg.get("meters") or []) if m.get("active", True)]
 
     if not meters:
-        st.info("No meters assigned to this location. Go to **Page Customization → Meters** and assign meters.")
+        _no_meters_message("condensate meter(s)", user)
         return
 
-    # 2) Date + remarks
-    c1, c2 = st.columns([1, 1])
-    with c1:
-        m_date = st.date_input("Date", value=st.session_state.get("m_date", date.today()), key="m_date")
-    with c2:
-        remarks = st.text_area("Remarks", value=st.session_state.get("m_remarks", ""), key="m_remarks", help="Optional notes.")
+    st.caption(
+        "Enter meter readings for condensate. Sum of meter nets gives **GOV (bbl)**, "
+        "then sampling parameters compute **API@60 → VCF → GSV → BS&W → NSV → MT → LT**. "
+        "If a meter’s unit is m³, net converts to bbls using 6.289811."
+    )
 
-    st.markdown("**Readings**")
-    totals = 0.0
-    per_meter_nets = []
-    # 3) Render a row for each meter
-    for m in meters:
-        oc1, oc2, oc3 = st.columns([0.4, 0.3, 0.3])
-        with oc1:
-            st.caption(f"🧪 {m.name} [{m.code}]")
-        with oc2:
-            om = st.number_input(f"Opening — {m.code}", value=0.0, step=0.01, format="%.2f", key=f"m_om_{m.id}")
-        with oc3:
-            cm = st.number_input(f"Closing — {m.code}", value=0.0, step=0.01, format="%.2f", key=f"m_cm_{m.id}")
+    tx_date = st.date_input("📅 Date", value=date.today(), key=f"cond_txdate_{loc.id}")
 
-        net = (cm - om)
-        per_meter_nets.append((m.code, om, cm, net))
-        st.caption(f"Net: **{net:,.2f}**")
+    st.markdown("##### Meter Readings")
+    GOV_total_bbl = 0.0
+    per_meter_rows = []
 
-        totals += net
+    for i, m in enumerate(meters):
+        mlabel = m.get("label") or f"Meter {i+1}"
+        mfactor = float(m.get("factor") or 1.0)
+        munit = (m.get("unit") or "bbls").lower()
 
+        c1, c2, c3, c4, c5 = st.columns([0.25, 0.20, 0.20, 0.15, 0.20])
+        with c1:
+            st.caption(f"**{mlabel}**  ({'bbls' if munit=='bbls' else 'm³'})")
+        with c2:
+            open_val = st.number_input("Opening", value=0.0, step=0.001, format="%.3f", key=f"cond_open_{loc.id}_{i}")
+        with c3:
+            close_val = st.number_input("Closing", value=0.0, step=0.001, format="%.3f", key=f"cond_close_{loc.id}_{i}")
+        with c4:
+            factor_val = st.number_input("Factor", value=mfactor, step=0.0001, format="%.4f", key=f"cond_fac_{loc.id}_{i}")
+        with c5:
+            net_native = (float(close_val) - float(open_val)) * float(factor_val)
+            net_bbl = net_native if munit == "bbls" else net_native * 6.289811
+            GOV_total_bbl += net_bbl
+            st.caption(f"Net: **{net_bbl:,.2f} bbl**")
+
+        per_meter_rows.append({
+            "label": mlabel,
+            "unit": munit,
+            "opening": float(open_val or 0.0),
+            "closing": float(close_val or 0.0),
+            "factor": float(factor_val or mfactor),
+            "net_bbl": float(net_bbl),
+        })
+
+    st.caption(f"📊 **GOV (sum of meters): {GOV_total_bbl:,.2f} bbl**")
     st.markdown("---")
-    st.caption(f"**Total Net Quantity (live):** {totals:,.2f}")
 
-    # 4) Save (stores total and details in remarks tail if model has no JSON column)
-    save_clicked = st.button("💾 Save to DB", type="primary", use_container_width=True, key="m_save_btn")
-    if save_clicked:
+    st.caption("Observed Property & Sample Temperature")
+    col_mode, col_sunit = st.columns([0.48, 0.52])
+    with col_mode:
+        obs_mode = st.selectbox("Input Type", ["Observed API", "Observed Density (kg/m3)"], index=0, key=f"cond_obs_mode_{loc.id}")
+    with col_sunit:
+        sample_unit = st.selectbox("Sample Temp Unit", ["°F", "°C"], index=0, key=f"cond_sunit_{loc.id}")
+
+    slo, shi = temp_bounds(sample_unit)
+    sample_temp_val = st.number_input("Sample Temperature", min_value=slo, max_value=shi, step=0.1, format="%.1f", key=f"cond_sample_temp_{loc.id}")
+
+    api60_val = 0.0
+    api_obs_val = 0.0
+    dens_obs_val = 0.0
+
+    if obs_mode == "Observed API":
+        api_obs_val = st.number_input("Observed API *", min_value=10.0, max_value=100.0, step=0.1, format="%.1f", key=f"cond_api_obs_{loc.id}")
+        api60_val = api60_from_api_obs(api_obs_val or 0.0, sample_temp_val or 0.0, sample_unit)
+        dens_obs_val = density_from_api(api_obs_val or 0.0)
+        st.caption(f"→ API @ 60°F: **{api60_val:.2f}**   |   ↔ Approx Density: **{dens_obs_val:.1f} kg/m³**")
+    else:
+        dens_obs_val = st.number_input("Observed Density (kg/m3) *", min_value=600.0, max_value=1100.0, step=0.1, format="%.1f", key=f"cond_density_obs_{loc.id}")
+        api_obs_val = api_from_density(dens_obs_val) if dens_obs_val > 0 else 0.0
+        api60_val = api60_from_density_obs(dens_obs_val or 0.0, sample_temp_val or 0.0, sample_unit)
+        st.caption(f"↔ Observed API (approx): **{api_obs_val:.2f}**   |   → API @ 60°F: **{api60_val:.2f}**")
+
+    st.caption("Tank Temperature & BS&W")
+    tcol1, tcol2, tcol3 = st.columns([0.35, 0.35, 0.30])
+    with tcol1:
+        tank_temp_unit = st.selectbox("Tank Temp Unit", ["°C", "°F"], index=0, key=f"cond_tank_unit_{loc.id}")
+    with tcol2:
+        lo, hi = temp_bounds(tank_temp_unit)
+        tank_temp_val = st.number_input(f"Tank Temperature ({tank_temp_unit})", min_value=lo, max_value=hi, step=0.1, format="%.1f", key=f"cond_tank_temp_{loc.id}")
+    with tcol3:
+        bsw_pct = st.number_input("BS&W (%)", min_value=0.0, max_value=100.0, step=0.01, key=f"cond_bsw_{loc.id}")
+
+    vcf_val = vcf_from_api60_and_tank_temp(api60_val, tank_temp_val, tank_temp_unit)
+    gsv_bbl = gsv_from_gov_vcf(GOV_total_bbl, vcf_val)
+    bsw_bbl = bsw_volume_from_gsv_pct(gsv_bbl, float(bsw_pct or 0.0))
+    nsv_bbl = nsv_from_gsv_bsw(gsv_bbl, bsw_bbl)
+    mt_val = mass_mt_from_gsv_api60(gsv_bbl, api60_val)
+    lt_val = mass_lt_from_mt(mt_val)
+
+    st.caption(
+        f"🧮 Computed — VCF: **{vcf_val:.5f}**  |  GSV: **{gsv_bbl:,.2f} bbl**  |  NSV: **{nsv_bbl:,.2f} bbl**  |  MT: **{mt_val:,.3f}**  |  LT: **{lt_val:,.3f}**"
+    )
+
+    remarks = st.text_input("📝 Remarks", value="", max_chars=250, key=f"cond_remarks_{loc.id}")
+
+    if st.button("💾 Save Condensate Record", type="primary", key=f"cond_save_{loc.id}"):
+        errs = []
+        if GOV_total_bbl <= 0:
+            errs.append("Net GOV from meters is zero or negative.")
+        if api60_val <= 0:
+            errs.append("Computed API @60°F is invalid. Check observed inputs.")
+        if vcf_val <= 0:
+            errs.append("Computed VCF is invalid. Check temperatures and API.")
+        if errs:
+            for e in errs:
+                st.error(e)
+            return
+
+        payload = {
+            "date": str(tx_date),
+            "meters": per_meter_rows,
+            "gov_bbl": float(GOV_total_bbl),
+            "observed": {
+                "mode": obs_mode,
+                "api_obs": float(api_obs_val or 0.0),
+                "density_obs": float(dens_obs_val or 0.0),
+                "sample_temp": float(sample_temp_val or 0.0),
+                "sample_temp_unit": sample_unit,
+            },
+            "tank_temp": {
+                "value": float(tank_temp_val or 0.0),
+                "unit": tank_temp_unit,
+            },
+            "api60": float(api60_val or 0.0),
+            "vcf": float(vcf_val or 1.0),
+            "gsv_bbl": float(gsv_bbl or 0.0),
+            "bsw_pct": float(bsw_pct or 0.0),
+            "bsw_bbl": float(bsw_bbl or 0.0),
+            "nsv_bbl": float(nsv_bbl or 0.0),
+            "mt": float(mt_val or 0.0),
+            "lt": float(lt_val or 0.0),
+            "remarks": (remarks.strip() or None),
+        }
+
         try:
-            # Resolve meter model dynamically (as before)
-            Mt = _get_meter_model()
-            if Mt is None:
-                st.error("MeterTransaction model not found in models.py.")
-                return
-
-            # Build a compact details string (compatible with any existing schema)
-            detail_parts = [f"{code}:{om:.2f}->{cm:.2f}({net:.2f})" for (code, om, cm, net) in per_meter_nets]
-            tail = f" [details: {'; '.join(detail_parts)}]"
-            remarks_final = (remarks or "") + tail
-
+            from models import FlexibleRecord
             with get_session() as s:
-                row = Mt(
+                rec = FlexibleRecord(
                     location_id=loc.id,
-                    date=m_date,
-                    net_qty=float(totals),
-                    remarks=remarks_final.strip(),
+                    page="tank_transactions",
+                    section="condensate",
+                    tx_date=tx_date,
+                    data_json=json.dumps(payload),
+                    created_by=(user or {}).get("username", "system"),
                 )
-                # Best-effort: if your model has per-meter columns (legacy 1–2), we won’t fill them here
-                # Optionally stamp audit fields
-                try:
-                    setattr(row, "created_by", (user or {}).get("username", "system"))
-                    setattr(row, "created_at", datetime.utcnow())
-                except Exception:
-                    pass
-
-                s.add(row)
-                s.flush()
-                rid = getattr(row, "id", None)
+                s.add(rec)
                 s.commit()
 
-                # Audit with IP
                 try:
                     SecurityManager.log_audit(
-                        None,
+                        s,
                         (user or {}).get("username", "system"),
                         "CREATE",
-                        resource_type="MeterTransaction",
-                        resource_id=str(rid or ""),
-                        details=f"Created meter entry {m_date}; total_net={totals:.2f}; ip={_get_client_ip()}",
+                        resource_type="TankTx:Condensate",
+                        resource_id=str(getattr(rec, "id", "")),
+                        details=f"Saved condensate record: GOV {GOV_total_bbl:.2f} bbl; NSV {nsv_bbl:.2f} bbl",
                         user_id=(user or {}).get("id"),
                         location_id=loc.id,
+                        ip_address=_get_client_ip(),
+                        success=True,
                     )
                 except Exception:
                     pass
 
-            st.success("✅ Meter entry saved.")
+            st.success("Condensate record saved.")
             st.rerun()
         except Exception as ex:
-            st.error(f"Failed to save: {ex}")
+            st.info("Generic model `FlexibleRecord` not found. Add it to models.py to persist this row.")
+            st.error(f"(Developer hint) Save failed: {ex}")
 
-# --- REPLACE your current _render_tab_condensate(...) with this ---
-def _render_tab_condensate(loc, user):
-    st.markdown("#### 🧪 Condensate Records")
 
-    # Load dynamic config: number of streams + labels (from Page Customization)
+# ======================= Dynamic Forms (Produced Water / Production) =======================
+def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str):
+    st.markdown(f"#### {title}")
+
     with get_session() as s:
-        cfg = get_page_section_config(s, loc.id, page="tank_transactions", section="condensate")
+        tdef = get_dynamic_table_def(s, loc.id, page=page_key, section=section_key)
+    columns = list(tdef.get("columns") or [])
 
-    streams = int(cfg.get("streams", 1))
-    labels = cfg.get("labels", [f"Stream {i+1}" for i in range(streams)])
-    # Normalize labels length
-    if len(labels) != streams:
-        labels = [labels[i] if i < len(labels) else f"Stream {i+1}" for i in range(streams)]
+    if not columns:
+        st.info(f"No table definition found. Please configure **{title}** in **Settings → Page Customization** first.")
+        return
 
-    # Date + optional remarks
-    c1, c2 = st.columns([1, 1])
-    with c1:
-        c_date = st.date_input("Date", value=st.session_state.get("c_date", date.today()), key="c_date")
-    with c2:
-        remarks = st.text_area("Remarks", value=st.session_state.get("c_remarks", ""), key="c_remarks")
+    date_fields = [c for c in columns if c.get("type") == "date"]
+    date_name = date_fields[0]["name"] if date_fields else None
 
-    st.markdown("**Readings (per stream)**")
-    total_net = 0.0
-    details = []  # for compact tail in remarks
+    with st.form(key=f"dyn_form_{page_key}_{section_key}_{loc.id}"):
+        row = {}
+        for i, col in enumerate(columns):
+            ctype = col.get("type", "text")
+            label = col.get("label") or col.get("name")
+            name = col.get("name")
+            if ctype == "date":
+                row[name] = st.date_input(label, key=f"{page_key}_{section_key}_{loc.id}_date_{i}")
+            elif ctype == "number":
+                row[name] = st.number_input(label, step=0.01, format="%.2f", key=f"{page_key}_{section_key}_{loc.id}_num_{i}")
+            else:
+                row[name] = st.text_input(label, key=f"{page_key}_{section_key}_{loc.id}_txt_{i}")
 
-    # Render opening/closing for each configured stream
-    for idx in range(streams):
-        label = labels[idx]
-        oc1, oc2, oc3, oc4 = st.columns([0.38, 0.20, 0.20, 0.22])
-        with oc1:
-            st.caption(f"🧷 {label}")
-        with oc2:
-            op = st.number_input(f"Opening — {label}", value=0.00, step=0.01, format="%.2f", key=f"cond_open_{idx}")
-        with oc3:
-            cl = st.number_input(f"Closing — {label}", value=0.00, step=0.01, format="%.2f", key=f"cond_close_{idx}")
-        net = cl - op
-        with oc4:
-            st.caption(f"Net: **{net:,.2f}**")
+        submitted = st.form_submit_button("💾 Save Row", type="primary")
 
-        total_net += net
-        details.append(f"{label}:{op:.2f}->{cl:.2f}({net:.2f})")
+    if not submitted:
+        return
 
-    st.markdown("---")
-    st.caption(f"**Total Net (live):** {total_net:,.2f}")
+    errs = []
+    for col in columns:
+        if col.get("required", False):
+            nm = col["name"]
+            val = row.get(nm)
+            if col.get("type") == "text" and (val is None or str(val).strip() == ""):
+                errs.append(f"'{col.get('label')}' is required.")
+            elif col.get("type") in ("number", "date") and val is None:
+                errs.append(f"'{col.get('label')}' is required.")
+    if errs:
+        for e in errs:
+            st.error(e)
+        return
 
-    # Save to DB
-    if st.button("💾 Save to DB", type="primary", use_container_width=True, key="cond_save_btn"):
-        # Resolve model
-        Cond = _get_condensate_model()
-        if Cond is None:
-            st.error("Condensate model not found (expected CondensateTransaction / CondensateRecord / CondensateLog).")
-            return
+    tx_date = None
+    if date_name and row.get(date_name):
+        tx_date = row[date_name]
+    data_json = json.dumps(row, default=str)
 
-        try:
-            with get_session() as s:
-                row = Cond(
-                    location_id=loc.id,
-                    date=c_date,
-                    total_net=float(total_net),
-                    remarks=((remarks or "") + f" [details: {'; '.join(details)}]").strip(),
-                )
-                # Best-effort audit columns if present on your model
-                try:
-                    setattr(row, "created_by", (user or {}).get("username", "system"))
-                    setattr(row, "created_at", datetime.utcnow())
-                except Exception:
-                    pass
-
-                s.add(row)
-                s.flush()
-                rec_id = getattr(row, "id", None)
-                s.commit()
-
-            # Audit
+    try:
+        from models import FlexibleRecord
+        with get_session() as s:
+            rec = FlexibleRecord(
+                location_id=loc.id,
+                page=page_key,
+                section=section_key,
+                tx_date=tx_date,
+                data_json=data_json,
+                created_by=(user or {}).get("username", "system"),
+            )
+            s.add(rec)
+            s.commit()
             try:
                 SecurityManager.log_audit(
-                    None,
-                    (user or {}).get("username", "system"),
+                    s, (user or {}).get("username","system"),
                     "CREATE",
-                    resource_type="CondensateRecord",
-                    resource_id=str(rec_id or ""),
-                    details=f"Created condensate record {c_date}; total_net={total_net:.2f}; ip={_get_client_ip()}",
+                    resource_type=f"{page_key}:{section_key}",
+                    resource_id=str(getattr(rec, "id", "")),
+                    details=f"Dynamic row saved: {row}",
                     user_id=(user or {}).get("id"),
                     location_id=loc.id,
+                    ip_address=_get_client_ip(),
+                    success=True
                 )
             except Exception:
                 pass
-
-            st.success("✅ Condensate record saved.")
-            st.rerun()
-        except Exception as ex:
-            st.error(f"Failed to save condensate record: {ex}")
-
+        st.success("Row saved.")
+    except Exception as ex:
+        st.info("Dynamic save target model `FlexibleRecord` not found. Define it in models.py to persist rows.")
+        st.error(f"(Developer hint) Save failed: {ex}")
 
 def _render_tab_produced_water(loc, user):
-    st.markdown("#### 💧 Produced Water Records")
-
-    # Pull dynamic configuration for this location
-    with get_session() as s:
-        cfg = get_page_section_config(s, loc.id, page="tank_transactions", section="produced_water")
-
-    streams = int(cfg.get("streams", 1))
-    labels = cfg.get("labels", [f"Stream {i+1}" for i in range(streams)])
-    if len(labels) != streams:
-        labels = [labels[i] if i < len(labels) else f"Stream {i+1}" for i in range(streams)]
-
-    # Date + remarks
-    c1, c2 = st.columns([1, 1])
-    with c1:
-        p_date = st.date_input("Date", value=st.session_state.get("pw_date", date.today()), key="pw_date")
-    with c2:
-        remarks = st.text_area("Remarks", value=st.session_state.get("pw_remarks", ""), key="pw_remarks")
-
-    st.markdown("**Readings (per stream)**")
-    total_net = 0.0
-    details = []
-
-    for idx in range(streams):
-        label = labels[idx]
-        oc1, oc2, oc3, oc4 = st.columns([0.38, 0.20, 0.20, 0.22])
-        with oc1:
-            st.caption(f"🧷 {label}")
-        with oc2:
-            op = st.number_input(f"Opening — {label}", value=0.00, step=0.01, format="%.2f", key=f"pw_open_{idx}")
-        with oc3:
-            cl = st.number_input(f"Closing — {label}", value=0.00, step=0.01, format="%.2f", key=f"pw_close_{idx}")
-        net = cl - op
-        with oc4:
-            st.caption(f"Net: **{net:,.2f}**")
-        total_net += net
-        details.append(f"{label}:{op:.2f}->{cl:.2f}({net:.2f})")
-
-    st.markdown("---")
-    st.caption(f"**Total Net (live):** {total_net:,.2f}")
-
-    if st.button("💾 Save to DB", type="primary", use_container_width=True, key="pw_save_btn"):
-        PW = _get_produced_water_model()
-        if PW is None:
-            st.error("Produced Water model not found (expected ProducedWaterRecord / ProducedWaterTransaction / ProducedWaterLog).")
-            return
-        try:
-            with get_session() as s:
-                row = PW(
-                    location_id=loc.id,
-                    date=p_date,
-                    total_net=float(total_net),
-                    remarks=((remarks or "") + f" [details: {'; '.join(details)}]").strip(),
-                )
-                try:
-                    setattr(row, "created_by", (user or {}).get("username", "system"))
-                    setattr(row, "created_at", datetime.utcnow())
-                except Exception:
-                    pass
-
-                s.add(row)
-                s.flush()
-                rid = getattr(row, "id", None)
-                s.commit()
-
-            try:
-                SecurityManager.log_audit(
-                    None,
-                    (user or {}).get("username", "system"),
-                    "CREATE",
-                    resource_type="ProducedWaterRecord",
-                    resource_id=str(rid or ""),
-                    details=f"Created PW {p_date}; total_net={total_net:.2f}; ip={_get_client_ip()}",
-                    user_id=(user or {}).get("id"),
-                    location_id=loc.id,
-                )
-            except Exception:
-                pass
-
-            st.success("✅ Produced water record saved.")
-            st.rerun()
-        except Exception as ex:
-            st.error(f"Failed to save produced water record: {ex}")
+    _render_dynamic_form(loc, user, page_key="tank_transactions", section_key="produced_water", title="💧 Produced Water Records")
 
 def _render_tab_production(loc, user):
-    st.markdown("#### 🏭 Production")
+    _render_dynamic_form(loc, user, page_key="tank_transactions", section_key="production", title="🏭 Production")
 
-    # Pull dynamic configuration for production rows
-    with get_session() as s:
-        cfg = get_page_section_config(s, loc.id, page="tank_transactions", section="production")
 
-    streams = int(cfg.get("streams", 1))
-    labels = cfg.get("labels", [f"Item {i+1}" for i in range(streams)])
-    if len(labels) != streams:
-        labels = [labels[i] if i < len(labels) else f"Item {i+1}" for i in range(streams)]
-
-    c1, c2 = st.columns([1, 1])
-    with c1:
-        d_prod = st.date_input("Date", value=st.session_state.get("prod_date", date.today()), key="prod_date")
-    with c2:
-        remarks = st.text_area("Remarks", value=st.session_state.get("prod_remarks", ""), key="prod_remarks")
-
-    st.markdown("**Entries**")
-    total_qty = 0.0
-    details = []
-
-    for idx in range(streams):
-        label = labels[idx]
-        cols = st.columns([0.55, 0.45])
-        with cols[0]:
-            st.caption(f"🔧 {label}")
-        with cols[1]:
-            qty = st.number_input(f"Quantity — {label} (bbl)", value=0.00, step=0.01, format="%.2f", key=f"prod_qty_{idx}")
-        total_qty += qty
-        details.append(f"{label}:{qty:.2f}")
-
-    st.markdown("---")
-    st.caption(f"**Total Production (live):** {total_qty:,.2f} bbl")
-
-    if st.button("💾 Save to DB", type="primary", use_container_width=True, key="prod_save_btn"):
-        Prod = _get_production_model()
-        if Prod is None:
-            st.error("Production model not found (expected ProductionRecord / DailyProduction / ProductionLog).")
-            return
-        try:
-            with get_session() as s:
-                row = Prod(
-                    location_id=loc.id,
-                    date=d_prod,
-                    total_qty=float(total_qty),
-                    remarks=((remarks or "") + f" [details: {'; '.join(details)}]").strip(),
-                )
-                try:
-                    setattr(row, "created_by", (user or {}).get("username", "system"))
-                    setattr(row, "created_at", datetime.utcnow())
-                except Exception:
-                    pass
-
-                s.add(row)
-                s.flush()
-                rid = getattr(row, "id", None)
-                s.commit()
-
-            try:
-                SecurityManager.log_audit(
-                    None,
-                    (user or {}).get("username", "system"),
-                    "CREATE",
-                    resource_type="ProductionRecord",
-                    resource_id=str(rid or ""),
-                    details=f"Created production {d_prod}; total={total_qty:.2f} bbl; ip={_get_client_ip()}",
-                    user_id=(user or {}).get("id"),
-                    location_id=loc.id,
-                )
-            except Exception:
-                pass
-
-            st.success("✅ Production entry saved.")
-            st.rerun()
-        except Exception as ex:
-            st.error(f"Failed to save production entry: {ex}")
-
-# -------- page entry --------
+# ======================= page entry =======================
 def render_tank_transactions_page(active_location_id, user):
     st.markdown("### 🛢️ Tank Transactions")
 
@@ -843,10 +872,9 @@ def render_tank_transactions_page(active_location_id, user):
 
     st.caption(f"Active Location: **{loc_label}**")
 
-    # per-tab flags
     tab_cfg = {
         "Tank Entry": True,
-        "Meter Records": True,            # enabled now
+        "Meter Records": True,
         "Condensate Records": True,
         "Produced Water Records": True,
         "Production": False,

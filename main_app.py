@@ -11,7 +11,7 @@ from app_pages.manage_users import ROLE_ICONS as USER_ROLE_ICONS
 from permission_manager import PermissionManager
 from location_config import get_location_page_visibility
 from app_pages.page_customization import render_page_customization  # <-- wired into nav + routing
-
+from location_config import get_page_section_config
 SecurityManager.SESSION_TIMEOUT_MINUTES = 30
 # Make sure DB is ready once at import
 init_db()
