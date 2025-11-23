@@ -204,3 +204,27 @@ Traceback (most recent call last):
     tanker_names = [t.name for t in tankers]
                     ^^^^^^
 AttributeError: 'str' object has no attribute 'name'
+2025-11-23 22:08:14 - OTMS - ERROR - Tanker form initialization failed: API gravity must be positive
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 845, in _render_entry_form
+    vcf_val = vcf_from_api60_and_tank_temp(api60_val, tank_temp_value, _ttu)
+  File "D:\Project OTMS-Rebuild\utils_calc.py", line 161, in vcf_from_api60_and_tank_temp
+    return calculate_vcf(float(api60 or 0.0), temp_f)
+  File "D:\Project OTMS-Rebuild\utils_calc.py", line 147, in calculate_vcf
+    raise ValueError("API gravity must be positive")
+ValueError: API gravity must be positive
+2025-11-23 22:12:20 - OTMS - ERROR - Tanker form initialization failed: API gravity must be positive
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 834, in _render_entry_form
+    vcf_val = vcf_from_api60_and_tank_temp(api60_val, tank_temp_value, tank_temp_unit)
+  File "D:\Project OTMS-Rebuild\utils_calc.py", line 161, in vcf_from_api60_and_tank_temp
+    return calculate_vcf(float(api60 or 0.0), temp_f)
+  File "D:\Project OTMS-Rebuild\utils_calc.py", line 147, in calculate_vcf
+    raise ValueError("API gravity must be positive")
+ValueError: API gravity must be positive
+2025-11-23 22:35:10 - OTMS - ERROR - Tanker Transactions page failed: name '_render_entry_form' is not defined
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1022, in render_tanker_transactions_page
+    _render_entry_form(loc, can_make_entries, tankers)
+    ^^^^^^^^^^^^^^^^^^
+NameError: name '_render_entry_form' is not defined. Did you mean: '_render_entry_form_legacy'?

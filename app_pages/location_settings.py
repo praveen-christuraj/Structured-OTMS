@@ -243,14 +243,19 @@ def _render_tank_tx_tabs(sel_location_id: int, user):
 # ===================== Operations config =====================
 def _render_operations_config(selected_location_id, user):
     """
-    IMPORTANT:
-    This single configurator is used to add items across OP_CATEGORIES in location_config,
-    which should include categories like:
+    UNIFIED operations configurator for all assets and categories:
       - 'Operation' (generic ops)
       - 'Cargo Type'
       - 'Destination'
       - 'Loading Berth'
-    and assets like 'yade' etc. YADE dropdowns read from here (so no hardcoding in pages).
+    and assets like 'tank', 'tanker', 'yade', 'fso' etc.
+    
+    All dropdowns in operational pages (Tank, Tanker, YADE, FSO) read from here (no hardcoding in pages).
+    This allows dynamic configuration of Destination and Loading Berth dropdowns per location.
+    
+    NOTE: When you add items to 'Destination' category, they appear ONLY in Destination dropdown.
+          When you add items to 'Loading Berth' category, they appear ONLY in Loading Bay/Berth dropdown.
+          When you add items to 'Operation' category, they appear ONLY in Operation dropdown.
     """
     from location_config import (
         OP_ASSETS,
@@ -262,6 +267,11 @@ def _render_operations_config(selected_location_id, user):
     )
 
     st.markdown("### 🧩 Operations (per Location / Asset / Category)")
+    st.caption(
+        "Configure operational dropdowns for all pages. "
+        "Use **Category** selector to choose what type of item you're adding: "
+        "Operations, Destinations, Loading Berths, or Cargo Types."
+    )
 
     if not selected_location_id:
         st.info("Select a location above to configure operations.")
@@ -275,40 +285,81 @@ def _render_operations_config(selected_location_id, user):
     with col3:
         st.write("")
 
-    op_name = st.text_input("Operation name (e.g. 'Receipt from Aggu' or 'Crude Oil' or 'Bonny')", key="ops_name_input")
+    # Provide context-sensitive hints and explanation based on category
+    hint_map = {
+        "Operation": "e.g., 'Receipt from Aggu', 'Dispatch to GPP', 'Opening Stock'",
+        "Cargo Type": "e.g., 'Crude Oil', 'Condensate', 'OKW', 'ANZ'",
+        "Destination": "e.g., 'Aggu', 'OFS', 'Ogini', 'GPP', 'Ndoni', 'Bonny'",
+        "Loading Berth": "e.g., 'Aggu', 'Ogini', 'OFS', 'Berth A', 'Loading Bay 1'",
+    }
+    hint = hint_map.get(category, "Enter a name for this operation/item")
+    
+    # Category-specific info messages
+    category_info = {
+        "Operation": "Items added here will appear in the **Operation** dropdown only.",
+        "Destination": "Items added here will appear in the **Destination** dropdown only.",
+        "Loading Berth": "Items added here will appear in the **Loading Bay/Berth** dropdown only.",
+        "Cargo Type": "Items added here will appear in the **Cargo Type** dropdown only.",
+    }
+    
+    info_msg = category_info.get(category, "")
+    if info_msg:
+        st.info(f"ℹ️ Currently configuring: **{asset.title()}** → **{category}**. {info_msg}")
+
+    op_name = st.text_input(
+        f"{category} name",
+        placeholder=hint,
+        help=f"Enter a {category.lower()} name for {asset}. {hint}",
+        key="ops_name_input"
+    )
 
     c1, c2 = st.columns([0.25, 0.75])
     with c1:
         if st.button("➕ Add Operation", type="primary", key="ops_add_btn"):
-            try:
-                with get_session() as s:
-                    item = add_operation(
-                        s,
-                        selected_location_id,
-                        asset=asset,
-                        category=category,
-                        name=op_name,
-                        active=True,
-                    )
-                    try:
-                        SecurityManager.log_audit(
+            if not op_name or not op_name.strip():
+                st.error(f"Please enter a valid {category.lower()} name.")
+            else:
+                try:
+                    with get_session() as s:
+                        item = add_operation(
                             s,
-                            (user or {}).get("username", "system"),
-                            "CREATE",
-                            resource_type="LocationOperation",
-                            resource_id=item["id"],
-                            details=f"Add op '{item['name']}' under {asset}/{category}",
-                            user_id=(user or {}).get("id"),
-                            location_id=selected_location_id,
-                            ip_address=st.session_state.get("client_ip"),
-                            success=True,
+                            selected_location_id,
+                            asset=asset,
+                            category=category,
+                            name=op_name.strip(),
+                            active=True,
                         )
-                    except Exception:
-                        pass
-                st.success("Operation added.")
-                st.rerun()
-            except Exception as ex:
-                st.error(f"Failed: {ex}")
+                        try:
+                            SecurityManager.log_audit(
+                                s,
+                                (user or {}).get("username", "system"),
+                                "CREATE",
+                                resource_type="LocationOperation",
+                                resource_id=item["id"],
+                                details=f"Add '{item['name']}' to {asset}/{category}",
+                                user_id=(user or {}).get("id"),
+                                location_id=selected_location_id,
+                                ip_address=st.session_state.get("client_ip"),
+                                success=True,
+                            )
+                        except Exception:
+                            pass
+                    st.success(f"✅ '{op_name.strip()}' added to {asset.title()} → {category}.")
+                    st.rerun()
+                except Exception as ex:
+                    st.error(f"Failed to add operation: {ex}")
+    with c2:
+        # Quick guide for categories
+        with st.expander("ℹ️ Category Guide"):
+            st.markdown("""
+            **Category Selector Guide:**
+            - **Operation**: General operations like 'Receipt', 'Dispatch', 'Opening Stock'
+            - **Destination**: Destinations like 'Aggu', 'OFS', 'GPP', 'Ndoni'
+            - **Loading Berth**: Loading bays/berths like 'Berth A', 'Loading Bay 1', 'Aggu'
+            - **Cargo Type**: Cargo types like 'Crude Oil', 'Condensate', 'OKW'
+            
+            **Important:** Each category populates a different dropdown in transaction pages.
+            """)
 
     st.markdown("---")
     st.markdown("#### Existing Operations")
@@ -317,16 +368,24 @@ def _render_operations_config(selected_location_id, user):
         ops = list_operations(s, selected_location_id)
 
     if not ops:
-        st.info("No operations configured yet.")
+        st.info("No operations configured yet. Use the form above to add operations for different assets and categories.")
         return
 
     show_filtered = st.checkbox(
         "Show only selected Asset/Category",
         value=True,
         key="ops_only_filter",
+        help="Filter the list to show only operations matching the selected asset and category above."
     )
+    
     if show_filtered:
         ops = [o for o in ops if o["asset"] == asset and o["category"] == category]
+        if not ops:
+            st.info(f"No operations found for **{asset.title()}** → **{category}**. Add one using the form above.")
+            return
+
+    # Show count
+    st.caption(f"📋 Showing {len(ops)} operation(s)" + (f" for **{asset.title()}** → **{category}**" if show_filtered else ""))
 
     for o in ops:
         row_key = o["id"]
@@ -335,9 +394,14 @@ def _render_operations_config(selected_location_id, user):
             st.write(f"**{o['name']}**")
             st.caption(f"{o['asset'].title()} · {o['category']}")
         with colB:
-            on = st.toggle("Active", value=o.get("active", True), key=f"ops_active_{row_key}")
+            on = st.toggle(
+                "Active", 
+                value=o.get("active", True), 
+                key=f"ops_active_{row_key}",
+                help="Toggle to enable/disable this operation in dropdowns"
+            )
         with colC:
-            if st.button("💾 Save", key=f"ops_save_{row_key}"):
+            if st.button("💾 Save", key=f"ops_save_{row_key}", help="Save the active/inactive status"):
                 with get_session() as s:
                     set_operation_active(s, selected_location_id, op_id=o["id"], active=on)
                     try:
@@ -354,9 +418,9 @@ def _render_operations_config(selected_location_id, user):
                         )
                     except Exception:
                         pass
-                st.success("Saved.")
+                st.success(f"✅ '{o['name']}' status updated.")
         with colD:
-            if st.button("🗑️ Delete", key=f"ops_del_{row_key}"):
+            if st.button("🗑️ Delete", key=f"ops_del_{row_key}", help="Permanently delete this operation"):
                 with get_session() as s:
                     delete_operation(s, selected_location_id, op_id=o["id"])
                     try:
@@ -373,5 +437,5 @@ def _render_operations_config(selected_location_id, user):
                         )
                     except Exception:
                         pass
-                st.success("Deleted.")
+                st.success(f"🗑️ '{o['name']}' deleted.")
                 st.rerun()
