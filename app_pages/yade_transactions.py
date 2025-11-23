@@ -5,6 +5,7 @@ from datetime import date, datetime
 from typing import Any, Dict, Optional, List, Tuple
 import re
 import streamlit as st
+import pandas as pd  # <-- for seals grid
 
 from db import get_session
 from ui import header
@@ -123,13 +124,10 @@ def _api_observed_to_api60(api_obs: float, temp_f: float) -> float:
     If you already have a refined function in utils_calc (api_observed_to_api60), swap this call.
     """
     try:
-        # If your utils_calc has the refined correlation, prefer it:
         from utils_calc import api_observed_to_api60 as _api_to60
         return float(_api_to60(float(api_obs or 0.0), float(temp_f or 0.0)))
     except Exception:
         # Fallback: small linearized adjustment around 60°F (very rough)
-        # Warmer sample → slightly lower API@60; Colder → slightly higher.
-        # This is intentionally conservative until your full table routine is wired.
         k = 0.02  # rough slope per °F
         df = float(temp_f or 60.0) - 60.0
         return round(float(api_obs or 0.0) - k * df, 2)
@@ -144,9 +142,7 @@ def _density_observed_to_api60(density_obs: float, temp_f: float) -> tuple[float
         api60, dens60 = _dens_to60(float(density_obs or 0.0), float(temp_f or 0.0))
         return float(api60 or 0.0), float(dens60 or 0.0)
     except Exception:
-        # Fallback: treat observed density roughly equal to density@60 with small temp bias.
-        # Warmer sample → slightly higher density@60 correction downward.
-        k = 0.0008  # rough kg/m3 per °F correction factor (placeholder)
+        k = 0.0008  # placeholder
         df = float(temp_f or 60.0) - 60.0
         dens60 = max(0.0, float(density_obs or 0.0) - k * df * 100.0)
         api60 = _density_to_api(dens60)
@@ -189,7 +185,6 @@ def _status_badge(_v: YadeVoyage) -> str:
 def _list_names_from_ops(session, location_id: int, *, asset: str, category: str) -> List[str]:
     """
     Return ACTIVE operation names for a given asset/category from Location Settings → Operations.
-    Requires that location_config.OP_CATEGORIES includes the category.
     """
     from location_config import list_operations
     try:
@@ -203,10 +198,6 @@ def _list_names_from_ops(session, location_id: int, *, asset: str, category: str
 _TANK_ORDER = ["C1", "C2", "P1", "P2", "S1", "S2"]
 
 def _resolve_op_labels(operation: str) -> Tuple[str, str]:
-    """
-    Return ("Before {operation}", "After {operation}") using the exact
-    selected operation text from the dropdown. Falls back to "Before"/"After".
-    """
     op_disp = (operation or "").strip()
     if not op_disp or op_disp.upper() == "N/A":
         return "Before", "After"
@@ -217,9 +208,8 @@ def _get_barge_tanks_and_limits(yade_name: str, design: str) -> Tuple[list[str],
     """
     Determine tank ids and max total dip (cm) per tank for a YADE barge.
     Priority:
-      1) Tanks that exist in YadeCalibration (sorted by standard order)
-      2) Fallback to barge 'design' → 6-tank: C1,C2,P1,P2,S1,S2; 4-tank: P1,P2,S1,S2
-    Note: Calibration 'dip_mm' is in millimetres; convert to cm (÷10).
+      1) YadeCalibration (sorted by std order)
+      2) Fallback to design → 6-tank or 4-tank
     """
     try:
         from sqlalchemy import func
@@ -238,22 +228,19 @@ def _get_barge_tanks_and_limits(yade_name: str, design: str) -> Tuple[list[str],
 
     if rows:
         tank_ids = [r.tank_id for r in rows]
-        # stable order
         tank_ids = sorted(tank_ids, key=lambda t: _TANK_ORDER.index(t) if t in _TANK_ORDER else 999)
         max_by_tank = {r.tank_id: (float(r.max_dip_mm or 0.0) / 10.0) for r in rows}
         return tank_ids, max_by_tank
 
-    # Fallback to barge design:
     if str(design) == "4":
         tank_ids = ["P1", "P2", "S1", "S2"]
     else:
         tank_ids = ["C1", "C2", "P1", "P2", "S1", "S2"]
-    max_by_tank = {t: 9999.0 for t in tank_ids}  # if no calibration yet
+    max_by_tank = {t: 9999.0 for t in tank_ids}
     return tank_ids, max_by_tank
 
 
 def _load_existing_dips(session, voyage_id: int) -> dict:
-    """Return {'before': {tid:{'total_cm':..,'water_cm':..}}, 'after': {...}} for prefill."""
     out = {"before": {}, "after": {}}
     if not voyage_id:
         return out
@@ -269,7 +256,6 @@ def _load_existing_dips(session, voyage_id: int) -> dict:
 
 
 # ========================= Sample Parameters (added) =========================
-# Temperature and observed limits consistent with Tank page behavior
 _TEMP_LIMITS = {"C": (0.0, 60.0), "F": (32.0, 140.0)}
 _API_MIN, _API_MAX = 15.0, 70.0
 _DEN_MIN, _DEN_MAX = 600.0, 1000.0
@@ -285,13 +271,6 @@ def _obs_bounds(mode: str) -> Tuple[float, float]:
     return (_DEN_MIN, _DEN_MAX) if "density" in (mode or "").lower() else (_API_MIN, _API_MAX)
 
 def _render_yade_sample_params(*, yade_no: str, voyage_no: str | None = None, ns_key: Optional[str] = None):
-    """
-    Render side-by-side Sample Parameters for BEFORE and AFTER.
-    - Observed selector: API or Density (enforces ranges).
-    - One temperature unit selector per stage that controls both Sample & Tank temps.
-    - Includes CCF and BS&W %.
-    Values are stored in st.session_state["yade_sample_params"][ns][stage].
-    """
     if not yade_no or yade_no.startswith("-- No YADE Barges"):
         st.warning("⚠️ Add/select a YADE barge to enter sample parameters.")
         return
@@ -368,15 +347,14 @@ def _render_yade_sample_params(*, yade_no: str, voyage_no: str | None = None, ns
                     key=f"{ns}_{stage_key}_bsw",
                 )
 
-            # Save stage values
             blk[stage_key] = {
                 "obs_mode": obs_mode,
                 "obs_val": float(oval),
-                "sample_unit": ucode,            # F/C for calculations if needed later
-                "sample_unit_label": unit_label, # for display
+                "sample_unit": ucode,
+                "sample_unit_label": unit_label,
                 "sample_temp": float(sval),
                 "tank_temp": float(tval),
-                "tank_temp_unit": ucode,         # same as sample
+                "tank_temp_unit": ucode,
                 "ccf": float(ccf),
                 "bsw_pct": float(bsw),
             }
@@ -384,7 +362,6 @@ def _render_yade_sample_params(*, yade_no: str, voyage_no: str | None = None, ns
     _block("before", col_b)
     _block("after",  col_a)
 
-    # write back
     st.session_state["yade_sample_params"][ns] = blk
 
 
@@ -397,14 +374,6 @@ def _render_yade_dip_section(
     voy_id_for_prefill: Optional[int] = None,
     ns_key: Optional[str] = None,
 ):
-    """
-    Renders side-by-side 'Before …' and 'After …' dip sections.
-    Stores values into st.session_state[ns_key] =
-      {
-        'before': {'date':..., 'time':'HH:MM', 'dips': {tid:{total_cm,water_cm}}},
-        'after' : {'date':..., 'time':'HH:MM', 'dips': {tid:{total_cm,water_cm}}}
-      }
-    """
     if not yade_no or yade_no.startswith("-- No YADE Barges"):
         st.warning("⚠️ Add/select a YADE barge to enter dip details.")
         return
@@ -425,7 +394,6 @@ def _render_yade_dip_section(
     st.subheader("🧪 Dip Details")
     st.caption("All values are in **cm**. Each input is validated against the **maximum dip** from calibration.")
 
-    # ---------- SIDE-BY-SIDE LAYOUT ----------
     col_before, col_after = st.columns(2, gap="large")
 
     with col_before:
@@ -483,7 +451,6 @@ def _render_yade_dip_section(
                 )
             dips_before[tid] = {"total_cm": float(tot or 0.0), "water_cm": float(wat or 0.0)}
 
-        # Persist before into session
         st.session_state[ns]["before"] = {
             "date": before_date,
             "time": st.session_state.get(f"{ns}_before_time", "07:30"),
@@ -545,7 +512,6 @@ def _render_yade_dip_section(
                 )
             dips_after[tid] = {"total_cm": float(tot or 0.0), "water_cm": float(wat or 0.0)}
 
-        # Persist after into session
         st.session_state[ns]["after"] = {
             "date": after_date,
             "time": st.session_state.get(f"{ns}_after_time", "17:30"),
@@ -559,14 +525,6 @@ def _render_yade_sample_params_section(
     default_unit: str = "F",
     ns_key: Optional[str] = None,
 ):
-    """
-    Side-by-side 'Before' and 'After' Sample Parameters with dynamic validation,
-    identical to Tank Entry behavior:
-      - Temp unit drives allowed range for Sample/Tank temps (utils_calc.temp_bounds).
-      - Observed selector (API vs Density) switches label, min/max, and help text LIVE.
-      - API@60 computed using utils_calc (same path as Tank page).
-    Stores values in st.session_state['yade_sample_params'][ns][stage].
-    """
     if not yade_no or str(yade_no).startswith("-- No YADE Barges"):
         st.warning("⚠️ Select a YADE barge to enter sample parameters.")
         return
@@ -603,19 +561,14 @@ def _render_yade_sample_params_section(
                     key=f"{ns}_{stage_key}_temp_unit_label",
                 )
 
-            # Normalize for bounds (this flips 32–140 ↔ 0–60 dynamically)
             unit_code = _normalize_temp_unit(unit_label)
             tmin, tmax = _temp_bounds(unit_code)
 
-            # Temperatures (Sample & Tank share the same unit/bounds)
             t1, t2 = st.columns(2)
             with t1:
-                # Get default temperature based on unit
                 default_sample_temp = 60.0 if unit_code == "F" else 15.6
                 stored_temp = block[stage_key].get("sample_temp", default_sample_temp)
-                # Ensure stored temp is within new bounds
                 stored_temp = max(tmin, min(tmax, float(stored_temp)))
-                
                 sample_temp = st.number_input(
                     f"Sample Temperature ({unit_label})",
                     min_value=tmin, max_value=tmax, step=0.1, format="%.1f",
@@ -625,9 +578,7 @@ def _render_yade_sample_params_section(
             with t2:
                 default_tank_temp = 60.0 if unit_code == "F" else 15.6
                 stored_tank = block[stage_key].get("tank_temp", default_tank_temp)
-                # Ensure stored temp is within new bounds
                 stored_tank = max(tmin, min(tmax, float(stored_tank)))
-                
                 tank_temp = st.number_input(
                     f"Tank Temperature ({unit_label})",
                     min_value=tmin, max_value=tmax, step=0.1, format="%.1f",
@@ -635,26 +586,22 @@ def _render_yade_sample_params_section(
                     key=f"{ns}_{stage_key}_tank_temp",
                 )
 
-            # Observed input (THIS flips the label and min/max dynamically)
             v1, v2 = st.columns([0.62, 0.38])
-            
-            # Get the stored obs_val and ensure it's appropriate for current mode
+
             stored_obs_val = block[stage_key].get("obs_val", None)
             if stored_obs_val is None:
-                # Set default based on current mode
                 stored_obs_val = 35.0 if obs_mode == "Observed API" else 850.0
             else:
-                # Validate stored value is within bounds of current mode
                 if obs_mode == "Observed API":
                     stored_obs_val = max(15.0, min(70.0, float(stored_obs_val)))
                 else:
                     stored_obs_val = max(600.0, min(1000.0, float(stored_obs_val)))
-            
+
             if obs_mode == "Observed API":
                 obs_val = v1.number_input(
                     "Observed API *",
                     min_value=15.0, max_value=70.0, step=0.1, format="%.1f",
-                    value=float(stored_obs_val) if obs_mode == "Observed API" and 15.0 <= stored_obs_val <= 70.0 else 35.0,
+                    value=float(stored_obs_val) if 15.0 <= stored_obs_val <= 70.0 else 35.0,
                     key=f"{ns}_{stage_key}_obs_api",
                     help="Allowed range: 15.0 – 70.0 API",
                 )
@@ -665,7 +612,7 @@ def _render_yade_sample_params_section(
                 obs_val = v1.number_input(
                     "Observed Density (kg/m³) *",
                     min_value=600.0, max_value=1000.0, step=0.1, format="%.1f",
-                    value=float(stored_obs_val) if obs_mode != "Observed API" and 600.0 <= stored_obs_val <= 1000.0 else 850.0,
+                    value=float(stored_obs_val) if 600.0 <= stored_obs_val <= 1000.0 else 850.0,
                     key=f"{ns}_{stage_key}_obs_density",
                     help="Allowed range: 600 – 1000 kg/m³",
                 )
@@ -688,17 +635,11 @@ def _render_yade_sample_params_section(
                     key=f"{ns}_{stage_key}_bsw",
                 )
 
-            # Live display (same idea as Tank Entry)
             if obs_mode == "Observed API":
-                st.caption(
-                    f"→ API @ 60°F: **{api60_val:.2f}**   |   ↔ Approx Density: **{dens_obs:.1f} kg/m³**"
-                )
+                st.caption(f"→ API @ 60°F: **{api60_val:.2f}**   |   ↔ Approx Density: **{dens_obs:.1f} kg/m³**")
             else:
-                st.caption(
-                    f"↔ Approx API: **{approx_api:.2f}**   |   → API @ 60°F: **{api60_val:.2f}**"
-                )
+                st.caption(f"↔ Approx API: **{approx_api:.2f}**   |   → API @ 60°F: **{api60_val:.2f}**")
 
-            # Persist
             block[stage_key] = {
                 "obs_mode": obs_mode,
                 "obs_val": float(obs_val or 0.0),
@@ -718,6 +659,105 @@ def _render_yade_sample_params_section(
 
     st.session_state["yade_sample_params"][ns] = block
 
+
+# ========================= Seals (After-only, GRID) =========================
+def _render_yade_seal_details_section(
+    *,
+    yade_no: str,
+    design: str | None = None,
+):
+    """
+    AFTER-only Seal Details displayed as a grid:
+      Rows: Tank No; Columns: MH1, MH2, Lock, Dip Hatch
+    Values map back to flat keys like c1_mh1, p2_lock, etc. in st.session_state['yade_seals'].
+    """
+    if not yade_no or str(yade_no).startswith("-- No YADE Barges"):
+        st.warning("⚠️ Select a YADE barge to enter seal details.")
+        return
+
+    try:
+        tank_ids, _ = _get_barge_tanks_and_limits(yade_no, str(design or ""))
+    except Exception:
+        tank_ids = ["C1", "C2", "P1", "P2", "S1", "S2"]
+
+    store = st.session_state.setdefault("yade_seals", {})
+    st.subheader("🔒 Seal Details — After")
+
+    # Build grid dataframe
+    rows = []
+    for tid in tank_ids:
+        low = tid.lower()
+        rows.append({
+            "Tank": tid,
+            "MH1": store.get(f"{low}_mh1", ""),
+            "MH2": store.get(f"{low}_mh2", ""),
+            "Lock": store.get(f"{low}_lock", ""),
+            "Dip Hatch": store.get(f"{low}_diphatch", ""),
+        })
+    df = pd.DataFrame(rows, columns=["Tank", "MH1", "MH2", "Lock", "Dip Hatch"])
+
+    edited = st.data_editor(
+        df,
+        key=f"yade_seals_grid_{yade_no}",
+        use_container_width=True,
+        num_rows="fixed",
+        hide_index=True,
+        column_config={
+            "Tank": st.column_config.TextColumn(disabled=True, width="small"),
+            "MH1": st.column_config.TextColumn(width="medium"),
+            "MH2": st.column_config.TextColumn(width="medium"),
+            "Lock": st.column_config.TextColumn(width="medium"),
+            "Dip Hatch": st.column_config.TextColumn(width="medium"),
+        },
+    )
+
+    # Persist back to flat keys so the saver works 1:1
+    for _, r in edited.iterrows():
+        low = str(r["Tank"]).lower()
+        store[f"{low}_mh1"] = str(r.get("MH1", "") or "")
+        store[f"{low}_mh2"] = str(r.get("MH2", "") or "")
+        store[f"{low}_lock"] = str(r.get("Lock", "") or "")
+        store[f"{low}_diphatch"] = str(r.get("Dip Hatch", "") or "")
+
+    st.session_state["yade_seals"] = store
+
+
+def _save_yade_seal_details(session, voyage_id: int):
+    """Save YADE seal details (flat keys, same as old app)."""
+    from models import YadeSealDetail
+
+    seals = st.session_state.get("yade_seals", {}) or {}
+
+    seal_detail = YadeSealDetail(
+        voyage_id=voyage_id,
+        c1_mh1=seals.get("c1_mh1"),
+        c1_mh2=seals.get("c1_mh2"),
+        c1_lock=seals.get("c1_lock"),
+        c1_diphatch=seals.get("c1_diphatch"),
+        c2_mh1=seals.get("c2_mh1"),
+        c2_mh2=seals.get("c2_mh2"),
+        c2_lock=seals.get("c2_lock"),
+        c2_diphatch=seals.get("c2_diphatch"),
+        p1_mh1=seals.get("p1_mh1"),
+        p1_mh2=seals.get("p1_mh2"),
+        p1_lock=seals.get("p1_lock"),
+        p1_diphatch=seals.get("p1_diphatch"),
+        p2_mh1=seals.get("p2_mh1"),
+        p2_mh2=seals.get("p2_mh2"),
+        p2_lock=seals.get("p2_lock"),
+        p2_diphatch=seals.get("p2_diphatch"),
+        s1_mh1=seals.get("s1_mh1"),
+        s1_mh2=seals.get("s1_mh2"),
+        s1_lock=seals.get("s1_lock"),
+        s1_diphatch=seals.get("s1_diphatch"),
+        s2_mh1=seals.get("s2_mh1"),
+        s2_mh2=seals.get("s2_mh2"),
+        s2_lock=seals.get("s2_lock"),
+        s2_diphatch=seals.get("s2_diphatch"),
+    )
+    session.add(seal_detail)
+
+
 # ========================= YADE form (Entry / Edit tab) =========================
 def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | None, yade_cfg: Dict[str, Any]):
     if "yade_edit_id" not in st.session_state:
@@ -729,12 +769,11 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
     barge_names = [b.name for b in barges]
     barge_design = {b.name: b.design for b in barges}
 
-    # --- Pull dropdowns from Location Settings → Operations (asset='yade') ---
+    # Dropdowns from Location Settings → Operations (asset='yade')
     with get_session() as s:
         cargo_opts = _list_names_from_ops(s, location_id, asset="yade", category="Cargo Type") or ["N/A"]
         dest_opts  = _list_names_from_ops(s, location_id, asset="yade", category="Destination") or ["N/A"]
         berth_opts = _list_names_from_ops(s, location_id, asset="yade", category="Loading Berth") or ["N/A"]
-        # Your YADE operations live here too (category you configured for ops). If you used "Others" earlier, keep it:
         op_opts    = _list_names_from_ops(s, location_id, asset="yade", category="Others") or ["N/A"]
 
     # Prefill for edit
@@ -758,14 +797,12 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
             f"{voy.voyage_no or 'No'} on {voy.date or 'N/A'}"
         )
 
-    # ===== Live Operation selector (outside the form so headings update immediately) =====
+    # Live Operation selector (outside to update headings immediately)
     c_op, _ = st.columns([1, 1])
     with c_op:
-        # Initialize session value once when editing
         if voy and "yade_operation" not in st.session_state and getattr(voy, "operation", None):
             st.session_state["yade_operation"] = voy.operation if voy.operation in op_opts else (op_opts[0] if op_opts else "N/A")
 
-        # Show the live control
         op_default_idx = 0
         if "yade_operation" in st.session_state and st.session_state["yade_operation"] in op_opts:
             op_default_idx = op_opts.index(st.session_state["yade_operation"])
@@ -774,55 +811,47 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
 
         op_live = st.selectbox("Operation (live for Dip headings)", op_opts, index=op_default_idx, key="yade_operation")
 
-    
-    
+    # ----- Header fields (NO form; single Save at bottom) -----
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        if not barge_names:
+            yade_no = st.selectbox("YADE No *", ["-- No YADE Barges (add in Assets) --"], index=0)
+            design = ""
+        else:
+            idx = 0
+            if voy and voy.yade_name in barge_names:
+                idx = barge_names.index(voy.yade_name)
+            yade_no = st.selectbox("YADE No *", barge_names, index=idx)
+            design = barge_design.get(yade_no, "")
 
-    
+    with c2:
+        voyage_no = st.text_input("Voyage No.", value=(voy.voyage_no or "") if voy else "")
+        convoy_no = st.text_input("Convoy No. (digits & '-' only)", value=(voy.convoy_no or "") if voy else "")
 
-    
-    with st.form("yade_voyage_form", clear_on_submit=False):
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            if not barge_names:
-                yade_no = st.selectbox("YADE No *", ["-- No YADE Barges (add in Assets) --"], index=0)
-                design = ""
-            else:
-                idx = 0
-                if voy and voy.yade_name in barge_names:
-                    idx = barge_names.index(voy.yade_name)
-                yade_no = st.selectbox("YADE No *", barge_names, index=idx)
-                design = barge_design.get(yade_no, "")
+    with c3:
+        tx_date = st.date_input(
+            "Date (DD/MM/YYYY)",
+            value=voy.date if (voy and voy.date) else date.today(),
+            format="DD/MM/YYYY",
+        )
+        default_time = voy.time.strftime("%H:%M") if (voy and voy.time) else "08:00"
+        tx_time = st.text_input("Time (HH:MM)", value=default_time)
 
-        with c2:
-            voyage_no = st.text_input("Voyage No.", value=(voy.voyage_no or "") if voy else "")
-            convoy_no = st.text_input("Convoy No. (digits & '-' only)", value=(voy.convoy_no or "") if voy else "")
+    c5, c6, c7 = st.columns(3)
+    with c5:
+        cargo_idx = cargo_opts.index(voy.cargo) if (voy and voy.cargo in cargo_opts) else 0
+        cargo = st.selectbox("Cargo", cargo_opts, index=cargo_idx)
+    with c6:
+        dest_idx = dest_opts.index(voy.destination) if (voy and voy.destination in dest_opts) else 0
+        destination = st.selectbox("Destination", dest_opts, index=dest_idx)
+    with c7:
+        berth_idx = berth_opts.index(voy.loading_berth) if (voy and voy.loading_berth in berth_opts) else 0
+        loading_berth = st.selectbox("Loading Berth", berth_opts, index=berth_idx)
 
-        with c3:
-            tx_date = st.date_input(
-                "Date (DD/MM/YYYY)",
-                value=voy.date if (voy and voy.date) else date.today(),
-                format="DD/MM/YYYY",
-            )
-            default_time = voy.time.strftime("%H:%M") if (voy and voy.time) else "08:00"
-            tx_time = st.text_input("Time (HH:MM)", value=default_time)
+    st.caption(f"📍 Location: **{loc_label}**")
+    st.markdown("---")
 
-        c5, c6, c7 = st.columns(3)
-        with c5:
-            cargo_idx = cargo_opts.index(voy.cargo) if (voy and voy.cargo in cargo_opts) else 0
-            cargo = st.selectbox("Cargo", cargo_opts, index=cargo_idx)
-        with c6:
-            dest_idx = dest_opts.index(voy.destination) if (voy and voy.destination in dest_opts) else 0
-            destination = st.selectbox("Destination", dest_opts, index=dest_idx)
-        with c7:
-            berth_idx = berth_opts.index(voy.loading_berth) if (voy and voy.loading_berth in berth_opts) else 0
-            loading_berth = st.selectbox("Loading Berth", berth_opts, index=berth_idx)
-
-        st.caption(f"📍 Location: **{loc_label}**")
-        st.markdown("---")
-
-        save_btn = st.form_submit_button("💾 Save Header", type="primary")
-
-    # Render DIP and Sample Parameters outside the form for live interactivity
+    # Render DIP and Sample Parameters outside (live interactivity)
     op_current = st.session_state.get("yade_operation", op_live)
     voy_id_for_prefill = voy.id if voy else None
     ns_key = f"dips_{re.sub(r'[^A-Za-z0-9]', '_', str(yade_no))}_{re.sub(r'[^A-Za-z0-9]', '_', str(voyage_no or 'new'))}"
@@ -842,9 +871,16 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
         default_unit="F",
         ns_key=f"sp_{re.sub(r'[^A-Za-z0-9]', '_', str(yade_no))}_{re.sub(r'[^A-Za-z0-9]', '_', str(voyage_no or 'new'))}",
     )
-    st.markdown("---")
 
-    if not save_btn:
+    _render_yade_seal_details_section(
+        yade_no=yade_no,
+        design=str(design),
+    )
+
+    st.markdown("---")
+    save_all = st.button("💾 Save", type="primary")
+
+    if not save_all:
         return
 
     # Minimal validation
@@ -859,7 +895,7 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
         st.error("Time must be in HH:MM (24-hour) format.")
         return
 
-    # Save / update (header only for now; dips are cached in session and will be persisted in the next step)
+    # Save / update header, then seals
     try:
         with get_session() as s:
             current_user = (st.session_state.get("auth_user") or {}).get("username", "unknown")
@@ -876,7 +912,7 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
                 voy.cargo = cargo
                 voy.destination = destination
                 voy.loading_berth = loading_berth
-                setattr(voy, "operation", op_selected)  # kept on object; persist if you add column later
+                setattr(voy, "operation", op_selected)
                 voy.updated_by = current_user
                 voy.updated_at = datetime.utcnow()
                 voyage_id = voy.id
@@ -904,6 +940,15 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
 
             s.commit()
 
+            # Save seals
+            try:
+                _save_yade_seal_details(s, voyage_id)
+                s.commit()
+            except Exception as _ex:
+                log_error(f"Save YADE seals failed: {_ex}", exc_info=True)
+                _audit_error(f"Save YADE seals failed: {_ex}", user, location_id)
+                st.warning("Header saved, but saving Seal Details failed. (Logged)")
+
             try:
                 SecurityManager.log_audit(
                     None,
@@ -920,13 +965,13 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
             except Exception:
                 pass
 
-        st.success(f"✅ YADE Voyage header saved for {yade_no} — Voyage {voyage_no}")
+        st.success(f"✅ YADE Voyage saved for {yade_no} — Voyage {voyage_no}")
         _st_safe_rerun()
 
     except Exception as ex:
-        log_error(f"Save YADE voyage header failed: {ex}", exc_info=True)
-        _audit_error(f"Save YADE voyage header failed: {ex}", user, location_id)
-        st.error("Failed to save YADE Voyage header. (Logged)")
+        log_error(f"Save YADE voyage failed: {ex}", exc_info=True)
+        _audit_error(f"Save YADE voyage failed: {ex}", user, location_id)
+        st.error("Failed to save YADE Voyage. (Logged)")
 
 
 # ========================= YADE list (Voyages List tab) =========================
