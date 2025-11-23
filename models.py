@@ -471,7 +471,9 @@ class TankerCalibration(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     tanker_name = Column(String(100), index=True, nullable=False)
-    compartment = Column(String(10), nullable=False)  # "C1" or "C2"
+    compartment = Column(String(10), nullable=False)
+    tanker_id = Column(Integer, ForeignKey("tankers.id"), nullable=True, index=True)
+    chassis_no = Column(String(100), nullable=True)
     dip_mm = Column(Float, nullable=False)
     volume_litres = Column(Float, nullable=False)
 

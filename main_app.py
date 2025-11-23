@@ -10,9 +10,13 @@ from models import User, Location
 from app_pages.manage_users import ROLE_ICONS as USER_ROLE_ICONS
 from permission_manager import PermissionManager
 from location_config import get_location_page_visibility
-from app_pages.page_customization import render_page_customization  # keep wired into nav + routing
-from location_config import get_page_section_config
+from app_pages.page_customization import render_page_customization
+from app_pages.tanker_transactions import render_tanker_transactions_page
+from location_config import get_page_section_config  # (kept in case other pages use it)
+
+# Session timeout (minutes)
 SecurityManager.SESSION_TIMEOUT_MINUTES = 30
+
 # Make sure DB is ready once at import
 init_db()
 
@@ -27,18 +31,20 @@ ICONS = {
     "Asset Management": "🧺",
     "Page Customization": "⚙️",
     "Tank Transactions": "🛢️",
-    "Tanker Transactions": "TT",
+    "Tanker Transactions": "🚚",  # nicer icon
     "Yade Transactions": "⛴️",
     "FSO-Operations": "⚓",
     "Reports": "📄",
     "Settings": "⚙️",
-    "View Transactions": "🗂️",  # <-- unified viewer
+    "View Transactions": "🗂️",  # unified viewer
 }
 
 ROLE_ICONS = USER_ROLE_ICONS
 
+
 def role_with_icon_main(role: str) -> str:
     return f"{ROLE_ICONS.get(role, '👤')} {role}"
+
 
 def ensure_default_admin_user():
     """
@@ -75,9 +81,11 @@ def ensure_default_admin_user():
             location_id=None,
         )
 
+
 def _module_exists(dotted_path: str) -> bool:
     """Return True if a module can be imported (module present)."""
     return importlib.util.find_spec(dotted_path) is not None
+
 
 def _inject_sidebar_css():
     """Apply light, professional theme + glass-style sidebar nav."""
@@ -143,11 +151,13 @@ def _inject_sidebar_css():
         unsafe_allow_html=True,
     )
 
+
 def _ensure_session_defaults():
     ss = st.session_state
     ss.setdefault("auth_user", None)
     ss.setdefault("active_location_id", None)
     ss.setdefault("current_page", "Home")
+
 
 def get_pages(user, active_location_id):
     """
@@ -181,12 +191,12 @@ def get_pages(user, active_location_id):
 
     # Mapping: flag -> (page title, module path)
     ops = [
-        ("show_tank_transactions", ("Tank Transactions", "app_pages.tank_transactions")),
+        ("show_tank_transactions",   ("Tank Transactions",   "app_pages.tank_transactions")),
         ("show_tanker_transactions", ("Tanker Transactions", "app_pages.tanker_transactions")),
-        ("show_tank_transactions", ("View Transactions", "app_pages.view_transactions")),  # <-- unified viewer
-        ("show_yade_transactions", ("Yade Transactions", "app_pages.yade_transactions")),
-        ("show_fso_operations",   ("FSO-Operations",   "app_pages.fso_operations")),
-        ("show_reports",          ("Reports",          "app_pages.reports")),
+        ("show_tank_transactions",   ("View Transactions",   "app_pages.view_transactions")),  # unified viewer; uses same flag
+        ("show_yade_transactions",   ("Yade Transactions",   "app_pages.yade_transactions")),
+        ("show_fso_operations",      ("FSO-Operations",      "app_pages.fso_operations")),
+        ("show_reports",             ("Reports",             "app_pages.reports")),
     ]
 
     if role_ok:
@@ -195,6 +205,7 @@ def get_pages(user, active_location_id):
                 pages.append(title)
 
     return pages
+
 
 def _render_sidebar_nav(pages, current_page, user, active_location_id):
     """User header (logo on top) + logout + glass-style icon nav in sidebar."""
@@ -283,6 +294,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         if st.sidebar.button(btn_label, key=f"nav_{p}"):
             st.session_state["current_page"] = p
             st.rerun()
+
 
 def main():
     st.set_page_config(
@@ -425,7 +437,7 @@ def main():
         render_tank_transactions_page(active_location_id, user)
 
     elif current_page == "Tanker Transactions":
-        from app_pages.tanker_transactions import render_tanker_transactions_page
+        # separate file: app_pages/tanker_transactions.py
         render_tanker_transactions_page(active_location_id, user)
 
     elif current_page == "Yade Transactions":
@@ -437,10 +449,6 @@ def main():
         render_view_transactions_page(active_location_id, user)
 
     # (keep YADE/FSO/Reports routes commented until those pages are ready)
-    # elif current_page == "Yade Transactions":
-    #     from app_pages.yade_transactions import render_yade_transactions_page
-    #     render_yade_transactions_page(active_location_id, user)
-    #
     # elif current_page == "FSO-Operations":
     #     from app_pages.fso_operations import render_fso_operations_page
     #     render_fso_operations_page(active_location_id, user)
@@ -448,6 +456,7 @@ def main():
     # elif current_page == "Reports":
     #     from app_pages.reports import render_reports_page
     #     render_reports_page(active_location_id, user)
+
 
 if __name__ == "__main__":
     main()

@@ -33,13 +33,18 @@ def _ensure_schema_updates():
     if backend != "sqlite":
         return
 
-    inspector_stmt = text("PRAGMA table_info('users')")
     try:
         with engine.begin() as conn:
-            existing_cols = {row[1] for row in conn.execute(inspector_stmt).fetchall()}
-            if "supervisor_code_hash" not in existing_cols:
+            cols_users = {row[1] for row in conn.execute(text("PRAGMA table_info('users')")).fetchall()}
+            if "supervisor_code_hash" not in cols_users:
                 conn.execute(text("ALTER TABLE users ADD COLUMN supervisor_code_hash VARCHAR(255)"))
-            if "supervisor_code_set_at" not in existing_cols:
+            if "supervisor_code_set_at" not in cols_users:
                 conn.execute(text("ALTER TABLE users ADD COLUMN supervisor_code_set_at DATETIME"))
+
+            cols_tanker_cal = {row[1] for row in conn.execute(text("PRAGMA table_info('tanker_calibration')")).fetchall()}
+            if "tanker_id" not in cols_tanker_cal:
+                conn.execute(text("ALTER TABLE tanker_calibration ADD COLUMN tanker_id INTEGER"))
+            if "chassis_no" not in cols_tanker_cal:
+                conn.execute(text("ALTER TABLE tanker_calibration ADD COLUMN chassis_no VARCHAR(100)"))
     except Exception:
         pass

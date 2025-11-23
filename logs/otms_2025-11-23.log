@@ -111,3 +111,96 @@ sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint fail
 [SQL: INSERT INTO yade_voyage (location_id, yade_name, design, voyage_no, convoy_no, date, time, cargo, destination, loading_berth, before_gauge_date, before_gauge_time, after_gauge_date, after_gauge_time, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
 [parameters: (2, 'YADE-36', '4', '1234', '2000', '2025-11-23', '08:00:00.000000', 'Okwuibome Blend Crude', 'Agge', 'Asemoku Jetty', None, None, None, None, 'admin', '2025-11-23 15:41:33.163244', None, None)]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-11-23 20:36:43 - OTMS - ERROR - Tanker Transactions page failed: The `value` 0.0 is less than the `min_value` 15.0.
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 936, in render_tanker_transactions_page
+    _render_entry_form(loc, can_make_entries, tanker_names)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 660, in _render_entry_form
+    api_observed = st.number_input(
+        "Observed API *",
+    ...<3 lines>...
+        key="tanker_tx_api_observed",
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\elements\widgets\number_input.py", line 401, in number_input
+    return self._number_input(
+           ~~~~~~~~~~~~~~~~~~^
+        label=label,
+        ^^^^^^^^^^^^
+    ...<15 lines>...
+        ctx=ctx,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\elements\widgets\number_input.py", line 640, in _number_input
+    raise StreamlitValueBelowMinError(
+        value=widget_state.value, min_value=number_input_proto.min
+    )
+streamlit.errors.StreamlitValueBelowMinError: The `value` 0.0 is less than the `min_value` 15.0.
+2025-11-23 20:36:50 - OTMS - ERROR - Tanker Transactions page failed: The `value` 0.0 is less than the `min_value` 15.0.
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 936, in render_tanker_transactions_page
+    _render_entry_form(loc, can_make_entries, tanker_names)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 660, in _render_entry_form
+    api_observed = st.number_input(
+        "Observed API *",
+    ...<3 lines>...
+        key="tanker_tx_api_observed",
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\elements\widgets\number_input.py", line 401, in number_input
+    return self._number_input(
+           ~~~~~~~~~~~~~~~~~~^
+        label=label,
+        ^^^^^^^^^^^^
+    ...<15 lines>...
+        ctx=ctx,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\elements\widgets\number_input.py", line 640, in _number_input
+    raise StreamlitValueBelowMinError(
+        value=widget_state.value, min_value=number_input_proto.min
+    )
+streamlit.errors.StreamlitValueBelowMinError: The `value` 0.0 is less than the `min_value` 15.0.
+2025-11-23 20:47:27 - OTMS - ERROR - Tanker Transactions page failed: The `value` 0.0 is less than the `min_value` 15.0.
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 936, in render_tanker_transactions_page
+    _render_entry_form(loc, can_make_entries, tanker_names)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 660, in _render_entry_form
+    api_observed = st.number_input(
+        "Observed API *",
+    ...<3 lines>...
+        key="tanker_tx_api_observed",
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\elements\widgets\number_input.py", line 401, in number_input
+    return self._number_input(
+           ~~~~~~~~~~~~~~~~~~^
+        label=label,
+        ^^^^^^^^^^^^
+    ...<15 lines>...
+        ctx=ctx,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\elements\widgets\number_input.py", line 640, in _number_input
+    raise StreamlitValueBelowMinError(
+        value=widget_state.value, min_value=number_input_proto.min
+    )
+streamlit.errors.StreamlitValueBelowMinError: The `value` 0.0 is less than the `min_value` 15.0.
+2025-11-23 21:31:04 - OTMS - ERROR - Tanker Transactions page failed: 'str' object has no attribute 'name'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 959, in render_tanker_transactions_page
+    _render_entry_form(loc, can_make_entries, tanker_names)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 540, in _render_entry_form
+    tanker_names = [t.name for t in tankers]
+                    ^^^^^^
+AttributeError: 'str' object has no attribute 'name'

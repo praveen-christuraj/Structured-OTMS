@@ -15,6 +15,7 @@ from location_config import (
 # ---------- defaults ----------
 DEFAULT_FLAGS = {
     "show_tank_transactions": True,
+    "show_tanker_transactions": True,
     "show_yade_transactions": True,
     "show_fso_operations": True,
     "show_reports": True,
@@ -96,6 +97,11 @@ def _render_page_access(sel_location_id: int, user):
             value=cfg.get("show_tank_transactions", True),
             key="ls_flag_tank",
         )
+        show_tanker = st.toggle(
+            "🚚 Tanker Transactions",
+            value=cfg.get("show_tanker_transactions", True),
+            key="ls_flag_tanker",
+        )
         show_fso = st.toggle(
             "⚓ FSO Operations",
             value=cfg.get("show_fso_operations", True),
@@ -118,6 +124,7 @@ def _render_page_access(sel_location_id: int, user):
     if st.button("💾 Save Settings", type="primary", key="ls_save_page_flags"):
         new_flags = {
             "show_tank_transactions": bool(show_tank),
+            "show_tanker_transactions": bool(show_tanker),
             "show_yade_transactions": bool(show_yade),
             "show_fso_operations": bool(show_fso),
             "show_reports": bool(show_rpts),

@@ -53,6 +53,22 @@ def _read_table(upload):
         return pd.read_excel(upload)
     raise ValueError("Unsupported file type. Please upload CSV or XLSX.")
 
+def _normalize_headers(df: pd.DataFrame, aliases: dict[str, str]) -> pd.DataFrame:
+    def norm_token(s: str) -> str:
+        s = str(s).lower().strip()
+        for ch in [" ", "_", "-", "(", ")"]:
+            s = s.replace(ch, "")
+        return s
+    colmap = {}
+    for c in df.columns:
+        token = norm_token(c)
+        target = aliases.get(token)
+        if target:
+            colmap[c] = target
+    if colmap:
+        df = df.rename(columns=colmap)
+    return df
+
 def _require_cols(df: pd.DataFrame, required: set):
     cols = {str(c).strip().lower() for c in df.columns}
     missing = [c for c in required if c.lower() not in cols]
@@ -145,12 +161,12 @@ def _tab_tanks(active_location_id, user):
                 c4.caption(f"Status: {t.status.name}")
                 with c5:
                     colA, colB = st.columns(2)
-                    if colA.button("✏️ Edit", key=f"edit_tank_{t.id}", use_container_width=True):
-                        st.session_state[f"edit_tank_{t.id}"] = True
+                    if colA.button("✏️ Edit", key=f"btn_edit_tank_{t.id}", use_container_width=True):
+                        st.session_state[f"editing_tank_{t.id}"] = True
                     if colB.button("🗑️ Delete", key=f"del_tank_{t.id}", use_container_width=True):
                         st.session_state[f"confirm_del_tank_{t.id}"] = True
 
-                if st.session_state.get(f"edit_tank_{t.id}"):
+                if st.session_state.get(f"editing_tank_{t.id}"):
                     with st.form(f"form_edit_tank_{t.id}", clear_on_submit=False):
                         ec1, ec2, ec3, ec4 = st.columns(4)
                         with ec1: new_name = st.text_input("Tank Name", value=t.name, max_chars=100)
@@ -175,11 +191,11 @@ def _tab_tanks(active_location_id, user):
                                     resource_type="Tank", resource_id=str(obj.id),
                                     details=f"Updated tank '{obj.name}' at {loc_label}",
                                     user_id=(user or {}).get("id"), location_id=loc.id)
-                                st.success("Updated."); st.session_state.pop(f"edit_tank_{t.id}", None); st.rerun()
+                                st.success("Updated."); st.session_state.pop(f"editing_tank_{t.id}", None); st.rerun()
                         except Exception as ex:
                             st.error(f"Failed to update tank: {ex}")
                     elif cancel:
-                        st.session_state.pop(f"edit_tank_{t.id}", None); st.rerun()
+                        st.session_state.pop(f"editing_tank_{t.id}", None); st.rerun()
 
                 if st.session_state.get(f"confirm_del_tank_{t.id}"):
                     st.error("Are you sure you want to delete this tank? This cannot be undone.")
@@ -343,12 +359,12 @@ def _tab_vessels_assign(active_location_id, user):
                 c3.caption(f"Capacity: {int(v.capacity_bbl or 0)} bbl")
                 with c4:
                     colA, colB = st.columns(2)
-                    if colA.button("✏️ Edit", key=f"edit_vessel_{v.id}", use_container_width=True):
-                        st.session_state[f"edit_vessel_{v.id}"] = True
+                    if colA.button("✏️ Edit", key=f"btn_edit_vessel_{v.id}", use_container_width=True):
+                        st.session_state[f"editing_vessel_{v.id}"] = True
                     if colB.button("🗑️ Delete", key=f"del_vessel_{v.id}", use_container_width=True):
                         st.session_state[f"confirm_del_vessel_{v.id}"] = True
 
-                if st.session_state.get(f"edit_vessel_{v.id}"):
+                if st.session_state.get(f"editing_vessel_{v.id}"):
                     with st.form(f"form_edit_vessel_{v.id}", clear_on_submit=False):
                         ec1, ec2, ec3, ec4 = st.columns(4)
                         with ec1: new_name = st.text_input("Vessel Name", value=v.name, max_chars=100)
@@ -371,11 +387,11 @@ def _tab_vessels_assign(active_location_id, user):
                                     resource_type="Vessel", resource_id=str(obj.id),
                                     details=f"Updated vessel '{obj.name}'",
                                     user_id=(user or {}).get("id"))
-                                st.success("Updated."); st.session_state.pop(f"edit_vessel_{v.id}", None); st.rerun()
+                                st.success("Updated."); st.session_state.pop(f"editing_vessel_{v.id}", None); st.rerun()
                         except Exception as ex:
                             st.error(f"Failed to update vessel: {ex}")
                     elif cancel:
-                        st.session_state.pop(f"edit_vessel_{v.id}", None); st.rerun()
+                        st.session_state.pop(f"editing_vessel_{v.id}", None); st.rerun()
 
                 if st.session_state.get(f"confirm_del_vessel_{v.id}"):
                     st.error("Are you sure you want to delete this vessel? This cannot be undone.")
@@ -444,10 +460,12 @@ def _tab_tankers(user):
     with st.expander("➕ Add New Tanker", expanded=False):
         with st.form("form_add_tanker", clear_on_submit=True):
             c1, c2, c3, c4 = st.columns(4)
-            with c1: t_name = st.text_input("Tanker Name", max_chars=100)
-            with c2: t_reg = st.text_input("Registration No.", max_chars=50)
+            with c1: t_name = st.text_input("Tanker ID / Name", max_chars=100)
+            with c2: t_reg = st.text_input("Chassis No.", max_chars=50)  # <-- label updated
             with c3: t_cap = st.number_input("Capacity (litres)", min_value=0.0, step=100.0)
             with c4: t_status = st.selectbox("Status", ["ACTIVE", "INACTIVE"], index=0)
+            st.caption("Optionally upload initial calibration chart for this tanker (CSV/XLSX)")
+            up_new_cal = st.file_uploader("Calibration file (optional)", type=["csv","xlsx"], key="tanker_cal_new")
             submitted = st.form_submit_button("💾 Save Tanker", use_container_width=True)
 
         if submitted:
@@ -459,11 +477,55 @@ def _tab_tankers(user):
                     else:
                         tk = Tanker(
                             name=t_name.strip(),
-                            registration_no=t_reg.strip() or None,
+                            registration_no=t_reg.strip() or None,   # DB field remains the same
                             capacity_litres=float(t_cap or 0.0) or None,
                             status=TankStatus.ACTIVE if t_status == "ACTIVE" else TankStatus.INACTIVE,
                         )
                         s.add(tk); s.commit()
+                        if up_new_cal is not None:
+                            try:
+                                df_new = _read_table(up_new_cal)
+                                df_new = _normalize_headers(df_new, {
+                                    "tankerid": "tanker_id",
+                                    "chassisno": "chassis_no",
+                                    "dipmm": "dip_mm",
+                                    "volumelitres": "volume_litres",
+                                    "volumelitre": "volume_litres",
+                                    "volume": "volume_litres",
+                                    "compartment": "compartment",
+                                })
+                                df_new.columns = [str(c).strip().lower() for c in df_new.columns]
+                                _require_cols(df_new, {"tanker_id", "chassis_no", "dip_mm", "volume_litres"})
+                                df_new["tanker_id"] = df_new["tanker_id"].astype(str).str.strip()
+                                df_new["chassis_no"] = df_new["chassis_no"].astype(str).str.strip()
+                                df_new = _numeric(df_new, ["dip_mm", "volume_litres"]).dropna(subset=["chassis_no","dip_mm","volume_litres"])
+                                s.query(TankerCalibration).filter(
+                                    TankerCalibration.tanker_id == int(tk.id),
+                                    TankerCalibration.chassis_no.in_(sorted(set(df_new["chassis_no"].tolist())))
+                                ).delete(synchronize_session=False)
+                                objs = []
+                                has_comp = "compartment" in df_new.columns
+                                for _, r in df_new.iterrows():
+                                    objs.append(TankerCalibration(
+                                        tanker_id=int(tk.id),
+                                        chassis_no=str(r["chassis_no"]),
+                                        dip_mm=float(r["dip_mm"]),
+                                        volume_litres=float(r["volume_litres"]),
+                                        tanker_name=str(tk.name),
+                                        compartment=(str(r["compartment"]).strip().upper() if has_comp and pd.notna(r.get("compartment")) else "C1")
+                                    ))
+                                if objs:
+                                    s.bulk_save_objects(objs)
+                                    s.commit()
+                                    try:
+                                        SecurityManager.log_audit(None,(user or {}).get("username","system"),"IMPORT",
+                                            resource_type="TankerCalibration", resource_id=str(tk.id),
+                                            details=f"Imported {len(objs)} calibration rows for tanker '{tk.name}'",
+                                            user_id=(user or {}).get("id"))
+                                    except Exception:
+                                        pass
+                            except Exception as ex:
+                                st.warning(f"Calibration import failed: {ex}")
                         SecurityManager.log_audit(None,(user or {}).get("username","system"),"CREATE",
                             resource_type="Tanker", resource_id=str(tk.id),
                             details=f"Created tanker '{tk.name}'",
@@ -481,19 +543,19 @@ def _tab_tankers(user):
             with st.container(border=True):
                 c1, c2, c3 = st.columns([2, 2, 1])
                 c1.markdown(f"**{tk.name}**")
-                c2.caption(f"Reg: {tk.registration_no or '-'} | Capacity: {int(tk.capacity_litres or 0)} L")
+                c2.caption(f"Chassis: {tk.registration_no or '-'} | Capacity: {int(tk.capacity_litres or 0)} L")  # <-- caption updated
                 with c3:
                     colA, colB = st.columns(2)
-                    if colA.button("✏️ Edit", key=f"edit_tanker_{tk.id}", use_container_width=True):
-                        st.session_state[f"edit_tanker_{tk.id}"] = True
+                    if colA.button("✏️ Edit", key=f"btn_edit_tanker_{tk.id}", use_container_width=True):
+                        st.session_state[f"editing_tanker_{tk.id}"] = True
                     if colB.button("🗑️ Delete", key=f"del_tanker_{tk.id}", use_container_width=True):
                         st.session_state[f"confirm_del_tanker_{tk.id}"] = True
 
-                if st.session_state.get(f"edit_tanker_{tk.id}"):
+                if st.session_state.get(f"editing_tanker_{tk.id}"):
                     with st.form(f"form_edit_tanker_{tk.id}", clear_on_submit=False):
                         ec1, ec2, ec3, ec4 = st.columns(4)
                         with ec1: new_name = st.text_input("Tanker Name", value=tk.name, max_chars=100)
-                        with ec2: new_reg = st.text_input("Registration No.", value=tk.registration_no or "", max_chars=50)
+                        with ec2: new_reg = st.text_input("Chassis No.", value=tk.registration_no or "", max_chars=50)  # <-- label updated
                         with ec3: new_cap = st.number_input("Capacity (litres)", value=float(tk.capacity_litres or 0.0), step=100.0)
                         with ec4:
                             new_status = st.selectbox("Status", ["ACTIVE", "INACTIVE"],
@@ -506,7 +568,7 @@ def _tab_tankers(user):
                             with get_session() as s:
                                 obj = s.query(Tanker).get(tk.id)
                                 obj.name = new_name.strip()
-                                obj.registration_no = new_reg.strip() or None
+                                obj.registration_no = new_reg.strip() or None   # still stored in registration_no
                                 obj.capacity_litres = float(new_cap or 0.0) or None
                                 obj.status = TankStatus.ACTIVE if new_status == "ACTIVE" else TankStatus.INACTIVE
                                 s.commit()
@@ -514,11 +576,11 @@ def _tab_tankers(user):
                                     resource_type="Tanker", resource_id=str(obj.id),
                                     details=f"Updated tanker '{obj.name}'",
                                     user_id=(user or {}).get("id"))
-                                st.success("Updated."); st.session_state.pop(f"edit_tanker_{tk.id}", None); st.rerun()
+                                st.success("Updated."); st.session_state.pop(f"editing_tanker_{tk.id}", None); st.rerun()
                         except Exception as ex:
                             st.error(f"Failed to update tanker: {ex}")
                     elif cancel:
-                        st.session_state.pop(f"edit_tanker_{tk.id}", None); st.rerun()
+                        st.session_state.pop(f"editing_tanker_{tk.id}", None); st.rerun()
 
                 if st.session_state.get(f"confirm_del_tanker_{tk.id}"):
                     st.error("Are you sure you want to delete this tanker? This cannot be undone.")
@@ -541,36 +603,49 @@ def _tab_tankers(user):
 
     # ---- Upload Tanker Calibration (same tab) ----
     st.markdown("#### 📤 Upload Tanker Calibration")
-    with get_session() as s:
-        tanker_names = [t.name for t in s.query(Tanker).order_by(Tanker.name.asc()).all()]
-    sel_tanker = st.selectbox("Tanker", options=tanker_names) if tanker_names else None
-    compartment = st.selectbox("Compartment", options=["C1", "C2"], index=0, help="Which compartment to calibrate")
-
-    st.caption("Required columns: **dip_mm, volume_litres**. CSV only (as in your old app).")
-    up_tc = st.file_uploader("Select CSV", type=["csv"], key="tanker_cal_upl")
+    st.caption("Required columns: **tanker_id, chassis_no, dip_mm, volume_litres**. CSV/XLSX.")
+    up_tc = st.file_uploader("Select file", type=["csv","xlsx"], key="tanker_cal_upl")
     df_tc = None
     if up_tc is not None:
         try:
-            df_tc = pd.read_csv(up_tc)
-            df_tc.columns = [c.strip().lower() for c in df_tc.columns]
-            _require_cols(df_tc, {"dip_mm", "volume_litres"})
-            df_tc = _numeric(df_tc, ["dip_mm", "volume_litres"]).dropna(subset=["dip_mm","volume_litres"])
+            df_tc = _read_table(up_tc)
+            df_tc = _normalize_headers(df_tc, {
+                "tankerid": "tanker_id",
+                "chassisno": "chassis_no",
+                "dipmm": "dip_mm",
+                "volumelitres": "volume_litres",
+                "volumelitre": "volume_litres",
+                "volume": "volume_litres",
+                "compartment": "compartment",
+            })
+            df_tc.columns = [str(c).strip().lower() for c in df_tc.columns]
+            _require_cols(df_tc, {"tanker_id", "chassis_no", "dip_mm", "volume_litres"})
+            df_tc["tanker_id"] = df_tc["tanker_id"].astype(str).str.strip()
+            df_tc["chassis_no"] = df_tc["chassis_no"].astype(str).str.strip()
+            df_tc = _numeric(df_tc, ["dip_mm", "volume_litres"]).dropna(subset=["chassis_no","dip_mm","volume_litres"])
             df_tc = df_tc.sort_values("dip_mm").reset_index(drop=True)
             with st.expander("Preview (first 30 rows)", expanded=True):
                 st.dataframe(df_tc.head(30), use_container_width=True, hide_index=True)
         except Exception as ex:
             st.error(f"Upload error: {ex}")
 
-    if df_tc is not None and sel_tanker:
+    if df_tc is not None:
         # overwrite check
         try:
             with get_session() as s:
-                existing = s.query(TankerCalibration).filter(
-                    TankerCalibration.tanker_name == sel_tanker,
-                    TankerCalibration.compartment == compartment
-                ).count()
+                t_all = s.query(Tanker).all()
+                id_by_name = {t.name.strip(): int(t.id) for t in t_all}
+                resolved_ids = sorted({id_by_name.get(str(x).strip(), None) for x in df_tc["tanker_id"].dropna().tolist()})
+                resolved_ids = [i for i in resolved_ids if i is not None]
+                chassis_set = sorted(set(df_tc["chassis_no"].dropna().tolist()))
+                existing = 0
+                if resolved_ids and chassis_set:
+                    existing = s.query(TankerCalibration).filter(
+                        TankerCalibration.tanker_id.in_(resolved_ids),
+                        TankerCalibration.chassis_no.in_(chassis_set)
+                    ).count()
             if existing > 0:
-                st.warning(f"Existing calibration found for **{sel_tanker} / {compartment}**. Importing will overwrite.")
+                st.warning("Existing calibration found for some (tanker_id, chassis_no) pairs. Importing will overwrite.")
                 tc_over_ok = st.checkbox("I confirm to overwrite the existing tanker calibration", key="tanker_over_ck")
             else:
                 st.success("No existing calibration found. A fresh set will be saved.")
@@ -585,27 +660,39 @@ def _tab_tankers(user):
             else:
                 try:
                     with get_session() as s:
-                        s.query(TankerCalibration).filter(
-                            TankerCalibration.tanker_name == sel_tanker,
-                            TankerCalibration.compartment == compartment
-                        ).delete()
-                        s.bulk_save_objects([
-                            TankerCalibration(
-                                tanker_name=sel_tanker,
-                                compartment=compartment,
+                        pairs = sorted(set(df_tc[["tanker_id","chassis_no"]].dropna().itertuples(index=False, name=None)))
+                        t_all = s.query(Tanker).all()
+                        id_by_name = {t.name.strip(): int(t.id) for t in t_all}
+                        name_by_id = {int(t.id): t.name for t in t_all}
+                        for tid_str, ch in pairs:
+                            tid = id_by_name.get(str(tid_str).strip(), None)
+                            if tid is not None:
+                                s.query(TankerCalibration).filter(
+                                    TankerCalibration.tanker_id == int(tid),
+                                    TankerCalibration.chassis_no == str(ch)
+                                ).delete(synchronize_session=False)
+                        objs = []
+                        has_comp = "compartment" in df_tc.columns
+                        for _, r in df_tc.iterrows():
+                            tid = id_by_name.get(str(r["tanker_id"]).strip(), None)
+                            objs.append(TankerCalibration(
+                                tanker_id=(int(tid) if tid is not None else None),
+                                chassis_no=str(r["chassis_no"]),
                                 dip_mm=float(r["dip_mm"]),
-                                volume_litres=float(r["volume_litres"])
-                            ) for _, r in df_tc.iterrows()
-                        ])
+                                volume_litres=float(r["volume_litres"]),
+                                tanker_name=(name_by_id.get(int(tid)) if tid is not None else str(r["tanker_id"]).strip()),
+                                compartment=(str(r["compartment"]).strip().upper() if has_comp and pd.notna(r.get("compartment")) else "C1")
+                            ))
+                        s.bulk_save_objects(objs)
                         s.commit()
                         try:
                             SecurityManager.log_audit(None,(user or {}).get("username","system"),"IMPORT",
-                                resource_type="TankerCalibration", resource_id=f"{sel_tanker}/{compartment}",
+                                resource_type="TankerCalibration", resource_id="batch",
                                 details=f"Imported {len(df_tc)} tanker calibration rows",
                                 user_id=(user or {}).get("id"))
                         except Exception:
                             pass
-                    st.success(f"Calibration imported for **{sel_tanker} / {compartment}**: {len(df_tc)} rows."); st.rerun()
+                    st.success(f"Tanker calibration imported: {len(df_tc)} rows."); st.rerun()
                 except Exception as ex:
                     st.error(f"Failed to import tanker calibration: {ex}")
 
@@ -655,12 +742,12 @@ def _tab_yade_barges(user):
                 c2.caption(f"Design: {b.design}")
                 with c3:
                     colA, colB = st.columns(2)
-                    if colA.button("✏️ Edit", key=f"edit_barge_{b.id}", use_container_width=True):
-                        st.session_state[f"edit_barge_{b.id}"] = True
+                    if colA.button("✏️ Edit", key=f"btn_edit_barge_{b.id}", use_container_width=True):
+                        st.session_state[f"editing_barge_{b.id}"] = True
                     if colB.button("🗑️ Delete", key=f"del_barge_{b.id}", use_container_width=True):
                         st.session_state[f"confirm_del_barge_{b.id}"] = True
 
-                if st.session_state.get(f"edit_barge_{b.id}"):
+                if st.session_state.get(f"editing_barge_{b.id}"):
                     with st.form(f"form_edit_barge_{b.id}", clear_on_submit=False):
                         ec1, ec2 = st.columns(2)
                         with ec1: new_name = st.text_input("Barge Name", value=b.name, max_chars=100)
@@ -679,11 +766,11 @@ def _tab_yade_barges(user):
                                     resource_type="YadeBarge", resource_id=str(obj.id),
                                     details=f"Updated YADE barge '{obj.name}'",
                                     user_id=(user or {}).get("id"))
-                                st.success("Updated."); st.session_state.pop(f"edit_barge_{b.id}", None); st.rerun()
+                                st.success("Updated."); st.session_state.pop(f"editing_barge_{b.id}", None); st.rerun()
                         except Exception as ex:
                             st.error(f"Failed to update barge: {ex}")
                     elif cancel:
-                        st.session_state.pop(f"edit_barge_{b.id}", None); st.rerun()
+                        st.session_state.pop(f"editing_barge_{b.id}", None); st.rerun()
 
                 if st.session_state.get(f"confirm_del_barge_{b.id}"):
                     st.error("Are you sure you want to delete this barge? This cannot be undone.")

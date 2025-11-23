@@ -12,7 +12,7 @@ from ui import header
 from logger import log_error
 from security import SecurityManager
 from models import Location, Tanker, TankerCalibration, TankerTransaction
-from location_config import LocationConfig
+from location_config import LocationConfig, get_active_operation_names, list_operations
 from timezone_utils import format_local_datetime
 from utils_calc import (
     api60_from_api_obs,
@@ -85,6 +85,17 @@ def _temperature_bounds(unit: str) -> tuple[float, float]:
 def _load_location_config(location_id: int) -> Dict[str, Any]:
     with get_session() as session:
         return LocationConfig.get_config(session, location_id) or {}
+
+
+def _list_names_from_ops(session, location_id: int, *, asset: str, category: str) -> List[str]:
+    """
+    Return ACTIVE operation names for a given asset/category from Location Settings → Operations.
+    """
+    try:
+        rows = list_operations(session, location_id, asset=asset, category=category)
+        return [str(r.get("name") or "").strip() for r in rows if r.get("active", True)]
+    except Exception:
+        return []
 
 
 def _guard_permissions(user: Optional[Dict[str, Any]], location_id: int, cfg: Dict[str, Any]) -> tuple[bool, bool]:
@@ -236,6 +247,7 @@ def _ensure_option(options: List[str], value: Optional[str]) -> List[str]:
         return options + [value]
     return options
 
+
 def _init_form_state(tanker_names: List[str]) -> None:
     ss = st.session_state
     ss.setdefault("tanker_form_mode", "new")
@@ -247,6 +259,7 @@ def _init_form_state(tanker_names: List[str]) -> None:
     ss.setdefault("tanker_tx_date", date.today())
     ss.setdefault("tanker_tx_time", DEFAULT_TIME)
     ss.setdefault("tanker_tx_cargo", CARGO_OPTIONS[0])
+    ss.setdefault("tanker_tx_operation", "")
     ss.setdefault("tanker_tx_destination", DESTINATION_OPTIONS[0])
     ss.setdefault("tanker_tx_loading_bay", LOADING_BAY_OPTIONS[0])
     ss.setdefault("tanker_tx_manhole", MANHOLE_OPTIONS[0])
@@ -278,6 +291,7 @@ def _clear_form_state(tanker_names: List[str]) -> None:
     ss["tanker_tx_date"] = date.today()
     ss["tanker_tx_time"] = DEFAULT_TIME
     ss["tanker_tx_cargo"] = CARGO_OPTIONS[0]
+    ss["tanker_tx_operation"] = ""
     ss["tanker_tx_destination"] = DESTINATION_OPTIONS[0]
     ss["tanker_tx_loading_bay"] = LOADING_BAY_OPTIONS[0]
     ss["tanker_tx_manhole"] = MANHOLE_OPTIONS[0]
@@ -522,7 +536,8 @@ def _calc_volume_preview(tanker_name: str, compartment: str, total_cm: float, wa
     gov_bbl = max(total_bbl - water_bbl, 0.0)
     return total_bbl, water_bbl, gov_bbl
 
-def _render_entry_form(location: Location, can_submit: bool, tanker_names: List[str]) -> None:
+def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanker]) -> None:
+    tanker_names = [t.name for t in tankers]
     _init_form_state(tanker_names)
     ss = st.session_state
     mode = ss.get("tanker_form_mode", "new")
@@ -533,159 +548,218 @@ def _render_entry_form(location: Location, can_submit: bool, tanker_names: List[
 
     st.markdown("### Add / Edit Tanker Transaction")
 
+    if not tanker_names:
+        st.warning("No tankers available for entry. Please create a tanker in Asset Management first.")
+        return
+
+    # Lookup for tanker → chassis no. (registration_no field in Tanker master)
+    tanker_by_name: Dict[str, Tanker] = {t.name: t for t in tankers}
+
+    # Location Settings driven dropdowns for tanker asset
+    op_options: List[str] = []
+    dest_options_cfg: List[str] = []
+    loading_options_cfg: List[str] = []
+    try:
+        with get_session() as s:
+            op_options = get_active_operation_names(s, location.id, asset="tanker") or []
+            dest_options_cfg = _list_names_from_ops(s, location.id, asset="tanker", category="Destination")
+            loading_options_cfg = _list_names_from_ops(s, location.id, asset="tanker", category="Loading Berth")
+    except Exception as exc:
+        log_error(f"Tanker operations lookup failed: {exc}", exc_info=True)
+
+    if not op_options:
+        op_options = ["N/A (configure in Location Settings)"]
+    if not dest_options_cfg:
+        dest_options_cfg = DESTINATION_OPTIONS.copy()
+    if not loading_options_cfg:
+        loading_options_cfg = LOADING_BAY_OPTIONS.copy()
+
     with st.form("tanker_transaction_form", clear_on_submit=False):
-        meta_c1, meta_c2, meta_c3 = st.columns(3)
-        with meta_c1:
-            tanker_name = st.selectbox(
-                "Tanker Name *",
-                tanker_names,
-                index=_select_index(tanker_names, ss.get("tanker_tx_tanker_name")),
-                key="tanker_tx_tanker_name",
-            )
-            chassis_no = st.text_input("Chassis No", key="tanker_tx_chassis_no")
-        with meta_c2:
-            convoy_no = st.text_input("Convoy No *", key="tanker_tx_convoy_no")
-            tx_date = st.date_input("Date *", key="tanker_tx_date")
-        with meta_c3:
-            cargo = st.selectbox(
-                "Cargo *",
-                CARGO_OPTIONS,
-                index=_select_index(CARGO_OPTIONS, ss.get("tanker_tx_cargo")),
-                key="tanker_tx_cargo",
-            )
-            tx_time_str = st.text_input("Time (HH:MM) *", key="tanker_tx_time")
+        try:
+            # ---------------- TANKER DETAILS ----------------
+            st.markdown("#### Tanker Details")
+            meta_c1, meta_c2, meta_c3 = st.columns(3)
+            with meta_c1:
+                tanker_name = st.selectbox(
+                    "Tanker Name *",
+                    tanker_names,
+                    index=_select_index(tanker_names, ss.get("tanker_tx_tanker_name")),
+                    key="tanker_tx_tanker_name",
+                )
 
-        meta_c4, meta_c5 = st.columns(2)
-        with meta_c4:
-            destination_options = _ensure_option(DESTINATION_OPTIONS, ss.get("tanker_tx_destination"))
-            destination = st.selectbox(
-                "Destination *",
-                destination_options,
-                index=_select_index(destination_options, ss.get("tanker_tx_destination")),
-                key="tanker_tx_destination",
-            )
-        with meta_c5:
-            loading_options = _ensure_option(LOADING_BAY_OPTIONS, ss.get("tanker_tx_loading_bay"))
-            loading_bay = st.selectbox(
-                "Loading Bay",
-                loading_options,
-                index=_select_index(loading_options, ss.get("tanker_tx_loading_bay")),
-                key="tanker_tx_loading_bay",
-            )
+                # Auto-fill chassis from tanker master when creating a new entry
+                if mode == "new":
+                    selected_tanker = tanker_by_name.get(tanker_name)
+                    master_chassis = (selected_tanker.registration_no or "") if selected_tanker else ""
+                    prev_name = ss.get("tanker_prev_name_for_chassis")
+                    if master_chassis and (not ss.get("tanker_tx_chassis_no") or tanker_name != prev_name):
+                        ss["tanker_tx_chassis_no"] = master_chassis
+                        ss["tanker_prev_name_for_chassis"] = tanker_name
 
-        st.markdown("#### Compartment / Manhole")
-        manhole = st.selectbox(
-            "Manhole Used *",
-            MANHOLE_OPTIONS,
-            index=_select_index(MANHOLE_OPTIONS, ss.get("tanker_tx_manhole")),
-            key="tanker_tx_manhole",
-        )
-        compartment = manhole
+                chassis_no = st.text_input("Chassis No", key="tanker_tx_chassis_no")
+            with meta_c2:
+                convoy_no = st.text_input("Convoy No *", key="tanker_tx_convoy_no")
+                tx_date = st.date_input("Date *", key="tanker_tx_date")
+            with meta_c3:
+                cargo = st.selectbox(
+                    "Cargo *",
+                    CARGO_OPTIONS,
+                    index=_select_index(CARGO_OPTIONS, ss.get("tanker_tx_cargo")),
+                    key="tanker_tx_cargo",
+                )
+                tx_time_str = st.text_input("Time (HH:MM) *", key="tanker_tx_time")
 
-        st.markdown("#### Dip Readings")
-        dip_c1, dip_c2 = st.columns(2)
-        with dip_c1:
-            total_dip_cm = st.number_input(
-                "Total Dip (cm) *",
+            # Operation / Destination / Loading Bay in a single row
+            op_c1, op_c2, op_c3 = st.columns(3)
+            with op_c1:
+                operation = st.selectbox(
+                    "Operation",
+                    op_options,
+                    index=_select_index(op_options, ss.get("tanker_tx_operation")),
+                    key="tanker_tx_operation",
+                )
+            with op_c2:
+                destination_options = _ensure_option(dest_options_cfg, ss.get("tanker_tx_destination"))
+                destination = st.selectbox(
+                    "Destination *",
+                    destination_options,
+                    index=_select_index(destination_options, ss.get("tanker_tx_destination")),
+                    key="tanker_tx_destination",
+                )
+            with op_c3:
+                loading_options = _ensure_option(loading_options_cfg, ss.get("tanker_tx_loading_bay"))
+                loading_bay = st.selectbox(
+                    "Loading Bay",
+                    loading_options,
+                    index=_select_index(loading_options, ss.get("tanker_tx_loading_bay")),
+                    key="tanker_tx_loading_bay",
+                )
+
+            # ---------------- DIP DETAILS ----------------
+            st.markdown("#### Dip Details")
+            manhole = st.selectbox(
+                "Manhole Used *",
+                MANHOLE_OPTIONS,
+                index=_select_index(MANHOLE_OPTIONS, ss.get("tanker_tx_manhole")),
+                key="tanker_tx_manhole",
+            )
+            compartment = manhole
+
+            dip_c1, dip_c2 = st.columns(2)
+            with dip_c1:
+                total_dip_cm = st.number_input(
+                    "Total Dip (cm) *",
+                    min_value=0.0,
+                    step=0.1,
+                    key="tanker_tx_total_dip_cm",
+                )
+            with dip_c2:
+                water_dip_cm = st.number_input(
+                    "Water Dip (cm)",
+                    min_value=0.0,
+                    step=0.1,
+                    key="tanker_tx_water_dip_cm",
+                )
+
+            total_bbl, water_bbl, gov_bbl = _calc_volume_preview(
+                tanker_name,
+                compartment,
+                float(total_dip_cm),
+                float(water_dip_cm),
+            )
+            if total_bbl > 0:
+                st.caption(
+                    f"Live volumes: Total **{total_bbl:,.2f} bbl**, "
+                    f"Water **{water_bbl:,.2f} bbl**, GOV **{gov_bbl:,.2f} bbl**."
+                )
+            else:
+                st.caption("Volume preview unavailable (check calibration or dip values).")
+
+            bsw_pct = st.number_input(
+                "BS&W % *",
                 min_value=0.0,
-                step=0.1,
-                key="tanker_tx_total_dip_cm",
-            )
-        with dip_c2:
-            water_dip_cm = st.number_input(
-                "Water Dip (cm)",
-                min_value=0.0,
-                step=0.1,
-                key="tanker_tx_water_dip_cm",
+                max_value=100.0,
+                step=0.01,
+                key="tanker_tx_bsw_pct",
             )
 
-        total_bbl, water_bbl, gov_bbl = _calc_volume_preview(
-            tanker_name,
-            compartment,
-            float(total_dip_cm),
-            float(water_dip_cm),
-        )
-        if total_bbl > 0:
-            st.caption(f"Volume preview: GOV approx {gov_bbl:,.2f} bbl.")
-        else:
-            st.caption("Volume preview unavailable (check calibration or dip values).")
+            # ---------------- SAMPLE PARAMETERS ----------------
+            st.markdown("#### Sample Parameters")
+            temp_c1, temp_c2 = st.columns(2)
+            with temp_c1:
+                tank_temp_unit = st.selectbox(
+                    "Tank Temp Unit",
+                    ["°C", "°F"],
+                    index=_select_index(["°C", "°F"], ss.get("tanker_tx_tank_temp_unit")),
+                    key="tanker_tx_tank_temp_unit",
+                )
+                _ttu = "C" if str(tank_temp_unit).startswith("°C") else "F"
+                lo, hi = _temperature_bounds(_ttu)
+                tank_temp_value = st.number_input(
+                    f"Tank Temperature ({tank_temp_unit})",
+                    min_value=lo,
+                    max_value=hi,
+                    step=0.1,
+                    key="tanker_tx_tank_temp_value",
+                )
+            with temp_c2:
+                st.caption("Observed Property & Sample Temperature")
+                obs_mode = st.selectbox(
+                    "Input Type",
+                    ["Observed API", "Observed Density (kg/m3)"],
+                    index=_select_index(["Observed API", "Observed Density (kg/m3)"], ss.get("tanker_tx_obs_mode")),
+                    key="tanker_tx_obs_mode",
+                )
+                sample_temp_unit = st.selectbox(
+                    "Sample Temp Unit",
+                    ["°F", "°C"],
+                    index=_select_index(["°F", "°C"], ss.get("tanker_tx_sample_temp_unit")),
+                    key="tanker_tx_sample_temp_unit",
+                )
+                _stu = "F" if str(sample_temp_unit).startswith("°F") else "C"
+                slo, shi = _temperature_bounds(_stu)
+                sample_temp_value = st.number_input(
+                    "Sample Temperature",
+                    min_value=slo,
+                    max_value=shi,
+                    step=0.1,
+                    key="tanker_tx_sample_temp_value",
+                )
 
-        bsw_pct = st.number_input(
-            "BS&W % *",
-            min_value=0.0,
-            max_value=100.0,
-            step=0.01,
-            key="tanker_tx_bsw_pct",
-        )
+            if obs_mode == "Observed API":
+                api_observed = st.number_input(
+                    "Observed API *",
+                    min_value=API_LIMITS[0],
+                    max_value=API_LIMITS[1],
+                    step=0.1,
+                    key="tanker_tx_api_observed",
+                )
+                api60_val = api60_from_api_obs(float(api_observed or 0.0), float(sample_temp_value or 0.0), _stu)
+                density_observed = density_from_api(float(api_observed or 0.0))
+                st.caption(f"→ API @ 60°F: {api60_val:.2f}   |   ↔ Density (approx): {density_observed:.1f} kg/m³")
+            else:
+                density_observed = st.number_input(
+                    "Observed Density (kg/m3) *",
+                    min_value=DENSITY_LIMITS[0],
+                    max_value=DENSITY_LIMITS[1],
+                    step=0.1,
+                    key="tanker_tx_density_observed",
+                )
+                api_observed = api_from_density(float(density_observed or 0.0)) if float(density_observed or 0.0) > 0 else 0.0
+                api60_val = api60_from_density_obs(float(density_observed or 0.0), float(sample_temp_value or 0.0), _stu)
+                st.caption(f"↔ Observed API (approx): {api_observed:.2f}   |   → API @ 60°F: {api60_val:.2f}")
 
-        st.markdown("#### Temperatures")
-        temp_c1, temp_c2 = st.columns(2)
-        with temp_c1:
-            tank_temp_unit = st.selectbox(
-                "Tank Temp Unit",
-                ["C", "F"],
-                index=_select_index(["C", "F"], ss.get("tanker_tx_tank_temp_unit")),
-                key="tanker_tx_tank_temp_unit",
-            )
-            tank_temp_value = st.number_input(
-                f"Tank Temperature ({tank_temp_unit})",
-                min_value=_temperature_bounds(tank_temp_unit)[0],
-                max_value=_temperature_bounds(tank_temp_unit)[1],
-                step=0.1,
-                key="tanker_tx_tank_temp_value",
-            )
-        with temp_c2:
-            sample_temp_unit = st.selectbox(
-                "Sample Temp Unit",
-                ["C", "F"],
-                index=_select_index(["C", "F"], ss.get("tanker_tx_sample_temp_unit")),
-                key="tanker_tx_sample_temp_unit",
-            )
-            sample_temp_value = st.number_input(
-                f"Sample Temperature ({sample_temp_unit})",
-                min_value=_temperature_bounds(sample_temp_unit)[0],
-                max_value=_temperature_bounds(sample_temp_unit)[1],
-                step=0.1,
-                key="tanker_tx_sample_temp_value",
-            )
+            # ---------------- SEAL DETAILS ----------------
+            st.markdown("#### Seal Details")
+            seal_row = st.columns(4)
+            seal_c1 = seal_row[0].text_input("Seal C1", key="tanker_tx_seal_c1")
+            seal_c2 = seal_row[1].text_input("Seal C2", key="tanker_tx_seal_c2")
+            seal_m1 = seal_row[2].text_input("Seal M1", key="tanker_tx_seal_m1")
+            seal_m2 = seal_row[3].text_input("Seal M2", key="tanker_tx_seal_m2")
 
-        st.markdown("#### Quality Parameters")
-        obs_mode = st.selectbox(
-            "Input Type",
-            OBS_MODES,
-            index=_select_index(OBS_MODES, ss.get("tanker_tx_obs_mode")),
-            key="tanker_tx_obs_mode",
-        )
-        if obs_mode == "Observed API":
-            api_observed = st.number_input(
-                "Observed API *",
-                min_value=API_LIMITS[0],
-                max_value=API_LIMITS[1],
-                step=0.1,
-                key="tanker_tx_api_observed",
-            )
-            density_observed = density_from_api(api_observed) if api_observed > 0 else 0.0
-            st.caption(f"Approx density: {density_observed:.2f} kg/m3")
-        else:
-            density_observed = st.number_input(
-                "Observed Density (kg/m3) *",
-                min_value=DENSITY_LIMITS[0],
-                max_value=DENSITY_LIMITS[1],
-                step=0.5,
-                key="tanker_tx_density_observed",
-            )
-            api_observed = api_from_density(density_observed) if density_observed > 0 else 0.0
-            st.caption(f"Approx API: {api_observed:.2f}")
-
-        st.markdown("#### Seal Numbers")
-        seal_row = st.columns(4)
-        seal_c1 = seal_row[0].text_input("Seal C1", key="tanker_tx_seal_c1")
-        seal_c2 = seal_row[1].text_input("Seal C2", key="tanker_tx_seal_c2")
-        seal_m1 = seal_row[2].text_input("Seal M1", key="tanker_tx_seal_m1")
-        seal_m2 = seal_row[3].text_input("Seal M2", key="tanker_tx_seal_m2")
-
-        remarks = st.text_area("Remarks", key="tanker_tx_remarks")
-
+            remarks = st.text_area("Remarks", key="tanker_tx_remarks")
+        except Exception as ex:
+            st.error("Form initialization error.")
         submit_label = "Update Tanker Transaction" if mode == "edit" else "Save Tanker Transaction"
         submitted = st.form_submit_button(submit_label, disabled=not can_submit)
 
@@ -929,11 +1003,10 @@ def render_tanker_transactions_page(active_location_id: Optional[int], user: Opt
         if not tankers:
             st.warning("No active tankers found. Add tankers in Asset Management first.")
             return
-        tanker_names = [t.name for t in tankers]
 
         _render_saved_transactions(loc.id, can_make_entries)
         st.markdown("---")
-        _render_entry_form(loc, can_make_entries, tanker_names)
+        _render_entry_form(loc, can_make_entries, tankers)
 
     except Exception as exc:  # pragma: no cover
         st.error("Unexpected error while rendering Tanker Transactions.")
