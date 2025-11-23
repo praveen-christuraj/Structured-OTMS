@@ -77,7 +77,7 @@ WAT60 = 999.012  # kg/m3 (water @60°F)
 
 _TEMP_LIMITS = {
     "C": (0.0, 60.0),
-    "F": (32.0, 120.0),
+    "F": (32.0, 140.0),
 }
 
 def normalize_temp_unit(unit: Optional[str]) -> str:
