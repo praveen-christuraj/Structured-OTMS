@@ -594,7 +594,6 @@ def _render_yade_sample_params_section(
                     ["Observed API", "Observed Density (kg/m³)"],
                     index=0 if (block[stage_key].get("obs_mode") in (None, "Observed API")) else 1,
                     key=f"{ns}_{stage_key}_obs_mode",
-                    on_change=_st_safe_rerun,
                 )
             with s2:
                 unit_label = st.selectbox(
@@ -602,37 +601,60 @@ def _render_yade_sample_params_section(
                     ["°F", "°C"],
                     index=0 if (block[stage_key].get("temp_unit") or default_unit).upper().startswith("F") else 1,
                     key=f"{ns}_{stage_key}_temp_unit_label",
-                    on_change=_st_safe_rerun,
                 )
 
             # Normalize for bounds (this flips 32–140 ↔ 0–60 dynamically)
-            unit_code = _norm_unit(unit_label)
-            tmin, tmax = _temp_bounds(unit_label)
+            unit_code = _normalize_temp_unit(unit_label)
+            tmin, tmax = _temp_bounds(unit_code)
 
             # Temperatures (Sample & Tank share the same unit/bounds)
             t1, t2 = st.columns(2)
             with t1:
+                # Get default temperature based on unit
+                default_sample_temp = 60.0 if unit_code == "F" else 15.6
+                stored_temp = block[stage_key].get("sample_temp", default_sample_temp)
+                # Ensure stored temp is within new bounds
+                stored_temp = max(tmin, min(tmax, float(stored_temp)))
+                
                 sample_temp = st.number_input(
                     f"Sample Temperature ({unit_label})",
                     min_value=tmin, max_value=tmax, step=0.1, format="%.1f",
-                    value=float(block[stage_key].get("sample_temp", 60.0 if unit_code == "F" else 15.6)),
+                    value=stored_temp,
                     key=f"{ns}_{stage_key}_sample_temp",
                 )
             with t2:
+                default_tank_temp = 60.0 if unit_code == "F" else 15.6
+                stored_tank = block[stage_key].get("tank_temp", default_tank_temp)
+                # Ensure stored temp is within new bounds
+                stored_tank = max(tmin, min(tmax, float(stored_tank)))
+                
                 tank_temp = st.number_input(
                     f"Tank Temperature ({unit_label})",
                     min_value=tmin, max_value=tmax, step=0.1, format="%.1f",
-                    value=float(block[stage_key].get("tank_temp", 60.0 if unit_code == "F" else 15.6)),
+                    value=stored_tank,
                     key=f"{ns}_{stage_key}_tank_temp",
                 )
 
             # Observed input (THIS flips the label and min/max dynamically)
             v1, v2 = st.columns([0.62, 0.38])
+            
+            # Get the stored obs_val and ensure it's appropriate for current mode
+            stored_obs_val = block[stage_key].get("obs_val", None)
+            if stored_obs_val is None:
+                # Set default based on current mode
+                stored_obs_val = 35.0 if obs_mode == "Observed API" else 850.0
+            else:
+                # Validate stored value is within bounds of current mode
+                if obs_mode == "Observed API":
+                    stored_obs_val = max(15.0, min(70.0, float(stored_obs_val)))
+                else:
+                    stored_obs_val = max(600.0, min(1000.0, float(stored_obs_val)))
+            
             if obs_mode == "Observed API":
                 obs_val = v1.number_input(
                     "Observed API *",
                     min_value=15.0, max_value=70.0, step=0.1, format="%.1f",
-                    value=float(block[stage_key].get("obs_val", 35.0)),
+                    value=float(stored_obs_val) if obs_mode == "Observed API" and 15.0 <= stored_obs_val <= 70.0 else 35.0,
                     key=f"{ns}_{stage_key}_obs_api",
                     help="Allowed range: 15.0 – 70.0 API",
                 )
@@ -643,7 +665,7 @@ def _render_yade_sample_params_section(
                 obs_val = v1.number_input(
                     "Observed Density (kg/m³) *",
                     min_value=600.0, max_value=1000.0, step=0.1, format="%.1f",
-                    value=float(block[stage_key].get("obs_val", 850.0)),
+                    value=float(stored_obs_val) if obs_mode != "Observed API" and 600.0 <= stored_obs_val <= 1000.0 else 850.0,
                     key=f"{ns}_{stage_key}_obs_density",
                     help="Allowed range: 600 – 1000 kg/m³",
                 )
