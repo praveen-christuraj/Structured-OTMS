@@ -334,10 +334,10 @@ def preview_or_summary_totals(session: Session, voyage_id: int) -> Dict[str, Dic
     summ = session.query(TOAYadeSummary).filter(TOAYadeSummary.voyage_id == voyage_id).one_or_none()
     
     if summ:
-        # Use saved summary
+        # Use saved summary for GOV/GSV/BSW/NSV/LT/MT, but recompute TOV/FW live
         before = {
-            "TOV": 0.0,  # Not stored in summary
-            "FW": 0.0,   # Not stored in summary
+            "TOV": 0.0,
+            "FW": 0.0,
             "GOV": _afloat(summ.before_gov_bbl),
             "GSV": _afloat(summ.before_gsv_bbl),
             "BSW": _afloat(summ.before_bsw_bbl),
@@ -346,8 +346,8 @@ def preview_or_summary_totals(session: Session, voyage_id: int) -> Dict[str, Dic
             "MT": _afloat(summ.before_mt),
         }
         after = {
-            "TOV": 0.0,  # Not stored in summary
-            "FW": 0.0,   # Not stored in summary
+            "TOV": 0.0,
+            "FW": 0.0,
             "GOV": _afloat(summ.after_gov_bbl),
             "GSV": _afloat(summ.after_gsv_bbl),
             "BSW": _afloat(summ.after_bsw_bbl),
@@ -355,6 +355,16 @@ def preview_or_summary_totals(session: Session, voyage_id: int) -> Dict[str, Dic
             "LT": _afloat(summ.after_lt_bbl),
             "MT": _afloat(summ.after_mt),
         }
+
+        try:
+            b_live = compute_stage(session, voyage_id, "BEFORE")
+            a_live = compute_stage(session, voyage_id, "AFTER")
+            before["TOV"] = _afloat(b_live["totals"].get("TOV"))
+            before["FW"]  = _afloat(b_live["totals"].get("FW"))
+            after["TOV"]  = _afloat(a_live["totals"].get("TOV"))
+            after["FW"]   = _afloat(a_live["totals"].get("FW"))
+        except Exception:
+            pass
         net = {
             "GOV": _afloat(summ.net_gov_bbl),
             "GSV": _afloat(summ.net_gsv_bbl),

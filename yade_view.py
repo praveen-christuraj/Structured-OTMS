@@ -150,6 +150,465 @@ def _apply_dip_edits(sess: Session, df_before: pd.DataFrame, df_after: pd.DataFr
     )
     return n_updated
 
+# ----------------------------- TOA-YADE PDF helpers -----------------------------
+
+def _kind_text(x):
+    """Safe text for enums / choice fields"""
+    try:
+        return x.value if hasattr(x, "value") else (str(x) if x is not None else "")
+    except Exception:
+        return str(x or "")
+
+
+def _fmt_date(d):
+    try:
+        return d.strftime("%d/%m/%Y")
+    except Exception:
+        return str(d or "")
+
+
+def _fmt_time(t):
+    try:
+        return d.strftime("%H:%M")
+    except Exception:
+        return str(t or "")
+
+
+def _toa_pdf_support_ok() -> bool:
+    """Check if ReportLab is available."""
+    try:
+        import reportlab  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def _build_toa_pdf_bytes(voyage_id: int) -> bytes | None:
+    """
+    Builds the TOA-YADE PDF using the same layout/design as the old TOA-Yade page.
+    """
+    if not _toa_pdf_support_ok():
+        st.error("❌ PDF export failed. Please install `reportlab` (pip install reportlab).")
+        return None
+
+    try:
+        # --- imports used only for PDF generation ---
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.units import mm
+        from reportlab.lib import colors
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.utils import ImageReader
+        from io import BytesIO
+        from pathlib import Path
+
+        from models import YadeVoyage, YadeSealDetail, YadeDip
+        from db import get_session
+        from toa_yade_calculator import preview_or_summary_totals
+
+        with get_session() as sess:
+            # --------- Fetch core data (same as old page) ----------
+            v = (
+                sess.query(YadeVoyage)
+                .filter(YadeVoyage.id == voyage_id)
+                .one()
+            )
+            totals = preview_or_summary_totals(sess, voyage_id)
+            before = totals.get("before", {})
+            after  = totals.get("after", {})
+
+            # --------- Create canvas ----------
+            buf = BytesIO()
+            c = canvas.Canvas(buf, pagesize=A4)
+            W, H = A4
+            LM, RM, TM, BM = 15 * mm, 15 * mm, 15 * mm, 15 * mm
+            x = LM
+            y = H - TM
+
+            # ================== Section 1: Header bar + logos + title ==================
+            bar_h = 22 * mm
+            c.setFillColorRGB(0.98, 0.98, 0.98)
+            c.setStrokeColorRGB(0.85, 0.85, 0.85)
+            c.roundRect(x, y - bar_h, W - LM - RM, bar_h, 4, fill=1, stroke=1)
+            c.setFillColor(colors.black)
+            c.setStrokeColor(colors.black)
+
+            Lx, Ly, Lw, Lh = x + 6 * mm, y - bar_h + 3 * mm, 26 * mm, bar_h - 6 * mm
+            Rx, Ry, Rw, Rh = x + (W - LM - RM) - 26 * mm - 6 * mm, Ly, 26 * mm, Lh
+
+            def _draw_img_or_box(path: Path | None, x0, y0, w0, h0, label: str):
+                try:
+                    if path and path.exists():
+                        img = ImageReader(str(path))
+                        iw, ih = img.getSize()
+                        if iw > 0 and ih > 0:
+                            scale = min(w0 / iw, h0 / ih)
+                            dw, dh = iw * scale, ih * scale
+                            ox = x0 + (w0 - dw) / 2.0
+                            oy = y0 + (h0 - dh) / 2.0
+                            c.drawImage(
+                                img,
+                                ox,
+                                oy,
+                                dw,
+                                dh,
+                                preserveAspectRatio=True,
+                                mask="auto",
+                            )
+                            return
+                except Exception:
+                    pass
+
+                # fallback box
+                c.setStrokeColor(colors.black)
+                c.rect(x0, y0, w0, h0, stroke=1, fill=0)
+                c.setFont("Helvetica", 7)
+                c.drawCentredString(x0 + w0 / 2, y0 - 10, label)
+
+            def _first_existing(paths: list[str]) -> Path | None:
+                for p in paths:
+                    pth = Path(p)
+                    if pth.exists():
+                        return pth
+                return None
+
+            COMPANY_LOGO = _first_existing(
+                [
+                    "assets/logos/company_logo.png",
+                    "assets/icons/company_logo.png",
+                    "assets/company_logo.png",
+                ]
+            )
+            YADE_LOGO = _first_existing(
+                [
+                    "assets/logos/yade_logo.png",
+                    "assets/icons/yade_logo.png",
+                    "assets/yade_logo.png",
+                ]
+            )
+
+            _draw_img_or_box(COMPANY_LOGO, Lx, Ly, Lw, Lh, "Company Logo")
+            _draw_img_or_box(YADE_LOGO, Rx, Ry, Rw, Rh, "YADE Logo")
+
+            c.setFont("Helvetica-Bold", 13)
+            c.drawCentredString(
+                LM + (W - LM - RM) / 2, y - 7 * mm, "TRANSHIPMENT ORDER & ADVICE"
+            )
+            c.setFont("Helvetica", 9)
+            c.drawCentredString(
+                LM + (W - LM - RM) / 2,
+                y - 13 * mm,
+                f"Report for {v.yade_name} – Voyage {v.voyage_no}",
+            )
+            y -= bar_h + 6 * mm
+
+            # ================== Section 2: Voyage metadata box ==================
+            meta_h = 34 * mm
+            c.setStrokeColor(colors.black)
+            c.rect(LM, y - meta_h, W - LM - RM, meta_h, stroke=1, fill=0)
+            c.setFont("Helvetica-Bold", 10)
+            c.setFillColor(colors.black)
+            c.drawString(LM + 4 * mm, y - 7 * mm, "Voyage Details")
+
+            c.setFont("Helvetica", 9)
+            mrow = y - 14 * mm
+            meta_items = [
+                ("Date", _fmt_date(v.date)),
+                ("Time", _fmt_time(v.time)),
+                ("YADE No", v.yade_name),
+                ("Voyage No", v.voyage_no),
+                ("Convoy No", v.convoy_no or ""),
+                ("Cargo", _kind_text(getattr(v, "cargo", ""))),
+                ("Destination", _kind_text(getattr(v, "destination", ""))),
+                ("Loading Berth", _kind_text(getattr(v, "loading_berth", ""))),
+            ]
+            left = meta_items[:4]
+            right = meta_items[4:]
+            xL = LM + 6 * mm
+            xR = LM + (W - LM - RM) / 2 + 6 * mm
+
+            for k, vv in left:
+                c.drawString(xL, mrow, f"{k}:  {vv}")
+                mrow -= 6 * mm
+
+            mrow = y - 14 * mm
+            for k, vv in right:
+                c.drawString(xR, mrow, f"{k}:  {vv}")
+                mrow -= 6 * mm
+
+            y -= meta_h + 10 * mm
+
+            # ================== Section 3: Quantity table (Before / After / Loaded) ==================
+            B_TOV = float(before.get("TOV", 0.0) or 0.0)
+            A_TOV = float(after.get("TOV", 0.0) or 0.0)
+            B_FW  = float(before.get("FW", 0.0) or 0.0)
+            A_FW  = float(after.get("FW", 0.0) or 0.0)
+            B_GOV = float(before.get("GOV", 0.0) or 0.0)
+            A_GOV = float(after.get("GOV", 0.0) or 0.0)
+            B_GSV = float(before.get("GSV", 0.0) or 0.0)
+            A_GSV = float(after.get("GSV", 0.0) or 0.0)
+            B_NSV = float(before.get("NSV", 0.0) or 0.0)
+            A_NSV = float(after.get("NSV", 0.0) or 0.0)
+            B_LT  = float(before.get("LT", 0.0) or 0.0)
+            A_LT  = float(after.get("LT", 0.0) or 0.0)
+            B_MT  = float(before.get("MT", 0.0) or 0.0)
+            A_MT  = float(after.get("MT", 0.0) or 0.0)
+
+            L_TOV = A_TOV - B_TOV
+            L_FW  = A_FW  - B_FW
+            L_GOV = A_GOV - B_GOV
+            L_GSV = A_GSV - B_GSV
+            L_NSV = A_NSV - B_NSV
+            L_LT  = A_LT  - B_LT
+            L_MT  = A_MT  - B_MT
+
+            rows = [
+                ("Total Volume (bbl)", B_TOV, A_TOV, L_TOV),
+                ("Free Water (bbl)", B_FW, A_FW, L_FW),
+                ("GOV (bbl)", B_GOV, A_GOV, L_GOV),
+                ("GSV (bbl)", B_GSV, A_GSV, L_GSV),
+                ("NSV (bbl)", B_NSV, A_NSV, L_NSV),
+                ("Long Tons (LT)", B_LT, A_LT, L_LT),
+                ("MT", B_MT, A_MT, L_MT),
+            ]
+
+            table_h = 7 * 18 + 28
+            col_w = (W - LM - RM) / 4.0
+            x_before = LM + 1.2 * col_w - 6
+            x_after = LM + 2.3 * col_w - 6
+            x_loaded = LM + 3.5 * col_w - 6
+
+            c.setFont("Helvetica-Bold", 10)
+            c.drawString(
+                LM + 4 * mm,
+                y - 7 * mm,
+                "Certified Quantity loaded in the Barge",
+            )
+            y -= 10 * mm
+
+            c.setFont("Helvetica-Bold", 9)
+            c.drawString(LM + 6, y - 12, "Quantity")
+            c.drawRightString(x_before, y - 12, "Before")
+            c.drawRightString(x_after, y - 12, "After")
+            c.drawRightString(x_loaded, y - 12, "Loaded")
+
+            c.setStrokeColor(colors.black)
+            c.rect(
+                LM,
+                y - (table_h + 18),
+                (W - LM - RM),
+                (table_h + 18),
+                stroke=1,
+                fill=0,
+            )
+
+            c.setFont("Helvetica", 9)
+
+            def _fmt_num(v):
+                try:
+                    return f"{(v or 0):,.2f}"
+                except Exception:
+                    return "0.00"
+
+            ry = y - 28
+            for name, vb, va, vl in rows:
+                c.line(LM, ry + 6, W - RM, ry + 6)
+                c.drawString(LM + 6, ry - 6, str(name))
+                c.drawRightString(
+                    x_before, ry - 6, "" if vb is None else _fmt_num(vb)
+                )
+                c.drawRightString(
+                    x_after, ry - 6, "" if va is None else _fmt_num(va)
+                )
+                c.drawRightString(
+                    x_loaded, ry - 6, "" if vl is None else _fmt_num(vl)
+                )
+                ry -= 18
+
+            y -= table_h + 30
+
+            # ================== Section 4: Seal & Dip details ==================
+            c.setFont("Helvetica-Bold", 10)
+            c.setFillColor(colors.black)
+            c.drawString(LM + 4 * mm, y - 5 * mm, "Seal & Dip Details")
+
+            seals = (
+                sess.query(YadeSealDetail)
+                .filter(YadeSealDetail.voyage_id == voyage_id)
+                .one_or_none()
+            )
+            dips_after = (
+                sess.query(YadeDip)
+                .filter(
+                    YadeDip.voyage_id == voyage_id,
+                    func.upper(YadeDip.stage) == "AFTER",
+                )
+                .all()
+            )
+            dips_map = {d.tank_id.upper(): d for d in dips_after}
+
+            tanks = (
+                ["C1", "C2", "P1", "P2", "S1", "S2"]
+                if str(getattr(v, "design", "")) == "6"
+                else ["P1", "P2", "S1", "S2"]
+            )
+
+            row_height = 8 * mm
+            col_widths = [
+                20 * mm,
+                24 * mm,
+                24 * mm,
+                28 * mm,
+                28 * mm,
+                28 * mm,
+                28 * mm,
+            ]
+            table_left_x = LM
+            table_top_y = y - 7 * mm
+            table_width = sum(col_widths)
+            table_height = (len(tanks) + 1) * row_height
+
+            c.setLineWidth(1)
+            c.rect(
+                table_left_x,
+                table_top_y - table_height,
+                table_width,
+                table_height,
+                stroke=1,
+                fill=0,
+            )
+
+            # vertical lines
+            current_x = table_left_x
+            for w in col_widths:
+                c.line(
+                    current_x,
+                    table_top_y,
+                    current_x,
+                    table_top_y - table_height,
+                )
+                current_x += w
+            c.line(
+                table_left_x + table_width,
+                table_top_y,
+                table_left_x + table_width,
+                table_top_y - table_height,
+            )
+
+            # horizontal lines
+            for i in range(len(tanks) + 2):
+                row_y = table_top_y - i * row_height
+                c.line(
+                    table_left_x,
+                    row_y,
+                    table_left_x + table_width,
+                    row_y,
+                )
+
+            # header row
+            hdrs = [
+                "Tank",
+                "Total Dip (cm)",
+                "Water Dip (cm)",
+                "Manhole-1",
+                "Manhole-2",
+                "Lock No",
+                "Dip Hatch",
+            ]
+            c.setFont("Helvetica-Bold", 9)
+            header_y = table_top_y - row_height / 2 + 3
+            current_x = table_left_x
+            for i, h in enumerate(hdrs):
+                c.drawCentredString(
+                    current_x + col_widths[i] / 2,
+                    header_y,
+                    h,
+                )
+                current_x += col_widths[i]
+
+            # data rows
+            c.setFont("Helvetica", 8)
+            for r_idx, tnk in enumerate(tanks):
+                key = tnk.upper()
+                dip_row = dips_map.get(key)
+                total_dip = (
+                    f"{dip_row.total_cm:.2f}" if dip_row else ""
+                )
+                water_dip = (
+                    f"{dip_row.water_cm:.2f}" if dip_row else ""
+                )
+
+                seals_key = tnk.lower()
+                mh1 = getattr(seals, f"{seals_key}_mh1", "") if seals else ""
+                mh2 = getattr(seals, f"{seals_key}_mh2", "") if seals else ""
+                lk = getattr(seals, f"{seals_key}_lock", "") if seals else ""
+                dh = (
+                    getattr(seals, f"{seals_key}_diphatch", "")
+                    if seals
+                    else ""
+                )
+
+                vals = [tnk, total_dip, water_dip, mh1, mh2, lk, dh]
+                row_y = (
+                    table_top_y
+                    - (r_idx + 1) * row_height
+                    - row_height / 2
+                    + 3
+                )
+                current_x = table_left_x
+                for i, vv in enumerate(vals):
+                    c.drawCentredString(
+                        current_x + col_widths[i] / 2,
+                        row_y,
+                        str(vv or ""),
+                    )
+                    current_x += col_widths[i]
+
+            y -= table_height + 12 * mm
+
+            # ================== Section 5: Authorized signatory box ==================
+            sig_h = 40 * mm
+            sig_y = BM + 5 * mm
+            c.rect(
+                LM,
+                sig_y,
+                W - LM - RM,
+                sig_h,
+                stroke=1,
+                fill=0,
+            )
+            c.setFont("Helvetica-Bold", 10)
+            c.drawString(
+                LM + 4 * mm,
+                sig_y + sig_h - 6 * mm,
+                "Authorized Signatory",
+            )
+
+            c.setFont("Helvetica", 9)
+            c.drawString(
+                LM + 4 * mm,
+                sig_y + 6 * mm,
+                "For SEEPCO                                                         For Yade Barge Operators Ltd",
+            )
+            c.drawRightString(
+                W - RM - 4 * mm,
+                sig_y + 6 * mm,
+                f"For Barge Master of {v.yade_name}",
+            )
+
+            # finish page
+            c.showPage()
+            c.save()
+            out = buf.getvalue()
+            buf.close()
+            return out
+
+    except Exception as e:
+        import traceback
+
+        st.error(f"PDF generation error: {e}")
+        st.code(traceback.format_exc())
+        return None
+
 # -------------------------- main YADE view (list + actions) --------------------------
 
 def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_id: Optional[int] = None) -> None:
@@ -238,8 +697,9 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
 
         # PDF
         if pdf_btn:
-            pdf = build_toa_pdf_yade(v.id)
-            _open_pdf_blob_inline(pdf)
+            pdf = _build_toa_pdf_bytes(v.id)
+            if pdf:
+                _open_pdf_blob_inline(pdf)
 
         if del_btn:
             st.session_state[f"yade_del_confirm_{v.id}"] = True
