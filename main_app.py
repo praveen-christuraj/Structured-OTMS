@@ -10,8 +10,9 @@ from models import User, Location
 from app_pages.manage_users import ROLE_ICONS as USER_ROLE_ICONS
 from permission_manager import PermissionManager
 from location_config import get_location_page_visibility
-from app_pages.page_customization import render_page_customization  # <-- wired into nav + routing
+from app_pages.page_customization import render_page_customization  # keep wired into nav + routing
 from location_config import get_page_section_config
+
 SecurityManager.SESSION_TIMEOUT_MINUTES = 30
 # Make sure DB is ready once at import
 init_db()
@@ -25,13 +26,13 @@ ICONS = {
     "Audit Log": "🧾",
     "Location Settings": "🧩",
     "Asset Management": "🧺",
-    "Page Customization": "⚙️",  # <-- added
+    "Page Customization": "⚙️",
     "Tank Transactions": "🛢️",
     "Yade Transactions": "⛴️",
     "FSO-Operations": "⚓",
     "Reports": "📄",
     "Settings": "⚙️",
-    "View Tank Transactions": "🗂️",
+    "View Transactions": "🗂️",  # <-- unified viewer
 }
 
 ROLE_ICONS = USER_ROLE_ICONS
@@ -165,7 +166,7 @@ def get_pages(user, active_location_id):
             "Audit Log",
             "Location Settings",
             "Asset Management",
-            "Page Customization",  # <-- added to management group
+            "Page Customization",
         ]
 
     # ---- Operational pages (role + location flags + module present) ----
@@ -181,7 +182,7 @@ def get_pages(user, active_location_id):
     # Mapping: flag -> (page title, module path)
     ops = [
         ("show_tank_transactions", ("Tank Transactions", "app_pages.tank_transactions")),
-        ("show_tank_transactions", ("View Tank Transactions", "app_pages.tank_transactions_view")),
+        ("show_tank_transactions", ("View Transactions", "app_pages.view_transactions")),  # <-- unified viewer
         ("show_yade_transactions", ("Yade Transactions", "app_pages.yade_transactions")),
         ("show_fso_operations",   ("FSO-Operations",   "app_pages.fso_operations")),
         ("show_reports",          ("Reports",          "app_pages.reports")),
@@ -415,18 +416,18 @@ def main():
         from app_pages.asset_management import render_asset_management_page
         render_asset_management_page(active_location_id, user)
 
-    elif current_page == "Page Customization":  # <-- new route
-        # This page typically needs the user context to show/limit options
+    elif current_page == "Page Customization":
         render_page_customization(user)
 
     elif current_page == "Tank Transactions":
         from app_pages.tank_transactions import render_tank_transactions_page
         render_tank_transactions_page(active_location_id, user)
 
-    elif current_page == "View Tank Transactions":
-        from app_pages.tank_transactions_view import render_tank_transactions_view_page
-        render_tank_transactions_view_page(active_location_id, user)
+    elif current_page == "View Transactions":
+        from app_pages.view_transactions import render_view_transactions_page
+        render_view_transactions_page(active_location_id, user)
 
+    # (keep YADE/FSO/Reports routes commented until those pages are ready)
     # elif current_page == "Yade Transactions":
     #     from app_pages.yade_transactions import render_yade_transactions_page
     #     render_yade_transactions_page(active_location_id, user)

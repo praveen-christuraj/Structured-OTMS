@@ -1,320 +1,433 @@
 # app_pages/tank_transactions_view.py
-import streamlit as st
-from datetime import date, timedelta
+import json
+from datetime import date, datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 import pandas as pd
+import streamlit as st
 
 from db import get_session
-from models import Location
-import models as db_models
+from models import Location  # always present in your project
 from security import SecurityManager
 
-# --- PDF imports ---
-from io import BytesIO
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER
+# ---------- Helpers: safe imports ----------
+def _get_flexible_model():
+    """
+    Returns FlexibleRecord model if present.
+    We used this in Meter/Condensate/ProducedWater/Production saves.
+    """
+    try:
+        import models as m
+        return getattr(m, "FlexibleRecord", None)
+    except Exception:
+        return None
 
-try:
-    from permission_manager import PermissionManager
-except Exception:
-    PermissionManager = None
+def _get_tank_tx_model():
+    try:
+        import models as m
+        # Your project uses TankTransaction in multiple files
+        return getattr(m, "TankTransaction", None)
+    except Exception:
+        return None
 
-try:
-    from location_config import get_location_page_visibility
-except Exception:
-    get_location_page_visibility = None
+def _detect_operation_enum_info(model_cls):
+    """
+    Returns (op_col_name, is_enum, allowed_values) for TankTransaction.operation-like columns.
+    If column missing, returns (None, False, []).
+    """
+    try:
+        # Try to find a real Column named 'operation'
+        table_col = model_cls.__table__.columns.get("operation")
+        if not table_col:
+            return (None, False, [])
+        # SQLAlchemy Enum columns usually expose .enums (list of allowed strings)
+        enums = getattr(table_col.type, "enums", None)
+        if isinstance(enums, (list, tuple)):
+            return ("operation", True, list(enums))
+        return ("operation", False, [])
+    except Exception:
+        return (None, False, [])
 
+def _map_friendly_to_enum(friendly: str, allowed: list[str]) -> str | None:
+    """
+    Map a human label (e.g., 'Opening Stock') to one of the allowed enum values.
+    Heuristics: normalize, then match direct/contains like OPEN, CLOS, RECEIPT, DISPATCH, DRAIN, SETTL.
+    """
+    if not friendly or not allowed:
+        return None
+    ftxt = friendly.upper()
 
-def _guard_location(active_location_id):
-    if not active_location_id:
-        st.warning("No active location is selected. Go to **Home** and select a location first.")
-        return None, None
-    with get_session() as session:
-        loc = session.query(Location).get(active_location_id)
-        if not loc:
-            st.warning("Selected location was not found. Please re-select from **Home**.")
-            return None, None
-        return loc, f"{loc.name} ({loc.code})"
+    # exact match on normalized “OPENING_STOCK” style if present
+    import re as _re
+    normalized = _re.sub(r"[^A-Z0-9]+", "_", ftxt).strip("_")
+    for a in allowed:
+        if a.upper() == normalized:
+            return a
 
+    # buckets / keywords
+    buckets = ("OPEN", "CLOS", "RECEIPT", "DISPATCH", "DRAIN", "SETTL")
+    for needle in buckets:
+        if needle in ftxt:
+            for a in allowed:
+                if needle in a.upper():
+                    return a
 
-def _guard_permissions(user, active_location_id) -> bool:
-    role = (user or {}).get("role", "")
-    if PermissionManager and user:
-        if not PermissionManager.can_access_operational_pages(user):
-            st.error(f"Your role **{role}** cannot access operational pages.")
-            return False
-    if get_location_page_visibility and active_location_id:
-        try:
-            with get_session() as session:
-                flags = get_location_page_visibility(session, active_location_id) or {}
-            if not flags.get("show_tank_transactions", True):
-                st.error("Tank Transactions are disabled for this location (see **Location Settings**).")
-                return False
-        except Exception:
-            pass
-    return True
+    # final fallback: soft prefix match on normalized
+    for a in allowed:
+        if a.upper().startswith(normalized[:6]):
+            return a
 
-
-def _get_tx_model():
-    for name in ("TankTransaction", "TankTransactions", "TankTxn", "Tank_Transaction"):
-        model = getattr(db_models, name, None)
-        if model is not None:
-            return model
     return None
 
+# ---------- Adapters: normalize to a common row ----------
+# Target columns:
+# ["Source","ID","Date","Time","Asset","Operation","GOV","GSV","NSV","MT","LT","Remarks","CreatedBy","CreatedAt"]
 
-def _fetch_transactions(session, location_id: int, d_from: date, d_to: date):
-    Tx = _get_tx_model()
-    if Tx is None:
-        return [], "TankTransaction model not found in models.py."
+def _adapt_tank_tx_row(r) -> Dict[str, Any]:
+    """Map TankTransaction ORM row to unified dict."""
+    # Safe getattr with defaults
+    g = lambda n, d=None: getattr(r, n, d)
 
-    # find date field
-    date_field = None
-    for cand in ("tx_date", "date", "txn_date", "entry_date"):
-        if hasattr(Tx, cand):
-            date_field = getattr(Tx, cand)
-            break
-    if date_field is None:
-        return [], "No date column on TankTransaction (expect tx_date/date/txn_date/entry_date)."
+    # Coerce date/time
+    dt_val = g("date")
+    tm_val = g("time")
+    dt_str = str(dt_val) if dt_val else ""
+    tm_str = tm_val.strftime("%H:%M") if tm_val else ""
 
-    loc_field = getattr(Tx, "location_id", None)
-    if loc_field is None:
-        return [], "No location_id on TankTransaction."
+    return {
+        "Source": "TankTx",
+        "ID": g("id"),
+        "Date": dt_str,
+        "Time": tm_str,
+        "Asset": g("tank_name") or "Tank",
+        "Operation": str(g("operation") or "") or "",
+        "GOV": _f(g("gov_bbl")),
+        "GSV": _f(g("gsv_bbl")),
+        "NSV": _f(g("qty_bbls")),
+        "MT": _f(g("mt")),
+        "LT": _f(g("lt")),
+        "Remarks": g("remarks") or "",
+        "CreatedBy": g("created_by") or "",
+        "CreatedAt": _dtstr(g("created_at")),
+        "_raw": r,   # keep original row for expanders/actions
+        "_payload": None,
+        "_section": None,
+    }
 
-    q = (
-        session.query(Tx)
-        .filter(loc_field == location_id)
-        .filter(date_field >= d_from)
-        .filter(date_field <= d_to)
-    )
+def _adapt_flex_row(r) -> Dict[str, Any]:
+    """
+    Map FlexibleRecord row to unified dict.
+    We’ll infer numbers from its data_json for known sections.
+    """
+    g = lambda n, d=None: getattr(r, n, d)
+    section = g("section", "")
+    payload = {}
     try:
-        q = q.order_by(date_field.desc(), getattr(Tx, "id").desc())
+        payload = json.loads(g("data_json") or "{}")
     except Exception:
-        pass
-    return q.all(), None
+        payload = {}
 
+    # Common values
+    dt_val = g("tx_date")
+    dt_str = str(dt_val) if dt_val else str(payload.get("date") or "")
+    tm_str = ""  # these flexible sections typically don’t have time
 
-def _rows_to_dataframe(rows):
-    data = []
-    for r in rows:
-        get = lambda *names, default=None: next((getattr(r, n) for n in names if hasattr(r, n)), default)
-        data.append(
-            {
-                "ID": get("id"),
-                "Date": get("tx_date", "date", "txn_date", "entry_date"),
-                "Tank": get("tank_name") or get("tank_code") or get("tank", "tank_id"),
-                "Movement": get("movement_type", "movement", "type"),
-                "Volume (bbl)": get("volume_bbl", "bbl", "volume", "qty_bbl", default=0.0),
-                "Remarks": get("remarks", "note", "notes"),
-                "Created By": get("created_by", "entered_by", "user"),
-                "Created At": get("created_at", "timestamp"),
-            }
-        )
-    df = pd.DataFrame(data)
-    if "Date" in df.columns:
-        df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.date
-    if "Created At" in df.columns:
-        df["Created At"] = pd.to_datetime(df["Created At"], errors="coerce")
-    return df
+    # Derive metrics by section
+    gov = gsv = nsv = mt = lt = None
+    asset = ""
+    op = ""
 
+    if section == "meters":
+        # Meter tab saved: {"date": "...", "meters":[{..,"net_bbl":..},...], "net_total_bbl": ...}
+        asset = "Meter"
+        gov = payload.get("net_total_bbl")  # Net used as the transactional qty; treat as GOV for viewing
+        # No temperature/BSW here; keep others blank
+    elif section == "condensate":
+        asset = "Condensate"
+        gov = payload.get("gov_bbl")
+        gsv = payload.get("gsv_bbl")
+        nsv = payload.get("nsv_bbl")
+        mt = payload.get("mt")
+        lt = payload.get("lt")
+    elif section == "produced_water":
+        asset = "Produced Water"
+        # Arbitrary columns; we don’t force GOV/GSV. Leave empty.
+    elif section == "production":
+        asset = "Production"
+        # Arbitrary columns; leave blank unless you later define derived sums.
 
-def _export_buttons(df: pd.DataFrame, filename_prefix: str = "tank_transactions"):
-    if df.empty:
-        return
-    csv_data = df.to_csv(index=False).encode("utf-8")
+    return {
+        "Source": f"Flex:{section or 'unknown'}",
+        "ID": g("id"),
+        "Date": dt_str,
+        "Time": tm_str,
+        "Asset": asset,
+        "Operation": op,
+        "GOV": _f(gov),
+        "GSV": _f(gsv),
+        "NSV": _f(nsv),
+        "MT": _f(mt),
+        "LT": _f(lt),
+        "Remarks": payload.get("remarks") or g("remarks") or "",
+        "CreatedBy": g("created_by") or "",
+        "CreatedAt": _dtstr(g("created_at")),
+        "_raw": r,
+        "_payload": payload,
+        "_section": section,
+    }
 
-    # Excel as bytes
-    from io import BytesIO
-    bio = BytesIO()
-    with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
-        df.to_excel(writer, sheet_name="Transactions", index=False)
-    xlsx_bytes = bio.getvalue()
+def _f(x) -> Optional[float]:
+    try:
+        if x is None: return None
+        return float(x)
+    except Exception:
+        return None
 
-    c1, c2 = st.columns(2)
-    with c1:
-        st.download_button(
-            "📊 Download Excel",
-            data=xlsx_bytes,
-            file_name=f"{filename_prefix}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True,
-        )
-    with c2:
-        st.download_button(
-            "📄 Download CSV",
-            data=csv_data,
-            file_name=f"{filename_prefix}.csv",
-            mime="text/csv",
-            use_container_width=True,
-        )
+def _dtstr(x) -> str:
+    try:
+        if not x: return ""
+        if isinstance(x, (datetime, )):
+            return x.strftime("%Y-%m-%d %H:%M:%S")
+        return str(x)
+    except Exception:
+        return ""
 
+# ---------- Loaders ----------
+def _load_tank_rows(session, location_id: int, d1: Optional[date], d2: Optional[date], created_by: str, search: str) -> List[Dict[str, Any]]:
+    Mt = _get_tank_tx_model()
+    if Mt is None:
+        return []
 
-# ---------- PDF builder ----------
+    q = session.query(Mt).filter(getattr(Mt, "location_id") == location_id)
 
-def _df_to_pdf_bytes(df: pd.DataFrame, loc_label: str, d_from: date, d_to: date, username: str = "") -> bytes:
-    """
-    Build an A4 portrait PDF with ~0.5 cm margins listing the transactions.
-    Conventional header + zebra table.
-    """
-    # Trim/arrange columns
-    want_cols = ["ID", "Date", "Tank", "Movement", "Volume (bbl)", "Remarks", "Created By", "Created At"]
-    cols = [c for c in want_cols if c in df.columns]
-    df2 = df[cols].copy()
+    if d1:
+        q = q.filter(getattr(Mt, "date") >= d1)
+    if d2:
+        q = q.filter(getattr(Mt, "date") <= d2)
 
-    # Format values & trim long remarks
-    def _fmt(v):
-        if pd.isna(v):
-            return ""
-        return str(v)
-    if "Remarks" in df2.columns:
-        df2["Remarks"] = df2["Remarks"].apply(
-            lambda x: (_fmt(x)[:120] + "…") if _fmt(x) and len(_fmt(x)) > 120 else _fmt(x)
-        )
+    if created_by:
+        q = q.filter(getattr(Mt, "created_by").ilike(f"%{created_by}%"))
 
-    title = "View Tank Transactions"
-    sub = f"{loc_label} — {d_from.isoformat()} to {d_to.isoformat()}"
-    gen = f"Generated by: {username or 'N/A'}"
-
-    bio = BytesIO()
-    doc = SimpleDocTemplate(
-        bio,
-        pagesize=A4,
-        leftMargin=0.5 * cm,
-        rightMargin=0.5 * cm,
-        topMargin=0.5 * cm,
-        bottomMargin=0.5 * cm,
-    )
-
-    styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name="TitleC", parent=styles["Title"], alignment=TA_CENTER, spaceAfter=6))
-    styles.add(ParagraphStyle(name="SubC", parent=styles["Normal"], alignment=TA_CENTER, textColor=colors.grey, spaceAfter=6))
-
-    elems = [
-        Paragraph(title, styles["TitleC"]),
-        Paragraph(sub, styles["SubC"]),
-        Paragraph(gen, styles["SubC"]),
-        Spacer(0, 6),
-    ]
-
-    data = [cols] + df2.fillna("").astype(str).values.tolist()
-    tbl = Table(data, repeatRows=1)
-    tbl.setStyle(TableStyle([
-        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#eeeeee")),
-        ("TEXTCOLOR", (0,0), (-1,0), colors.black),
-        ("ALIGN", (0,0), (-1,0), "CENTER"),
-        ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-        ("FONTSIZE", (0,0), (-1,0), 9),
-
-        ("FONTSIZE", (0,1), (-1,-1), 8),
-        ("ALIGN", (0,1), (-1,-1), "LEFT"),
-        ("VALIGN", (0,0), (-1,-1), "TOP"),
-
-        ("GRID", (0,0), (-1,-1), 0.25, colors.HexColor("#cccccc")),
-        ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.white, colors.HexColor("#fafafa")]),
-        ("TOPPADDING", (0,0), (-1,-1), 3),
-        ("BOTTOMPADDING", (0,0), (-1,-1), 3),
-    ]))
-
-    elems.append(tbl)
-    doc.build(elems)
-    return bio.getvalue()
-
-
-def render_tank_transactions_view_page(active_location_id, user):
-    """Read-only viewer page for saved tank transactions."""
-    st.markdown("### 🗂️ View Tank Transactions")
-
-    loc, loc_label = _guard_location(active_location_id)
-    if not loc:
-        return
-    if not _guard_permissions(user, active_location_id):
-        return
-
-    st.caption(f"Active Location: **{loc_label}**")
-
-    # Date range
-    today = date.today()
-    default_from = today - timedelta(days=6)
-    default_to = today
-
-    col1, col2, col3 = st.columns([1, 1, 0.5])
-    with col1:
-        d_from = st.date_input("From", value=default_from, max_value=today)
-    with col2:
-        d_to = st.date_input("To", value=default_to, max_value=today)
-    with col3:
-        load_clicked = st.button("🔍 Load", use_container_width=True)
-
-    if "tt_view_loaded_once" not in st.session_state:
-        st.session_state["tt_view_loaded_once"] = True
-        load_clicked = True
-
-    df = pd.DataFrame()
-    error_msg = None
-    if load_clicked:
-        with get_session() as session:
-            rows, error_msg = _fetch_transactions(session, loc.id, d_from, d_to)
-            if not error_msg:
-                df = _rows_to_dataframe(rows)
-
-            # Audit the view
-            try:
-                SecurityManager.log_audit(
-                    None,
-                    (user or {}).get("username", "system"),
-                    "VIEW",
-                    resource_type="TankTransaction",
-                    resource_id="",
-                    details=f"Viewed transactions for {loc_label} from {d_from} to {d_to}; rows={len(df)}",
-                    user_id=(user or {}).get("id"),
-                    location_id=loc.id,
-                )
-            except Exception:
-                pass
-
-    if error_msg:
-        st.error(error_msg)
-        return
-
-    # Exports (Excel/CSV + PDF)
-    if not df.empty:
-        _export_buttons(df)
-
-        pdf_bytes = _df_to_pdf_bytes(
-            df=df,
-            loc_label=loc_label,
-            d_from=d_from,
-            d_to=d_to,
-            username=(user or {}).get("username", ""),
-        )
-        st.download_button(
-            "📄 Download PDF",
-            data=pdf_bytes,
-            file_name=f"tank_transactions_{loc_label.replace(' ', '_')}_{d_from}_{d_to}.pdf",
-            mime="application/pdf",
-            use_container_width=True,
-        )
-
-        # Audit the export
+    # basic search across a few fields
+    if search:
+        like = f"%{search}%"
         try:
-            SecurityManager.log_audit(
-                None,
-                (user or {}).get("username", "system"),
-                "EXPORT_PDF",
-                resource_type="TankTransaction",
-                resource_id="",
-                details=f"Exported PDF for {loc_label} from {d_from} to {d_to}; rows={len(df)}",
-                user_id=(user or {}).get("id"),
-                location_id=loc.id,
+            q = q.filter(
+                (getattr(Mt, "tank_name").ilike(like)) |
+                (getattr(Mt, "ticket_id").ilike(like)) |
+                (getattr(Mt, "remarks").ilike(like))
             )
         except Exception:
             pass
 
+    try:
+        q = q.order_by(getattr(Mt, "date").desc(), getattr(Mt, "id").desc())
+    except Exception:
+        pass
+
+    return [_adapt_tank_tx_row(r) for r in q.all()]
+
+def _load_flex_rows(session, location_id: int, sections: List[str], d1: Optional[date], d2: Optional[date], created_by: str, search: str) -> List[Dict[str, Any]]:
+    Flex = _get_flexible_model()
+    if Flex is None:
+        return []
+
+    q = session.query(Flex).filter(getattr(Flex, "location_id") == location_id)
+
+    # page & sections
+    q = q.filter(getattr(Flex, "page") == "tank_transactions")
+    if sections:
+        q = q.filter(getattr(Flex, "section").in_(sections))
+
+    # date filter: use tx_date; if null, skip
+    if d1:
+        q = q.filter((getattr(Flex, "tx_date") >= d1) | (getattr(Flex, "tx_date") == None))
+    if d2:
+        q = q.filter((getattr(Flex, "tx_date") <= d2) | (getattr(Flex, "tx_date") == None))
+
+    if created_by:
+        q = q.filter(getattr(Flex, "created_by").ilike(f"%{created_by}%"))
+
+    if search:
+        like = f"%{search}%"
+        try:
+            q = q.filter(
+                (getattr(Flex, "section").ilike(like)) |
+                (getattr(Flex, "data_json").ilike(like)) |
+                (getattr(Flex, "remarks").ilike(like))
+            )
+        except Exception:
+            pass
+
+    try:
+        q = q.order_by(getattr(Flex, "tx_date").desc(), getattr(Flex, "id").desc())
+    except Exception:
+        pass
+
+    return [_adapt_flex_row(r) for r in q.all()]
+
+# ---------- UI ----------
+def render_tank_transactions_view_page(active_location_id: Optional[int], user: Dict[str, Any]):
+    st.markdown("### 🗂️ View Transactions")
+
+    # Guard
+    if not active_location_id:
+        st.info("Select a location on **Home** to view records.")
+        return
+
+    # Show location label
+    with get_session() as s:
+        loc = s.query(Location).get(active_location_id)
+    loc_label = f"{loc.name} ({loc.code})" if loc else f"ID={active_location_id}"
+    st.caption(f"Active Location: **{loc_label}**")
+
+    # Filters row
+    col1, col2, col3 = st.columns([0.28, 0.28, 0.44])
+    today = date.today()
+    default_from = today - timedelta(days=30)
+    with col1:
+        d1 = st.date_input("From", value=default_from, key="vtv_from")
+    with col2:
+        d2 = st.date_input("To", value=today, key="vtv_to")
+    with col3:
+        created_by = st.text_input("Created By (contains)", value="", key="vtv_created_by")
+
+    # Source filter
+    src_col = st.columns([1])[0]
+    with src_col:
+        srcs = st.multiselect(
+            "Sources",
+            ["TankTx", "Meters", "Condensate", "Produced Water", "Production"],
+            default=["TankTx", "Meters", "Condensate", "Produced Water", "Production"],
+            key="vtv_sources"
+        )
+
+    # Free text search
+    search = st.text_input("Search (ticket, tank name, remarks, etc.)", value="", key="vtv_search")
+
+    # Load
+    rows: List[Dict[str, Any]] = []
+    with get_session() as s:
+        if "TankTx" in srcs:
+            rows += _load_tank_rows(s, active_location_id, d1, d2, created_by, search)
+
+        # Map UI labels to flex sections
+        flex_map = []
+        if "Meters" in srcs:
+            flex_map.append("meters")
+        if "Condensate" in srcs:
+            flex_map.append("condensate")
+        if "Produced Water" in srcs:
+            flex_map.append("produced_water")
+        if "Production" in srcs:
+            flex_map.append("production")
+
+        rows += _load_flex_rows(s, active_location_id, flex_map, d1, d2, created_by, search)
+
+    # If FlexibleRecord missing, hint
+    if any(x in srcs for x in ["Meters","Condensate","Produced Water","Production"]) and _get_flexible_model() is None:
+        st.info("`FlexibleRecord` model not found. Add it to `models.py` to see Meter/Condensate/PW/Production rows.")
+
+    if not rows:
+        st.warning("No records found for the selected filters.")
+        return
+
+    # DataFrame
+    df = pd.DataFrame(rows, columns=[
+        "Source","ID","Date","Time","Asset","Operation","GOV","GSV","NSV","MT","LT","Remarks","CreatedBy","CreatedAt"
+    ])
+
+    # Quick metrics summary
+    m1, m2, m3, m4, m5 = st.columns(5)
+    with m1: st.metric("Count", len(df))
+    with m2: st.metric("∑ GOV (bbl)", _sumfmt(df["GOV"]))
+    with m3: st.metric("∑ GSV (bbl)", _sumfmt(df["GSV"]))
+    with m4: st.metric("∑ NSV (bbl)", _sumfmt(df["NSV"]))
+    with m5: st.metric("∑ MT", _sumfmt(df["MT"]))
+
+    # Table + expanders
+    st.markdown("#### Results")
+    for r in rows:
+        with st.expander(f"{r['Source']} • ID {r['ID']} • {r['Date']} {r['Time']} • {r['Asset']}"):
+            _render_row_card(r)
+
+    # Exports
     st.markdown("---")
-    if df.empty:
-        st.info("No transactions found for the selected date range.")
-    else:
-        st.dataframe(df, use_container_width=True, height=460)
+    c1, c2 = st.columns([0.25, 0.75])
+    with c1:
+        st.markdown("#### Export")
+    with c2:
+        _export_bar(df)
+
+    # audit view event (optional)
+    try:
+        SecurityManager.log_audit(
+            None,
+            (user or {}).get("username", "system"),
+            "READ",
+            resource_type="UnifiedView",
+            resource_id=str(active_location_id),
+            details=f"Viewed {len(df)} rows: filters src={srcs}, from={d1}, to={d2}, by={created_by}, q={search}",
+            user_id=(user or {}).get("id"),
+            location_id=active_location_id,
+            ip_address=st.session_state.get("client_ip"),
+            success=True,
+        )
+    except Exception:
+        pass
+
+
+# ---------- Row card / summary ----------
+def _render_row_card(r: Dict[str, Any]):
+    cols = st.columns([0.20, 0.20, 0.20, 0.20, 0.20])
+    with cols[0]: st.write(f"**Source:** {r['Source']}")
+    with cols[1]: st.write(f"**Asset:** {r['Asset'] or ''}")
+    with cols[2]: st.write(f"**Operation:** {r['Operation'] or ''}")
+    with cols[3]: st.write(f"**GOV (bbl):** {nf(r['GOV'])}")
+    with cols[4]: st.write(f"**NSV (bbl):** {nf(r['NSV'])}")
+
+    cols2 = st.columns([0.20, 0.20, 0.20, 0.40])
+    with cols2[0]: st.write(f"**GSV (bbl):** {nf(r['GSV'])}")
+    with cols2[1]: st.write(f"**MT:** {nf(r['MT'])}")
+    with cols2[2]: st.write(f"**LT:** {nf(r['LT'])}")
+    with cols2[3]: st.write(f"**Remarks:** {r['Remarks'] or ''}")
+
+    st.caption(f"Created By: **{r['CreatedBy'] or ''}**  •  Created At: **{r['CreatedAt'] or ''}**")
+
+    # Show raw payload if flexible
+    if r.get("Source","").startswith("Flex"):
+        st.markdown("**Raw Payload**")
+        st.code(json.dumps(r.get("_payload") or {}, indent=2, ensure_ascii=False))
+
+
+# ---------- Exports ----------
+def _export_bar(df: pd.DataFrame):
+    # CSV
+    csv = df.to_csv(index=False).encode("utf-8")
+    st.download_button("⬇️ CSV", data=csv, file_name="transactions_view.csv", mime="text/csv")
+
+    # Excel
+    try:
+        import io
+        import xlsxwriter
+        bio = io.BytesIO()
+        with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
+            df.to_excel(writer, index=False, sheet_name="Transactions")
+        st.download_button("⬇️ Excel", data=bio.getvalue(), file_name="transactions_view.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    except Exception as ex:
+        st.info(f"Excel export unavailable: {ex}")
+
+
+# ---------- number helpers ----------
+def nf(x: Any) -> str:
+    try:
+        if x is None: return ""
+        return f"{float(x):,.2f}"
+    except Exception:
+        return ""
+
+def _sumfmt(series: pd.Series) -> str:
+    try:
+        return f"{pd.to_numeric(series, errors='coerce').fillna(0).sum():,.2f}"
+    except Exception:
+        return "0.00"

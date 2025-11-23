@@ -1,0 +1,182 @@
+OTMS (Refactor v1) — Implementation Notes (Up to Tank Tx + Config)
+=====================================================================
+
+1) Scope covered
+----------------
+- Main app routing (main_app.py)
+  - Adds Page Customization to sidebar.
+  - Session timeout + last-activity refresh.
+  - Role-based page visibility.
+- Location Settings (app_pages/location_settings.py)
+  - Page Access toggles (Tank/Yade/FSO/Reports).
+  - Tank Transactions tab visibility (per location).
+  - Operations configuration (per location, per asset, per category).
+- Tank Transactions (app_pages/tank_transactions.py)
+  - Tank Entry tab: live GOV math from calibration, API60 routes, VCF, GSV/BSW/NSV, MT/LT, ticketing, audit.
+  - Meter Records: soft-configured meters per location; unit-aware (bbls/m3), sum to Net bbls, audit.
+  - Condensate Records: soft-configured meters; GOV→API60/VCF→GSV→BSW→NSV→MT/LT, audit.
+  - Produced Water & Production: fully soft-coded data-entry tables driven by Page Customization (admin defines columns). Saves rows, audit.
+- Location Config (location_config.py)
+  - Persistent JSON config per location (deep-merged over defaults).
+  - Tabs visibility, generic page/section configs, dynamic tables, meters, operations.
+- Calculations (utils_calc.py)
+  - Interpolation, density/API conversions, VCF (Table 6A–style), LT (Table 11), end-to-end tank calc helpers.
+
+2) Roles & access
+-----------------
+- admin-operations / admin-it: can see Location Settings, Page Customization, add assets/config.
+- Operators & others: can use operational pages; when required config is missing, they see a friendly “please contact admin” message.
+
+3) Page visibility (per location)
+---------------------------------
+- Stored in LocationConfig → page_visibility.
+- Managed via Location Settings → Page Access.
+- Sidebar pages rendered dynamically in main_app.get_pages() using get_location_page_visibility(...).
+
+4) Tank Transactions tab visibility
+-----------------------------------
+- Keys: Tank Entry, Meter Records, Condensate Records, Produced Water Records, Production.
+- Stored under config["tabs_access"]["Tank Transactions"].
+- Managed in Location Settings → Tank Tx Tabs.
+- render_tank_transactions_page(...) reads these flags and only renders enabled tabs.
+
+5) Operations (soft-coded)
+--------------------------
+- Where: location_config.py
+  - OP_ASSETS = ["tank","yade","tanker","vessel"]
+  - OP_CATEGORIES = ["Opening","Closing","Receipt","Dispatch","Draining","Others"]
+  - CRUD helpers: list_operations, add_operation, set_operation_active, delete_operation, get_active_operation_names.
+- UI: Location Settings → Operations.
+- Usage (next step): Tank Entry op dropdown should be driven by get_active_operation_names(..., asset="tank").
+
+6) Page Customization (soft configs)
+------------------------------------
+Used to remove hard-coding for locations.
+
+6.1 Meters for “Meter Records”
+- Stored at: set_page_section_config(..., page="tank_transactions", section="meters", cfg)
+- Example cfg:
+  {
+    "meters": [
+      {"id":"...","label":"Meter-1","factor":1.0000,"unit":"bbls","active":true},
+      {"id":"...","label":"Meter-2","factor":0.9995,"unit":"m3","active":true}
+    ]
+  }
+- If no meters configured:
+  - Admins: “Go to Settings → Page Customization to add meters.”
+  - Non-admins: “Please contact admin…”
+
+6.2 Condensate meters
+- Same structure, stored under section="condensate_meters".
+- Drives Condensate tab’s meter rows.
+
+6.3 Dynamic tables (Produced Water, Production)
+- Definition getter/setter:
+  - get_dynamic_table_def(session, location_id, page, section)
+  - set_dynamic_table_def(session, location_id, page, section, new_def)
+- Structure:
+  {
+    "columns": [
+      {"name":"date","label":"Date","type":"date","required":true},
+      {"name":"stream_a","label":"Stream A (bbl)","type":"number"},
+      {"name":"remarks","label":"Remarks","type":"text"}
+    ]
+  }
+- Only text|number|date; max one date column enforced.
+- When not defined: tab shows an instruction to configure in Page Customization.
+
+7) Tank Entry calculations & validations
+----------------------------------------
+- Calibration interpolation (per tank) → TOV/FW → GOV.
+- Max dip guard: Dip/Water inputs are validated against max dip_cm in calibration for the selected tank.
+- Observed property routes:
+  - Observed API @ sample temp (°F/°C) → API60.
+  - Observed Density (kg/m3) @ sample temp (°C/°F) → (API60, density@15°C).
+- Tank temp: in °C/°F, normalized to °F for VCF.
+- VCF: ASTM 6A style (calculate_vcf).
+- GSV = round(GOV × VCF).
+- BS&W vol (bbl) = round(GSV × bsw% / 100).
+- NSV = round(GSV − BS&W vol).
+- LT = NSV × Table-11 factor (get_lt_factor).
+- MT = LT × 1.01605.
+- Ticket ID: {LOC}-{yyyymmdd}-{seq} auto-generated on save.
+- Time input: manual HH:MM (no dropdown), Date via datepicker.
+
+8) Meter Records (Net quantity logic)
+-------------------------------------
+- For each meter i:
+  - net_native = (closing_i − opening_i) × factor_i
+  - If unit bbls → net_bbl = net_native
+  - If unit m3 → net_bbl = net_native × 6.289811
+- Total = sum of net_bbl across meters.
+- Saved to a generic model FlexibleRecord with:
+  - page="tank_transactions", section="meters", tx_date, data_json.
+- Audit logs include IP (if captured via st.session_state["client_ip"]).
+
+9) Condensate Records
+---------------------
+- Same meter math to get GOV (sum of meters).
+- Then sampling & temperature like Tank Entry:
+  - API60 → VCF → GSV/BSW/NSV/MT/LT.
+- Saved in FlexibleRecord with section="condensate".
+
+10) Produced Water & Production (Dynamic)
+-----------------------------------------
+- Renders a form from your column definition:
+  - date → date_input
+  - number → number_input
+  - text → text_input
+- Required fields respected.
+- On save: packs to data_json and inserts into FlexibleRecord with page="tank_transactions", section="produced_water" or "production".
+
+11) Audit logging
+-----------------
+- CREATE/UPDATE/DELETE paths log to SecurityManager.log_audit(...) with:
+  - resource_type (e.g., TankTx:MeterRecord, LocationOperation)
+  - resource_id (new row id or op id)
+  - details (small summary)
+  - user_id, location_id, and ip_address (if available)
+- Session timeout is enforced; login/logout/timeout are also audit-logged.
+
+12) Models you need to have (DB)
+--------------------------------
+To persist everything:
+- CalibrationTank: fields: tank_id, dip_cm, volume_bbl.
+- TankTransaction: the hard-coded tank entry save target.
+- LocationConfiguration: (location_id, config_json TEXT) — holds per-location settings.
+- LocationPageConfig (optional): if you prefer to store page/section configs here. Our helpers store in LocationConfiguration by default.
+- Meter & LocationMeter: meter assets and mapping (if you use asset tables in addition to JSON configs).
+- FlexibleRecord: generic sink for soft-coded entries (id, location_id, page, section, tx_date, data_json, created_by, created_at).
+
+13) Utilities recap
+-------------------
+- Interpolation: _two_point (dip→volume).
+- Temp utils: normalize_temp_unit, temp_bounds, c_to_f, f_to_c.
+- API/Density: api_observed_to_api60, density_obs_to_api60, api_from_density, density_from_api.
+- VCF: calculate_vcf(api60, temp_f).
+- Table 11: get_lt_factor(api60).
+- Convenience: vcf_from_api60_and_tank_temp, gsv_from_gov_vcf, bsw_volume_from_gsv_pct, nsv_from_gsv_bsw, mass_mt_from_gsv_api60, mass_lt_from_mt.
+
+14) Validation rules in place
+-----------------------------
+- Dip & Water: cannot exceed max calibration dip for selected tank (hard block).
+- API60 & VCF: must be positive to save Tank/Condensate entries.
+- Meter total: must be > 0 to save a record.
+- Dynamic forms: respect required flags.
+
+15) Developer tips
+------------------
+- If a page shows “Model not found” for FlexibleRecord, add the model or adjust the save target.
+- If “no meters configured” appears for operators, add meters in Settings → Page Customization.
+- If Operations don’t appear in Tank Entry yet: wire get_active_operation_names(asset="tank") into the dropdown (with fallback to enum).
+
+16) What’s next (recommended order)
+-----------------------------------
+1) Wire Tank Entry “Operation” dropdown to get_active_operation_names(..., asset="tank") and keep a fallback to old enum.
+2) View pages:
+   - View Tank Transactions (filter, edit, delete, audit trail).
+   - View Meter/Condensate/PW/Production (read from FlexibleRecord, pretty tables, export).
+3) Exports & PDFs:
+   - Standardize A4 portrait, 0.5 cm margins, consistent headers/footers.
+4) Sync engine:
+   - Local SQLite → server DB, idempotent upserts from last sync point.

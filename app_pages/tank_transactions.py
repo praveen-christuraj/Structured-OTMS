@@ -3,6 +3,8 @@ from datetime import datetime, date, time as dt_time
 from typing import Optional
 import json
 import re
+import enum
+from sqlalchemy import Enum as SAEnum
 
 from db import get_session
 from models import Location, Tank, TankTransaction, CalibrationTank
@@ -96,6 +98,86 @@ def _generate_ticket_id(session, location_code: str) -> str:
         seq = max(seqs) + 1 if seqs else 1
     return f"{prefix}-{seq:04d}"
 
+# --- Back-compat: old code may call this helper; we define it here too ---
+def _detect_operation_enum_info(model_cls, colname: str):
+    """
+    Return (enum_class, enum_choices) for the given column if it is a SQLAlchemy Enum.
+    - enum_class: a Python Enum subclass if present, else None
+    - enum_choices: list of string choices if present, else None
+    """
+    try:
+        col = getattr(model_cls.__table__.c, colname)
+        typ = getattr(col, "type", None)
+        if isinstance(typ, SAEnum):
+            enum_cls = getattr(typ, "enum_class", None)
+            choices = getattr(typ, "enums", None)
+            return enum_cls if isinstance(enum_cls, type) and issubclass(enum_cls, enum.Enum) else None, choices
+    except Exception:
+        pass
+    return None, None
+
+_OP_CLEAN_RE = re.compile(r"[^A-Z0-9_]+")
+
+def _normalize_op_text(text: str) -> str:
+    if not text:
+        return ""
+    t = str(text).upper().replace("-", " ").replace("/", " ").replace("&", " AND ")
+    t = "_".join(t.split())
+    return _OP_CLEAN_RE.sub("", t)
+
+def _coerce_operation_value(model_cls, colname: str | None, display_text: str):
+    """
+    Convert a label like 'Opening Stock' into whatever the model column wants:
+      - a Python Enum member (if the SA Enum is Python-backed), or
+      - one of the allowed strings on a string-backed SA Enum, or
+      - fallback to the text.
+    """
+    if not colname:
+        return display_text
+
+    enum_cls, choices = _detect_operation_enum_info(model_cls, colname)
+    norm = _normalize_op_text(display_text or "")
+
+    # Python Enum backing
+    if enum_cls:
+        for member in enum_cls:
+            if _normalize_op_text(member.name) == norm or _normalize_op_text(str(member.value)) == norm:
+                return member
+        for member in enum_cls:  # relaxed prefix match
+            n = _normalize_op_text(member.name)
+            if n.startswith(norm) or norm.startswith(n):
+                return member
+
+    # String-backed SA Enum
+    if choices:
+        for ch in choices:
+            if ch == display_text:
+                return ch
+        for ch in choices:
+            if _normalize_op_text(ch) == norm:
+                return ch
+        for ch in choices:
+            n = _normalize_op_text(ch)
+            if n.startswith(norm) or norm.startswith(n):
+                return ch
+
+    return display_text
+
+# ---- model-safe helpers ----
+def _model_columns(M):
+    """Return set of column keys for an SQLAlchemy model class, else fall back to dir()."""
+    try:
+        return {c.key for c in M.__table__.columns}
+    except Exception:
+        return set(dir(M))
+
+def _first_present(cols: set, *candidates: str) -> str | None:
+    """Return the first name that exists in cols (case-sensitive)."""
+    for c in candidates:
+        if c in cols:
+            return c
+    return None
+
 
 # ---------------- messages ----------------
 def _no_meters_message(kind_label: str, user):
@@ -163,24 +245,6 @@ def _get_operation_labels_for_tank(location_id: int) -> list[str]:
     except Exception:
         return []
 
-def _set_operation_text_on_tx(tx: TankTransaction, op_text: Optional[str], remarks: Optional[str]):
-    op_text = (op_text or "").strip() or None
-    if not op_text:
-        return remarks
-
-    try:
-        setattr(tx, "operation", op_text)
-        return remarks
-    except Exception:
-        pass
-    try:
-        setattr(tx, "operation_text", op_text)
-        return remarks
-    except Exception:
-        pass
-    base = (remarks or "").strip()
-    return (f"[OP:{op_text}] " + base) if op_text else base
-
 _TIME_RE = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 
 def _parse_hhmm(text: str) -> Optional[dt_time]:
@@ -238,7 +302,7 @@ def _render_tab_tank_entry(loc, loc_label, user):
     with c4:
         selected_op_label = st.selectbox("🔁 Operation", op_labels, index=0, key="tx_op")
     with c5:
-        # Clamp to calibration; if no calibration, allow any ≥0 (but we’ll still compute with 0 range)
+        # Clamp to calibration; if no calibration, allow any ≥0
         dip_cm = st.number_input(
             f"📏 Dip (cm) *  (max {max_dip:.1f})" if max_dip > 0 else "📏 Dip (cm) *",
             min_value=0.0,
@@ -339,12 +403,8 @@ def _render_tab_tank_entry(loc, loc_label, user):
             errs.append("Please select a valid tank.")
         if not tx_date:
             errs.append("Date is required.")
-        if tx_time is None:
-            errs.append("Time is invalid. Enter in HH:MM 24-hour format.")
-        if not op_labels or selected_op_label.startswith("N/A"):
-            errs.append("Operation not configured. Please configure operations in Location Settings → Operations.")
-        if max_dip > 0 and (float(dip_cm or 0.0) > max_dip or float(water_cm or 0.0) > max_dip):
-            errs.append(f"Dip/Water exceeds calibration maximum ({max_dip:.1f} cm) for this tank.")
+        if not tx_time:
+            errs.append("Time is required.")
         if api60_val <= 0:
             errs.append("Computed API @ 60°F is invalid. Please check observed inputs.")
         if vcf_val <= 0:
@@ -356,45 +416,100 @@ def _render_tab_tank_entry(loc, loc_label, user):
 
         try:
             with get_session() as session:
+                # Resolve model + columns
+                from models import TankTransaction as TT
+                cols = _model_columns(TT)
+
                 tnk = tank_by_label[selected_tank_label]
                 ticket_id = _generate_ticket_id(session, loc_label.split("(")[-1].split(")")[0])
 
-                tx = TankTransaction(
-                    location_id=loc.id,
-                    ticket_id=ticket_id,
-                    tank_id=tnk.id,
-                    tank_name=tnk.name,
-                    date=tx_date,
-                    time=tx_time,  # parsed manual HH:MM
-                    dip_cm=float(dip_cm or 0.0),
-                    water_cm=float(water_cm or 0.0),
-                    tank_temp_c=None,
-                    tank_temp_f=None,
-                    api_observed=float(api_obs_val or 0.0),
-                    density_observed=float(dens_obs_val or 0.0),
-                    api_at60=float(api60_val or 0.0),
-                    vcf=float(vcf_val or 1.0),
-                    tov_bbl=float(tov_bbl or 0.0),
-                    fw_bbl=float(fw_bbl or 0.0),
-                    gov_bbl=float(gov_bbl or 0.0),
-                    gsv_bbl=float(gsv_bbl or 0.0),
-                    bsw_pct=float(bsw_pct or 0.0),
-                    bsw_bbl=float((gsv_bbl - nsv_bbl) if gsv_bbl >= nsv_bbl else 0.0),
-                    qty_bbls=float(nsv_bbl or 0.0),
-                    mt=float(mt or 0.0),
-                    lt=float(lt or 0.0),
-                    remarks=(remarks.strip() or None),
-                    created_by=(user or {}).get("username", "system"),
-                )
+                # Detect available columns
+                api60_col = _first_present(cols, "api_at60", "api60", "api_60", "api_at_60f", "api_60f")
+                temp_c_col = _first_present(cols, "tank_temp_c", "tank_temperature_c", "tank_temp_celsius")
+                temp_f_col = _first_present(cols, "tank_temp_f", "tank_temperature_f", "tank_temp_fahrenheit")
+                op_text_col = _first_present(cols, "operation_text", "op_text", "operation_label")
+                op_col = _first_present(cols, "operation")  # enum/string operation column if present
 
-                # Store operation text safely
-                new_remarks = _set_operation_text_on_tx(tx, selected_op_label, remarks)
-                if new_remarks != remarks:
-                    tx.remarks = new_remarks
+                # Build canonical payload
+                time_val = tx_time if isinstance(tx_time, dt_time) else dt_time(hour=tx_time.hour, minute=tx_time.minute)
+                payload = {
+                    "location_id": loc.id,
+                    "ticket_id": ticket_id,
+                    "tank_id": tnk.id,
+                    "tank_name": tnk.name,
+                    "date": tx_date,
+                    "time": time_val,
+
+                    "dip_cm": float(dip_cm or 0.0),
+                    "water_cm": float(water_cm or 0.0),
+
+                    # observed inputs
+                    "api_observed": float(api_obs_val or 0.0),
+                    "density_observed": float(dens_obs_val or 0.0),
+                    "api60": float(api60_val or 0.0),  # will remap to actual column
+                    "vcf": float(vcf_val or 1.0),
+
+                    # volumes
+                    "tov_bbl": float(tov_bbl or 0.0),
+                    "fw_bbl": float(fw_bbl or 0.0),
+                    "gov_bbl": float(gov_bbl or 0.0),
+                    "gsv_bbl": float(gsv_bbl or 0.0),
+                    "bsw_pct": float(bsw_pct or 0.0),
+                    "bsw_bbl": float((gsv_bbl - nsv_bbl) if gsv_bbl >= nsv_bbl else 0.0),
+                    "qty_bbls": float(nsv_bbl or 0.0),   # NSV
+                    "nsv_bbl": float(nsv_bbl or 0.0),    # provide both; only existing col will be kept
+                    "mt": float(mt or 0.0),
+                    "lt": float(lt or 0.0),
+
+                    "remarks": (remarks.strip() or None),
+                    "created_by": (user or {}).get("username", "system"),
+                }
+
+                # Map API@60 into the actual column (or drop if none)
+                if api60_col:
+                    payload[api60_col] = payload.pop("api60")
+                else:
+                    payload.pop("api60", None)
+
+                # Handle OPERATION safely (enum-aware)
+                selected_label = None if (selected_op_label or "").startswith("N/A") else (selected_op_label or "").strip()
+                if selected_label:
+                    if op_col:
+                        mapped_value = _coerce_operation_value(TT, op_col, selected_label)
+                        payload[op_col] = mapped_value
+                        if op_text_col:
+                            payload[op_text_col] = selected_label
+                    elif op_text_col:
+                        payload[op_text_col] = selected_label
+
+                # Only pass keys that exist on the model
+                safe_kwargs = {k: v for k, v in payload.items() if k in cols}
+
+                # Create row
+                tx = TT(**safe_kwargs)
+
+                # Optionally store normalized temps if those columns exist
+                try:
+                    if temp_c_col and temp_f_col:
+                        if st.session_state.get("tx_tank_temp_unit") == "°C":
+                            setattr(tx, temp_c_col, float(tank_temp_val))
+                            setattr(tx, temp_f_col, float(c_to_f(float(tank_temp_val))))
+                        else:
+                            setattr(tx, temp_f_col, float(tank_temp_val))
+                            setattr(tx, temp_c_col, float(f_to_c(float(tank_temp_val))))
+                    elif temp_c_col:
+                        val_c = tank_temp_val if st.session_state.get("tx_tank_temp_unit") == "°C" else f_to_c(float(tank_temp_val))
+                        setattr(tx, temp_c_col, float(val_c))
+                    elif temp_f_col:
+                        val_f = tank_temp_val if st.session_state.get("tx_tank_temp_unit") == "°F" else c_to_f(float(tank_temp_val))
+                        setattr(tx, temp_f_col, float(val_f))
+                except Exception:
+                    pass
 
                 session.add(tx)
                 session.commit()
 
+                # Audit with IP for CREATE
                 try:
                     SecurityManager.log_audit(
                         None,
@@ -402,7 +517,7 @@ def _render_tab_tank_entry(loc, loc_label, user):
                         "CREATE",
                         resource_type="TankTransaction",
                         resource_id=str(getattr(tx, "id", "")),
-                        details=f"Created tank tx {ticket_id} (op='{selected_op_label}') for tank {tnk.name}; "
+                        details=f"Created tank tx {ticket_id} ({selected_op_label}) for tank {tnk.name}; "
                                 f"NSV {nsv_bbl:.2f} bbl, MT {mt:.3f}; ip={_get_client_ip()}",
                         user_id=(user or {}).get("id"),
                         location_id=loc.id,
@@ -410,10 +525,11 @@ def _render_tab_tank_entry(loc, loc_label, user):
                 except Exception:
                     pass
 
-            st.success(f"Saved. Ticket ID: **{ticket_id}**  |  NSV: **{nsv_bbl:,.2f} bbl**  |  MT: **{mt:,.3f}**  |  LT: **{lt:,.3f}**")
+            st.success(f"Saved. Ticket ID: **{ticket_id}**  |  NSV: **{nsv_bbl:,.2f} bbl**  |  MT: **{mt:.3f}**  |  LT: **{lt:,.3f}**")
             st.rerun()
         except Exception as ex:
             st.error(f"Failed to save transaction: {ex}")
+
 
 
 # ======================= TAB: Meter Records =======================
