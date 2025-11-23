@@ -423,6 +423,10 @@ def main():
         from app_pages.tank_transactions import render_tank_transactions_page
         render_tank_transactions_page(active_location_id, user)
 
+    elif current_page == "Yade Transactions":
+        from app_pages.yade_transactions import render_yade_transactions_page
+        render_yade_transactions_page(active_location_id, user)
+
     elif current_page == "View Transactions":
         from app_pages.view_transactions import render_view_transactions_page
         render_view_transactions_page(active_location_id, user)

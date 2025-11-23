@@ -1,4 +1,3 @@
-# location_config.py
 """
 Location-specific configuration management.
 Allows each location to have customized settings for operations, validations, etc.
@@ -17,10 +16,10 @@ DEFAULT_CONFIG = {
         "show_tanker_transactions": False,  # Enabled only for specific locations
         "show_yade_transactions": False,    # Enabled only for specific locations
         "show_toa_yade": False,             # Enabled only for specific locations
-        # Optional flags some code paths may read
-        "show_fso_operations": True,
-        "show_reports": True,
+        "show_fso_operations": False,       # FSO-Operations page
+        "show_reports": True,               # Reports page
     },
+
     "page_access": {
         "Tank Transactions": True,
         "Yade Transactions": True,
@@ -119,7 +118,11 @@ class LocationConfig:
     def get_config(session: Session, location_id: int) -> Dict[str, Any]:
         """
         Get configuration for a specific location.
-        Applies location-specific overrides based on location code.
+
+        Order of precedence (lowest → highest):
+        1. Global defaults (DEFAULT_CONFIG)
+        2. Location-based defaults (by location code)
+        3. Saved configuration from Location Settings (DB overrides)
         """
         from models import Location, LocationConfiguration
 
@@ -136,7 +139,24 @@ class LocationConfig:
             for k, v in DEFAULT_CONFIG.get("tabs_access", {}).items()
         }
 
-        # Load from database if exists
+        # -------- 2) Location-based defaults (by code) --------
+        loc = session.query(Location).filter(Location.id == location_id).one_or_none()
+        if loc:
+            code = (loc.code or "").upper()
+
+            # TANKER LOCATIONS (Ndoni, Aggu, Oguali, Ogini)
+            if code in ["NDONI", "AGGU", "OGUALI", "OGINI"]:
+                config["page_visibility"]["show_tanker_transactions"] = True
+
+            # YADE LOCATIONS (Ndoni only for now) – defaults only
+            if code == "NDONI":
+                config["page_visibility"]["show_yade_transactions"] = True
+                config["page_visibility"]["show_toa_yade"] = True
+
+            # Tank transactions (enabled for all locations by default)
+            config["page_visibility"]["show_tank_transactions"] = True
+
+        # -------- 3) Load from database if exists (DB overrides) --------
         db_config = session.query(LocationConfiguration).filter(
             LocationConfiguration.location_id == location_id
         ).one_or_none()
@@ -144,7 +164,7 @@ class LocationConfig:
         if db_config and db_config.config_json:
             try:
                 stored_config = json.loads(db_config.config_json)
-                # Deep merge stored config into default
+                # Deep merge stored config into current config
                 for key, value in stored_config.items():
                     if isinstance(value, dict) and key in config:
                         # nested deep-merge
@@ -161,28 +181,8 @@ class LocationConfig:
                     else:
                         config[key] = value
             except Exception:
-                # Use default if parsing fails
+                # Use defaults + location-based if parsing fails
                 pass
-
-        # Location-specific overrides (by code)
-        loc = session.query(Location).filter(Location.id == location_id).one_or_none()
-        if loc:
-            code = (loc.code or "").upper()
-
-            # TANKER LOCATIONS (Ndoni, Aggu, Oguali, Ogini)
-            if code in ["NDONI", "AGGU", "OGUALI", "OGINI"]:
-                config["page_visibility"]["show_tanker_transactions"] = True
-
-            # YADE LOCATIONS (Ndoni only for now)
-            if code == "NDONI":
-                config["page_visibility"]["show_yade_transactions"] = True
-                config["page_visibility"]["show_toa_yade"] = True
-            else:
-                config["page_visibility"]["show_yade_transactions"] = False
-                config["page_visibility"]["show_toa_yade"] = False
-
-            # Tank transactions (enabled for all locations by default)
-            config["page_visibility"]["show_tank_transactions"] = True
 
         return config
 
