@@ -823,17 +823,30 @@ class TOAYadeSummary(Base):
     
     id = Column(Integer, primary_key=True)
     voyage_id = Column(Integer, ForeignKey("yade_voyage.id", ondelete="CASCADE"), unique=True, index=True)
-    ticket_id = Column(String(64), nullable=True)
-    date = Column(Date, nullable=False)
-    time = Column(Time, nullable=False)
-    yade_name = Column(String(64), nullable=False)
-    convoy_no = Column(String(64), nullable=True)
-    destination = Column(String(64), nullable=True)
-    loading_berth = Column(String(64), nullable=True)
     
-    gsv_before_bbl = Column(Float, default=0.0)
-    gsv_after_bbl = Column(Float, default=0.0)
-    gsv_loaded_bbl = Column(Float, default=0.0)
+    # BEFORE stage
+    before_gov_bbl = Column(Float, default=0.0)
+    before_gsv_bbl = Column(Float, default=0.0)
+    before_bsw_bbl = Column(Float, default=0.0)
+    before_nsv_bbl = Column(Float, default=0.0)
+    before_lt_bbl = Column(Float, default=0.0)
+    before_mt = Column(Float, default=0.0)
+    
+    # AFTER stage
+    after_gov_bbl = Column(Float, default=0.0)
+    after_gsv_bbl = Column(Float, default=0.0)
+    after_bsw_bbl = Column(Float, default=0.0)
+    after_nsv_bbl = Column(Float, default=0.0)
+    after_lt_bbl = Column(Float, default=0.0)
+    after_mt = Column(Float, default=0.0)
+    
+    # NET (AFTER - BEFORE)
+    net_gov_bbl = Column(Float, default=0.0)
+    net_gsv_bbl = Column(Float, default=0.0)
+    net_bsw_bbl = Column(Float, default=0.0)
+    net_nsv_bbl = Column(Float, default=0.0)
+    net_lt_bbl = Column(Float, default=0.0)
+    net_mt = Column(Float, default=0.0)
 
 
 class TOAYadeStage(Base):

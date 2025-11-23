@@ -667,9 +667,8 @@ def _render_yade_seal_details_section(
     design: str | None = None,
 ):
     """
-    AFTER-only Seal Details displayed as a grid:
-      Rows: Tank No; Columns: MH1, MH2, Lock, Dip Hatch
-    Values map back to flat keys like c1_mh1, p2_lock, etc. in st.session_state['yade_seals'].
+    AFTER-only Seal Details displayed in individual input rows (user-friendly format).
+    Values map to flat keys like c1_mh1, p2_lock, etc. in st.session_state['yade_seals'].
     """
     if not yade_no or str(yade_no).startswith("-- No YADE Barges"):
         st.warning("⚠️ Select a YADE barge to enter seal details.")
@@ -682,49 +681,119 @@ def _render_yade_seal_details_section(
 
     store = st.session_state.setdefault("yade_seals", {})
     st.subheader("🔒 Seal Details — After")
+    st.caption("Enter seal numbers for Manifold Hatch 1 & 2, Lock, and Dip Hatch for each tank.")
 
-    # Build grid dataframe
-    rows = []
-    for tid in tank_ids:
+    # Render each tank as a row with 5 columns (Tank label + 4 input fields)
+    for idx, tid in enumerate(tank_ids):
         low = tid.lower()
-        rows.append({
-            "Tank": tid,
-            "MH1": store.get(f"{low}_mh1", ""),
-            "MH2": store.get(f"{low}_mh2", ""),
-            "Lock": store.get(f"{low}_lock", ""),
-            "Dip Hatch": store.get(f"{low}_diphatch", ""),
-        })
-    df = pd.DataFrame(rows, columns=["Tank", "MH1", "MH2", "Lock", "Dip Hatch"])
-
-    edited = st.data_editor(
-        df,
-        key=f"yade_seals_grid_{yade_no}",
-        use_container_width=True,
-        num_rows="fixed",
-        hide_index=True,
-        column_config={
-            "Tank": st.column_config.TextColumn(disabled=True, width="small"),
-            "MH1": st.column_config.TextColumn(width="medium"),
-            "MH2": st.column_config.TextColumn(width="medium"),
-            "Lock": st.column_config.TextColumn(width="medium"),
-            "Dip Hatch": st.column_config.TextColumn(width="medium"),
-        },
-    )
-
-    # Persist back to flat keys so the saver works 1:1
-    for _, r in edited.iterrows():
-        low = str(r["Tank"]).lower()
-        store[f"{low}_mh1"] = str(r.get("MH1", "") or "")
-        store[f"{low}_mh2"] = str(r.get("MH2", "") or "")
-        store[f"{low}_lock"] = str(r.get("Lock", "") or "")
-        store[f"{low}_diphatch"] = str(r.get("Dip Hatch", "") or "")
+        c1, c2, c3, c4, c5 = st.columns([0.15, 0.2125, 0.2125, 0.2125, 0.2125])
+        
+        with c1:
+            st.text_input(
+                "Tank" if idx == 0 else "Tank ",
+                value=tid,
+                disabled=True,
+                key=f"seal_tank_label_{low}",
+                label_visibility="visible" if idx == 0 else "collapsed"
+            )
+        with c2:
+            mh1 = st.text_input(
+                "MH1" if idx == 0 else "MH1 ",
+                value=store.get(f"{low}_mh1", ""),
+                key=f"seal_{low}_mh1",
+                placeholder="MH1",
+                label_visibility="visible" if idx == 0 else "collapsed"
+            )
+            store[f"{low}_mh1"] = mh1.strip()
+        with c3:
+            mh2 = st.text_input(
+                "MH2" if idx == 0 else "MH2 ",
+                value=store.get(f"{low}_mh2", ""),
+                key=f"seal_{low}_mh2",
+                placeholder="MH2",
+                label_visibility="visible" if idx == 0 else "collapsed"
+            )
+            store[f"{low}_mh2"] = mh2.strip()
+        with c4:
+            lock = st.text_input(
+                "Lock" if idx == 0 else "Lock ",
+                value=store.get(f"{low}_lock", ""),
+                key=f"seal_{low}_lock",
+                placeholder="Lock",
+                label_visibility="visible" if idx == 0 else "collapsed"
+            )
+            store[f"{low}_lock"] = lock.strip()
+        with c5:
+            diphatch = st.text_input(
+                "Dip Hatch" if idx == 0 else "Dip Hatch ",
+                value=store.get(f"{low}_diphatch", ""),
+                key=f"seal_{low}_diphatch",
+                placeholder="Dip Hatch",
+                label_visibility="visible" if idx == 0 else "collapsed"
+            )
+            store[f"{low}_diphatch"] = diphatch.strip()
 
     st.session_state["yade_seals"] = store
+
+
+def _save_yade_dips(session, voyage_id: int, dip_ns_key: str):
+    """Save YADE dip readings for BEFORE and AFTER stages."""
+    from models import YadeDip
+    
+    # Delete existing dips for this voyage
+    session.query(YadeDip).filter(YadeDip.voyage_id == voyage_id).delete()
+    
+    dip_data = st.session_state.get(dip_ns_key, {})
+    
+    for stage in ["before", "after"]:
+        stage_data = dip_data.get(stage, {})
+        dips = stage_data.get("dips", {})
+        
+        for tank_id, values in dips.items():
+            dip = YadeDip(
+                voyage_id=voyage_id,
+                tank_id=tank_id,
+                stage=stage.upper(),
+                total_cm=float(values.get("total_cm", 0.0)),
+                water_cm=float(values.get("water_cm", 0.0)),
+            )
+            session.add(dip)
+
+
+def _save_yade_sample_params(session, voyage_id: int, sample_ns_key: str):
+    """Save YADE sample parameters for BEFORE and AFTER stages."""
+    from models import YadeSampleParam
+    
+    # Delete existing sample params for this voyage
+    session.query(YadeSampleParam).filter(YadeSampleParam.voyage_id == voyage_id).delete()
+    
+    sample_data = st.session_state.get("yade_sample_params", {}).get(sample_ns_key, {})
+    
+    for stage in ["before", "after"]:
+        params = sample_data.get(stage, {})
+        if not params:
+            continue
+        
+        sample_param = YadeSampleParam(
+            voyage_id=voyage_id,
+            stage=stage.upper(),
+            obs_mode=params.get("obs_mode", "Observed API"),
+            obs_val=float(params.get("obs_val", 0.0)),
+            sample_unit=params.get("temp_unit", "F"),
+            sample_temp=float(params.get("sample_temp", 0.0)),
+            tank_temp=float(params.get("tank_temp", 0.0)),
+            ccf=float(params.get("ccf", 1.0)),
+            bsw_pct=float(params.get("bsw_pct", 0.0)),
+        )
+        session.add(sample_param)
 
 
 def _save_yade_seal_details(session, voyage_id: int):
     """Save YADE seal details (flat keys, same as old app)."""
     from models import YadeSealDetail
+
+    # Delete existing seal details for this voyage
+    session.query(YadeSealDetail).filter(YadeSealDetail.voyage_id == voyage_id).delete()
 
     seals = st.session_state.get("yade_seals", {}) or {}
 
@@ -879,6 +948,9 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
 
     st.markdown("---")
     save_all = st.button("💾 Save", type="primary")
+    
+    # Placeholder for success message (will appear below button after save)
+    success_placeholder = st.empty()
 
     if not save_all:
         return
@@ -902,6 +974,25 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
             current_user_id = (st.session_state.get("auth_user") or {}).get("id")
             op_selected = st.session_state.get("yade_operation", "N/A")
 
+            # Extract gauge dates/times from session state (dip section)
+            dip_ns_key = f"dips_{re.sub(r'[^A-Za-z0-9]', '_', str(yade_no))}_{re.sub(r'[^A-Za-z0-9]', '_', str(voyage_no or 'new'))}"
+            dip_data = st.session_state.get(dip_ns_key, {"before": {}, "after": {}})
+            
+            before_gauge_date = dip_data.get("before", {}).get("date") or tx_date
+            before_gauge_time_str = dip_data.get("before", {}).get("time") or "07:30"
+            after_gauge_date = dip_data.get("after", {}).get("date") or tx_date
+            after_gauge_time_str = dip_data.get("after", {}).get("time") or "17:30"
+            
+            try:
+                before_gauge_time = datetime.strptime(before_gauge_time_str, "%H:%M").time()
+            except Exception:
+                before_gauge_time = datetime.strptime("07:30", "%H:%M").time()
+            
+            try:
+                after_gauge_time = datetime.strptime(after_gauge_time_str, "%H:%M").time()
+            except Exception:
+                after_gauge_time = datetime.strptime("17:30", "%H:%M").time()
+
             if voy:
                 voy.yade_name = yade_no
                 voy.design = str(design)
@@ -912,6 +1003,10 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
                 voy.cargo = cargo
                 voy.destination = destination
                 voy.loading_berth = loading_berth
+                voy.before_gauge_date = before_gauge_date
+                voy.before_gauge_time = before_gauge_time
+                voy.after_gauge_date = after_gauge_date
+                voy.after_gauge_time = after_gauge_time
                 setattr(voy, "operation", op_selected)
                 voy.updated_by = current_user
                 voy.updated_at = datetime.utcnow()
@@ -929,6 +1024,10 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
                     cargo=cargo,
                     destination=destination,
                     loading_berth=loading_berth,
+                    before_gauge_date=before_gauge_date,
+                    before_gauge_time=before_gauge_time,
+                    after_gauge_date=after_gauge_date,
+                    after_gauge_time=after_gauge_time,
                     created_by=current_user,
                     created_at=datetime.utcnow(),
                 )
@@ -940,6 +1039,25 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
 
             s.commit()
 
+            # Save dips
+            try:
+                _save_yade_dips(s, voyage_id, dip_ns_key)
+                s.commit()
+            except Exception as _ex:
+                log_error(f"Save YADE dips failed: {_ex}", exc_info=True)
+                _audit_error(f"Save YADE dips failed: {_ex}", user, location_id)
+                st.warning("Header saved, but saving Dip Details failed. (Logged)")
+
+            # Save sample parameters
+            sample_ns_key = f"sp_{re.sub(r'[^A-Za-z0-9]', '_', str(yade_no))}_{re.sub(r'[^A-Za-z0-9]', '_', str(voyage_no or 'new'))}"
+            try:
+                _save_yade_sample_params(s, voyage_id, sample_ns_key)
+                s.commit()
+            except Exception as _ex:
+                log_error(f"Save YADE sample params failed: {_ex}", exc_info=True)
+                _audit_error(f"Save YADE sample params failed: {_ex}", user, location_id)
+                st.warning("Header saved, but saving Sample Parameters failed. (Logged)")
+
             # Save seals
             try:
                 _save_yade_seal_details(s, voyage_id)
@@ -948,6 +1066,16 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
                 log_error(f"Save YADE seals failed: {_ex}", exc_info=True)
                 _audit_error(f"Save YADE seals failed: {_ex}", user, location_id)
                 st.warning("Header saved, but saving Seal Details failed. (Logged)")
+
+            # Compute and save TOA summary
+            try:
+                from toa_yade_calculator import compute_and_save_summary
+                compute_and_save_summary(s, voyage_id, created_by=current_user)
+                s.commit()
+            except Exception as _ex:
+                log_error(f"TOA computation failed: {_ex}", exc_info=True)
+                _audit_error(f"TOA computation failed: {_ex}", user, location_id)
+                st.warning("Data saved, but TOA calculation failed. (Logged)")
 
             try:
                 SecurityManager.log_audit(
@@ -965,13 +1093,67 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
             except Exception:
                 pass
 
-        st.success(f"✅ YADE Voyage saved for {yade_no} — Voyage {voyage_no}")
+        # Display success message in the placeholder (below save button)
+        success_placeholder.success(f"✅ YADE Voyage saved successfully for {yade_no} — Voyage {voyage_no}")
+        
+        # Clear all session state for fresh entry
+        # Get tank IDs for clearing seal keys
+        try:
+            tank_ids, _ = _get_barge_tanks_and_limits(yade_no, str(design))
+        except Exception:
+            tank_ids = ["C1", "C2", "P1", "P2", "S1", "S2"]
+        
+        # Clear edit mode
+        if "yade_edit_id" in st.session_state:
+            st.session_state["yade_edit_id"] = None
+        
+        # Clear operation selection
+        if "yade_operation" in st.session_state:
+            del st.session_state["yade_operation"]
+        
+        # Clear dip data and all dip widget keys
+        if dip_ns_key in st.session_state:
+            del st.session_state[dip_ns_key]
+        # Clear all dip-related widget keys
+        keys_to_delete = []
+        for key in st.session_state.keys():
+            if key.startswith(f"{dip_ns_key}_"):
+                keys_to_delete.append(key)
+        for key in keys_to_delete:
+            del st.session_state[key]
+        
+        # Clear sample parameters and all sample widget keys
+        sample_ns_key = f"sp_{re.sub(r'[^A-Za-z0-9]', '_', str(yade_no))}_{re.sub(r'[^A-Za-z0-9]', '_', str(voyage_no or 'new'))}"
+        if "yade_sample_params" in st.session_state and sample_ns_key in st.session_state["yade_sample_params"]:
+            del st.session_state["yade_sample_params"][sample_ns_key]
+        # Clear all sample parameter widget keys
+        keys_to_delete = []
+        for key in st.session_state.keys():
+            if key.startswith(f"{sample_ns_key}_"):
+                keys_to_delete.append(key)
+        for key in keys_to_delete:
+            del st.session_state[key]
+        
+        # Clear seal details and all seal widget keys
+        if "yade_seals" in st.session_state:
+            st.session_state["yade_seals"] = {}
+        # Clear all seal widget keys
+        keys_to_delete = []
+        for key in st.session_state.keys():
+            if key.startswith("seal_"):
+                keys_to_delete.append(key)
+        for key in keys_to_delete:
+            del st.session_state[key]
+        
+        # Small delay to show success message before rerun
+        import time
+        time.sleep(1.5)
         _st_safe_rerun()
 
     except Exception as ex:
         log_error(f"Save YADE voyage failed: {ex}", exc_info=True)
         _audit_error(f"Save YADE voyage failed: {ex}", user, location_id)
-        st.error("Failed to save YADE Voyage. (Logged)")
+        success_placeholder.error("❌ Failed to save YADE Voyage. (Logged)")
 
 
 # ========================= YADE list (Voyages List tab) =========================
@@ -1011,7 +1193,7 @@ def _render_yade_list(location_id: int, user: Dict[str, Any] | None):
         st.caption(f"Total voyages: **{len(rows)}**")
 
     for v in rows:
-        c1, c2, c3, c4, c5 = st.columns([0.6, 1.4, 1.0, 1.0, 0.6])
+        c1, c2, c3, c4, c5 = st.columns([0.6, 1.4, 1.0, 1.0, 0.8])
         with c1:
             st.markdown(f"**#{v.id}**")
             st.markdown(v.date.isoformat() if v.date else "—")
@@ -1025,9 +1207,76 @@ def _render_yade_list(location_id: int, user: Dict[str, Any] | None):
             st.markdown(v.destination or "—")
             st.caption(_status_badge(v))
         with c5:
-            if st.button("✏️ Edit", key=f"yade_edit_{v.id}", use_container_width=True):
-                st.session_state["yade_edit_id"] = v.id
-                _st_safe_rerun()
+            ac1, ac2 = st.columns([1, 1])
+            with ac1:
+                if st.button("✏️ Edit", key=f"yade_edit_{v.id}", use_container_width=True):
+                    st.session_state["yade_edit_id"] = v.id
+                    _st_safe_rerun()
+            with ac2:
+                if st.button("🗑️ Delete", key=f"yade_del_{v.id}", use_container_width=True):
+                    st.session_state[f"confirm_del_yade_{v.id}"] = True
+
+        if st.session_state.get(f"confirm_del_yade_{v.id}"):
+            st.error("Are you sure you want to delete this YADE voyage? This cannot be undone.")
+            dc1, dc2 = st.columns([1, 1])
+            with dc1:
+                if st.button("✅ Yes, delete", key=f"y_del_yade_{v.id}", use_container_width=True):
+                    try:
+                        with get_session() as s:
+                            obj = s.query(YadeVoyage).filter(YadeVoyage.id == v.id).one_or_none()
+                            if obj:
+                                from recycle_bin import RecycleBinManager
+                                from models import YadeDip, YadeSampleParam, YadeSealDetail, TOAYadeSummary
+                                u = user or {}
+
+                                dips = s.query(YadeDip).filter(YadeDip.voyage_id == v.id).all()
+                                sample_params = s.query(YadeSampleParam).filter(YadeSampleParam.voyage_id == v.id).all()
+                                seals = s.query(YadeSealDetail).filter(YadeSealDetail.voyage_id == v.id).all()
+                                toa = s.query(TOAYadeSummary).filter(TOAYadeSummary.voyage_id == v.id).all()
+
+                                payload = RecycleBinManager.snapshot_record(obj)
+                                payload["_related_dips"] = [RecycleBinManager.snapshot_record(d) for d in dips]
+                                payload["_related_sample_params"] = [RecycleBinManager.snapshot_record(sp) for sp in sample_params]
+                                payload["_related_seals"] = [RecycleBinManager.snapshot_record(seal) for seal in seals]
+                                payload["_related_toa"] = [RecycleBinManager.snapshot_record(t) for t in toa]
+
+                                RecycleBinManager.archive_payload(
+                                    session=s,
+                                    resource_type="YadeVoyage",
+                                    resource_id=str(v.id),
+                                    payload=payload,
+                                    username=u.get("username", "unknown"),
+                                    user_id=u.get("id"),
+                                    location_id=st.session_state.get("active_location_id"),
+                                    reason="User deleted from Yade Transactions list",
+                                    label=f"Voyage {v.voyage_no or v.id}"
+                                )
+
+                                s.delete(obj)
+                                try:
+                                    SecurityManager.log_audit(
+                                        s,
+                                        u.get("username", "unknown"),
+                                        "DELETE",
+                                        resource_type="YadeVoyage",
+                                        resource_id=str(v.id),
+                                        details=f"Moved YADE voyage {v.voyage_no or v.id} to recycle bin",
+                                        user_id=u.get("id"),
+                                        location_id=st.session_state.get("active_location_id"),
+                                    )
+                                except Exception:
+                                    pass
+                                s.commit()
+                        st.success("Deleted.")
+                        st.session_state.pop(f"confirm_del_yade_{v.id}", None)
+                        _st_safe_rerun()
+                    except Exception as ex:
+                        st.error(f"Failed to delete: {ex}")
+            with dc2:
+                if st.button("❌ Cancel", key=f"n_del_yade_{v.id}", use_container_width=True):
+                    st.session_state.pop(f"confirm_del_yade_{v.id}", None)
+                    _st_safe_rerun()
+
         st.markdown("---")
 
 

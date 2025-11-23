@@ -10,7 +10,8 @@ import streamlit as st
 from db import get_session
 from security import SecurityManager
 from models import Location
-
+# ⬇️ UPDATED: import the new YADE renderer
+from yade_view import render_yade_transactions_view
 # Optional permissions
 try:
     from permission_manager import PermissionManager
@@ -1536,7 +1537,8 @@ def render_view_transactions_page(active_location_id, user):
         if source == "Tank":
             _render_tank_view_tabs(loc.id, loc_label, user)
         elif source == "Yade":
-            st.info("YADE viewer will mirror this compact layout next.")
+            # ⬇️ UPDATED: call the new YADE list + inline editor + PDF renderer
+            render_yade_transactions_view(user=user or {}, location_id=loc.id)
         else:
             st.info("Tanker viewer will mirror this compact layout next.")
     except Exception as ex:
