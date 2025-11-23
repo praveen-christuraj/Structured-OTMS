@@ -1,3 +1,4 @@
+# app_pages/location_settings.py
 import streamlit as st
 
 from db import get_session
@@ -19,15 +20,19 @@ DEFAULT_FLAGS = {
     "show_reports": True,
 }
 
+
 def _is_admin(user) -> bool:
     role = (user or {}).get("role", "").lower()
     return role in ("admin-operations", "admin-it")
+
 
 def _load_locations():
     with get_session() as session:
         return session.query(Location).order_by(Location.name).all()
 
+
 def render_location_settings_page(active_location_id, user):
+    """PUBLIC ENTRY — imported by main_app.py"""
     st.markdown("### 🧭 Location Settings")
 
     # Guard
@@ -50,10 +55,15 @@ def render_location_settings_page(active_location_id, user):
         default_label = labels[0]
 
     st.markdown("#### Select Location to Configure")
-    sel_label = st.selectbox("Location", labels, index=labels.index(default_label), key="ls_location_selector")
+    sel_label = st.selectbox(
+        "Location",
+        labels,
+        index=labels.index(default_label),
+        key="ls_location_selector",
+    )
     sel_location_id = id_by_label[sel_label]
 
-    # -------- section switcher (instead of tabs so it's impossible to miss) --------
+    # -------- section switcher --------
     section = st.radio(
         "Configure Section",
         ["Page Access", "Tank Tx Tabs", "Operations"],
@@ -67,7 +77,7 @@ def render_location_settings_page(active_location_id, user):
     elif section == "Tank Tx Tabs":
         _render_tank_tx_tabs(sel_location_id, user)
 
-    else:  # "Operations"
+    else:  # "Operations" (this is where you also add Cargo Type / Destination / Loading Berth via categories)
         _render_operations_config(sel_location_id, user)
 
 
@@ -81,11 +91,27 @@ def _render_page_access(sel_location_id: int, user):
 
     col1, col2 = st.columns(2)
     with col1:
-        show_tank = st.toggle("🛢️ Tank Transactions", value=cfg.get("show_tank_transactions", True), key="ls_flag_tank")
-        show_fso  = st.toggle("⚓ FSO Operations", value=cfg.get("show_fso_operations", True), key="ls_flag_fso")
+        show_tank = st.toggle(
+            "🛢️ Tank Transactions",
+            value=cfg.get("show_tank_transactions", True),
+            key="ls_flag_tank",
+        )
+        show_fso = st.toggle(
+            "⚓ FSO Operations",
+            value=cfg.get("show_fso_operations", True),
+            key="ls_flag_fso",
+        )
     with col2:
-        show_yade = st.toggle("⛴️ YADE Transactions", value=cfg.get("show_yade_transactions", True), key="ls_flag_yade")
-        show_rpts = st.toggle("📄 Reports", value=cfg.get("show_reports", True), key="ls_flag_reports")
+        show_yade = st.toggle(
+            "⛴️ YADE Transactions",
+            value=cfg.get("show_yade_transactions", True),
+            key="ls_flag_yade",
+        )
+        show_rpts = st.toggle(
+            "📄 Reports",
+            value=cfg.get("show_reports", True),
+            key="ls_flag_reports",
+        )
 
     st.caption("These switches control which operational pages this location can access.")
 
@@ -132,29 +158,66 @@ def _render_tank_tx_tabs(sel_location_id: int, user):
 
     d = st.columns(5)
     with d[0]:
-        f_entry = st.toggle("📝 Tank Entry", value=tab_flags["Tank Entry"], disabled=not page_enabled, key="ls_tt_entry")
+        f_entry = st.toggle(
+            "📝 Tank Entry",
+            value=tab_flags["Tank Entry"],
+            disabled=not page_enabled,
+            key="ls_tt_entry",
+        )
     with d[1]:
-        f_meter = st.toggle("🧮 Meter Records", value=tab_flags["Meter Records"], disabled=not page_enabled, key="ls_tt_meter")
+        f_meter = st.toggle(
+            "🧮 Meter Records",
+            value=tab_flags["Meter Records"],
+            disabled=not page_enabled,
+            key="ls_tt_meter",
+        )
     with d[2]:
-        f_cond  = st.toggle("🧪 Condensate Records", value=tab_flags["Condensate Records"], disabled=not page_enabled, key="ls_tt_cond")
+        f_cond = st.toggle(
+            "🧪 Condensate Records",
+            value=tab_flags["Condensate Records"],
+            disabled=not page_enabled,
+            key="ls_tt_cond",
+        )
     with d[3]:
-        f_pwater = st.toggle("💧 Produced Water Records", value=tab_flags["Produced Water Records"], disabled=not page_enabled, key="ls_tt_pwater")
+        f_pwater = st.toggle(
+            "💧 Produced Water Records",
+            value=tab_flags["Produced Water Records"],
+            disabled=not page_enabled,
+            key="ls_tt_pwater",
+        )
     with d[4]:
-        f_prod = st.toggle("🏭 Production", value=tab_flags["Production"], disabled=not page_enabled, key="ls_tt_prod")
+        f_prod = st.toggle(
+            "🏭 Production",
+            value=tab_flags["Production"],
+            disabled=not page_enabled,
+            key="ls_tt_prod",
+        )
 
     if not page_enabled:
-        st.info("Tank Transactions page access is OFF for this location, so these tabs are disabled. Turn on page access in Page Access.")
+        st.info(
+            "Tank Transactions page access is OFF for this location, so these tabs are disabled. "
+            "Turn on page access in Page Access."
+        )
 
-    if st.button("💾 Save Tank Transactions Tabs", use_container_width=True, disabled=not page_enabled, key="ls_tt_save"):
+    if st.button(
+        "💾 Save Tank Transactions Tabs",
+        use_container_width=True,
+        disabled=not page_enabled,
+        key="ls_tt_save",
+    ):
         try:
             with get_session() as session:
-                save_tank_transactions_tab_visibility(session, sel_location_id, {
-                    "Tank Entry": bool(f_entry),
-                    "Meter Records": bool(f_meter),
-                    "Condensate Records": bool(f_cond),
-                    "Produced Water Records": bool(f_pwater),
-                    "Production": bool(f_prod),
-                })
+                save_tank_transactions_tab_visibility(
+                    session,
+                    sel_location_id,
+                    {
+                        "Tank Entry": bool(f_entry),
+                        "Meter Records": bool(f_meter),
+                        "Condensate Records": bool(f_cond),
+                        "Produced Water Records": bool(f_pwater),
+                        "Production": bool(f_prod),
+                    },
+                )
             SecurityManager.log_audit(
                 None,
                 (user or {}).get("username", "system"),
@@ -172,10 +235,23 @@ def _render_tank_tx_tabs(sel_location_id: int, user):
 
 # ===================== Operations config =====================
 def _render_operations_config(selected_location_id, user):
+    """
+    IMPORTANT:
+    This single configurator is used to add items across OP_CATEGORIES in location_config,
+    which should include categories like:
+      - 'Operation' (generic ops)
+      - 'Cargo Type'
+      - 'Destination'
+      - 'Loading Berth'
+    and assets like 'yade' etc. YADE dropdowns read from here (so no hardcoding in pages).
+    """
     from location_config import (
-        OP_ASSETS, OP_CATEGORIES,
-        list_operations, add_operation,
-        set_operation_active, delete_operation,
+        OP_ASSETS,
+        OP_CATEGORIES,
+        list_operations,
+        add_operation,
+        set_operation_active,
+        delete_operation,
     )
 
     st.markdown("### 🧩 Operations (per Location / Asset / Category)")
@@ -192,14 +268,21 @@ def _render_operations_config(selected_location_id, user):
     with col3:
         st.write("")
 
-    op_name = st.text_input("Operation name (e.g., 'Receipt from Agu')", key="ops_name_input")
+    op_name = st.text_input("Operation name (e.g. 'Receipt from Aggu' or 'Crude Oil' or 'Bonny')", key="ops_name_input")
 
     c1, c2 = st.columns([0.25, 0.75])
     with c1:
         if st.button("➕ Add Operation", type="primary", key="ops_add_btn"):
             try:
                 with get_session() as s:
-                    item = add_operation(s, selected_location_id, asset=asset, category=category, name=op_name, active=True)
+                    item = add_operation(
+                        s,
+                        selected_location_id,
+                        asset=asset,
+                        category=category,
+                        name=op_name,
+                        active=True,
+                    )
                     try:
                         SecurityManager.log_audit(
                             s,
@@ -230,7 +313,11 @@ def _render_operations_config(selected_location_id, user):
         st.info("No operations configured yet.")
         return
 
-    show_filtered = st.checkbox("Show only selected Asset/Category", value=True, key="ops_only_filter")
+    show_filtered = st.checkbox(
+        "Show only selected Asset/Category",
+        value=True,
+        key="ops_only_filter",
+    )
     if show_filtered:
         ops = [o for o in ops if o["asset"] == asset and o["category"] == category]
 
@@ -248,43 +335,36 @@ def _render_operations_config(selected_location_id, user):
                     set_operation_active(s, selected_location_id, op_id=o["id"], active=on)
                     try:
                         SecurityManager.log_audit(
-                            s, (user or {}).get("username", "system"),
+                            s,
+                            (user or {}).get("username", "system"),
                             "UPDATE",
                             resource_type="LocationOperation",
                             resource_id=o["id"],
                             details=f"Set active={on} for '{o['name']}'",
                             user_id=(user or {}).get("id"),
                             location_id=selected_location_id,
-                            ip_address=st.session_state.get("client_ip"),
                             success=True,
                         )
                     except Exception:
                         pass
-                st.success("Saved")
+                st.success("Saved.")
         with colD:
-            confirm_key = f"ops_confirm_del_{row_key}"
-            if not st.session_state.get(confirm_key, False):
-                if st.button("🗑️ Delete", key=f"ops_del_{row_key}"):
-                    st.session_state[confirm_key] = True
-                    st.warning("Click delete again to confirm.")
-            else:
-                if st.button("🗑️ Confirm Delete", key=f"ops_del_confirm_{row_key}"):
-                    with get_session() as s:
-                        delete_operation(s, selected_location_id, op_id=o["id"])
-                        try:
-                            SecurityManager.log_audit(
-                                s, (user or {}).get("username", "system"),
-                                "DELETE",
-                                resource_type="LocationOperation",
-                                resource_id=o["id"],
-                                details=f"Deleted '{o['name']}'",
-                                user_id=(user or {}).get("id"),
-                                location_id=selected_location_id,
-                                ip_address=st.session_state.get("client_ip"),
-                                success=True,
-                            )
-                        except Exception:
-                            pass
-                    st.success("Deleted")
-                    st.session_state[confirm_key] = False
-                    st.rerun()
+            if st.button("🗑️ Delete", key=f"ops_del_{row_key}"):
+                with get_session() as s:
+                    delete_operation(s, selected_location_id, op_id=o["id"])
+                    try:
+                        SecurityManager.log_audit(
+                            s,
+                            (user or {}).get("username", "system"),
+                            "DELETE",
+                            resource_type="LocationOperation",
+                            resource_id=o["id"],
+                            details=f"Delete '{o['name']}'",
+                            user_id=(user or {}).get("id"),
+                            location_id=selected_location_id,
+                            success=True,
+                        )
+                    except Exception:
+                        pass
+                st.success("Deleted.")
+                st.rerun()

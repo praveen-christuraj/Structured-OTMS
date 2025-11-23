@@ -506,7 +506,11 @@ def set_dynamic_table_def(session: Session, location_id: int, page: str, section
 
 # ==================== Soft-coded Operations (per-location / per-asset / per-category) ====================
 OP_ASSETS = ["tank", "yade", "tanker", "vessel"]
-OP_CATEGORIES = ["Opening", "Closing", "Receipt", "Dispatch", "Draining", "Others"]
+OP_CATEGORIES = [
+    "Opening", "Closing", "Receipt", "Dispatch", "Draining", "Others",
+    "Cargo Type", "Destination", "Loading Berth"   # <-- added for YADE dropdowns
+]
+
 
 def _ensure_ops_root(cfg: Dict[str, Any]) -> Dict[str, Any]:
     ops = cfg.setdefault("operations", {})

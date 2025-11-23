@@ -12,7 +12,6 @@ from permission_manager import PermissionManager
 from location_config import get_location_page_visibility
 from app_pages.page_customization import render_page_customization  # keep wired into nav + routing
 from location_config import get_page_section_config
-
 SecurityManager.SESSION_TIMEOUT_MINUTES = 30
 # Make sure DB is ready once at import
 init_db()
@@ -28,6 +27,7 @@ ICONS = {
     "Asset Management": "🧺",
     "Page Customization": "⚙️",
     "Tank Transactions": "🛢️",
+    "Tanker Transactions": "TT",
     "Yade Transactions": "⛴️",
     "FSO-Operations": "⚓",
     "Reports": "📄",
@@ -182,6 +182,7 @@ def get_pages(user, active_location_id):
     # Mapping: flag -> (page title, module path)
     ops = [
         ("show_tank_transactions", ("Tank Transactions", "app_pages.tank_transactions")),
+        ("show_tanker_transactions", ("Tanker Transactions", "app_pages.tanker_transactions")),
         ("show_tank_transactions", ("View Transactions", "app_pages.view_transactions")),  # <-- unified viewer
         ("show_yade_transactions", ("Yade Transactions", "app_pages.yade_transactions")),
         ("show_fso_operations",   ("FSO-Operations",   "app_pages.fso_operations")),
@@ -248,7 +249,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         else:
             st.sidebar.warning("Are you sure you want to logout?")
             c1, c2 = st.sidebar.columns(2)
-            if c1.button("✅ Yes", key="btn_logout_yes"):
+            if c1.button("✅Yes", key="btn_logout_yes"):
                 SecurityManager.log_audit(
                     None,
                     user["username"],
@@ -422,6 +423,10 @@ def main():
     elif current_page == "Tank Transactions":
         from app_pages.tank_transactions import render_tank_transactions_page
         render_tank_transactions_page(active_location_id, user)
+
+    elif current_page == "Tanker Transactions":
+        from app_pages.tanker_transactions import render_tanker_transactions_page
+        render_tanker_transactions_page(active_location_id, user)
 
     elif current_page == "Yade Transactions":
         from app_pages.yade_transactions import render_yade_transactions_page

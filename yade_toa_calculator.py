@@ -64,18 +64,26 @@ def calculate_yade_toa(
             bsw_pct = float(stage_params.get("bsw_pct", 0.0))
             tank_temp = float(stage_params.get("tank_temp", 60.0))
             sample_temp = float(stage_params.get("sample_temp", 60.0))
+            sample_unit = stage_params.get("sample_unit", "F")
+            tank_unit = stage_params.get("tank_temp_unit", sample_unit)
             obs_val = float(stage_params.get("obs_val", 0.0))
-            obs_mode = stage_params.get("obs_mode", "API")
+            obs_mode = stage_params.get("obs_mode", "Observed API")
             ccf = float(stage_params.get("ccf", 1.0))
             
-            # Calculate API@60
-            if obs_mode == "Observed API" or "API" in obs_mode:
-                api60 = convert_api_to_60(obs_val, sample_temp, "API")
+            # Calculate API@60 based on input type
+            # Check if mode is "Observed API" (exact match or contains "API" without "Density")
+            if obs_mode == "Observed API" or ("API" in obs_mode and "Density" not in obs_mode):
+                api60 = convert_api_to_60(obs_val, sample_temp, sample_unit)
             else:
-                api60 = convert_density_to_api60(obs_val, sample_temp)
+                # Mode is "Observed Density (kg/m3)" or contains "Density"
+                api60 = convert_density_to_api60(obs_val, sample_temp, sample_unit)
             
             # Calculate VCF
-            vcf = calculate_vcf(api60, tank_temp)
+            if str(tank_unit).upper().startswith("C"):
+                tank_temp_f = (tank_temp * 1.8) + 32.0
+            else:
+                tank_temp_f = tank_temp
+            vcf = calculate_vcf(api60, tank_temp_f)
             
             # Apply CCF
             vcf = vcf * ccf
