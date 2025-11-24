@@ -158,7 +158,6 @@ def _interpolate_tanker_volume(session, tanker_name: str, compartment: str, dip_
     rows = (
         session.query(TankerCalibration)
         .filter(TankerCalibration.tanker_name == tanker_name)
-        .filter(TankerCalibration.compartment == compartment)
         .order_by(TankerCalibration.dip_mm.asc())
         .all()
     )
@@ -182,6 +181,19 @@ def _interpolate_tanker_volume(session, tanker_name: str, compartment: str, dip_
         return y1
     t = (dip_mm - x1) / (x2 - x1)
     return y1 + t * (y2 - y1)
+
+def _get_calibration_min_max_cm(session, tanker_name: str, compartment: str) -> tuple[float, float]:
+    rows = (
+        session.query(TankerCalibration.dip_mm)
+        .filter(TankerCalibration.tanker_name == tanker_name)
+        .order_by(TankerCalibration.dip_mm.asc())
+        .all()
+    )
+    if not rows:
+        return 0.0, 0.0
+    mins = float(rows[0][0] or 0.0) / 10.0
+    maxs = float(rows[-1][0] or 0.0) / 10.0
+    return mins, maxs
 
 
 def _record_created_timestamp(record: TankerTransaction) -> Optional[datetime]:
@@ -586,9 +598,9 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
     if not op_options:
         op_options = ["N/A (configure in Location Settings)"]
     if not dest_options_cfg:
-        dest_options_cfg = DESTINATION_OPTIONS.copy()
+        dest_options_cfg = ["N/A (configure in Location Settings)"]
     if not loading_options_cfg:
-        loading_options_cfg = LOADING_BAY_OPTIONS.copy()
+        loading_options_cfg = ["N/A (configure in Location Settings)"]
 
     submitted = False
     try:
@@ -633,7 +645,7 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
                 key="tanker_tx_operation",
             )
         with op_c2:
-            destination_options = _ensure_option(dest_options_cfg, ss.get("tanker_tx_destination"))
+            destination_options = dest_options_cfg
             destination = st.selectbox(
                 "Destination *",
                 destination_options,
@@ -641,7 +653,7 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
                 key="tanker_tx_destination",
             )
         with op_c3:
-            loading_options = _ensure_option(loading_options_cfg, ss.get("tanker_tx_loading_bay"))
+            loading_options = loading_options_cfg
             loading_bay = st.selectbox(
                 "Loading Bay",
                 loading_options,
@@ -659,21 +671,46 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
         )
         compartment = manhole
 
+        with get_session() as _s:
+            _, max_dip_cm = _get_calibration_min_max_cm(_s, tanker_name, compartment)
+        st.caption(f"Max calibration: {max_dip_cm:.1f} cm")
         dip_c1, dip_c2 = st.columns(2)
         with dip_c1:
-            total_dip_cm = st.number_input(
-                "Total Dip (cm) *",
-                min_value=0.0,
-                step=0.1,
-                key="tanker_tx_total_dip_cm",
-            )
+            if max_dip_cm > 0:
+                total_dip_cm = st.number_input(
+                    f"Total Dip (cm) *  (max {max_dip_cm:.1f})",
+                    min_value=0.0,
+                    max_value=max_dip_cm,
+                    step=0.1,
+                    format="%.1f",
+                    key="tanker_tx_total_dip_cm",
+                )
+            else:
+                total_dip_cm = st.number_input(
+                    "Total Dip (cm) *",
+                    min_value=0.0,
+                    step=0.1,
+                    format="%.1f",
+                    key="tanker_tx_total_dip_cm",
+                )
         with dip_c2:
-            water_dip_cm = st.number_input(
-                "Water Dip (cm)",
-                min_value=0.0,
-                step=0.1,
-                key="tanker_tx_water_dip_cm",
-            )
+            if max_dip_cm > 0:
+                water_dip_cm = st.number_input(
+                    f"Water Dip (cm)  (max {max_dip_cm:.1f})",
+                    min_value=0.0,
+                    max_value=max_dip_cm,
+                    step=0.1,
+                    format="%.1f",
+                    key="tanker_tx_water_dip_cm",
+                )
+            else:
+                water_dip_cm = st.number_input(
+                    "Water Dip (cm)",
+                    min_value=0.0,
+                    step=0.1,
+                    format="%.1f",
+                    key="tanker_tx_water_dip_cm",
+                )
 
         total_bbl, water_bbl, gov_bbl = _calc_volume_preview(
             tanker_name,
@@ -864,9 +901,9 @@ def _render_entry_form_legacy(location: Location, can_submit: bool, tankers: Lis
     if not op_options:
         op_options = ["N/A (configure in Location Settings)"]
     if not dest_options_cfg:
-        dest_options_cfg = DESTINATION_OPTIONS.copy()
+        dest_options_cfg = ["N/A (configure in Location Settings)"]
     if not loading_options_cfg:
-        loading_options_cfg = LOADING_BAY_OPTIONS.copy()
+        loading_options_cfg = ["N/A (configure in Location Settings)"]
 
     with st.form("tanker_transaction_form", clear_on_submit=False):
         try:
@@ -913,7 +950,7 @@ def _render_entry_form_legacy(location: Location, can_submit: bool, tankers: Lis
                     key="tanker_tx_operation",
                 )
             with op_c2:
-                destination_options = _ensure_option(dest_options_cfg, ss.get("tanker_tx_destination"))
+                destination_options = dest_options_cfg
                 destination = st.selectbox(
                     "Destination *",
                     destination_options,
@@ -921,7 +958,7 @@ def _render_entry_form_legacy(location: Location, can_submit: bool, tankers: Lis
                     key="tanker_tx_destination",
                 )
             with op_c3:
-                loading_options = _ensure_option(loading_options_cfg, ss.get("tanker_tx_loading_bay"))
+                loading_options = loading_options_cfg
                 loading_bay = st.selectbox(
                     "Loading Bay",
                     loading_options,
@@ -939,21 +976,46 @@ def _render_entry_form_legacy(location: Location, can_submit: bool, tankers: Lis
             )
             compartment = manhole
 
+            with get_session() as _s:
+                _, max_dip_cm = _get_calibration_min_max_cm(_s, tanker_name, compartment)
+            st.caption(f"Max calibration: {max_dip_cm:.1f} cm")
             dip_c1, dip_c2 = st.columns(2)
             with dip_c1:
-                total_dip_cm = st.number_input(
-                    "Total Dip (cm) *",
-                    min_value=0.0,
-                    step=0.1,
-                    key="tanker_tx_total_dip_cm",
-                )
+                if max_dip_cm > 0:
+                    total_dip_cm = st.number_input(
+                        f"Total Dip (cm) *  (max {max_dip_cm:.1f})",
+                        min_value=0.0,
+                        max_value=max_dip_cm,
+                        step=0.1,
+                        format="%.1f",
+                        key="tanker_tx_total_dip_cm",
+                    )
+                else:
+                    total_dip_cm = st.number_input(
+                        "Total Dip (cm) *",
+                        min_value=0.0,
+                        step=0.1,
+                        format="%.1f",
+                        key="tanker_tx_total_dip_cm",
+                    )
             with dip_c2:
-                water_dip_cm = st.number_input(
-                    "Water Dip (cm)",
-                    min_value=0.0,
-                    step=0.1,
-                    key="tanker_tx_water_dip_cm",
-                )
+                if max_dip_cm > 0:
+                    water_dip_cm = st.number_input(
+                        f"Water Dip (cm)  (max {max_dip_cm:.1f})",
+                        min_value=0.0,
+                        max_value=max_dip_cm,
+                        step=0.1,
+                        format="%.1f",
+                        key="tanker_tx_water_dip_cm",
+                    )
+                else:
+                    water_dip_cm = st.number_input(
+                        "Water Dip (cm)",
+                        min_value=0.0,
+                        step=0.1,
+                        format="%.1f",
+                        key="tanker_tx_water_dip_cm",
+                    )
 
             total_bbl, water_bbl, gov_bbl = _calc_volume_preview(
                 tanker_name,
@@ -1142,6 +1204,19 @@ def _handle_form_submission(
 
     try:
         with get_session() as session:
+            max_row = (
+                session.query(TankerCalibration.dip_mm)
+                .filter(TankerCalibration.tanker_name == tanker_name)
+                .order_by(TankerCalibration.dip_mm.desc())
+                .first()
+            )
+            if max_row and max_row[0]:
+                max_dip_cm = float(max_row[0]) / 10.0
+                if float(total_dip_cm or 0.0) > max_dip_cm or float(water_dip_cm or 0.0) > max_dip_cm:
+                    st.error(
+                        f"Entered Dip exceeds calibration maximum ({max_dip_cm:.1f} cm) for this tanker/compartment."
+                    )
+                    return
             total_l = _interpolate_tanker_volume(session, tanker_name, compartment, total_dip_cm * 10.0)
             water_l = _interpolate_tanker_volume(session, tanker_name, compartment, water_dip_cm * 10.0)
             if total_l <= 0:
