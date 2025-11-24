@@ -17,6 +17,7 @@ DEFAULT_FLAGS = {
     "show_tank_transactions": True,
     "show_tanker_transactions": True,
     "show_yade_transactions": True,
+    "show_vessel_operations": True,
     "show_fso_operations": True,
     "show_reports": True,
 }
@@ -107,6 +108,11 @@ def _render_page_access(sel_location_id: int, user):
             value=cfg.get("show_fso_operations", True),
             key="ls_flag_fso",
         )
+        show_vessel_ops = st.toggle(                           # ← add this block
+            "⛴️ Vessel Operations",
+            value=cfg.get("show_vessel_operations", True),
+            key="ls_flag_vessel_ops",
+        )
     with col2:
         show_yade = st.toggle(
             "⛴️ YADE Transactions",
@@ -126,6 +132,7 @@ def _render_page_access(sel_location_id: int, user):
             "show_tank_transactions": bool(show_tank),
             "show_tanker_transactions": bool(show_tanker),
             "show_yade_transactions": bool(show_yade),
+            "show_vessel_operations": bool(show_vessel_ops),
             "show_fso_operations": bool(show_fso),
             "show_reports": bool(show_rpts),
         }

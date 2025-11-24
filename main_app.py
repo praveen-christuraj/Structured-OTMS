@@ -12,6 +12,7 @@ from permission_manager import PermissionManager
 from location_config import get_location_page_visibility
 from app_pages.page_customization import render_page_customization
 from app_pages.tanker_transactions import render_tanker_transactions_page
+from app_pages.vessel_operations import render_vessel_operations_page
 from location_config import get_page_section_config  # (kept in case other pages use it)
 
 # Session timeout (minutes)
@@ -33,6 +34,7 @@ ICONS = {
     "Tank Transactions": "🛢️",
     "Tanker Transactions": "🚚",  # nicer icon
     "Yade Transactions": "⛴️",
+    "Vessel Operations": "🛳️",   # ← added
     "FSO-Operations": "⚓",
     "Reports": "📄",
     "Settings": "⚙️",
@@ -193,11 +195,13 @@ def get_pages(user, active_location_id):
     ops = [
         ("show_tank_transactions",   ("Tank Transactions",   "app_pages.tank_transactions")),
         ("show_tanker_transactions", ("Tanker Transactions", "app_pages.tanker_transactions")),
-        ("show_tank_transactions",   ("View Transactions",   "app_pages.view_transactions")),  # unified viewer; uses same flag
+        ("show_tank_transactions",   ("View Transactions",   "app_pages.view_transactions")),  # unified viewer
         ("show_yade_transactions",   ("Yade Transactions",   "app_pages.yade_transactions")),
         ("show_fso_operations",      ("FSO-Operations",      "app_pages.fso_operations")),
+        ("show_vessel_operations",   ("Vessel Operations",   "app_pages.vessel_operations")),  # 🔹 add this
         ("show_reports",             ("Reports",             "app_pages.reports")),
     ]
+
 
     if role_ok:
         for flag, (title, mod) in ops:
@@ -447,6 +451,9 @@ def main():
     elif current_page == "View Transactions":
         from app_pages.view_transactions import render_view_transactions_page
         render_view_transactions_page(active_location_id, user)
+
+    elif current_page == "Vessel Operations":
+        render_vessel_operations_page(active_location_id, user)
 
     # (keep YADE/FSO/Reports routes commented until those pages are ready)
     # elif current_page == "FSO-Operations":
