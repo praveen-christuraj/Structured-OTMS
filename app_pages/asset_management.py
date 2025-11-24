@@ -13,6 +13,10 @@ from models import (
     TankerCalibration, YadeCalibration,
 )
 from security import SecurityManager
+try:
+    from recycle_bin import RecycleBinManager
+except Exception:
+    RecycleBinManager = None
 
 # ---- optional helpers (defense-in-depth) ----
 try:
@@ -205,12 +209,30 @@ def _tab_tanks(active_location_id, user):
                             with get_session() as s:
                                 obj = s.query(Tank).get(t.id)
                                 if obj:
-                                    s.delete(obj); s.commit()
-                                    SecurityManager.log_audit(None,(user or {}).get("username","system"),"DELETE",
-                                        resource_type="Tank", resource_id=str(t.id),
-                                        details=f"Deleted tank '{t.name}' at {loc_label}",
-                                        user_id=(user or {}).get("id"), location_id=loc.id)
-                                    st.success("Deleted."); st.session_state.pop(f"confirm_del_tank_{t.id}", None); st.rerun()
+                                    if RecycleBinManager:
+                                        try:
+                                            RecycleBinManager.archive_record(
+                                                s,
+                                                obj,
+                                                "Tank",
+                                                username=(user or {}).get("username", "system"),
+                                                user_id=(user or {}).get("id"),
+                                                location_id=loc.id,
+                                                reason=f"Deleted tank '{t.name}' at {loc_label}",
+                                                label=str(t.id),
+                                            )
+                                            SecurityManager.log_audit(None,(user or {}).get("username","system"),"DELETE",
+                                                resource_type="Tank", resource_id=str(t.id),
+                                                details=f"Moved tank '{t.name}' to recycle bin",
+                                                user_id=(user or {}).get("id"), location_id=loc.id)
+                                            s.commit()
+                                            st.success("Tank moved to Recycle Bin"); st.session_state.pop(f"confirm_del_tank_{t.id}", None); st.rerun()
+                                        except Exception:
+                                            s.delete(obj); s.commit()
+                                            st.success("Deleted."); st.session_state.pop(f"confirm_del_tank_{t.id}", None); st.rerun()
+                                    else:
+                                        s.delete(obj); s.commit()
+                                        st.success("Deleted."); st.session_state.pop(f"confirm_del_tank_{t.id}", None); st.rerun()
                         except Exception as ex:
                             st.error(f"Failed to delete: {ex}")
                     if dc2.button("❌ Cancel", key=f"n_del_tank_{t.id}", use_container_width=True):
@@ -401,12 +423,30 @@ def _tab_vessels_assign(active_location_id, user):
                             with get_session() as s:
                                 obj = s.query(Vessel).get(v.id)
                                 if obj:
-                                    s.delete(obj); s.commit()
-                                    SecurityManager.log_audit(None,(user or {}).get("username","system"),"DELETE",
-                                        resource_type="Vessel", resource_id=str(v.id),
-                                        details=f"Deleted vessel '{v.name}'",
-                                        user_id=(user or {}).get("id"))
-                                    st.success("Deleted."); st.session_state.pop(f"confirm_del_vessel_{v.id}", None); st.rerun()
+                                    if RecycleBinManager:
+                                        try:
+                                            RecycleBinManager.archive_record(
+                                                s,
+                                                obj,
+                                                "Vessel",
+                                                username=(user or {}).get("username", "system"),
+                                                user_id=(user or {}).get("id"),
+                                                location_id=loc.id,
+                                                reason=f"Deleted vessel '{v.name}'",
+                                                label=str(v.id),
+                                            )
+                                            SecurityManager.log_audit(None,(user or {}).get("username","system"),"DELETE",
+                                                resource_type="Vessel", resource_id=str(v.id),
+                                                details=f"Moved vessel '{v.name}' to recycle bin",
+                                                user_id=(user or {}).get("id"))
+                                            s.commit()
+                                            st.success("Vessel moved to Recycle Bin"); st.session_state.pop(f"confirm_del_vessel_{v.id}", None); st.rerun()
+                                        except Exception:
+                                            s.delete(obj); s.commit()
+                                            st.success("Deleted."); st.session_state.pop(f"confirm_del_vessel_{v.id}", None); st.rerun()
+                                    else:
+                                        s.delete(obj); s.commit()
+                                        st.success("Deleted."); st.session_state.pop(f"confirm_del_vessel_{v.id}", None); st.rerun()
                         except Exception as ex:
                             st.error(f"Failed to delete: {ex}")
                     if dc2.button("❌ Cancel", key=f"n_del_vessel_{v.id}", use_container_width=True):
@@ -446,6 +486,151 @@ def _tab_vessels_assign(active_location_id, user):
         st.info("No vessels assigned to this location.")
     else:
         st.write(", ".join([n for n in names if by_name[n].id in assigned_ids]))
+
+
+def _tab_fso_assign(active_location_id, user):
+    st.subheader("⚓ FSO & Assign to Location")
+
+    loc, loc_label = _active_location(active_location_id)
+    if not loc:
+        return
+    st.caption(f"Active Location: **{loc_label}**")
+
+    with get_session() as session:
+        vessels = session.query(Vessel).filter((Vessel.vessel_type == "FSO") | (Vessel.vessel_type == None)).order_by(Vessel.name.asc()).all()
+        assigned = session.query(LocationVessel).filter(LocationVessel.location_id == loc.id).all()
+        assigned_ids = {lv.vessel_id for lv in assigned if getattr(lv.vessel, "vessel_type", None) == "FSO"}
+
+    with st.expander("➕ Add New FSO", expanded=False):
+        with st.form("form_add_fso", clear_on_submit=True):
+            c1, c2, c3, c4 = st.columns(4)
+            with c1: v_name = st.text_input("FSO Name", max_chars=100)
+            with c2: v_capacity = st.number_input("Capacity (bbl)", min_value=0.0, step=1.0)
+            with c3: v_reg = st.text_input("Registration No.", max_chars=50)
+            with c4: status_label = st.selectbox("Status", ["ACTIVE", "INACTIVE"], index=0)
+            submitted_v = st.form_submit_button("💾 Save FSO", use_container_width=True)
+
+        if submitted_v:
+            try:
+                with get_session() as s:
+                    exists = s.query(Vessel).filter(Vessel.name == v_name.strip()).first()
+                    if exists:
+                        st.error("A vessel with this name already exists.")
+                    else:
+                        v = Vessel(
+                            name=v_name.strip(),
+                            vessel_type="FSO",
+                            capacity_bbl=float(v_capacity or 0.0) or None,
+                            registration_no=v_reg.strip() or None,
+                            status=status_label,
+                        )
+                        s.add(v); s.commit()
+                        SecurityManager.log_audit(None,(user or {}).get("username","system"),"CREATE",
+                            resource_type="Vessel", resource_id=str(v.id),
+                            details=f"Created FSO '{v.name}'",
+                            user_id=(user or {}).get("id"))
+                        st.success(f"FSO **{v.name}** added."); st.rerun()
+            except Exception as ex:
+                st.error(f"Failed to add FSO: {ex}")
+
+    st.markdown("#### Current FSOs")
+    fsos = [v for v in vessels if (v.vessel_type or "").upper() == "FSO"]
+    if not fsos:
+        st.info("No FSOs found.")
+    else:
+        for v in fsos:
+            with st.container(border=True):
+                c1, c2, c3 = st.columns([2, 1, 1])
+                c1.markdown(f"**{v.name}**")
+                c2.caption(f"Capacity: {int(v.capacity_bbl or 0)} bbl")
+                with c3:
+                    colA, colB = st.columns(2)
+                    if colA.button("✏️ Edit", key=f"btn_edit_fso_{v.id}", use_container_width=True):
+                        st.session_state[f"editing_fso_{v.id}"] = True
+                    if colB.button("🗑️ Delete", key=f"del_fso_{v.id}", use_container_width=True):
+                        st.session_state[f"confirm_del_fso_{v.id}"] = True
+
+                if st.session_state.get(f"editing_fso_{v.id}"):
+                    with st.form(f"form_edit_fso_{v.id}", clear_on_submit=False):
+                        ec1, ec2, ec3, ec4 = st.columns(4)
+                        with ec1: new_name = st.text_input("FSO Name", value=v.name, max_chars=100)
+                        with ec2: new_cap = st.number_input("Capacity (bbl)", value=float(v.capacity_bbl or 0.0), step=1.0)
+                        with ec3: new_reg = st.text_input("Registration No.", value=v.registration_no or "", max_chars=50)
+                        with ec4:
+                            new_status_label = st.selectbox("Status", ["ACTIVE","INACTIVE"], index=0 if (v.status or "ACTIVE") == "ACTIVE" else 1)
+                        saved = st.form_submit_button("💾 Update", use_container_width=True)
+                        cancel = st.form_submit_button("❌ Cancel", use_container_width=True)
+
+                    if saved:
+                        try:
+                            with get_session() as s:
+                                obj = s.query(Vessel).get(v.id)
+                                obj.name = new_name.strip()
+                                obj.capacity_bbl = float(new_cap or 0.0) or None
+                                obj.registration_no = new_reg.strip() or None
+                                obj.vessel_type = "FSO"
+                                obj.status = new_status_label
+                                s.commit()
+                                SecurityManager.log_audit(None,(user or {}).get("username","system"),"UPDATE",
+                                    resource_type="Vessel", resource_id=str(obj.id),
+                                    details=f"Updated FSO '{obj.name}'",
+                                    user_id=(user or {}).get("id"))
+                                st.success("Updated."); st.session_state.pop(f"editing_fso_{v.id}", None); st.rerun()
+                        except Exception as ex:
+                            st.error(f"Failed to update FSO: {ex}")
+                    elif cancel:
+                        st.session_state.pop(f"editing_fso_{v.id}", None); st.rerun()
+
+                if st.session_state.get(f"confirm_del_fso_{v.id}"):
+                    st.error("Are you sure you want to delete this FSO? This cannot be undone.")
+                    dc1, dc2 = st.columns(2)
+                    if dc1.button("✅ Yes, delete", key=f"y_del_fso_{v.id}", use_container_width=True):
+                        try:
+                            with get_session() as s:
+                                obj = s.query(Vessel).get(v.id)
+                                if obj:
+                                    s.delete(obj); s.commit()
+                                    SecurityManager.log_audit(None,(user or {}).get("username","system"),"DELETE",
+                                        resource_type="Vessel", resource_id=str(v.id),
+                                        details=f"Deleted FSO '{v.name}'",
+                                        user_id=(user or {}).get("id"))
+                                    st.success("Deleted."); st.session_state.pop(f"confirm_del_fso_{v.id}", None); st.rerun()
+                        except Exception as ex:
+                            st.error(f"Failed to delete: {ex}")
+                    if dc2.button("❌ Cancel", key=f"n_del_fso_{v.id}", use_container_width=True):
+                        st.session_state.pop(f"confirm_del_fso_{v.id}", None); st.rerun()
+
+    names = [v.name for v in fsos]; by_name = {v.name: v for v in fsos}
+    selected = st.multiselect("Assign FSOs to this location", names,
+                              default=[v.name for v in fsos if v.id in assigned_ids]) if names else []
+    target_ids = {by_name[n].id for n in selected} if selected else set()
+
+    if st.button("💾 Save FSO Assignments", use_container_width=True):
+        try:
+            with get_session() as s:
+                for v in fsos:
+                    if v.id in target_ids and v.id not in assigned_ids:
+                        s.add(LocationVessel(location_id=loc.id, vessel_id=v.id, is_active=True))
+                for v in fsos:
+                    if v.id in assigned_ids and v.id not in target_ids:
+                        s.query(LocationVessel).filter(
+                            LocationVessel.location_id == loc.id,
+                            LocationVessel.vessel_id == v.id
+                        ).delete()
+                s.commit()
+                SecurityManager.log_audit(None,(user or {}).get("username","system"),"UPDATE",
+                    resource_type="LocationVessel", resource_id=str(loc.id),
+                    details=f"Updated FSO assignments for {loc_label}: {sorted(list(target_ids))}",
+                    user_id=(user or {}).get("id"), location_id=loc.id)
+                st.success("FSO assignments saved."); st.rerun()
+        except Exception as ex:
+            st.error(f"Failed to save FSO assignments: {ex}")
+
+    st.markdown("#### Currently Assigned FSOs")
+    if not assigned_ids:
+        st.info("No FSOs assigned to this location.")
+    else:
+        st.write(", ".join([n for n in names if by_name.get(n) and by_name[n].id in assigned_ids]))
 
 
 # ====================== Tankers (master + calibration) ======================
@@ -957,6 +1142,7 @@ def render_asset_management_page(active_location_id, user):
     tabs = st.tabs([
         "🛢️ Tanks",
         "⛴️ Vessels & ⚓ Assign",
+        "⚓ FSO",
         "🚚 Tankers",
         "🛶 YADE Barges",
         "📚 ASTM Table 11",
@@ -964,6 +1150,7 @@ def render_asset_management_page(active_location_id, user):
 
     with tabs[0]: _tab_tanks(active_location_id, user)
     with tabs[1]: _tab_vessels_assign(active_location_id, user)
-    with tabs[2]: _tab_tankers(user)
-    with tabs[3]: _tab_yade_barges(user)
-    with tabs[4]: _tab_astm_table11(user)
+    with tabs[2]: _tab_fso_assign(active_location_id, user)
+    with tabs[3]: _tab_tankers(user)
+    with tabs[4]: _tab_yade_barges(user)
+    with tabs[5]: _tab_astm_table11(user)

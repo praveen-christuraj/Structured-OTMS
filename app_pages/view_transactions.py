@@ -10,6 +10,10 @@ import streamlit as st
 from db import get_session
 from security import SecurityManager
 from models import Location
+try:
+    from recycle_bin import RecycleBinManager
+except Exception:
+    RecycleBinManager = None
 
 from yade_view import render_yade_transactions_view
 from tanker_view import render_tanker_transactions_view
@@ -1286,27 +1290,46 @@ def _render_tank_list(location_id: int, user: dict | None):
                         if rec_id is None:
                             raise RuntimeError("Record id not found for delete.")
                         with get_session() as s:
-                            s.execute(
-                                sql_text(f"DELETE FROM {table.name} WHERE {pk_col} = :id_val"),
-                                {"id_val": rec_id},
-                            )
-                            s.commit()
-                            try:
-                                SecurityManager.log_audit(
-                                    s,
-                                    (user or {}).get("username", "system"),
-                                    "DELETE",
-                                    resource_type="TankTransaction",
-                                    resource_id=str(rec_id),
-                                    details=f"Deleted ticket {r.get('Ticket ID')}",
-                                    user_id=(user or {}).get("id"),
-                                    location_id=location_id,
-                                    ip_address=_get_client_ip(),
-                                    success=True,
+                            if TankTransaction and RecycleBinManager:
+                                try:
+                                    obj = s.query(TankTransaction).get(rec_id)
+                                    if obj:
+                                        RecycleBinManager.archive_record(
+                                            s,
+                                            obj,
+                                            "TankTransaction",
+                                            username=(user or {}).get("username", "system"),
+                                            user_id=(user or {}).get("id"),
+                                            location_id=location_id,
+                                            reason=f"Deleted ticket {r.get('Ticket ID')}",
+                                            label=str(rec_id),
+                                        )
+                                        SecurityManager.log_audit(
+                                            s,
+                                            (user or {}).get("username", "system"),
+                                            "DELETE",
+                                            resource_type="TankTransaction",
+                                            resource_id=str(rec_id),
+                                            details=f"Moved ticket {r.get('Ticket ID')} to recycle bin",
+                                            user_id=(user or {}).get("id"),
+                                            location_id=location_id,
+                                            ip_address=_get_client_ip(),
+                                            success=True,
+                                        )
+                                        s.commit()
+                                except Exception:
+                                    s.execute(
+                                        sql_text(f"DELETE FROM {table.name} WHERE {pk_col} = :id_val"),
+                                        {"id_val": rec_id},
+                                    )
+                                    s.commit()
+                            else:
+                                s.execute(
+                                    sql_text(f"DELETE FROM {table.name} WHERE {pk_col} = :id_val"),
+                                    {"id_val": rec_id},
                                 )
-                            except Exception:
-                                pass
-                        st.success("Deleted.")
+                                s.commit()
+                        st.success("Ticket moved to Recycle Bin")
                         st.session_state[f"vt_tank_del_confirm_{idx}"] = False
                         st.rerun()
                     except Exception as ex:
@@ -1434,24 +1457,38 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                 if st.button("✅ Yes", key=f"vt_{section}_del_yes_{i}"):
                     try:
                         with get_session() as s:
-                            s.delete(r)
-                            s.commit()
-                            try:
-                                SecurityManager.log_audit(
-                                    s,
-                                    (user or {}).get("username", "system"),
-                                    "DELETE",
-                                    resource_type=f"FlexibleRecord:{section}",
-                                    resource_id=str(getattr(r, "id", "")),
-                                    details=f"Deleted {section} record on {getattr(r,'tx_date', '')}",
-                                    user_id=(user or {}).get("id"),
-                                    location_id=location_id,
-                                    ip_address=_get_client_ip(),
-                                    success=True,
-                                )
-                            except Exception:
-                                pass
-                        st.success("Deleted.")
+                            if RecycleBinManager:
+                                try:
+                                    RecycleBinManager.archive_record(
+                                        s,
+                                        r,
+                                        f"FlexibleRecord:{section}",
+                                        username=(user or {}).get("username", "system"),
+                                        user_id=(user or {}).get("id"),
+                                        location_id=location_id,
+                                        reason=f"Deleted {section} record on {getattr(r,'tx_date', '')}",
+                                        label=str(getattr(r, "id", "")),
+                                    )
+                                    SecurityManager.log_audit(
+                                        s,
+                                        (user or {}).get("username", "system"),
+                                        "DELETE",
+                                        resource_type=f"FlexibleRecord:{section}",
+                                        resource_id=str(getattr(r, "id", "")),
+                                        details=f"Moved {section} record to recycle bin",
+                                        user_id=(user or {}).get("id"),
+                                        location_id=location_id,
+                                        ip_address=_get_client_ip(),
+                                        success=True,
+                                    )
+                                    s.commit()
+                                except Exception:
+                                    s.delete(r)
+                                    s.commit()
+                            else:
+                                s.delete(r)
+                                s.commit()
+                        st.success("Record moved to Recycle Bin")
                         st.session_state[f"vt_{section}_del_confirm_{i}"] = False
                         st.rerun()
                     except Exception as ex:

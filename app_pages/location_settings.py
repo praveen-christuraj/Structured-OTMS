@@ -20,6 +20,7 @@ DEFAULT_FLAGS = {
     "show_vessel_operations": True,
     "show_fso_operations": True,
     "show_reports": True,
+    "show_otr": True,
 }
 
 
@@ -113,6 +114,11 @@ def _render_page_access(sel_location_id: int, user):
             value=cfg.get("show_vessel_operations", True),
             key="ls_flag_vessel_ops",
         )
+        show_otr = st.toggle(
+            "📊 OTR",
+            value=cfg.get("show_otr", True),
+            key="ls_flag_otr",
+        )
     with col2:
         show_yade = st.toggle(
             "⛴️ YADE Transactions",
@@ -135,6 +141,7 @@ def _render_page_access(sel_location_id: int, user):
             "show_vessel_operations": bool(show_vessel_ops),
             "show_fso_operations": bool(show_fso),
             "show_reports": bool(show_rpts),
+            "show_otr": bool(show_otr),
         }
         try:
             with get_session() as session:

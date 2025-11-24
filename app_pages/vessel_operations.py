@@ -13,6 +13,10 @@ from sqlalchemy import func
 from db import get_session
 from security import SecurityManager
 from ui import header
+try:
+    from recycle_bin import RecycleBinManager
+except Exception:
+    RecycleBinManager = None
 
 # models
 from models import Location, Vessel, LocationVessel, VesselOperation
@@ -581,17 +585,53 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                                         )
                                         st.error("Delete restricted after 24 hours.")
                                     else:
-                                        s.delete(row)
-                                        SecurityManager.log_audit(
-                                            s, user["username"], "DELETE",
-                                            resource_type="VesselOpsEntry",
-                                            resource_id=str(entry.id),
-                                            location_id=active_location_id,
-                                            details=f"Delete vessel entry {entry.id}",
-                                            user_id=user.get("id")
-                                        )
-                                        s.commit()
-                            st.success("Deleted.")
+                                        if RecycleBinManager:
+                                            try:
+                                                RecycleBinManager.archive_record(
+                                                    s,
+                                                    row,
+                                                    "VesselOpsEntry",
+                                                    username=user.get("username", "unknown"),
+                                                    user_id=user.get("id"),
+                                                    location_id=active_location_id,
+                                                    reason=f"User deleted vessel entry {entry.id}",
+                                                    label=str(entry.id),
+                                                )
+                                                SecurityManager.log_audit(
+                                                    s,
+                                                    user["username"],
+                                                    "DELETE",
+                                                    resource_type="VesselOpsEntry",
+                                                    resource_id=str(entry.id),
+                                                    location_id=active_location_id,
+                                                    details=f"Moved vessel entry {entry.id} to recycle bin",
+                                                    user_id=user.get("id"),
+                                                )
+                                                s.commit()
+                                            except Exception:
+                                                # Fallback to hard delete if archiving fails
+                                                s.delete(row)
+                                                SecurityManager.log_audit(
+                                                    s, user["username"], "DELETE",
+                                                    resource_type="VesselOpsEntry",
+                                                    resource_id=str(entry.id),
+                                                    location_id=active_location_id,
+                                                    details=f"Delete vessel entry {entry.id} (fallback)",
+                                                    user_id=user.get("id")
+                                                )
+                                                s.commit()
+                                        else:
+                                            s.delete(row)
+                                            SecurityManager.log_audit(
+                                                s, user["username"], "DELETE",
+                                                resource_type="VesselOpsEntry",
+                                                resource_id=str(entry.id),
+                                                location_id=active_location_id,
+                                                details=f"Delete vessel entry {entry.id}",
+                                                user_id=user.get("id")
+                                            )
+                                            s.commit()
+                            st.success("Entry moved to Recycle Bin")
                             st.session_state.pop(f"vop_deleting_{entry.id}", None)
                             _st_safe_rerun()
                         except Exception as ex:

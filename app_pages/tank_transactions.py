@@ -525,6 +525,48 @@ def _render_tab_tank_entry(loc, loc_label, user):
                 except Exception:
                     pass
 
+                # Mirror non-condensate transactions into OTRRecord for OTR page
+                try:
+                    if selected_label and ("condensate" not in selected_label.lower()):
+                        from models import OTRRecord
+                        otr = OTRRecord(
+                            location_id=loc.id,
+                            ticket_id=ticket_id,
+                            tank_id=str(tnk.id),
+                            date=tx_date,
+                            time=time_val,
+                            operation=selected_label,
+                            dip_cm=float(dip_cm or 0.0),
+                            total_volume_bbl=float(tov_bbl or 0.0),
+                            water_cm=float(water_cm or 0.0),
+                            free_water_bbl=float(fw_bbl or 0.0),
+                            gov_bbl=float(gov_bbl or 0.0),
+                            api60=float(api60_val or 0.0),
+                            vcf=float(vcf_val or 1.0),
+                            gsv_bbl=float(gsv_bbl or 0.0),
+                            bsw_vol_bbl=float((gsv_bbl - nsv_bbl) if gsv_bbl >= nsv_bbl else 0.0),
+                            nsv_bbl=float(nsv_bbl or 0.0),
+                            lt=float(lt or 0.0),
+                            mt=float(mt or 0.0),
+                        )
+                        session.add(otr)
+                        session.commit()
+                        try:
+                            SecurityManager.log_audit(
+                                None,
+                                (user or {}).get("username", "system"),
+                                "CREATE",
+                                resource_type="OTRRecord",
+                                resource_id=str(getattr(otr, "id", "")),
+                                details=f"Mirrored OTR for ticket {ticket_id} ({selected_op_label})",
+                                user_id=(user or {}).get("id"),
+                                location_id=loc.id,
+                            )
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+
             st.success(f"Saved. Ticket ID: **{ticket_id}**  |  NSV: **{nsv_bbl:,.2f} bbl**  |  MT: **{mt:.3f}**  |  LT: **{lt:,.3f}**")
             st.rerun()
         except Exception as ex:

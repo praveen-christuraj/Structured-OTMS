@@ -32,13 +32,15 @@ ICONS = {
     "Asset Management": "🧺",
     "Page Customization": "⚙️",
     "Tank Transactions": "🛢️",
-    "Tanker Transactions": "🚚",  # nicer icon
+    "Tanker Transactions": "🚚",
     "Yade Transactions": "⛴️",
-    "Vessel Operations": "🛳️",   # ← added
+    "Vessel Operations": "🛳️", 
     "FSO-Operations": "⚓",
     "Reports": "📄",
     "Settings": "⚙️",
-    "View Transactions": "🗂️",  # unified viewer
+    "View Transactions": "🗂️",
+    "OTR": "📊",
+    "Recycle Bin": "♻️",
 }
 
 ROLE_ICONS = USER_ROLE_ICONS
@@ -179,6 +181,7 @@ def get_pages(user, active_location_id):
             "Location Settings",
             "Asset Management",
             "Page Customization",
+            "Recycle Bin",
         ]
 
     # ---- Operational pages (role + location flags + module present) ----
@@ -197,19 +200,25 @@ def get_pages(user, active_location_id):
         ("show_tanker_transactions", ("Tanker Transactions", "app_pages.tanker_transactions")),
         ("show_tank_transactions",   ("View Transactions",   "app_pages.view_transactions")),  # unified viewer
         ("show_yade_transactions",   ("Yade Transactions",   "app_pages.yade_transactions")),
+        ("show_otr",                 ("OTR",                 "app_pages.otr")),               # ← NEW
         ("show_fso_operations",      ("FSO-Operations",      "app_pages.fso_operations")),
-        ("show_vessel_operations",   ("Vessel Operations",   "app_pages.vessel_operations")),  # 🔹 add this
+        ("show_vessel_operations",   ("Vessel Operations",   "app_pages.vessel_operations")),
         ("show_reports",             ("Reports",             "app_pages.reports")),
     ]
 
-
     if role_ok:
         for flag, (title, mod) in ops:
-            if loc_flags.get(flag, False) and _module_exists(mod):
+            # For OTR, default to True if flag is missing so it appears now,
+            # but can still be controlled later from Location Settings.
+            if flag == "show_otr":
+                allow = loc_flags.get(flag, True)
+            else:
+                allow = loc_flags.get(flag, False)
+
+            if allow and _module_exists(mod):
                 pages.append(title)
 
     return pages
-
 
 def _render_sidebar_nav(pages, current_page, user, active_location_id):
     """User header (logo on top) + logout + glass-style icon nav in sidebar."""
@@ -455,6 +464,15 @@ def main():
     elif current_page == "Vessel Operations":
         render_vessel_operations_page(active_location_id, user)
 
+    elif current_page == "FSO-Operations":
+        from app_pages.fso_operations import render_fso_operations_page
+        render_fso_operations_page(active_location_id, user)
+    elif current_page == "Recycle Bin":
+        from app_pages.recycle_bin_page import render_recycle_bin_page
+        render_recycle_bin_page(active_location_id, user)
+    elif current_page == "OTR":
+        from app_pages.otr import render_otr_page
+        render_otr_page(active_location_id, user)
     # (keep YADE/FSO/Reports routes commented until those pages are ready)
     # elif current_page == "FSO-Operations":
     #     from app_pages.fso_operations import render_fso_operations_page

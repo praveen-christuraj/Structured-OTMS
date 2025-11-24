@@ -505,10 +505,12 @@ def set_dynamic_table_def(session: Session, location_id: int, page: str, section
 
 
 # ==================== Soft-coded Operations (per-location / per-asset / per-category) ====================
-OP_ASSETS = ["tank", "yade", "tanker", "vessel"]
+OP_ASSETS = ["tank", "yade", "tanker", "vessel", "fso"]
 OP_CATEGORIES = [
+    "Operation",
+    "FSO Vessel",
     "Opening", "Closing", "Receipt", "Dispatch", "Draining", "Others",
-    "Cargo Type", "Destination", "Loading Berth"   # <-- added for YADE dropdowns
+    "Cargo Type", "Destination", "Loading Berth"
 ]
 
 

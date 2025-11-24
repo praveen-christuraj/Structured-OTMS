@@ -353,8 +353,8 @@ def _user_maintenance_section():
 
     st.markdown("---")
 
-    # --- 5) Permanent user deletion ---
-    st.markdown("##### 🗑️ Delete User (Permanent)")
+    # --- 5) Delete user (moves to Recycle Bin; purge from Recycle Bin only) ---
+    st.markdown("##### 🗑️ Delete User (Moves to Recycle Bin)")
 
     col_d1, col_d2 = st.columns([2, 1])
     with col_d1:
@@ -363,7 +363,7 @@ def _user_maintenance_section():
             help="To prevent mistakes, type the exact username here.",
         )
     with col_d2:
-        delete_clicked = st.button("Delete User Permanently")
+        delete_clicked = st.button("Delete User")
 
     if delete_clicked:
         if confirm_text.strip() != selected_user.username:
@@ -371,23 +371,37 @@ def _user_maintenance_section():
         else:
             try:
                 with get_session() as session:
-                    info = AuthManager.permanently_delete_user(session, selected_user.id)
-                st.success(
-                    f"User '{info['username']}' ({role_with_icon(info['role'])}) deleted permanently."
-                )
-                actor = (st.session_state.get("auth_user") or {}).get("username", "system")
-                actor_id = (st.session_state.get("auth_user") or {}).get("id")
-                SecurityManager.log_audit(
-                    None,
-                    actor,
-                    "DELETE",
-                    resource_type="User",
-                    resource_id=str(info.get("id", "")),
-                    details=f"Deleted user {info.get('username')}.",
-                    user_id=actor_id,
-                    location_id=info.get("location_id"),
-                )
-
+                    from models import User
+                    u = session.query(User).get(selected_user.id)
+                    if u:
+                        try:
+                            from recycle_bin import RecycleBinManager
+                            RecycleBinManager.archive_record(
+                                session,
+                                u,
+                                "User",
+                                username=(st.session_state.get("auth_user") or {}).get("username", "system"),
+                                user_id=(st.session_state.get("auth_user") or {}).get("id"),
+                                location_id=u.location_id,
+                                reason="Deleted from Manage Users page",
+                                label=str(u.id),
+                            )
+                            session.commit()
+                            st.success(
+                                f"User '{u.username}' ({role_with_icon(u.role)}) moved to Recycle Bin."
+                            )
+                            SecurityManager.log_audit(
+                                None,
+                                (st.session_state.get("auth_user") or {}).get("username", "system"),
+                                "DELETE",
+                                resource_type="User",
+                                resource_id=str(u.id),
+                                details=f"Moved user {u.username} to recycle bin.",
+                                user_id=(st.session_state.get("auth_user") or {}).get("id"),
+                                location_id=u.location_id,
+                            )
+                        except Exception as ex:
+                            st.error(str(ex))
             except ValueError as ex:
                 st.error(str(ex))
 
