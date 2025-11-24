@@ -47,10 +47,7 @@ EDIT_LOCK_HOURS = 24
 
 
 def _safe_rerun() -> None:
-    try:
-        st.rerun()
-    except Exception:  # pragma: no cover
-        st.experimental_rerun()  # type: ignore[attr-defined]
+    st.rerun()
 
 
 def _user_audit_context() -> tuple[str, Optional[int], Optional[int]]:
@@ -489,7 +486,8 @@ def _render_transaction_view(tx: TankerTransaction, can_edit: bool) -> None:
         if can_edit:
             if st.button("Edit This Transaction", key=f"edit_{tx.id}"):
                 if not _deny_edit_for_lock(tx, f"{tx.tanker_name}-{tx.convoy_no}"):
-                    _prefill_form_state(tx)
+                    # Store transaction data in flag to prefill on next render
+                    st.session_state["tanker_tx_prefill_data"] = tx
                     st.info("Form below pre-filled for editing.")
                     _safe_rerun()
 
@@ -570,6 +568,16 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
     tanker_names = [t.name for t in tankers]
     _init_form_state(tanker_names)
     ss = st.session_state
+    
+    # Handle clear/prefill flags BEFORE creating any widgets
+    if ss.get("tanker_tx_clear_form_flag"):
+        ss.pop("tanker_tx_clear_form_flag", None)
+        _clear_form_state(tanker_names)
+    
+    if ss.get("tanker_tx_prefill_data"):
+        tx_data = ss.pop("tanker_tx_prefill_data")
+        _prefill_form_state(tx_data)
+    
     mode = ss.get("tanker_form_mode", "new")
     editing_id = ss.get("tanker_edit_id")
 
@@ -1227,24 +1235,30 @@ def _handle_form_submission(
             water_bbl = water_l / LITRES_PER_BBL
             gov_bbl = max(total_bbl - water_bbl, 0.0)
 
+            # Normalize temperature units before using them
+            tank_temp_unit_norm = normalize_temp_unit(tank_temp_unit)
+            sample_temp_unit_norm = normalize_temp_unit(sample_temp_unit)
+
             if obs_mode == "Observed API":
-                api60 = api60_from_api_obs(api_observed, sample_temp_value, sample_temp_unit)
+                api60 = api60_from_api_obs(api_observed, sample_temp_value, sample_temp_unit_norm)
                 density_val = density_from_api(api_observed)
             else:
-                api60 = api60_from_density_obs(density_observed, sample_temp_value, sample_temp_unit)
+                api60 = api60_from_density_obs(density_observed, sample_temp_value, sample_temp_unit_norm)
                 density_val = density_observed
                 api_observed = api_from_density(density_observed)
 
-            vcf_val = vcf_from_api60_and_tank_temp(api60, tank_temp_value, tank_temp_unit)
+            vcf_val = vcf_from_api60_and_tank_temp(api60, tank_temp_value, tank_temp_unit_norm)
             gsv_bbl = gov_bbl * vcf_val
             bsw_vol_bbl = gsv_bbl * (bsw_pct / 100.0)
             nsv_bbl = gsv_bbl - bsw_vol_bbl
-            lt_factor = get_lt_factor(session, api60) if api60 > 0 else 0.0
+            try:
+                lt_factor = get_lt_factor(session, api60) if api60 > 0 else 0.0
+            except Exception:
+                lt_factor = 0.0
             lt_val = nsv_bbl * lt_factor
             mt_val = lt_val * 1.01605
 
-            tank_temp_unit_norm = normalize_temp_unit(tank_temp_unit)
-            sample_temp_unit_norm = normalize_temp_unit(sample_temp_unit)
+            # Convert temperatures to both C and F
             if tank_temp_unit_norm == "C":
                 tank_temp_c = tank_temp_value
                 tank_temp_f = c_to_f(tank_temp_value)
@@ -1298,12 +1312,17 @@ def _handle_form_submission(
                 remarks=remarks.strip() or None,
             )
 
-            _persist_tanker_transaction(editing_id, payload)
-            _clear_form_state(tanker_names)
+            action = _persist_tanker_transaction(editing_id, payload)
+            # Set flag to clear form on next render instead of modifying widget keys
+            st.session_state["tanker_tx_clear_form_flag"] = True
+            if action == "CREATE":
+                st.success("Tanker transaction saved.")
+            else:
+                st.success("Tanker transaction updated.")
             _safe_rerun()
 
     except Exception as exc:
-        st.error("Failed to save tanker transaction. Please try again.")
+        st.error(f"Failed to save tanker transaction: {exc}")
         log_error(f"Failed to save tanker transaction: {exc}", exc_info=True)
 
 def _persist_tanker_transaction(editing_id: Optional[int], payload: Dict[str, Any]) -> None:
@@ -1348,10 +1367,7 @@ def _persist_tanker_transaction(editing_id: Optional[int], payload: Dict[str, An
     except Exception:  # pragma: no cover
         pass
 
-    if action == "CREATE":
-        st.success("Tanker transaction saved.")
-    else:
-        st.success("Tanker transaction updated.")
+    return action
 
 def render_tanker_transactions_page(active_location_id: Optional[int], user: Optional[Dict[str, Any]]) -> None:
     try:

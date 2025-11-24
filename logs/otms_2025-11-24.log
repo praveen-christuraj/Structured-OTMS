@@ -1,0 +1,81 @@
+2025-11-24 06:32:51 - OTMS - ERROR - Failed to save tanker transaction: `st.session_state.tanker_tx_tanker_name` cannot be modified after the widget with key `tanker_tx_tanker_name` is instantiated.
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1302, in _handle_form_submission
+    _clear_form_state(tanker_names)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 313, in _clear_form_state
+    ss["tanker_tx_tanker_name"] = tanker_names[0]
+    ~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state_proxy.py", line 114, in __setitem__
+    get_session_state()[key] = value
+    ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\safe_session_state.py", line 109, in __setitem__
+    self._state[key] = value
+    ~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state.py", line 533, in __setitem__
+    raise StreamlitAPIException(
+    ...<2 lines>...
+    )
+streamlit.errors.StreamlitAPIException: `st.session_state.tanker_tx_tanker_name` cannot be modified after the widget with key `tanker_tx_tanker_name` is instantiated.
+2025-11-24 06:34:24 - OTMS - ERROR - Failed to save tanker transaction: `st.session_state.tanker_tx_tanker_name` cannot be modified after the widget with key `tanker_tx_tanker_name` is instantiated.
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1302, in _handle_form_submission
+    _clear_form_state(tanker_names)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 313, in _clear_form_state
+    ss["tanker_tx_tanker_name"] = tanker_names[0]
+    ~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state_proxy.py", line 114, in __setitem__
+    get_session_state()[key] = value
+    ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\safe_session_state.py", line 109, in __setitem__
+    self._state[key] = value
+    ~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state.py", line 533, in __setitem__
+    raise StreamlitAPIException(
+    ...<2 lines>...
+    )
+streamlit.errors.StreamlitAPIException: `st.session_state.tanker_tx_tanker_name` cannot be modified after the widget with key `tanker_tx_tanker_name` is instantiated.
+2025-11-24 06:35:54 - OTMS - ERROR - Failed to save tanker transaction: cannot access local variable 'sample_temp_unit_norm' where it is not associated with a value
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1231, in _handle_form_submission
+    api60 = api60_from_api_obs(api_observed, sample_temp_value, sample_temp_unit_norm)
+                                                                ^^^^^^^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'sample_temp_unit_norm' where it is not associated with a value
+2025-11-24 06:37:01 - OTMS - ERROR - Failed to save tanker transaction: cannot access local variable 'sample_temp_unit_norm' where it is not associated with a value
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1231, in _handle_form_submission
+    api60 = api60_from_api_obs(api_observed, sample_temp_value, sample_temp_unit_norm)
+                                                                ^^^^^^^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'sample_temp_unit_norm' where it is not associated with a value
+2025-11-24 06:38:10 - OTMS - ERROR - Failed to save tanker transaction: `st.session_state.tanker_tx_tanker_name` cannot be modified after the widget with key `tanker_tx_tanker_name` is instantiated.
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1308, in _handle_form_submission
+    _clear_form_state(tanker_names)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 313, in _clear_form_state
+    ss["tanker_tx_tanker_name"] = tanker_names[0]
+    ~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state_proxy.py", line 114, in __setitem__
+    get_session_state()[key] = value
+    ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\safe_session_state.py", line 109, in __setitem__
+    self._state[key] = value
+    ~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state.py", line 533, in __setitem__
+    raise StreamlitAPIException(
+    ...<2 lines>...
+    )
+streamlit.errors.StreamlitAPIException: `st.session_state.tanker_tx_tanker_name` cannot be modified after the widget with key `tanker_tx_tanker_name` is instantiated.
+2025-11-24 06:40:37 - OTMS - ERROR - Failed to save tanker transaction: name 'ss' is not defined
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1320, in _handle_form_submission
+    ss["tanker_tx_clear_form_flag"] = True
+    ^^
+NameError: name 'ss' is not defined. Did you mean: 'st'?
