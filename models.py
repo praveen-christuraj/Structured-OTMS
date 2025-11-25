@@ -1362,3 +1362,34 @@ class ReportDefinition(Base):
     created_by = Column(String(50))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.utcnow)
+    
+class ReportAccess(Base):
+    """
+    Controls which users/roles/locations can access specific reports.
+    Admins can grant access at role level, user level, or location level.
+    """
+    __tablename__ = "report_access"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    report_id = Column(Integer, ForeignKey("report_definitions.id", ondelete="CASCADE"), nullable=False)
+    
+    # Access can be granted by role, specific user, or location
+    role = Column(String(30), nullable=True)  # e.g., "manager", "supervisor", "operator"
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    location_id = Column(Integer, ForeignKey("locations.id", ondelete="CASCADE"), nullable=True)
+    
+    # Audit fields
+    granted_by = Column(String(50), nullable=False)
+    granted_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    report = relationship("ReportDefinition", backref="access_grants")
+    user = relationship("User")
+    location = relationship("Location")
+    
+    def __repr__(self):
+        return f"<ReportAccess(report_id={self.report_id}, role='{self.role}', user_id={self.user_id})>"
+
+
+# Index for faster access control queries
+Index('idx_report_access_lookup', ReportAccess.report_id, ReportAccess.role, ReportAccess.user_id)

@@ -37,6 +37,7 @@ ICONS = {
     "Vessel Operations": "🛳️", 
     "FSO-Operations": "⚓",
     "Reports": "📄",
+    "Reporting": "📊",
     "Settings": "⚙️",
     "View Transactions": "🗂️",
     "OTR": "📊",
@@ -195,22 +196,24 @@ def get_pages(user, active_location_id):
             loc_flags = {}
 
     # Mapping: flag -> (page title, module path)
+        # Mapping: flag -> (page title, module path)
     ops = [
         ("show_tank_transactions",   ("Tank Transactions",   "app_pages.tank_transactions")),
         ("show_tanker_transactions", ("Tanker Transactions", "app_pages.tanker_transactions")),
-        ("show_tank_transactions",   ("View Transactions",   "app_pages.view_transactions")),  # unified viewer
+        ("show_tank_transactions",   ("View Transactions",   "app_pages.view_transactions")),
         ("show_yade_transactions",   ("Yade Transactions",   "app_pages.yade_transactions")),
-        ("show_otr",                 ("OTR",                 "app_pages.otr")),               # ← NEW
+        ("show_otr",                 ("OTR",                 "app_pages.otr")),
         ("show_fso_operations",      ("FSO-Operations",      "app_pages.fso_operations")),
         ("show_vessel_operations",   ("Vessel Operations",   "app_pages.vessel_operations")),
         ("show_reports",             ("Reports",             "app_pages.reports")),
+        ("show_reporting",           ("Reporting",           "app_pages.reporting")),
     ]
 
     if role_ok:
         for flag, (title, mod) in ops:
             # For OTR, default to True if flag is missing so it appears now,
             # but can still be controlled later from Location Settings.
-            if flag == "show_otr":
+            if flag in ["show_otr", "show_reporting"]:
                 allow = loc_flags.get(flag, True)
             else:
                 allow = loc_flags.get(flag, False)
@@ -473,7 +476,10 @@ def main():
     elif current_page == "OTR":
         from app_pages.otr import render_otr_page
         render_otr_page(active_location_id, user)
-    # (keep YADE/FSO/Reports routes commented until those pages are ready)
+    elif current_page == "Reporting":
+        from app_pages.reporting import render_reporting_page
+        render_reporting_page(active_location_id, user)
+        
     # elif current_page == "FSO-Operations":
     #     from app_pages.fso_operations import render_fso_operations_page
     #     render_fso_operations_page(active_location_id, user)
