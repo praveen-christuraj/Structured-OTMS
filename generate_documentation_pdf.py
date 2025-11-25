@@ -6,15 +6,15 @@ This script generates a comprehensive PDF documentation for the Dynamic Reportin
 It creates professional documentation with proper formatting, tables, and code examples.
 """
 
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch, cm
+from reportlab.lib.units import inch
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    PageBreak, ListFlowable, ListItem, Preformatted, KeepTogether
+    PageBreak, Preformatted
 )
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 from reportlab.pdfgen import canvas
 from datetime import datetime
 
