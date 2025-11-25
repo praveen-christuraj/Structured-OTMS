@@ -1,0 +1,181 @@
+# Custom Column Calculations - User Guide
+
+## Overview
+The Page Customization feature now supports **automatic calculations** for custom columns in the Production and Produced Water tabs of Tank Transactions. This allows you to define columns that automatically compute their values based on other columns.
+
+## How It Works
+
+### Scenario: 5 Columns with Calculation
+As per your example:
+- **Columns 1-4**: Manual entry fields (e.g., "Stream A", "Stream B", "Stream C", "Stream D")
+- **Column 5**: Automatically calculated (e.g., "Total" = Column 3 + Column 4)
+
+### Supported Operations
+
+1. **Sum** - Adds selected columns together
+   - Example: `Column A + Column B + Column C`
+
+2. **Subtract** - Subtracts columns sequentially
+   - Example: `Column A - Column B - Column C`
+
+3. **Multiply** - Multiplies selected columns
+   - Example: `Column A × Column B × Column C`
+
+4. **Divide** - Divides columns sequentially
+   - Example: `Column A ÷ Column B ÷ Column C`
+   - Note: Automatically handles division by zero
+
+5. **Percentage** - Calculates percentage (requires 2 columns)
+   - Formula: `(Column A ÷ Column B) × 100`
+   - Example: "Oil Cut" = (Oil Production ÷ Total Production) × 100%
+
+6. **Maximum** - Returns the highest value from selected columns
+   - Example: `MAX(Column A, Column B, Column C)`
+
+7. **Minimum** - Returns the lowest value from selected columns
+   - Example: `MIN(Column A, Column B, Column C)`
+
+8. **Average** - Calculates the average of selected columns
+   - Example: `AVG(Column A, Column B, Column C)`
+
+## Configuration Steps
+
+### Step 1: Access Page Customization
+1. Navigate to **Settings → Page Customization**
+2. Select your location
+3. Expand **"🏭 Production — Table Definition"** or **"💧 Produced Water — Table Definition"**
+
+### Step 2: Define Your Columns
+1. Set **"Number of columns"** to 5 (for your example)
+2. For each column, configure:
+   - **Field name**: Internal identifier (no spaces) - e.g., `stream_a`, `stream_b`, `total`
+   - **Label**: Display name - e.g., "Stream A (bbls)", "Stream B (bbls)", "Total (bbls)"
+   - **Type**: Select "number" for numeric columns
+   - **Required**: Check if the field must be filled
+
+### Step 3: Configure Formulas (For Calculated Columns)
+
+For **Column 5** (the calculated one):
+
+1. After setting the basic column properties, expand the **"➕ Formula for [Column Name] (Optional)"** section
+2. Check **"Enable Formula"**
+3. Select the **Operation**:
+   - For your example: Choose **"sum"**
+4. Select the **Columns** to use in the calculation:
+   - For your example: Select "Column 3" and "Column 4"
+5. Review the **Formula Preview** displayed:
+   - Example: `Formula: col_3 + col_4`
+
+### Step 4: Save Configuration
+1. Click **"💾 Save Production Table"** (or "Save Produced Water Table")
+2. The configuration is now active for all users at this location
+
+## Using Calculated Columns
+
+### During Data Entry
+
+When users enter data in the Production or Produced Water tab:
+
+1. **Manual Entry Fields**: Users enter values for columns 1-4 (as normal)
+2. **Calculated Fields**: 
+   - Displayed in a separate **"🧮 Calculated Columns"** section
+   - Shows real-time preview of the calculated value
+   - Automatically computed when the form is submitted
+   - Users **cannot manually edit** these values
+
+### Example Workflow
+
+**Form Display:**
+```
+Production Data Entry
+━━━━━━━━━━━━━━━━━━━━
+Stream A (bbls):     [ 100.00 ]
+Stream B (bbls):     [ 150.00 ]
+Stream C (bbls):     [ 200.00 ]
+Stream D (bbls):     [ 75.00  ]
+
+🧮 Calculated Columns (Auto-computed)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total (bbls):        275.00
+(Formula: SUM(stream_c, stream_d))
+```
+
+## Advanced Examples
+
+### Example 1: Net Production Calculation
+- **Column 1**: Gross Production (manual)
+- **Column 2**: BSW % (manual)
+- **Column 3**: Net Production (calculated)
+  - Formula: `subtract` → Gross - BSW
+
+### Example 2: Oil Cut Percentage
+- **Column 1**: Oil Volume (manual)
+- **Column 2**: Water Volume (manual)
+- **Column 3**: Total Fluid (calculated)
+  - Formula: `sum` → Oil + Water
+- **Column 4**: Oil Cut % (calculated)
+  - Formula: `percentage` → (Oil ÷ Total) × 100
+
+### Example 3: Average Daily Production
+- **Column 1**: Day 1 Production (manual)
+- **Column 2**: Day 2 Production (manual)
+- **Column 3**: Day 3 Production (manual)
+- **Column 4**: Average Daily (calculated)
+  - Formula: `average` → AVG(Day1, Day2, Day3)
+
+## Important Notes
+
+1. **Only Number Type**: Formulas can only be applied to columns with type "number"
+2. **No Circular References**: You cannot reference a column in its own formula
+3. **Column Order**: Ensure columns used in formulas are defined before the calculated column
+4. **Data Validation**: Calculated columns are automatically populated and cannot be manually overridden
+5. **Error Handling**: If a calculation fails (e.g., division by zero), the column will show as null/empty
+6. **Audit Trail**: All calculated values are saved to the database along with manual entries
+
+## Troubleshooting
+
+### Formula Not Calculating
+- Ensure all referenced columns have numeric values entered
+- Check that the formula is saved (should appear in "Saved definition" section)
+- Verify column names match exactly (case-sensitive)
+
+### Wrong Calculation Result
+- Review the formula preview in Page Customization
+- Check the order of columns for subtract/divide operations
+- Ensure correct operation is selected (sum vs multiply, etc.)
+
+### Column Not Showing Formula Option
+- Verify the column type is set to "number" (not "text" or "date")
+- Formulas are only supported for numeric columns
+
+## Technical Details
+
+### Data Storage
+- Formulas are stored in the location configuration JSON
+- Calculated values are stored in the `FlexibleRecord` table
+- Each record includes both manual and calculated values
+
+### Formula Structure (JSON)
+```json
+{
+  "name": "total",
+  "label": "Total (bbls)",
+  "type": "number",
+  "required": false,
+  "formula": {
+    "operation": "sum",
+    "columns": ["stream_c", "stream_d"]
+  }
+}
+```
+
+### Calculation Precedence
+1. User enters values for manual columns
+2. Form validates required fields (excluding calculated columns)
+3. System evaluates all formulas in order
+4. Calculated values are added to the data record
+5. Complete record (manual + calculated) is saved to database
+
+---
+
+For questions or issues, contact your system administrator.

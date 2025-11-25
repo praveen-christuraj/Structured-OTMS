@@ -467,6 +467,7 @@ def set_dynamic_table_def(session: Session, location_id: int, page: str, section
     Save the dynamic table definition under:
       cfg["page_customization"][page][section] = {"columns": [...]}
     Only allows text/number/date types; ensures at most one 'date' column.
+    Supports formula field for calculated columns.
     """
     allowed_types = {"text", "number", "date"}
 
@@ -479,6 +480,7 @@ def set_dynamic_table_def(session: Session, location_id: int, page: str, section
         label = (c.get("label") or name or "").strip()
         ctype = (c.get("type") or "text").lower()
         required = bool(c.get("required", False))
+        formula = c.get("formula") or None  # New: formula support
         if not name:
             continue
         if ctype not in allowed_types:
@@ -489,12 +491,16 @@ def set_dynamic_table_def(session: Session, location_id: int, page: str, section
                 ctype = "text"
             else:
                 seen_date = True
-        cleaned.append({
+        col_def = {
             "name": name,
             "label": label or name,
             "type": ctype,
             "required": required,
-        })
+        }
+        # Add formula if present (for calculated columns)
+        if formula:
+            col_def["formula"] = formula
+        cleaned.append(col_def)
 
     cfg = LocationConfig.get_config(session, location_id)
     pc = cfg.setdefault("page_customization", {})
@@ -627,3 +633,161 @@ def get_active_operation_names(
     """Flatten active operation names for a given asset (all categories)."""
     ops = list_operations(session, location_id, asset=asset)
     return [o["name"] for o in ops if o.get("active", True)]
+
+
+# ==================== Custom Tabs Management ====================
+def get_custom_tabs(session: Session, location_id: int, page: str) -> List[Dict[str, Any]]:
+    """
+    Get all custom tabs defined for a specific page (e.g., 'tank_transactions', 'tanker_transactions').
+    
+    Returns list of tab definitions:
+    [
+        {
+            "id": "unique_id",
+            "name": "Custom Tab Name",
+            "table_name": "custom_tab_name",  # DB table name
+            "columns": [...],  # Column definitions with formulas
+            "active": True
+        }
+    ]
+    """
+    cfg = LocationConfig.get_config(session, location_id)
+    custom_tabs = cfg.setdefault("custom_tabs", {})
+    page_tabs = custom_tabs.setdefault(page, [])
+    return list(page_tabs)
+
+
+def add_custom_tab(
+    session: Session,
+    location_id: int,
+    page: str,
+    tab_name: str,
+    columns: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """
+    Add a new custom tab to a page.
+    
+    Args:
+        session: Database session
+        location_id: Location ID
+        page: Page name (e.g., 'tank_transactions')
+        tab_name: Display name for the tab
+        columns: List of column definitions
+    
+    Returns:
+        The created tab definition
+    """
+    import uuid
+    import re
+    
+    tab_name = (tab_name or "").strip()
+    if not tab_name:
+        raise ValueError("Tab name is required")
+    
+    # Generate table name from tab name (sanitize for DB)
+    table_name = re.sub(r'[^a-z0-9_]', '_', tab_name.lower())
+    table_name = f"custom_{table_name}_{location_id}"
+    
+    # Check for duplicate tab names
+    cfg = LocationConfig.get_config(session, location_id)
+    custom_tabs = cfg.setdefault("custom_tabs", {})
+    page_tabs = custom_tabs.setdefault(page, [])
+    
+    # Check if tab name already exists
+    if any(t.get("name", "").lower() == tab_name.lower() for t in page_tabs):
+        raise ValueError(f"Tab '{tab_name}' already exists for this page")
+    
+    # Check if table name already exists
+    if any(t.get("table_name") == table_name for t in page_tabs):
+        raise ValueError(f"Table name '{table_name}' already exists")
+    
+    # Create tab definition
+    tab_id = str(uuid.uuid4())
+    new_tab = {
+        "id": tab_id,
+        "name": tab_name,
+        "table_name": table_name,
+        "columns": columns,
+        "active": True,
+        "created_at": datetime.now().isoformat()
+    }
+    
+    page_tabs.append(new_tab)
+    cfg["custom_tabs"] = custom_tabs
+    LocationConfig.save_config(session, location_id, cfg)
+    
+    return new_tab
+
+
+def update_custom_tab(
+    session: Session,
+    location_id: int,
+    page: str,
+    tab_id: str,
+    tab_name: str = None,
+    columns: List[Dict[str, Any]] = None,
+    active: bool = None
+) -> bool:
+    """Update an existing custom tab."""
+    cfg = LocationConfig.get_config(session, location_id)
+    custom_tabs = cfg.setdefault("custom_tabs", {})
+    page_tabs = custom_tabs.setdefault(page, [])
+    
+    for tab in page_tabs:
+        if tab.get("id") == tab_id:
+            if tab_name is not None:
+                tab["name"] = tab_name.strip()
+            if columns is not None:
+                tab["columns"] = columns
+            if active is not None:
+                tab["active"] = bool(active)
+            tab["updated_at"] = datetime.now().isoformat()
+            
+            cfg["custom_tabs"] = custom_tabs
+            LocationConfig.save_config(session, location_id, cfg)
+            return True
+    
+    return False
+
+
+def delete_custom_tab(session: Session, location_id: int, page: str, tab_id: str) -> bool:
+    """Delete a custom tab."""
+    cfg = LocationConfig.get_config(session, location_id)
+    custom_tabs = cfg.setdefault("custom_tabs", {})
+    page_tabs = custom_tabs.setdefault(page, [])
+    
+    original_len = len(page_tabs)
+    page_tabs[:] = [t for t in page_tabs if t.get("id") != tab_id]
+    
+    if len(page_tabs) < original_len:
+        cfg["custom_tabs"] = custom_tabs
+        LocationConfig.save_config(session, location_id, cfg)
+        return True
+    
+    return False
+
+
+def get_all_custom_table_names(session: Session) -> List[str]:
+    """
+    Get all custom table names across all locations for report data source.
+    
+    Returns:
+        List of table names
+    """
+    from models import Location
+    
+    all_tables = []
+    locations = session.query(Location).all()
+    
+    for loc in locations:
+        cfg = LocationConfig.get_config(session, loc.id)
+        custom_tabs = cfg.get("custom_tabs", {})
+        
+        for page, tabs in custom_tabs.items():
+            for tab in tabs:
+                if tab.get("active", True):
+                    table_name = tab.get("table_name")
+                    if table_name and table_name not in all_tables:
+                        all_tables.append(table_name)
+    
+    return sorted(all_tables)

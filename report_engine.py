@@ -89,21 +89,42 @@ class ReportEngine:
         table_name = self.data_source.get('table')
         if not table_name or not isinstance(table_name, str):
             raise ValueError(f"Invalid or missing data source table: {table_name}")
-        if table_name not in self.DATA_SOURCES:
-            raise ValueError(f"Unknown data source: {table_name}")
         
-        primary_model = self.DATA_SOURCES[table_name]
+        # Check if it's a standard table or custom table
+        if table_name in self.DATA_SOURCES:
+            primary_model = self.DATA_SOURCES[table_name]
+        else:
+            # Try to get custom table model
+            try:
+                from models import get_custom_table_model
+                from logger import log_info, log_error
+                
+                log_info(f"Attempting to load custom table model for '{table_name}'")
+                primary_model = get_custom_table_model(table_name)
+                
+                if not primary_model:
+                    log_error(f"Custom table '{table_name}' not found in database")
+                    raise ValueError(f"Custom table '{table_name}' not found in database. Please ensure the table exists.")
+                    
+                log_info(f"Successfully loaded model for custom table '{table_name}'")
+            except ValueError:
+                raise  # Re-raise ValueError as-is
+            except Exception as e:
+                from logger import log_error
+                log_error(f"Error loading custom table '{table_name}': {str(e)}", exc_info=True)
+                raise ValueError(f"Unknown data source: {table_name}. Error: {e}")
         
         # Start with base query
         query = session.query(primary_model)
         
-        # Apply joins if specified
-        joins = self.data_source.get('joins', [])
-        for join_config in joins:
-            join_table = join_config.get('table')
-            if join_table in self.DATA_SOURCES:
-                join_model = self.DATA_SOURCES[join_table]
-                query = query.join(join_model)
+        # Apply joins if specified (only for standard tables)
+        if table_name in self.DATA_SOURCES:
+            joins = self.data_source.get('joins', [])
+            for join_config in joins:
+                join_table = join_config.get('table')
+                if join_table in self.DATA_SOURCES:
+                    join_model = self.DATA_SOURCES[join_table]
+                    query = query.join(join_model)
         
         # Apply predefined filters from config
         query = self._apply_filters(query, primary_model, self.filters, user_filters)
@@ -385,8 +406,47 @@ class ReportEngine:
 
 
 def get_available_data_sources() -> List[str]:
-    """Get list of available data sources for report building."""
-    return list(ReportEngine.DATA_SOURCES.keys())
+    """Get list of available data sources for report building - includes ALL database tables."""
+    from logger import log_info, log_error
+    
+    sources = []
+    
+    # Get ALL tables from database
+    try:
+        from sqlalchemy import inspect
+        from db import engine
+        
+        if engine:
+            inspector = inspect(engine)
+            all_tables = inspector.get_table_names()
+            
+            # Add ALL tables from the database
+            sources.extend(all_tables)
+            log_info(f"Loaded {len(all_tables)} tables from database")
+        else:
+            log_error("Database engine not available")
+            # Fallback to standard sources if engine not available
+            sources = list(ReportEngine.DATA_SOURCES.keys())
+    except Exception as e:
+        log_error(f"Could not load tables from database: {str(e)}", exc_info=True)
+        # Fallback to standard sources
+        sources = list(ReportEngine.DATA_SOURCES.keys())
+    
+    # Add custom tab tables from location_config (in case they're not in DB yet)
+    try:
+        from location_config import get_all_custom_table_names
+        from db import get_session
+        
+        with get_session() as session:
+            custom_tables = get_all_custom_table_names(session)
+            for ct in custom_tables:
+                if ct not in sources:
+                    sources.append(ct)
+            log_info(f"Added {len([ct for ct in custom_tables if ct not in all_tables])} additional custom tables from location_config")
+    except Exception as e:
+        log_error(f"Could not load custom tables from location_config: {str(e)}")
+    
+    return sorted(sources)
 
 
 def get_columns_for_source(source_name: str) -> List[Dict[str, str]]:
@@ -399,33 +459,59 @@ def get_columns_for_source(source_name: str) -> List[Dict[str, str]]:
     Returns:
         List of column definitions with field name and type
     """
-    if source_name not in ReportEngine.DATA_SOURCES:
+    from logger import log_info, log_error, log_warning
+    
+    model = None
+    
+    # Check if it's a standard data source
+    if source_name in ReportEngine.DATA_SOURCES:
+        model = ReportEngine.DATA_SOURCES[source_name]
+        log_info(f"Loading columns for standard data source '{source_name}'")
+    else:
+        # Try to get custom table model
+        try:
+            from models import get_custom_table_model
+            log_info(f"Attempting to load custom table '{source_name}'")
+            model = get_custom_table_model(source_name)
+            if model:
+                log_info(f"Successfully loaded custom table model for '{source_name}'")
+            else:
+                log_warning(f"Custom table '{source_name}' not found")
+        except Exception as e:
+            log_error(f"Error loading custom table '{source_name}': {str(e)}", exc_info=True)
+    
+    if not model:
+        log_warning(f"No model found for data source '{source_name}'")
         return []
     
-    model = ReportEngine.DATA_SOURCES[source_name]
     columns = []
     
-    for column in model.__table__.columns:
-        col_type = str(column.type)
+    try:
+        for column in model.__table__.columns:
+            col_type = str(column.type)
+            
+            # Map SQL types to our types
+            if 'INT' in col_type:
+                field_type = 'numeric'
+            elif 'FLOAT' in col_type or 'DECIMAL' in col_type:
+                field_type = 'numeric'
+            elif 'DATE' in col_type and 'TIME' not in col_type:
+                field_type = 'date'
+            elif 'DATETIME' in col_type or 'TIMESTAMP' in col_type:
+                field_type = 'datetime'
+            elif 'BOOL' in col_type:
+                field_type = 'boolean'
+            else:
+                field_type = 'string'
+            
+            columns.append({
+                'field': column.name,
+                'label': column.name.replace('_', ' ').title(),
+                'type': field_type
+            })
         
-        # Map SQL types to our types
-        if 'INT' in col_type:
-            field_type = 'numeric'
-        elif 'FLOAT' in col_type or 'DECIMAL' in col_type:
-            field_type = 'numeric'
-        elif 'DATE' in col_type and 'TIME' not in col_type:
-            field_type = 'date'
-        elif 'DATETIME' in col_type or 'TIMESTAMP' in col_type:
-            field_type = 'datetime'
-        elif 'BOOL' in col_type:
-            field_type = 'boolean'
-        else:
-            field_type = 'string'
-        
-        columns.append({
-            'field': column.name,
-            'label': column.name.replace('_', ' ').title(),
-            'type': field_type
-        })
+        log_info(f"Retrieved {len(columns)} columns for data source '{source_name}'")
+    except Exception as e:
+        log_error(f"Error extracting columns from model for '{source_name}': {str(e)}", exc_info=True)
     
     return columns

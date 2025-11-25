@@ -928,6 +928,80 @@ def _render_tab_condensate(loc, user):
 
 
 # ======================= Dynamic Forms (Produced Water / Production) =======================
+def _evaluate_formula(formula: dict, row_data: dict) -> float:
+    """
+    Evaluate a formula based on row data.
+    
+    Formula structure:
+    {
+        "operation": "sum|subtract|multiply|divide|percentage|maximum|minimum|average",
+        "columns": ["col1", "col2", ...]
+    }
+    
+    Returns the calculated value or None if calculation fails.
+    """
+    if not formula or not isinstance(formula, dict):
+        return None
+    
+    operation = formula.get("operation", "sum")
+    columns = formula.get("columns", [])
+    
+    if not columns:
+        return None
+    
+    # Extract numeric values from row data
+    values = []
+    for col_name in columns:
+        val = row_data.get(col_name)
+        if val is not None:
+            try:
+                values.append(float(val))
+            except (ValueError, TypeError):
+                pass  # Skip non-numeric values
+    
+    if not values:
+        return None
+    
+    try:
+        if operation == "sum":
+            return sum(values)
+        elif operation == "subtract":
+            result = values[0]
+            for v in values[1:]:
+                result -= v
+            return result
+        elif operation == "multiply":
+            result = values[0]
+            for v in values[1:]:
+                result *= v
+            return result
+        elif operation == "divide":
+            if len(values) < 2:
+                return values[0] if values else None
+            result = values[0]
+            for v in values[1:]:
+                if v == 0:
+                    return None  # Avoid division by zero
+                result /= v
+            return result
+        elif operation == "percentage":
+            if len(values) < 2:
+                return None
+            if values[1] == 0:
+                return None  # Avoid division by zero
+            return (values[0] / values[1]) * 100
+        elif operation == "maximum":
+            return max(values)
+        elif operation == "minimum":
+            return min(values)
+        elif operation == "average":
+            return sum(values) / len(values)
+        else:
+            return None
+    except Exception:
+        return None
+
+
 def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str):
     st.markdown(f"#### {title}")
 
@@ -941,10 +1015,16 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
 
     date_fields = [c for c in columns if c.get("type") == "date"]
     date_name = date_fields[0]["name"] if date_fields else None
+    
+    # Separate columns into manual and calculated
+    manual_columns = [c for c in columns if not c.get("formula")]
+    calculated_columns = [c for c in columns if c.get("formula")]
 
     with st.form(key=f"dyn_form_{page_key}_{section_key}_{loc.id}"):
         row = {}
-        for i, col in enumerate(columns):
+        
+        # Render manual input columns
+        for i, col in enumerate(manual_columns):
             ctype = col.get("type", "text")
             label = col.get("label") or col.get("name")
             name = col.get("name")
@@ -954,6 +1034,26 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
                 row[name] = st.number_input(label, step=0.01, format="%.2f", key=f"{page_key}_{section_key}_{loc.id}_num_{i}")
             else:
                 row[name] = st.text_input(label, key=f"{page_key}_{section_key}_{loc.id}_txt_{i}")
+        
+        # Calculate and display calculated columns (read-only preview)
+        if calculated_columns:
+            st.markdown("##### 🧮 Calculated Columns (Auto-computed)")
+            for calc_col in calculated_columns:
+                formula = calc_col.get("formula")
+                label = calc_col.get("label") or calc_col.get("name")
+                name = calc_col.get("name")
+                
+                # Try to evaluate formula with current form data
+                calculated_value = _evaluate_formula(formula, row)
+                
+                if calculated_value is not None:
+                    st.metric(label, f"{calculated_value:.2f}")
+                    row[name] = calculated_value
+                else:
+                    operation = formula.get("operation", "N/A")
+                    cols_used = ", ".join(formula.get("columns", []))
+                    st.info(f"**{label}**: {operation.upper()}({cols_used}) - Will be calculated after input")
+                    row[name] = None
 
         submitted = st.form_submit_button("💾 Save Row", type="primary")
 
@@ -965,6 +1065,9 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
         if col.get("required", False):
             nm = col["name"]
             val = row.get(nm)
+            # Skip validation for calculated columns
+            if col.get("formula"):
+                continue
             if col.get("type") == "text" and (val is None or str(val).strip() == ""):
                 errs.append(f"'{col.get('label')}' is required.")
             elif col.get("type") in ("number", "date") and val is None:
@@ -973,49 +1076,249 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
         for e in errs:
             st.error(e)
         return
+    
+    # Recalculate all formulas with final values before saving
+    for calc_col in calculated_columns:
+        formula = calc_col.get("formula")
+        name = calc_col.get("name")
+        calculated_value = _evaluate_formula(formula, row)
+        row[name] = calculated_value
 
     tx_date = None
     if date_name and row.get(date_name):
         tx_date = row[date_name]
-    data_json = json.dumps(row, default=str)
 
     try:
-        from models import FlexibleRecord
+        from models import create_custom_tab_table, get_custom_table_model
+        from logger import log_info, log_error, log_warning
+        
+        # Derive a deterministic table name per location and section
+        table_name = f"flex_{section_key}_{loc.id}"
+        log_info(f"Saving {section_key} data to table '{table_name}' for location_id={loc.id}, username={(user or {}).get('username', 'system')}")
+        
+        # Ensure table exists with current columns
+        try:
+            log_info(f"Attempting to create/verify table '{table_name}' with {len(columns)} columns")
+            create_custom_tab_table(table_name, columns, loc.id)
+            log_info(f"Table '{table_name}' is ready for use")
+        except Exception as e:
+            log_error(f"Failed to create table '{table_name}': {str(e)}", exc_info=True)
+            st.error(f"❌ Database table '{table_name}' could not be created.")
+            st.error(f"**Error details:** {str(e)}")
+            st.warning("⚠️ Please check:")
+            st.markdown("- Database connection is active")
+            st.markdown("- User has CREATE TABLE permissions")
+            st.markdown("- Database is not in read-only mode")
+            st.markdown("- Column definitions are valid")
+            st.info("💡 Check the logs folder for detailed error information.")
+            return
+            
+        CustomModel = get_custom_table_model(table_name)
+        if not CustomModel:
+            log_error(f"Failed to get model for table '{table_name}' after successful creation")
+            st.error(f"❌ Database table '{table_name}' exists but could not be loaded.")
+            st.error("**Error details:** Model reflection failed after table creation.")
+            st.info("💡 Check the logs folder for detailed error information.")
+            return
+
+        log_info(f"Successfully loaded model for table '{table_name}'. Proceeding to save data...")
+        
         with get_session() as s:
-            rec = FlexibleRecord(
-                location_id=loc.id,
-                page=page_key,
-                section=section_key,
-                tx_date=tx_date,
-                data_json=data_json,
-                created_by=(user or {}).get("username", "system"),
-            )
+            record_data = {
+                "location_id": loc.id,
+                "tx_date": tx_date,
+                "created_by": (user or {}).get("username", "system"),
+            }
+            for col in columns:
+                nm = col.get("name")
+                if nm and nm in row:
+                    record_data[nm] = row[nm]
+            
+            log_info(f"Inserting record into '{table_name}' with data: {record_data}")
+            rec = CustomModel(**record_data)
             s.add(rec)
             s.commit()
+            
+            record_id = getattr(rec, "id", "unknown")
+            log_info(f"✅ Successfully saved record {record_id} to table '{table_name}'")
+            
             try:
                 SecurityManager.log_audit(
-                    s, (user or {}).get("username","system"),
+                    s,
+                    (user or {}).get("username", "system"),
                     "CREATE",
                     resource_type=f"{page_key}:{section_key}",
-                    resource_id=str(getattr(rec, "id", "")),
-                    details=f"Dynamic row saved: {row}",
+                    resource_id=str(record_id),
+                    details=f"Saved to {table_name}: {row}",
                     user_id=(user or {}).get("id"),
                     location_id=loc.id,
                     ip_address=_get_client_ip(),
-                    success=True
+                    success=True,
                 )
-            except Exception:
-                pass
-        st.success("Row saved.")
+            except Exception as audit_ex:
+                log_warning(f"Failed to log audit trail for {table_name}: {str(audit_ex)}")
+                
+        st.success("✅ Row saved successfully!")
+        log_info(f"User notified of successful save to '{table_name}'")
+        
     except Exception as ex:
-        st.info("Dynamic save target model `FlexibleRecord` not found. Define it in models.py to persist rows.")
-        st.error(f"(Developer hint) Save failed: {ex}")
+        log_error(f"Unexpected error while saving {section_key} data to {table_name}: {str(ex)}", exc_info=True)
+        st.error(f"❌ Save failed: {str(ex)}")
+        st.info("💡 Check the logs folder for detailed error information.")
 
 def _render_tab_produced_water(loc, user):
     _render_dynamic_form(loc, user, page_key="tank_transactions", section_key="produced_water", title="💧 Produced Water Records")
 
 def _render_tab_production(loc, user):
     _render_dynamic_form(loc, user, page_key="tank_transactions", section_key="production", title="🏭 Production")
+
+
+def _render_custom_tab(loc, user, tab_def: dict):
+    """
+    Render a custom tab with dynamic columns and save to custom table.
+    
+    Args:
+        loc: Location object
+        user: User dict
+        tab_def: Tab definition with columns and table_name
+    """
+    import json
+    from models import get_custom_table_model
+    
+    tab_name = tab_def.get("name", "Custom Tab")
+    table_name = tab_def.get("table_name")
+    columns = tab_def.get("columns", [])
+    
+    st.markdown(f"#### {tab_name}")
+    
+    if not columns:
+        st.info(f"No columns defined for {tab_name}. Configure in **Page Customization**.")
+        return
+    
+    if not table_name:
+        st.error("No table name defined for this custom tab.")
+        return
+    
+    # Separate manual and calculated columns
+    date_fields = [c for c in columns if c.get("type") == "date"]
+    date_name = date_fields[0]["name"] if date_fields else None
+    manual_columns = [c for c in columns if not c.get("formula")]
+    calculated_columns = [c for c in columns if c.get("formula")]
+    
+    with st.form(key=f"custom_tab_form_{table_name}_{loc.id}"):
+        row = {}
+        
+        # Render manual input columns
+        for i, col in enumerate(manual_columns):
+            ctype = col.get("type", "text")
+            label = col.get("label") or col.get("name")
+            name = col.get("name")
+            
+            if ctype == "date":
+                row[name] = st.date_input(label, key=f"custom_{table_name}_{loc.id}_date_{i}")
+            elif ctype == "number":
+                row[name] = st.number_input(label, step=0.01, format="%.2f", key=f"custom_{table_name}_{loc.id}_num_{i}")
+            else:
+                row[name] = st.text_input(label, key=f"custom_{table_name}_{loc.id}_txt_{i}")
+        
+        # Calculate and display calculated columns
+        if calculated_columns:
+            st.markdown("##### 🧮 Calculated Columns (Auto-computed)")
+            for calc_col in calculated_columns:
+                formula = calc_col.get("formula")
+                label = calc_col.get("label") or calc_col.get("name")
+                name = calc_col.get("name")
+                
+                calculated_value = _evaluate_formula(formula, row)
+                
+                if calculated_value is not None:
+                    st.metric(label, f"{calculated_value:.2f}")
+                    row[name] = calculated_value
+                else:
+                    operation = formula.get("operation", "N/A")
+                    cols_used = ", ".join(formula.get("columns", []))
+                    st.info(f"**{label}**: {operation.upper()}({cols_used}) - Will be calculated after input")
+                    row[name] = None
+        
+        submitted = st.form_submit_button("💾 Save Row", type="primary")
+    
+    if not submitted:
+        return
+    
+    # Validate required fields
+    errs = []
+    for col in columns:
+        if col.get("required", False):
+            nm = col["name"]
+            val = row.get(nm)
+            if col.get("formula"):
+                continue
+            if col.get("type") == "text" and (val is None or str(val).strip() == ""):
+                errs.append(f"'{col.get('label')}' is required.")
+            elif col.get("type") in ("number", "date") and val is None:
+                errs.append(f"'{col.get('label')}' is required.")
+    
+    if errs:
+        for e in errs:
+            st.error(e)
+        return
+    
+    # Recalculate all formulas before saving
+    for calc_col in calculated_columns:
+        formula = calc_col.get("formula")
+        name = calc_col.get("name")
+        calculated_value = _evaluate_formula(formula, row)
+        row[name] = calculated_value
+    
+    # Get tx_date
+    tx_date = None
+    if date_name and row.get(date_name):
+        tx_date = row[date_name]
+    
+    # Save to custom table
+    try:
+        CustomModel = get_custom_table_model(table_name)
+        
+        if CustomModel:
+            with get_session() as s:
+                # Prepare data for insertion
+                record_data = {
+                    "location_id": loc.id,
+                    "tx_date": tx_date,
+                    "created_by": (user or {}).get("username", "system"),
+                }
+                
+                # Add custom columns
+                for col in columns:
+                    col_name = col.get("name")
+                    if col_name and col_name in row:
+                        record_data[col_name] = row[col_name]
+                
+                # Create record
+                record = CustomModel(**record_data)
+                s.add(record)
+                s.commit()
+                
+                try:
+                    SecurityManager.log_audit(
+                        s, (user or {}).get("username", "system"),
+                        "CREATE",
+                        resource_type=f"CustomTab:{tab_name}",
+                        resource_id=str(getattr(record, "id", "")),
+                        details=f"Custom tab row saved: {row}",
+                        user_id=(user or {}).get("id"),
+                        location_id=loc.id,
+                        ip_address=_get_client_ip(),
+                        success=True
+                    )
+                except Exception:
+                    pass
+                
+                st.success(f"Row saved to {tab_name}.")
+        else:
+            st.error(f"Database table `{table_name}` not found. Please contact administrator.")
+    except Exception as ex:
+        st.error(f"Failed to save: {ex}")
 
 
 # ======================= page entry =======================
@@ -1051,6 +1354,25 @@ def render_tank_transactions_page(active_location_id, user):
         ("Produced Water Records", _render_tab_produced_water),
         ("Production", _render_tab_production),
     ]
+    
+    # Load custom tabs
+    from location_config import get_custom_tabs
+    try:
+        with get_session() as s:
+            custom_tabs = get_custom_tabs(s, loc.id, "tank_transactions")
+        
+        for custom_tab in custom_tabs:
+            if custom_tab.get("active", True):
+                tab_label = custom_tab.get("name", "Custom")
+                # Create a closure to capture the custom_tab definition
+                def make_custom_renderer(tab_def):
+                    return lambda loc, user: _render_custom_tab(loc, user, tab_def)
+                
+                tab_defs.append((tab_label, make_custom_renderer(custom_tab)))
+                tab_cfg[tab_label] = True  # Enable custom tabs by default
+    except Exception:
+        pass  # If custom tabs fail to load, continue with standard tabs
+    
     enabled = [(label, fn) for (label, fn) in tab_defs if tab_cfg.get(label, False)]
 
     if not enabled:

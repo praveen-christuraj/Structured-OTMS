@@ -331,7 +331,38 @@ def _open_pdf_blob_new_tab(pdf_bytes: bytes) -> None:
 
 def render_tanker_transactions_view(user: Dict[str, Any] | None = None, location_id: Optional[int] = None) -> None:
     st.subheader("Tanker — View Transactions")
+    
+    # Load custom tabs
+    custom_tabs = []
+    try:
+        from location_config import get_custom_tabs
+        if location_id:
+            with get_session() as s:
+                custom_tabs = get_custom_tabs(s, location_id, "tanker_transactions")
+                custom_tabs = [t for t in custom_tabs if t.get("active", True)]
+    except Exception:
+        pass
+    
+    # Create tabs if custom tabs exist
+    if custom_tabs:
+        tab_labels = ["Tanker Dispatch"] + [t.get("name", "Custom") for t in custom_tabs]
+        tabs = st.tabs(tab_labels)
+        
+        # Main tanker dispatch tab
+        with tabs[0]:
+            _render_main_tanker_view(user, location_id)
+        
+        # Custom tabs
+        for idx, custom_tab in enumerate(custom_tabs, start=1):
+            with tabs[idx]:
+                _render_custom_tanker_tab_view(location_id, custom_tab, user)
+    else:
+        # No custom tabs, render normally
+        _render_main_tanker_view(user, location_id)
 
+
+def _render_main_tanker_view(user: Dict[str, Any] | None, location_id: Optional[int]) -> None:
+    """Render main tanker transactions view"""
     # Load all (filter in Python to stay consistent with your current pattern)
     with get_session() as s:
         rows: List[TankerTransaction] = (
@@ -1090,6 +1121,331 @@ def _render_tanker_detail_view(tx: TankerTransaction, user: Dict[str, Any], loca
     with action_col1:
         if st.button("Close Viewer", key=f"close_detail_{tx.id}"):
             st.session_state.pop("tanker_view_selected", None)
+
+
+# ========== Custom Tab View ==========
+
+def _render_custom_tanker_tab_view(location_id: Optional[int], tab_def: dict, user: Dict[str, Any] | None) -> None:
+    """Render custom tab data view with edit/delete functionality"""
+    from models import get_custom_table_model
+    import pandas as pd
+    from datetime import date, timedelta
+    
+    tab_name = tab_def.get("name", "Custom Tab")
+    table_name = tab_def.get("table_name")
+    columns = tab_def.get("columns", [])
+    
+    st.markdown(f"#### {tab_name}")
+    
+    if not table_name:
+        st.error("No table name defined for this custom tab.")
+        return
+    
+    CustomModel = get_custom_table_model(table_name)
+    if not CustomModel:
+        st.error(f"Database table `{table_name}` not found.")
+        return
+    
+    # Filters
+    today = date.today()
+    default_from = today - timedelta(days=30)
+    
+    f1, f2, f3 = st.columns(3)
+    with f1:
+        date_from = st.date_input("From Date", value=default_from, key=f"ctv_{table_name}_from")
+    with f2:
+        date_to = st.date_input("To Date", value=today, key=f"ctv_{table_name}_to")
+    with f3:
+        created_by_filter = st.text_input("Created By (contains)", key=f"ctv_{table_name}_creator")
+    
+    # Load data
+    with get_session() as s:
+        query = s.query(CustomModel).filter(CustomModel.location_id == location_id)
+        
+        if hasattr(CustomModel, 'tx_date'):
+            if date_from:
+                query = query.filter(CustomModel.tx_date >= date_from)
+            if date_to:
+                query = query.filter(CustomModel.tx_date <= date_to)
+        
+        if created_by_filter and hasattr(CustomModel, 'created_by'):
+            query = query.filter(CustomModel.created_by.contains(created_by_filter))
+        
+        records = query.order_by(CustomModel.id.desc()).all()
+    
+    if not records:
+        st.info(f"No records found for {tab_name}.")
+        return
+    
+    st.metric("Total Records", len(records))
+    st.markdown("---")
+    
+    # Prepare table data
+    table_data = []
+    for rec in records:
+        row_dict = {
+            "ID": getattr(rec, "id", ""),
+            "Date": str(getattr(rec, "tx_date", "")) if hasattr(rec, "tx_date") else "",
+            "Created By": getattr(rec, "created_by", "") or "",
+            "Created At": getattr(rec, "created_at").strftime("%Y-%m-%d %H:%M") if hasattr(rec, "created_at") and getattr(rec, "created_at") else "",
+        }
+        
+        # Add custom columns
+        for col in columns:
+            col_name = col.get("name")
+            col_label = col.get("label", col_name)
+            if col_name and hasattr(rec, col_name):
+                value = getattr(rec, col_name)
+                if col.get("type") == "number" and value is not None:
+                    row_dict[col_label] = f"{float(value):.2f}"
+                elif col.get("type") == "date" and value:
+                    row_dict[col_label] = str(value)
+                else:
+                    row_dict[col_label] = value or ""
+            else:
+                row_dict[col_label] = ""
+        
+        table_data.append(row_dict)
+    
+    # Display table with action buttons
+    if table_data:
+        df = pd.DataFrame(table_data)
+        st.dataframe(df, use_container_width=True, height=400)
+        
+        # Export
+        st.markdown("---")
+        col1, col2 = st.columns([0.2, 0.8])
+        with col1:
+            st.markdown("**Export:**")
+        with col2:
+            csv = df.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                "⬇️ Download CSV",
+                data=csv,
+                file_name=f"{tab_name.lower().replace(' ', '_')}_data.csv",
+                mime="text/csv"
+            )
+        
+        st.markdown("---")
+        st.markdown("##### 📝 Actions")
+        st.markdown("Select a record to edit or delete:")
+        st.markdown("")
+        
+        # Create a cleaner table view with action buttons
+        for idx, rec in enumerate(records):
+            rec_id = getattr(rec, "id")
+            tx_date = getattr(rec, "tx_date", None) if hasattr(rec, "tx_date") else None
+            created_by = getattr(rec, "created_by", "") if hasattr(rec, "created_by") else ""
+            created_at = getattr(rec, "created_at", None) if hasattr(rec, "created_at") else None
+            updated_at = getattr(rec, "updated_at", None) if hasattr(rec, "updated_at") else None
+            
+            # Show summary data from custom columns
+            summary_parts = [f"ID {rec_id}"]
+            if tx_date:
+                summary_parts.append(str(tx_date))
+            
+            # Add first 2 custom column values as preview
+            preview_count = 0
+            for col in columns[:3]:
+                col_name = col.get("name")
+                col_label = col.get("label", col_name)
+                if col_name and hasattr(rec, col_name) and preview_count < 2:
+                    value = getattr(rec, col_name)
+                    if value is not None:
+                        if col.get("type") == "number":
+                            summary_parts.append(f"{col_label}: {float(value):.2f}")
+                        else:
+                            summary_parts.append(f"{col_label}: {value}")
+                        preview_count += 1
+            
+            summary = " • ".join(summary_parts)
+            
+            col1, col2, col3, col4 = st.columns([0.50, 0.25, 0.125, 0.125])
+            
+            with col1:
+                edit_indicator = " ⚠️" if updated_at else ""
+                st.text(f"{summary}{edit_indicator}")
+            
+            with col2:
+                created_str = created_at.strftime("%Y-%m-%d %H:%M") if created_at else "Unknown"
+                st.caption(f"By: {created_by or 'Unknown'} • {created_str}")
+            
+            with col3:
+                if st.button("✏️ Edit", key=f"edit_ctv_{table_name}_{rec_id}"):
+                    st.session_state[f"editing_ctv_{table_name}_{rec_id}"] = True
+                    st.rerun()
+            
+            with col4:
+                if st.button("🗑️ Delete", key=f"delete_ctv_{table_name}_{rec_id}"):
+                    st.session_state[f"deleting_ctv_{table_name}_{rec_id}"] = True
+                    st.rerun()
+            
+            # Edit modal
+            if st.session_state.get(f"editing_ctv_{table_name}_{rec_id}"):
+                _render_ctv_edit_modal(rec, tab_def, user)
+            
+            # Delete confirmation
+            if st.session_state.get(f"deleting_ctv_{table_name}_{rec_id}"):
+                _render_ctv_delete_confirmation(rec, tab_def, user)
+            
+            st.markdown("---")
+
+
+def _render_ctv_edit_modal(record, tab_def: dict, user: Dict[str, Any] | None):
+    """Edit modal for custom tanker tab record"""
+    from models import get_custom_table_model
+    from datetime import datetime as dt
+    
+    tab_name = tab_def.get("name", "Custom Tab")
+    table_name = tab_def.get("table_name")
+    columns = tab_def.get("columns", [])
+    rec_id = getattr(record, "id")
+    
+    st.markdown(f"### ✏️ Edit {tab_name} Record (ID: {rec_id})")
+    
+    created_by = getattr(record, "created_by", "") if hasattr(record, "created_by") else ""
+    created_at = getattr(record, "created_at", None) if hasattr(record, "created_at") else None
+    updated_at = getattr(record, "updated_at", None) if hasattr(record, "updated_at") else None
+    
+    if updated_at:
+        st.warning(f"⚠️ This record was last edited on {updated_at.strftime('%Y-%m-%d %H:%M')}")
+    
+    st.caption(f"**Created by:** {created_by or 'Unknown'} on {created_at.strftime('%Y-%m-%d %H:%M') if created_at else 'Unknown'}")
+    
+    with st.form(key=f"edit_ctv_form_{table_name}_{rec_id}"):
+        edited_values = {}
+        
+        # Separate manual and calculated columns
+        manual_columns = [c for c in columns if not c.get("formula")]
+        calculated_columns = [c for c in columns if c.get("formula")]
+        
+        # Render editable fields
+        for col in manual_columns:
+            col_name = col.get("name")
+            col_label = col.get("label", col_name)
+            col_type = col.get("type", "text")
+            current_value = getattr(record, col_name, None) if hasattr(record, col_name) else None
+            
+            if col_type == "date":
+                edited_values[col_name] = st.date_input(col_label, value=current_value, key=f"edit_ctv_{table_name}_{rec_id}_{col_name}")
+            elif col_type == "number":
+                edited_values[col_name] = st.number_input(col_label, value=float(current_value) if current_value is not None else 0.0, step=0.01, format="%.2f", key=f"edit_ctv_{table_name}_{rec_id}_{col_name}")
+            else:
+                edited_values[col_name] = st.text_input(col_label, value=str(current_value) if current_value else "", key=f"edit_ctv_{table_name}_{rec_id}_{col_name}")
+        
+        # Recalculate formulas
+        if calculated_columns:
+            st.markdown("##### 🧮 Calculated Columns (Auto-updated)")
+            from tank_transactions import _evaluate_formula
+            
+            for calc_col in calculated_columns:
+                formula = calc_col.get("formula")
+                col_label = calc_col.get("label", calc_col.get("name"))
+                col_name = calc_col.get("name")
+                
+                calculated_value = _evaluate_formula(formula, edited_values)
+                if calculated_value is not None:
+                    st.metric(col_label, f"{calculated_value:.2f}")
+                    edited_values[col_name] = calculated_value
+                else:
+                    edited_values[col_name] = None
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.form_submit_button("💾 Save Changes", type="primary"):
+                try:
+                    CustomModel = get_custom_table_model(table_name)
+                    with get_session() as s:
+                        rec = s.query(CustomModel).get(rec_id)
+                        if rec:
+                            # Update fields
+                            for col_name, value in edited_values.items():
+                                if hasattr(rec, col_name):
+                                    setattr(rec, col_name, value)
+                            
+                            # Set updated_at timestamp
+                            if hasattr(rec, "updated_at"):
+                                setattr(rec, "updated_at", dt.now())
+                            
+                            s.commit()
+                            
+                            # Audit log
+                            try:
+                                SecurityManager.log_audit(
+                                    s, (user or {}).get("username", "system"), "UPDATE",
+                                    resource_type=f"CustomTankerTab:{tab_name}",
+                                    resource_id=str(rec_id),
+                                    details=f"Edited {tab_name} record. Updated by {(user or {}).get('username')} at {dt.now().strftime('%Y-%m-%d %H:%M')}",
+                                    user_id=(user or {}).get("id"),
+                                    location_id=getattr(record, "location_id"),
+                                    ip_address=None,
+                                    success=True
+                                )
+                            except Exception:
+                                pass
+                            
+                            st.success(f"✅ {tab_name} record updated successfully!")
+                            del st.session_state[f"editing_ctv_{table_name}_{rec_id}"]
+                            st.rerun()
+                except Exception as ex:
+                    st.error(f"Failed to update: {ex}")
+        
+        with col2:
+            if st.form_submit_button("❌ Cancel"):
+                del st.session_state[f"editing_ctv_{table_name}_{rec_id}"]
+                st.rerun()
+
+
+def _render_ctv_delete_confirmation(record, tab_def: dict, user: Dict[str, Any] | None):
+    """Delete confirmation for custom tanker tab record"""
+    from models import get_custom_table_model
+    
+    tab_name = tab_def.get("name", "Custom Tab")
+    table_name = tab_def.get("table_name")
+    rec_id = getattr(record, "id")
+    
+    st.warning(f"⚠️ Are you sure you want to delete {tab_name} record ID {rec_id}?")
+    st.caption("This action cannot be undone.")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🗑️ Confirm Delete", key=f"confirm_delete_ctv_{table_name}_{rec_id}", type="primary"):
+            try:
+                CustomModel = get_custom_table_model(table_name)
+                with get_session() as s:
+                    rec = s.query(CustomModel).get(rec_id)
+                    if rec:
+                        location_id = getattr(rec, "location_id")
+                        
+                        # Audit log before deleting
+                        try:
+                            SecurityManager.log_audit(
+                                s, (user or {}).get("username", "system"), "DELETE",
+                                resource_type=f"CustomTankerTab:{tab_name}",
+                                resource_id=str(rec_id),
+                                details=f"Deleted {tab_name} record",
+                                user_id=(user or {}).get("id"),
+                                location_id=location_id,
+                                ip_address=None,
+                                success=True
+                            )
+                        except Exception:
+                            pass
+                        
+                        s.delete(rec)
+                        s.commit()
+                        
+                        st.success(f"✅ {tab_name} record deleted successfully!")
+                        del st.session_state[f"deleting_ctv_{table_name}_{rec_id}"]
+                        st.rerun()
+            except Exception as ex:
+                st.error(f"Failed to delete: {ex}")
+    
+    with col2:
+        if st.button("❌ Cancel", key=f"cancel_delete_ctv_{table_name}_{rec_id}"):
+            del st.session_state[f"deleting_ctv_{table_name}_{rec_id}"]
+            st.rerun()
+
             st.rerun()
     with action_col2:
         st.caption("Edit functionality would be implemented in tanker_transactions.py entry form")

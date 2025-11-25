@@ -1,0 +1,617 @@
+# Custom Tabs Feature - Complete Guide
+
+## Overview
+The Custom Tabs feature allows administrators to dynamically create new tabs with custom columns in Tank Transactions and Tanker Transactions pages. Each custom tab automatically creates its own database table and becomes available as a data source for reporting.
+
+## Key Features
+
+### 1. Dynamic Tab Creation
+- Create unlimited custom tabs for any page
+- Define custom columns with various data types
+- Support for calculated columns with formulas
+- Each tab gets its own dedicated database table
+
+### 2. Flexible Column Configuration
+- **Column Types**: Text, Number, Date
+- **Column Properties**: Name, Label, Required flag
+- **Calculated Columns**: Automatic calculations based on other columns
+- **Formula Support**: Sum, Subtract, Multiply, Divide, Percentage, Maximum, Minimum, Average
+
+### 3. Automatic Database Management
+- Tables are created automatically when tabs are created
+- Standardized schema with location tracking
+- Audit trail for all entries
+- Preserved data even after tab deactivation
+
+### 4. Reporting Integration
+- Custom tab tables appear automatically in Report Customization
+- Full support for filtering, sorting, and grouping
+- Compatible with all report types
+
+---
+
+## How to Create a Custom Tab
+
+### Step 1: Access Page Customization
+1. Navigate to **Settings → Page Customization**
+2. Select your location
+3. Scroll down to **"📑 Custom Tabs Management"**
+4. Expand **"➕ Create New Custom Tab"**
+
+### Step 2: Configure Tab Settings
+
+#### Basic Information
+1. **Target Page**: Select where the tab should appear
+   - Tank Transactions
+   - Tanker Transactions
+
+2. **Tab Name**: Enter a descriptive name
+   - Example: "Daily Production Summary"
+   - Example: "Chemical Injection Log"
+   - Example: "Quality Control Data"
+
+#### Column Configuration
+3. **Number of Columns**: Set how many columns you need (1-20)
+
+4. **For Each Column, Configure**:
+   - **Field Name**: Internal identifier (no spaces)
+     - Example: `production_date`, `crude_volume`, `water_cut`
+   - **Label**: Display name shown to users
+     - Example: "Production Date", "Crude Volume (bbls)", "Water Cut %"
+   - **Type**: Data type
+     - `text`: Free text entry
+     - `number`: Numeric values with decimals
+     - `date`: Date picker
+   - **Required**: Check if field must be filled
+
+#### Formula Configuration (Optional)
+5. **For Calculated Columns**:
+   - Click **"➕ Formula"** expander
+   - Check **"Enable Formula"**
+   - Select **Operation**:
+     - Sum: Add columns together
+     - Subtract: Sequential subtraction
+     - Multiply: Multiply columns
+     - Divide: Sequential division
+     - Percentage: (A ÷ B) × 100
+     - Maximum: Highest value
+     - Minimum: Lowest value
+     - Average: Mean value
+   - Select **Columns** to use in calculation
+   - Review formula preview
+
+### Step 3: Create the Tab
+1. Click **"✅ Create Custom Tab"**
+2. System will:
+   - Save configuration to location settings
+   - Create database table automatically
+   - Make tab available immediately
+   - Add table to report data sources
+
+### Step 4: Verify Creation
+1. Navigate to Tank Transactions or Tanker Transactions
+2. Look for your new tab in the tab bar
+3. Test data entry
+4. Verify calculated columns work correctly
+
+---
+
+## Using Custom Tabs
+
+### Data Entry
+
+When users access a custom tab:
+
+1. **Manual Entry Fields** appear as normal input controls
+2. **Calculated Fields** appear in a separate section showing:
+   - Real-time preview of calculated values
+   - Formula being used
+   - Final computed value
+3. **Save Button** validates and saves the complete record
+
+### Example Workflow
+
+**Custom Tab: "Daily Production Report"**
+
+Columns:
+1. Report Date (date) - Required
+2. Crude Oil (number) - Manual
+3. Natural Gas (number) - Manual
+4. Condensate (number) - Manual
+5. Total Hydrocarbon (number) - Calculated (Sum of 2, 3, 4)
+
+**User Experience:**
+```
+Daily Production Report
+━━━━━━━━━━━━━━━━━━━━
+Report Date:        [Date Picker]
+Crude Oil (bbls):   [1000.00]
+Natural Gas (mcf):  [500.00]
+Condensate (bbls):  [250.00]
+
+🧮 Calculated Columns (Auto-computed)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Hydrocarbon:  1750.00
+(Formula: SUM(crude_oil, natural_gas, condensate))
+
+[💾 Save Row]
+```
+
+---
+
+## Managing Existing Custom Tabs
+
+### View Custom Tabs
+1. Go to **Settings → Page Customization**
+2. Expand **"📋 Manage Existing Custom Tabs"**
+3. Tabs are organized by page (Tank Transactions, Tanker Transactions)
+
+### For Each Tab, You Can:
+
+#### Deactivate/Activate
+- **Deactivate**: Hides tab from users but preserves data and configuration
+- **Activate**: Makes tab visible again
+- Click **"⏸️ Deactivate"** or **"▶️ Activate"** button
+
+#### View Details
+- Click **"View Columns"** expander to see:
+  - All column definitions
+  - Column types
+  - Required fields
+  - Formulas (if any)
+
+#### Delete Tab
+- Click **"🗑️ Delete"** button
+- Removes tab configuration from system
+- **Important**: Database table is preserved for data safety
+- Contact IT if you need the table completely removed
+
+---
+
+## Database Tables
+
+### Table Naming Convention
+```
+custom_[tab_name]_[location_id]
+```
+
+Examples:
+- `custom_daily_production_summary_1`
+- `custom_chemical_injection_log_2`
+- `custom_quality_control_data_3`
+
+### Standard Table Schema
+
+Every custom tab table includes:
+
+**System Columns** (automatic):
+- `id`: Primary key (auto-increment)
+- `location_id`: Foreign key to locations table
+- `tx_date`: Transaction date (from date column or NULL)
+- `created_by`: Username who created the record
+- `created_at`: Timestamp when record was created
+- `updated_at`: Timestamp of last update
+
+**Custom Columns** (your configuration):
+- All columns you defined in the tab configuration
+- Column names match the "Field name" you specified
+- Data types mapped from your selection (text=VARCHAR, number=FLOAT, date=DATE)
+
+### Example Table Structure
+
+For a tab with 5 columns (Date, Value A, Value B, Value C, Total):
+
+```sql
+CREATE TABLE custom_production_summary_1 (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    location_id INTEGER NOT NULL,
+    tx_date DATE,
+    created_by VARCHAR(64),
+    created_at DATETIME DEFAULT NOW(),
+    updated_at DATETIME,
+    report_date DATE,           -- Custom column 1
+    value_a FLOAT,              -- Custom column 2
+    value_b FLOAT,              -- Custom column 3
+    value_c FLOAT,              -- Custom column 4
+    total FLOAT,                -- Custom column 5 (calculated)
+    FOREIGN KEY (location_id) REFERENCES locations(id)
+);
+```
+
+---
+
+## Using Custom Tabs in Reports
+
+### Accessing Custom Tab Data
+
+Custom tab tables are automatically available in Report Customization.
+
+1. Go to **Settings → Report Customization**
+2. Click **"📝 Create New Report"**
+3. In **"Select Data Source"**, you'll see:
+   - All standard tables (Tank Transactions, etc.)
+   - All custom tab tables (e.g., `custom_production_summary_1`)
+
+### Data Source Display
+
+Custom tables appear with their generated names:
+- `custom_daily_production_summary_1`
+- `custom_chemical_injection_log_2`
+
+### Available Columns for Reporting
+
+When you select a custom table, you can report on:
+- All system columns (id, location_id, tx_date, created_by, created_at)
+- All custom columns you defined
+- Calculated column values (stored after calculation)
+
+### Report Configuration Example
+
+**Scenario**: Daily production summary report
+
+**Data Source**: `custom_production_summary_1`
+
+**Columns to Include**:
+- tx_date (Report Date)
+- value_a (Crude Oil)
+- value_b (Natural Gas)
+- value_c (Condensate)
+- total (Total Hydrocarbon - calculated)
+
+**Filters**:
+- tx_date between [start_date] and [end_date]
+- location_id = [user_location]
+
+**Grouping**: By tx_date
+
+**Result**: Daily totals with automatic calculations
+
+---
+
+## Advanced Use Cases
+
+### Use Case 1: Multi-Stream Production Tracking
+
+**Tab Name**: "Multi-Stream Production"
+
+**Columns**:
+1. Date (date, required)
+2. Stream A (number)
+3. Stream B (number)
+4. Stream C (number)
+5. Stream D (number)
+6. Stream E (number)
+7. Total Production (number, calculated: SUM of streams)
+8. Average Stream (number, calculated: AVERAGE of streams)
+9. Peak Stream (number, calculated: MAXIMUM of streams)
+
+**Benefits**:
+- Track multiple production streams
+- Automatic totals and statistics
+- Historical data for trend analysis
+
+### Use Case 2: Quality Control Measurements
+
+**Tab Name**: "Quality Control Log"
+
+**Columns**:
+1. Test Date (date, required)
+2. Sample ID (text, required)
+3. API Gravity (number)
+4. Density (number)
+5. Temperature (number)
+6. BS&W % (number)
+7. Net Volume (number)
+8. BS&W Volume (number, calculated: Net × BS&W%)
+
+**Benefits**:
+- Structured quality data
+- Automatic BS&W calculations
+- Compliance reporting
+
+### Use Case 3: Chemical Injection Tracking
+
+**Tab Name**: "Chemical Injection"
+
+**Columns**:
+1. Date (date, required)
+2. Chemical Type (text, required)
+3. Opening Stock (number)
+4. Received (number)
+5. Consumed (number)
+6. Closing Stock (number, calculated: Opening + Received - Consumed)
+
+**Benefits**:
+- Inventory tracking
+- Automatic balance calculation
+- Usage reporting
+
+### Use Case 4: Equipment Performance Monitoring
+
+**Tab Name**: "Pump Performance"
+
+**Columns**:
+1. Date (date, required)
+2. Pump ID (text, required)
+3. Run Hours (number)
+4. Volume Pumped (number)
+5. Power Consumption (number)
+6. Efficiency (number, calculated: Volume ÷ Power × 100)
+
+**Benefits**:
+- Performance metrics
+- Efficiency tracking
+- Maintenance scheduling
+
+---
+
+## Best Practices
+
+### Naming Conventions
+
+**Tab Names**:
+- Use descriptive, specific names
+- Include the purpose: "Daily Production Summary" not "Production"
+- Avoid special characters
+- Keep under 50 characters
+
+**Field Names**:
+- Use lowercase with underscores: `crude_volume`, `water_cut_pct`
+- Be consistent across tabs
+- Avoid spaces and special characters
+- Make them meaningful for database queries
+
+**Labels**:
+- Use proper case: "Crude Volume (bbls)"
+- Include units: "Temperature (°F)", "Volume (m³)"
+- Be user-friendly
+- Keep reasonably short
+
+### Column Organization
+
+1. **Start with Date**: If tracking time-series data, make the first column a date
+2. **Group Related Fields**: Put related inputs together
+3. **Calculated Fields Last**: Place formulas at the end
+4. **Logical Flow**: Order columns as users would enter them
+
+### Formula Design
+
+1. **Check for Zero Division**: Use divide carefully
+2. **Validate Inputs**: Mark source columns as required if needed for calculation
+3. **Test Formulas**: Create test entries to verify calculations
+4. **Document Logic**: Use clear labels that explain the calculation
+
+### Data Entry
+
+1. **Set Required Fields**: Mark essential fields as required
+2. **Provide Guidance**: Use clear labels and units
+3. **Validate Early**: Test tab with sample data before rolling out
+4. **Train Users**: Ensure users understand calculated vs manual fields
+
+### Maintenance
+
+1. **Regular Reviews**: Check if tabs are still needed
+2. **Deactivate Unused**: Don't delete immediately, deactivate first
+3. **Monitor Usage**: Use audit logs to see if tabs are being used
+4. **Backup Data**: Ensure database backups include custom tables
+
+---
+
+## Troubleshooting
+
+### Tab Not Appearing
+
+**Problem**: Created tab doesn't show on the page
+
+**Solutions**:
+1. Check tab is set to "Active" in management section
+2. Verify correct target page was selected
+3. Refresh the browser page
+4. Check location is correct
+
+### Database Table Not Created
+
+**Problem**: Error message about missing table
+
+**Solutions**:
+1. Check database permissions
+2. Contact IT to manually create table
+3. Try recreating the tab
+4. Check database logs for errors
+
+### Formula Not Calculating
+
+**Problem**: Calculated column shows no value
+
+**Solutions**:
+1. Ensure source columns have values entered
+2. Check formula includes correct column names
+3. Verify column types are numeric
+4. Check for division by zero
+
+### Can't Delete Tab
+
+**Problem**: Delete button doesn't work
+
+**Solutions**:
+1. Deactivate tab first, then delete
+2. Check you have admin permissions
+3. Check if tab is referenced in active reports
+4. Contact system administrator
+
+### Data Not Saving
+
+**Problem**: Form submits but data doesn't save
+
+**Solutions**:
+1. Check database table exists
+2. Verify column names match configuration
+3. Check required fields are filled
+4. Look at browser console for errors
+5. Check database connectivity
+
+---
+
+## Security and Permissions
+
+### Who Can Create Custom Tabs?
+- Only users with admin permissions
+- Managed through Page Customization page
+- Requires "admin-operations", "admin-it", or "manager" role
+
+### Who Can Enter Data?
+- Users with operational page access
+- Controlled by location-specific permissions
+- Same permissions as standard tabs
+
+### Data Access
+- Users can only see data for their assigned location
+- Location filtering enforced at database level
+- Audit trail tracks all data entries
+
+### Audit Trail
+Every custom tab action is logged:
+- Tab creation (who, when, configuration)
+- Tab modification (activation/deactivation)
+- Data entry (user, timestamp, values)
+- Tab deletion (who, when)
+
+---
+
+## Technical Architecture
+
+### Components
+
+1. **location_config.py**
+   - Functions: `get_custom_tabs()`, `add_custom_tab()`, `update_custom_tab()`, `delete_custom_tab()`
+   - Storage: LocationConfig JSON in database
+   - Scope: Per-location configuration
+
+2. **models.py**
+   - Functions: `create_custom_tab_table()`, `get_custom_table_model()`, `drop_custom_tab_table()`
+   - Purpose: Dynamic table creation and reflection
+   - Uses: SQLAlchemy metadata and automap
+
+3. **page_customization.py**
+   - UI: Custom tabs management interface
+   - Features: Create, edit, delete tabs
+   - Includes: Formula builder UI
+
+4. **tank_transactions.py & tanker_transactions.py**
+   - Function: `_render_custom_tab()`
+   - Dynamic: Loads tabs at runtime
+   - Rendering: Creates form based on column definitions
+
+5. **report_engine.py**
+   - Enhanced: `get_available_data_sources()` includes custom tables
+   - Enhanced: `get_columns_for_source()` reflects custom tables
+   - Enhanced: `build_query()` supports custom table models
+
+### Data Flow
+
+**Tab Creation**:
+1. User fills form in page_customization.py
+2. Configuration saved to LocationConfig
+3. Table created via create_custom_tab_table()
+4. Tab immediately available in target page
+
+**Data Entry**:
+1. User selects custom tab in Tank/Tanker Transactions
+2. Form rendered dynamically based on column config
+3. Formulas evaluated in real-time
+4. Data saved to custom table
+5. Audit log created
+
+**Reporting**:
+1. Report Customization loads available sources
+2. Custom tables included via get_available_data_sources()
+3. User selects custom table as source
+4. Column metadata loaded via get_columns_for_source()
+5. Query built and executed
+
+---
+
+## Migration and Backup
+
+### Backing Up Custom Tabs
+
+**Configuration Backup**:
+- Included in LocationConfig JSON backup
+- Export from location_config table
+- Contains all tab definitions and formulas
+
+**Data Backup**:
+- Include custom_* tables in database backup
+- Standard database backup procedures apply
+- Export individual tables if needed
+
+### Moving Between Environments
+
+**Dev to Production**:
+1. Export LocationConfig for the location
+2. Import to production database
+3. Tables will auto-create on first use
+4. Or manually create tables using same schema
+
+### Data Migration
+
+If you need to move data between custom tables:
+1. Export data from source table (CSV/SQL)
+2. Transform column names if needed
+3. Import to destination table
+4. Verify data integrity
+
+---
+
+## Support and Maintenance
+
+### Getting Help
+
+**For Configuration Issues**:
+- Contact system administrator
+- Check Page Customization settings
+- Review documentation
+
+**For Data Issues**:
+- Check audit logs for recent changes
+- Verify data entry procedures
+- Contact database administrator
+
+**For Report Issues**:
+- Verify table name in data source
+- Check column mappings
+- Test with smaller date range
+
+### Maintenance Tasks
+
+**Weekly**:
+- Monitor active tabs usage
+- Review data entry patterns
+- Check for errors in audit logs
+
+**Monthly**:
+- Review unused tabs (consider deactivating)
+- Analyze calculated column accuracy
+- Optimize table indexes if needed
+
+**Quarterly**:
+- Audit tab configurations
+- Review and update documentation
+- Archive old data if needed
+
+---
+
+## Summary
+
+The Custom Tabs feature provides powerful flexibility for adapting the OTMS system to location-specific needs without code changes. By allowing administrators to create dynamic forms with calculated columns and automatic database integration, the system can evolve with your operational requirements.
+
+**Key Benefits**:
+✅ No coding required
+✅ Immediate deployment
+✅ Full reporting integration
+✅ Location-specific customization
+✅ Audit trail included
+✅ Formula support
+✅ Scalable architecture
+
+For questions or advanced customization needs, contact your OTMS system administrator or IT support team.

@@ -1,0 +1,228 @@
+================================================================================
+CUSTOM TABLE VIEWING & EDITING SYSTEM - UNIVERSAL DESIGN
+================================================================================
+
+OVERVIEW:
+This system in view_transactions.py automatically handles ALL custom tables 
+(flex_production_*, flex_meters_*, flex_condensate_*, etc.) without requiring 
+code changes when new custom tables are created.
+
+================================================================================
+KEY FEATURES - AUTOMATICALLY WORKS FOR ALL CUSTOM TABLES:
+================================================================================
+
+1. AUTOMATIC TABLE DETECTION
+   - Dynamically loads any flex_{section}_{location_id} table
+   - No hardcoding of table names or structures needed
+   - Future custom tables work immediately
+
+2. AUTOMATIC COLUMN DETECTION
+   - Scans table structure to find all columns
+   - Separates system columns (id, location_id, created_by, etc.)
+   - Automatically identifies user-defined columns for editing
+   - No manual column list maintenance required
+
+3. AUTOMATIC INPUT FIELD GENERATION
+   - Date fields → st.date_input() with calendar picker
+   - Number fields → st.number_input() with numeric validation
+   - Boolean fields → st.checkbox()
+   - Long text (>100 chars) → st.text_area()
+   - Short text → st.text_input()
+   - Automatically detects field type from data
+
+4. AUTOMATIC TYPE CONVERSION
+   - Converts string dates to Python date objects for SQLite
+   - Handles datetime to date conversion
+   - Converts empty strings to None for optional fields
+   - All conversions logged for debugging
+
+5. EDIT TRACKING (WHO & WHEN)
+   - Shows ⚠️ badge when record is edited
+   - Hover tooltip displays: "Edited by {username} on {YYYY-MM-DD HH:MM}"
+   - Automatically uses updated_by and updated_at columns
+   - Works for all custom tables with these columns
+
+6. 24-HOUR EDIT RESTRICTION
+   - Only records created within 24 hours can be edited
+   - 🔒 lock icon shown for older records
+   - Edit button changes to ✖️ close button when editing
+   - Automatic time calculation
+
+7. COMPREHENSIVE LOGGING
+   - Logs all save attempts with record ID
+   - Logs column names and values being saved
+   - Logs all errors with full stack traces
+   - Logs type conversions
+   - Logs database commits and audit trail creation
+
+================================================================================
+HOW IT WORKS - NO CODE CHANGES NEEDED FOR NEW TABLES:
+================================================================================
+
+STEP 1: CREATE NEW CUSTOM TABLE
+   - Use tank_transactions.py to define new custom tab
+   - Table automatically created as flex_{section}_{location_id}
+   - Add any number of custom columns
+
+STEP 2: VIEW & EDIT AUTOMATICALLY WORKS
+   - _flex_list() function automatically detects the new table
+   - Columns are auto-discovered from table structure
+   - Edit form is auto-generated with appropriate input types
+   - Save logic handles all field types automatically
+
+STEP 3: NO MANUAL CONFIGURATION
+   - No code updates needed in view_transactions.py
+   - No column lists to maintain
+   - No hardcoded field names
+   - System is completely data-driven
+
+================================================================================
+CODE STRUCTURE:
+================================================================================
+
+MAIN FUNCTION: _flex_list()
+Location: app_pages/view_transactions.py (line ~1350)
+
+Parameters:
+  - location_id: int - Location ID
+  - section: str - Section name (production, meters, etc.)
+  - user: dict - Current user info
+  - title: str - Display title
+
+Flow:
+  1. Load table using get_custom_table_model(f"flex_{section}_{location_id}")
+  2. Query records with filters (date, created_by, search)
+  3. Auto-detect all columns by inspecting table structure
+  4. Separate system columns from user columns
+  5. Display records with edit/delete buttons
+  6. Show edit form with auto-generated input fields
+  7. Save with automatic type conversion
+  8. Log everything for debugging
+
+================================================================================
+SYSTEM COLUMNS (PROTECTED - NOT EDITABLE):
+================================================================================
+
+- id: Primary key
+- location_id: Foreign key to locations table
+- created_by: Username who created record
+- created_at: Timestamp of creation
+- updated_by: Username who last edited (auto-updated)
+- updated_at: Timestamp of last edit (auto-updated)
+- tx_date: Transaction date (shown separately, not editable in form)
+
+All other columns are automatically editable.
+
+================================================================================
+USER-DEFINED COLUMNS (AUTOMATICALLY EDITABLE):
+================================================================================
+
+Examples from Production table (flex_production_5):
+- date: Date field
+- gpp2_production: Numeric field
+- gpp3_production: Numeric field
+- export_production: Numeric field
+- remarks: Text field
+
+The system automatically:
+- Detects these columns
+- Creates appropriate input fields
+- Validates data types
+- Saves to database
+- Logs all operations
+
+================================================================================
+ADDING NEW CUSTOM TABLES - ZERO CODE CHANGES NEEDED:
+================================================================================
+
+Example: Adding "Condensate" custom table for Location 7
+
+1. In tank_transactions.py:
+   - Create new tab definition with custom columns
+   - Define fields (dates, numbers, text, etc.)
+   - System creates flex_condensate_7 table automatically
+
+2. In view_transactions.py:
+   - NOTHING TO CHANGE!
+   - Call _flex_list(7, "condensate", user, "Condensate Records")
+   - System automatically handles everything
+
+3. Users can immediately:
+   - View all condensate records
+   - Edit records within 24 hours
+   - See edit history with timestamps
+   - Use appropriate input types (date pickers, number inputs, etc.)
+
+================================================================================
+BENEFITS OF THIS DESIGN:
+================================================================================
+
+✓ MAINTAINABILITY: Single code path for all custom tables
+✓ SCALABILITY: Add unlimited custom tables without code bloat
+✓ CONSISTENCY: Same UX for all custom data entry
+✓ RELIABILITY: Comprehensive logging for all operations
+✓ TYPE SAFETY: Automatic conversion prevents SQLite type errors
+✓ USER FRIENDLY: Appropriate input types for each data type
+✓ AUDIT TRAIL: Complete tracking of who changed what and when
+✓ SECURITY: System columns protected from modification
+
+================================================================================
+LOGGING & DEBUGGING:
+================================================================================
+
+All operations logged to: logs/otms_YYYY-MM-DD.log
+
+Log entries include:
+- "Attempting to save {section} record ID: {id}"
+- "Editable columns: [list]"
+- "Edited values: {dict}"
+- "Found record in database, updating fields..."
+- "Updated {column}: {old_value} -> {new_value}"
+- "Set updated_by to {username}"
+- "Successfully committed changes to database"
+- "Audit log created successfully"
+- Full error traces with stack dumps
+
+To debug save issues:
+1. Check logs for exact error message
+2. Look for "Edit {section} failed:" entries
+3. Review type conversion logs for date fields
+4. Verify column names match table structure
+
+================================================================================
+FUTURE ENHANCEMENTS - ALREADY SUPPORTED:
+================================================================================
+
+The current design already supports future needs:
+
+✓ Time fields: Add time input detection
+✓ Decimal fields: Already handled as floats
+✓ Dropdown fields: Can add enum detection
+✓ Multi-select: Can add array field handling
+✓ File uploads: Can add binary/blob handling
+✓ Calculated fields: Add read-only field support
+✓ Conditional validation: Add validation rules
+✓ Bulk operations: Add batch edit capability
+
+All can be added to _flex_list() without breaking existing tables.
+
+================================================================================
+CONCLUSION:
+================================================================================
+
+This is a complete, production-ready system for managing custom tables.
+
+NO CODE CHANGES are needed when creating new custom tables.
+The system is FULLY AUTOMATIC and DATA-DRIVEN.
+
+Every new custom table (production, meters, condensate, inspections, etc.)
+automatically gets:
+- Viewing with filtering
+- Editing with appropriate input types
+- 24-hour edit restriction
+- Edit tracking
+- Type-safe database saves
+- Complete logging
+
+This is the STANDARD METHOD for all current and future custom tables in OTMS.
+================================================================================

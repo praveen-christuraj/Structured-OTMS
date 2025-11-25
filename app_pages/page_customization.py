@@ -224,11 +224,12 @@ def render_page_customization(user: Dict[str, Any]):
         pw_columns = list(pw_def.get("columns") or [])
 
         st.caption("Define the columns used in Produced Water data entry. Exactly one column can be 'date' (enforced as date picker). Others can be 'number' or 'text'.")
+        st.info("💡 **Calculated Columns**: For columns with formulas, the value will be auto-calculated based on other columns.")
         n_cols = st.number_input("Number of columns", min_value=1, max_value=20, step=1, value=max(1, len(pw_columns) or 3), key=f"pc_pw_count_{loc_key}")
 
         # normalize length
         def _def_col(i):
-            return {"name": f"col_{i+1}", "label": f"Column {i+1}", "type": "text", "required": False}
+            return {"name": f"col_{i+1}", "label": f"Column {i+1}", "type": "text", "required": False, "formula": None}
         if len(pw_columns) < n_cols:
             for i in range(len(pw_columns), n_cols):
                 pw_columns.append(_def_col(i))
@@ -237,11 +238,12 @@ def render_page_customization(user: Dict[str, Any]):
 
         date_seen = any(c.get("type") == "date" for c in pw_columns)
         for i in range(n_cols):
+            st.markdown(f"**Column {i+1}**")
             c1, c2, c3, c4 = st.columns([0.28, 0.28, 0.24, 0.20])
             with c1:
-                pw_columns[i]["name"] = st.text_input("Field name (no spaces)", value=pw_columns[i]["name"], key=f"pc_pw_name_{loc_key}_{i}")
+                pw_columns[i]["name"] = st.text_input("Field name (no spaces)", value=pw_columns[i].get("name", f"col_{i+1}"), key=f"pc_pw_name_{loc_key}_{i}")
             with c2:
-                pw_columns[i]["label"] = st.text_input("Label", value=pw_columns[i]["label"], key=f"pc_pw_label_{loc_key}_{i}")
+                pw_columns[i]["label"] = st.text_input("Label", value=pw_columns[i].get("label", f"Column {i+1}"), key=f"pc_pw_label_{loc_key}_{i}")
             with c3:
                 current_type = pw_columns[i].get("type", "text")
                 type_choice = st.selectbox("Type", ["text", "number", "date"], index=["text","number","date"].index(current_type), key=f"pc_pw_type_{loc_key}_{i}")
@@ -257,6 +259,82 @@ def render_page_customization(user: Dict[str, Any]):
                     pw_columns[i]["type"] = type_choice
             with c4:
                 pw_columns[i]["required"] = st.checkbox("Required", value=bool(pw_columns[i].get("required", False)), key=f"pc_pw_req_{loc_key}_{i}")
+            
+            # Formula configuration (only for number type)
+            if pw_columns[i].get("type") == "number":
+                with st.expander(f"➕ Formula for {pw_columns[i].get('label', 'Column')} (Optional)", expanded=bool(pw_columns[i].get("formula"))):
+                    st.caption("Configure automatic calculation for this column based on other columns.")
+                    
+                    current_formula = pw_columns[i].get("formula") or {}
+                    use_formula = st.checkbox("Enable Formula", value=bool(current_formula), key=f"pc_pw_formula_enable_{loc_key}_{i}")
+                    
+                    if use_formula:
+                        fc1, fc2 = st.columns([0.4, 0.6])
+                        with fc1:
+                            operation = st.selectbox(
+                                "Operation",
+                                ["sum", "subtract", "multiply", "divide", "percentage", "maximum", "minimum", "average"],
+                                index=["sum", "subtract", "multiply", "divide", "percentage", "maximum", "minimum", "average"].index(current_formula.get("operation", "sum")),
+                                key=f"pc_pw_formula_op_{loc_key}_{i}"
+                            )
+                        
+                        with fc2:
+                            available_cols = [(idx, c.get("name"), c.get("label")) 
+                                            for idx, c in enumerate(pw_columns) 
+                                            if idx != i and c.get("type") != "date"]
+                            
+                            if not available_cols:
+                                st.warning("No other numeric columns available for formula.")
+                            else:
+                                col_options = [f"{label} ({name})" for _, name, label in available_cols]
+                                col_name_map = {f"{label} ({name})": name for _, name, label in available_cols}
+                                
+                                current_cols = current_formula.get("columns", [])
+                                default_selection = [f"{pw_columns[idx].get('label')} ({pw_columns[idx].get('name')})" 
+                                                   for idx, c in enumerate(pw_columns) 
+                                                   if c.get("name") in current_cols]
+                                
+                                selected_cols = st.multiselect(
+                                    "Select Columns",
+                                    col_options,
+                                    default=default_selection,
+                                    key=f"pc_pw_formula_cols_{loc_key}_{i}",
+                                    help="Select columns to use in the calculation"
+                                )
+                                
+                                selected_col_names = [col_name_map[sc] for sc in selected_cols]
+                                
+                                if selected_col_names:
+                                    if operation == "sum":
+                                        formula_preview = " + ".join(selected_col_names)
+                                    elif operation == "subtract":
+                                        formula_preview = " - ".join(selected_col_names)
+                                    elif operation == "multiply":
+                                        formula_preview = " × ".join(selected_col_names)
+                                    elif operation == "divide":
+                                        formula_preview = " ÷ ".join(selected_col_names)
+                                    elif operation == "percentage":
+                                        formula_preview = f"({selected_col_names[0]} ÷ {selected_col_names[1] if len(selected_col_names) > 1 else '?'}) × 100" if len(selected_col_names) >= 2 else "Need 2 columns"
+                                    elif operation == "maximum":
+                                        formula_preview = f"MAX({', '.join(selected_col_names)})"
+                                    elif operation == "minimum":
+                                        formula_preview = f"MIN({', '.join(selected_col_names)})"
+                                    elif operation == "average":
+                                        formula_preview = f"AVG({', '.join(selected_col_names)})"
+                                    
+                                    st.code(f"Formula: {formula_preview}", language="text")
+                                    
+                                    pw_columns[i]["formula"] = {
+                                        "operation": operation,
+                                        "columns": selected_col_names
+                                    }
+                                else:
+                                    st.info("Select at least one column for the formula.")
+                                    pw_columns[i]["formula"] = None
+                    else:
+                        pw_columns[i]["formula"] = None
+            
+            st.markdown("---")
 
         if st.button("💾 Save Produced Water Table", type="primary", key=f"pc_pw_save_{loc_key}"):
             try:
@@ -283,7 +361,13 @@ def render_page_customization(user: Dict[str, Any]):
             st.info("No columns defined yet.")
         else:
             for j, c in enumerate(pw_columns, start=1):
-                st.write(f"**{j}.** `{c['name']}` — {c['label']} — *{c['type']}* — {'required' if c.get('required') else 'optional'}")
+                formula_info = ""
+                if c.get("formula"):
+                    f = c["formula"]
+                    op = f.get("operation", "N/A")
+                    cols = ", ".join(f.get("columns", []))
+                    formula_info = f" — **Formula**: {op.upper()}({cols})"
+                st.write(f"**{j}.** `{c['name']}` — {c['label']} — *{c['type']}* — {'required' if c.get('required') else 'optional'}{formula_info}")
 
 
     # ==============================
@@ -295,10 +379,11 @@ def render_page_customization(user: Dict[str, Any]):
         prod_columns = list(prod_def.get("columns") or [])
 
         st.caption("Define the columns used in Production data entry. Exactly one 'date' column. Others can be 'number' or 'text'.")
+        st.info("💡 **Calculated Columns**: For columns with formulas, the value will be auto-calculated based on other columns.")
         n_cols = st.number_input("Number of columns", min_value=1, max_value=30, step=1, value=max(1, len(prod_columns) or 4), key=f"pc_prod_count_{loc_key}")
 
         def _def_col2(i):
-            return {"name": f"col_{i+1}", "label": f"Column {i+1}", "type": "number", "required": False}
+            return {"name": f"col_{i+1}", "label": f"Column {i+1}", "type": "number", "required": False, "formula": None}
         if len(prod_columns) < n_cols:
             for i in range(len(prod_columns), n_cols):
                 prod_columns.append(_def_col2(i))
@@ -306,12 +391,17 @@ def render_page_customization(user: Dict[str, Any]):
             prod_columns = prod_columns[:n_cols]
 
         date_seen = any(c.get("type") == "date" for c in prod_columns)
+        
+        # Get all column names for formula reference
+        all_col_names = [c.get("name", f"col_{i+1}") for i, c in enumerate(prod_columns)]
+        
         for i in range(n_cols):
+            st.markdown(f"**Column {i+1}**")
             c1, c2, c3, c4 = st.columns([0.28, 0.28, 0.24, 0.20])
             with c1:
-                prod_columns[i]["name"] = st.text_input("Field name (no spaces)", value=prod_columns[i]["name"], key=f"pc_prod_name_{loc_key}_{i}")
+                prod_columns[i]["name"] = st.text_input("Field name (no spaces)", value=prod_columns[i].get("name", f"col_{i+1}"), key=f"pc_prod_name_{loc_key}_{i}")
             with c2:
-                prod_columns[i]["label"] = st.text_input("Label", value=prod_columns[i]["label"], key=f"pc_prod_label_{loc_key}_{i}")
+                prod_columns[i]["label"] = st.text_input("Label", value=prod_columns[i].get("label", f"Column {i+1}"), key=f"pc_prod_label_{loc_key}_{i}")
             with c3:
                 current_type = prod_columns[i].get("type", "number")
                 type_choice = st.selectbox("Type", ["text", "number", "date"], index=["text","number","date"].index(current_type), key=f"pc_prod_type_{loc_key}_{i}")
@@ -326,6 +416,90 @@ def render_page_customization(user: Dict[str, Any]):
                     prod_columns[i]["type"] = type_choice
             with c4:
                 prod_columns[i]["required"] = st.checkbox("Required", value=bool(prod_columns[i].get("required", False)), key=f"pc_prod_req_{loc_key}_{i}")
+            
+            # Formula configuration (only for number type)
+            if prod_columns[i].get("type") == "number":
+                with st.expander(f"➕ Formula for {prod_columns[i].get('label', 'Column')} (Optional)", expanded=bool(prod_columns[i].get("formula"))):
+                    st.caption("Configure automatic calculation for this column based on other columns.")
+                    
+                    # Get current formula or create default
+                    current_formula = prod_columns[i].get("formula") or {}
+                    
+                    use_formula = st.checkbox("Enable Formula", value=bool(current_formula), key=f"pc_prod_formula_enable_{loc_key}_{i}")
+                    
+                    if use_formula:
+                        fc1, fc2 = st.columns([0.4, 0.6])
+                        with fc1:
+                            operation = st.selectbox(
+                                "Operation",
+                                ["sum", "subtract", "multiply", "divide", "percentage", "maximum", "minimum", "average"],
+                                index=["sum", "subtract", "multiply", "divide", "percentage", "maximum", "minimum", "average"].index(current_formula.get("operation", "sum")),
+                                key=f"pc_prod_formula_op_{loc_key}_{i}"
+                            )
+                        
+                        with fc2:
+                            # Get available columns (exclude current column and date columns)
+                            available_cols = [(idx, c.get("name"), c.get("label")) 
+                                            for idx, c in enumerate(prod_columns) 
+                                            if idx != i and c.get("type") != "date"]
+                            
+                            if not available_cols:
+                                st.warning("No other numeric columns available for formula.")
+                            else:
+                                col_options = [f"{label} ({name})" for _, name, label in available_cols]
+                                col_name_map = {f"{label} ({name})": name for _, name, label in available_cols}
+                                
+                                # Get currently selected columns
+                                current_cols = current_formula.get("columns", [])
+                                default_selection = [f"{prod_columns[idx].get('label')} ({prod_columns[idx].get('name')})" 
+                                                   for idx, c in enumerate(prod_columns) 
+                                                   if c.get("name") in current_cols]
+                                
+                                selected_cols = st.multiselect(
+                                    "Select Columns",
+                                    col_options,
+                                    default=default_selection,
+                                    key=f"pc_prod_formula_cols_{loc_key}_{i}",
+                                    help="Select columns to use in the calculation"
+                                )
+                                
+                                # Convert back to column names
+                                selected_col_names = [col_name_map[sc] for sc in selected_cols]
+                                
+                                # Show formula preview
+                                if selected_col_names:
+                                    if operation == "sum":
+                                        formula_preview = " + ".join(selected_col_names)
+                                    elif operation == "subtract":
+                                        formula_preview = " - ".join(selected_col_names)
+                                    elif operation == "multiply":
+                                        formula_preview = " × ".join(selected_col_names)
+                                    elif operation == "divide":
+                                        formula_preview = " ÷ ".join(selected_col_names)
+                                    elif operation == "percentage":
+                                        formula_preview = f"({selected_col_names[0]} ÷ {selected_col_names[1] if len(selected_col_names) > 1 else '?'}) × 100" if len(selected_col_names) >= 2 else "Need 2 columns"
+                                    elif operation == "maximum":
+                                        formula_preview = f"MAX({', '.join(selected_col_names)})"
+                                    elif operation == "minimum":
+                                        formula_preview = f"MIN({', '.join(selected_col_names)})"
+                                    elif operation == "average":
+                                        formula_preview = f"AVG({', '.join(selected_col_names)})"
+                                    
+                                    st.code(f"Formula: {formula_preview}", language="text")
+                                    
+                                    # Save formula to column definition
+                                    prod_columns[i]["formula"] = {
+                                        "operation": operation,
+                                        "columns": selected_col_names
+                                    }
+                                else:
+                                    st.info("Select at least one column for the formula.")
+                                    prod_columns[i]["formula"] = None
+                    else:
+                        # Clear formula if disabled
+                        prod_columns[i]["formula"] = None
+            
+            st.markdown("---")  # Separator between columns
 
         if st.button("💾 Save Production Table", type="primary", key=f"pc_prod_save_{loc_key}"):
             try:
@@ -351,7 +525,13 @@ def render_page_customization(user: Dict[str, Any]):
             st.info("No columns defined yet.")
         else:
             for j, c in enumerate(prod_columns, start=1):
-                st.write(f"**{j}.** `{c['name']}` — {c['label']} — *{c['type']}* — {'required' if c.get('required') else 'optional'}")
+                formula_info = ""
+                if c.get("formula"):
+                    f = c["formula"]
+                    op = f.get("operation", "N/A")
+                    cols = ", ".join(f.get("columns", []))
+                    formula_info = f" — **Formula**: {op.upper()}({cols})"
+                st.write(f"**{j}.** `{c['name']}` — {c['label']} — *{c['type']}* — {'required' if c.get('required') else 'optional'}{formula_info}")
 
     # ==============================================
     # 🧮 Meter Records (Meters & Factors)  <-- FULL CRUD + AUDIT
@@ -576,3 +756,331 @@ def render_page_customization(user: Dict[str, Any]):
                 st.markdown("---")
 
     st.info("All changes take effect immediately on the corresponding pages.")
+
+    # ==============================
+    # 📑 Custom Tabs Management
+    # ==============================
+    st.markdown("---")
+    st.markdown("## 📑 Custom Tabs Management")
+    st.caption("Create custom tabs with dynamic columns for Tank Transactions and Tanker Transactions pages. Each tab gets its own database table and can be used in reports.")
+    
+    with st.expander("➕ Create New Custom Tab", expanded=False):
+        st.markdown("### Add New Custom Tab")
+        
+        # Select target page
+        target_page = st.selectbox(
+            "Target Page",
+            ["tank_transactions", "tanker_transactions"],
+            format_func=lambda x: "Tank Transactions" if x == "tank_transactions" else "Tanker Transactions",
+            key=f"pc_custom_tab_page_{loc_key}"
+        )
+        
+        # Tab name
+        new_tab_name = st.text_input(
+            "Tab Name *",
+            placeholder="e.g., Daily Production, Chemical Injection",
+            key=f"pc_custom_tab_name_{loc_key}"
+        )
+        
+        st.markdown("#### Define Columns")
+        st.caption("Configure the columns for this custom tab. At least one column is required.")
+        
+        num_cols = st.number_input(
+            "Number of Columns",
+            min_value=1,
+            max_value=20,
+            value=3,
+            step=1,
+            key=f"pc_custom_tab_cols_count_{loc_key}"
+        )
+        
+        # Store column definitions in session state
+        if f"pc_custom_tab_columns_{loc_key}" not in st.session_state:
+            st.session_state[f"pc_custom_tab_columns_{loc_key}"] = [
+                {"name": f"col_{i+1}", "label": f"Column {i+1}", "type": "number", "required": False, "formula": None}
+                for i in range(num_cols)
+            ]
+        
+        # Adjust list size if num_cols changed
+        current_cols = st.session_state[f"pc_custom_tab_columns_{loc_key}"]
+        if len(current_cols) < num_cols:
+            for i in range(len(current_cols), num_cols):
+                current_cols.append({"name": f"col_{i+1}", "label": f"Column {i+1}", "type": "number", "required": False, "formula": None})
+        elif len(current_cols) > num_cols:
+            current_cols = current_cols[:num_cols]
+            st.session_state[f"pc_custom_tab_columns_{loc_key}"] = current_cols
+        
+        date_seen = any(c.get("type") == "date" for c in current_cols)
+        
+        for i in range(num_cols):
+            st.markdown(f"**Column {i+1}**")
+            c1, c2, c3, c4 = st.columns([0.28, 0.28, 0.24, 0.20])
+            
+            with c1:
+                current_cols[i]["name"] = st.text_input(
+                    "Field name (no spaces)",
+                    value=current_cols[i].get("name", f"col_{i+1}"),
+                    key=f"pc_custom_new_col_name_{loc_key}_{i}"
+                )
+            
+            with c2:
+                current_cols[i]["label"] = st.text_input(
+                    "Label",
+                    value=current_cols[i].get("label", f"Column {i+1}"),
+                    key=f"pc_custom_new_col_label_{loc_key}_{i}"
+                )
+            
+            with c3:
+                current_type = current_cols[i].get("type", "number")
+                type_choice = st.selectbox(
+                    "Type",
+                    ["text", "number", "date"],
+                    index=["text", "number", "date"].index(current_type),
+                    key=f"pc_custom_new_col_type_{loc_key}_{i}"
+                )
+                
+                if type_choice == "date":
+                    if not date_seen or current_type == "date":
+                        current_cols[i]["type"] = "date"
+                        date_seen = True
+                    else:
+                        st.warning("Only one 'date' column allowed. Switching to 'number'.")
+                        current_cols[i]["type"] = "number"
+                else:
+                    current_cols[i]["type"] = type_choice
+            
+            with c4:
+                current_cols[i]["required"] = st.checkbox(
+                    "Required",
+                    value=bool(current_cols[i].get("required", False)),
+                    key=f"pc_custom_new_col_req_{loc_key}_{i}"
+                )
+            
+            # Formula configuration for number columns
+            if current_cols[i].get("type") == "number":
+                with st.expander(f"➕ Formula for {current_cols[i].get('label', 'Column')} (Optional)", expanded=bool(current_cols[i].get("formula"))):
+                    st.caption("Configure automatic calculation for this column based on other columns.")
+                    
+                    current_formula = current_cols[i].get("formula") or {}
+                    use_formula = st.checkbox(
+                        "Enable Formula",
+                        value=bool(current_formula),
+                        key=f"pc_custom_new_formula_enable_{loc_key}_{i}"
+                    )
+                    
+                    if use_formula:
+                        fc1, fc2 = st.columns([0.4, 0.6])
+                        with fc1:
+                            operation = st.selectbox(
+                                "Operation",
+                                ["sum", "subtract", "multiply", "divide", "percentage", "maximum", "minimum", "average"],
+                                index=["sum", "subtract", "multiply", "divide", "percentage", "maximum", "minimum", "average"].index(current_formula.get("operation", "sum")),
+                                key=f"pc_custom_new_formula_op_{loc_key}_{i}"
+                            )
+                        
+                        with fc2:
+                            available_cols = [(idx, c.get("name"), c.get("label"))
+                                            for idx, c in enumerate(current_cols)
+                                            if idx != i and c.get("type") != "date"]
+                            
+                            if not available_cols:
+                                st.warning("No other numeric columns available for formula.")
+                            else:
+                                col_options = [f"{label} ({name})" for _, name, label in available_cols]
+                                col_name_map = {f"{label} ({name})": name for _, name, label in available_cols}
+                                
+                                current_sel = current_formula.get("columns", [])
+                                default_selection = [f"{current_cols[idx].get('label')} ({current_cols[idx].get('name')})"
+                                                   for idx, c in enumerate(current_cols)
+                                                   if c.get("name") in current_sel]
+                                
+                                selected_cols = st.multiselect(
+                                    "Select Columns",
+                                    col_options,
+                                    default=default_selection,
+                                    key=f"pc_custom_new_formula_cols_{loc_key}_{i}",
+                                    help="Select columns to use in the calculation"
+                                )
+                                
+                                selected_col_names = [col_name_map[sc] for sc in selected_cols]
+                                
+                                if selected_col_names:
+                                    if operation == "sum":
+                                        formula_preview = " + ".join(selected_col_names)
+                                    elif operation == "subtract":
+                                        formula_preview = " - ".join(selected_col_names)
+                                    elif operation == "multiply":
+                                        formula_preview = " × ".join(selected_col_names)
+                                    elif operation == "divide":
+                                        formula_preview = " ÷ ".join(selected_col_names)
+                                    elif operation == "percentage":
+                                        formula_preview = f"({selected_col_names[0]} ÷ {selected_col_names[1] if len(selected_col_names) > 1 else '?'}) × 100"
+                                    elif operation == "maximum":
+                                        formula_preview = f"MAX({', '.join(selected_col_names)})"
+                                    elif operation == "minimum":
+                                        formula_preview = f"MIN({', '.join(selected_col_names)})"
+                                    elif operation == "average":
+                                        formula_preview = f"AVG({', '.join(selected_col_names)})"
+                                    
+                                    st.code(f"Formula: {formula_preview}", language="text")
+                                    
+                                    current_cols[i]["formula"] = {
+                                        "operation": operation,
+                                        "columns": selected_col_names
+                                    }
+                                else:
+                                    st.info("Select at least one column for the formula.")
+                                    current_cols[i]["formula"] = None
+                    else:
+                        current_cols[i]["formula"] = None
+            
+            st.markdown("---")
+        
+        # Create button
+        if st.button("✅ Create Custom Tab", type="primary", key=f"pc_custom_tab_create_{loc_key}"):
+            if not new_tab_name or not new_tab_name.strip():
+                st.error("Tab name is required.")
+            elif not current_cols:
+                st.error("At least one column is required.")
+            else:
+                try:
+                    from location_config import add_custom_tab
+                    from models import create_custom_tab_table
+                    
+                    with get_session() as s:
+                        # Add tab configuration
+                        new_tab = add_custom_tab(s, loc.id, target_page, new_tab_name, current_cols)
+                        
+                        # Create database table
+                        table_created = create_custom_tab_table(
+                            new_tab["table_name"],
+                            current_cols,
+                            loc.id
+                        )
+                        
+                        if table_created:
+                            try:
+                                SecurityManager.log_audit(
+                                    s, (user or {}).get("username", "system"), "CREATE",
+                                    resource_type="PageCustomization:CustomTab",
+                                    resource_id=new_tab["id"],
+                                    details=f"Created custom tab '{new_tab_name}' with table '{new_tab['table_name']}'",
+                                    user_id=(user or {}).get("id"),
+                                    location_id=loc.id,
+                                    success=True,
+                                    ip_address=st.session_state.get("client_ip")
+                                )
+                            except Exception:
+                                pass
+                            
+                            st.success(f"✅ Custom tab '{new_tab_name}' created successfully!")
+                            st.info(f"📊 Database table: `{new_tab['table_name']}`")
+                            
+                            # Clear session state
+                            if f"pc_custom_tab_columns_{loc_key}" in st.session_state:
+                                del st.session_state[f"pc_custom_tab_columns_{loc_key}"]
+                            
+                            st.rerun()
+                        else:
+                            st.error("Failed to create database table for custom tab.")
+                except ValueError as ve:
+                    st.error(f"❌ {str(ve)}")
+                except Exception as ex:
+                    st.error(f"❌ Failed to create custom tab: {ex}")
+    
+    # Manage existing custom tabs
+    with st.expander("📋 Manage Existing Custom Tabs", expanded=True):
+        st.markdown("### Existing Custom Tabs")
+        
+        from location_config import get_custom_tabs, delete_custom_tab, update_custom_tab
+        
+        # Show tabs for each page
+        for page in ["tank_transactions", "tanker_transactions"]:
+            page_display = "Tank Transactions" if page == "tank_transactions" else "Tanker Transactions"
+            
+            with get_session() as s:
+                tabs = get_custom_tabs(s, loc.id, page)
+            
+            if tabs:
+                st.markdown(f"#### {page_display}")
+                
+                for tab in tabs:
+                    tab_id = tab.get("id")
+                    tab_name = tab.get("name")
+                    table_name = tab.get("table_name")
+                    columns = tab.get("columns", [])
+                    active = tab.get("active", True)
+                    
+                    with st.container():
+                        col1, col2, col3 = st.columns([0.5, 0.3, 0.2])
+                        
+                        with col1:
+                            status_icon = "✅" if active else "⏸️"
+                            st.markdown(f"**{status_icon} {tab_name}**")
+                            st.caption(f"Table: `{table_name}` | {len(columns)} columns")
+                        
+                        with col2:
+                            # Toggle active status
+                            if st.button(
+                                "⏸️ Deactivate" if active else "▶️ Activate",
+                                key=f"pc_custom_tab_toggle_{tab_id}"
+                            ):
+                                try:
+                                    with get_session() as s:
+                                        update_custom_tab(s, loc.id, page, tab_id, active=not active)
+                                    st.success(f"Tab {'deactivated' if active else 'activated'}.")
+                                    st.rerun()
+                                except Exception as ex:
+                                    st.error(f"Failed to update: {ex}")
+                        
+                        with col3:
+                            # Delete tab
+                            if st.button("🗑️ Delete", key=f"pc_custom_tab_delete_{tab_id}"):
+                                try:
+                                    from models import drop_custom_tab_table
+                                    
+                                    with get_session() as s:
+                                        # Delete from config
+                                        delete_custom_tab(s, loc.id, page, tab_id)
+                                        
+                                        # Try to drop table (optional - may want to keep data)
+                                        # drop_custom_tab_table(table_name)
+                                        
+                                        try:
+                                            SecurityManager.log_audit(
+                                                s, (user or {}).get("username", "system"), "DELETE",
+                                                resource_type="PageCustomization:CustomTab",
+                                                resource_id=tab_id,
+                                                details=f"Deleted custom tab '{tab_name}' (table: {table_name})",
+                                                user_id=(user or {}).get("id"),
+                                                location_id=loc.id,
+                                                success=True,
+                                                ip_address=st.session_state.get("client_ip")
+                                            )
+                                        except Exception:
+                                            pass
+                                    
+                                    st.success(f"Tab '{tab_name}' deleted.")
+                                    st.info("Note: Database table was preserved. Contact IT to drop the table if needed.")
+                                    st.rerun()
+                                except Exception as ex:
+                                    st.error(f"Failed to delete: {ex}")
+                        
+                        # Show column details
+                        with st.expander(f"View Columns for {tab_name}"):
+                            for idx, col in enumerate(columns, 1):
+                                formula_info = ""
+                                if col.get("formula"):
+                                    f = col["formula"]
+                                    op = f.get("operation", "N/A")
+                                    cols = ", ".join(f.get("columns", []))
+                                    formula_info = f" — **Formula**: {op.upper()}({cols})"
+                                
+                                st.write(f"{idx}. `{col['name']}` — {col['label']} — *{col['type']}* — {'required' if col.get('required') else 'optional'}{formula_info}")
+                        
+                        st.markdown("---")
+            else:
+                st.info(f"No custom tabs defined for {page_display} yet.")
+            
+            st.markdown("---")
+

@@ -1389,10 +1389,240 @@ def render_tanker_transactions_page(active_location_id: Optional[int], user: Opt
             st.warning("No active tankers found. Add tankers in Asset Management first.")
             return
 
-        _render_saved_transactions(loc.id, can_make_entries)
-        st.markdown("---")
-        _render_entry_form(loc, can_make_entries, tankers)
+        # Check if there are custom tabs
+        custom_tabs = []
+        try:
+            from location_config import get_custom_tabs
+            with get_session() as s:
+                custom_tabs = get_custom_tabs(s, loc.id, "tanker_transactions")
+                custom_tabs = [t for t in custom_tabs if t.get("active", True)]
+        except Exception:
+            pass
+        
+        if custom_tabs:
+            # Use tabs if custom tabs exist
+            tab_labels = ["Tanker Dispatch"] + [t.get("name", "Custom") for t in custom_tabs]
+            tabs = st.tabs(tab_labels)
+            
+            # Main tanker dispatch tab
+            with tabs[0]:
+                _render_saved_transactions(loc.id, can_make_entries)
+                st.markdown("---")
+                _render_entry_form(loc, can_make_entries, tankers)
+            
+            # Custom tabs
+            for idx, custom_tab in enumerate(custom_tabs, start=1):
+                with tabs[idx]:
+                    _render_custom_tanker_tab(loc, user, custom_tab)
+        else:
+            # No custom tabs, render normally
+            _render_saved_transactions(loc.id, can_make_entries)
+            st.markdown("---")
+            _render_entry_form(loc, can_make_entries, tankers)
 
     except Exception as exc:  # pragma: no cover
         st.error("Unexpected error while rendering Tanker Transactions.")
         log_error(f"Tanker Transactions page failed: {exc}", exc_info=True)
+
+
+def _render_custom_tanker_tab(loc, user, tab_def: dict):
+    """
+    Render a custom tab for tanker transactions with dynamic columns.
+    
+    Args:
+        loc: Location object
+        user: User dict
+        tab_def: Tab definition with columns and table_name
+    """
+    import json
+    from models import get_custom_table_model
+    
+    # Import the formula evaluator from tank_transactions
+    try:
+        import sys
+        import os
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from tank_transactions import _evaluate_formula
+    except Exception:
+        # Fallback: define a simple evaluator
+        def _evaluate_formula(formula, row_data):
+            if not formula:
+                return None
+            operation = formula.get("operation", "sum")
+            columns = formula.get("columns", [])
+            values = []
+            for col in columns:
+                val = row_data.get(col)
+                if val is not None:
+                    try:
+                        values.append(float(val))
+                    except (ValueError, TypeError):
+                        pass
+            if not values:
+                return None
+            if operation == "sum":
+                return sum(values)
+            elif operation == "subtract":
+                result = values[0]
+                for v in values[1:]:
+                    result -= v
+                return result
+            elif operation == "multiply":
+                result = values[0]
+                for v in values[1:]:
+                    result *= v
+                return result
+            elif operation == "divide":
+                result = values[0]
+                for v in values[1:]:
+                    if v == 0:
+                        return None
+                    result /= v
+                return result
+            elif operation == "percentage":
+                if len(values) >= 2 and values[1] != 0:
+                    return (values[0] / values[1]) * 100
+                return None
+            elif operation == "maximum":
+                return max(values)
+            elif operation == "minimum":
+                return min(values)
+            elif operation == "average":
+                return sum(values) / len(values)
+            return None
+    
+    tab_name = tab_def.get("name", "Custom Tab")
+    table_name = tab_def.get("table_name")
+    columns = tab_def.get("columns", [])
+    
+    st.markdown(f"#### {tab_name}")
+    
+    if not columns:
+        st.info(f"No columns defined for {tab_name}. Configure in **Page Customization**.")
+        return
+    
+    if not table_name:
+        st.error("No table name defined for this custom tab.")
+        return
+    
+    # Separate manual and calculated columns
+    date_fields = [c for c in columns if c.get("type") == "date"]
+    date_name = date_fields[0]["name"] if date_fields else None
+    manual_columns = [c for c in columns if not c.get("formula")]
+    calculated_columns = [c for c in columns if c.get("formula")]
+    
+    with st.form(key=f"custom_tanker_tab_form_{table_name}_{loc.id}"):
+        row = {}
+        
+        # Render manual input columns
+        for i, col in enumerate(manual_columns):
+            ctype = col.get("type", "text")
+            label = col.get("label") or col.get("name")
+            name = col.get("name")
+            
+            if ctype == "date":
+                row[name] = st.date_input(label, key=f"custom_tanker_{table_name}_{loc.id}_date_{i}")
+            elif ctype == "number":
+                row[name] = st.number_input(label, step=0.01, format="%.2f", key=f"custom_tanker_{table_name}_{loc.id}_num_{i}")
+            else:
+                row[name] = st.text_input(label, key=f"custom_tanker_{table_name}_{loc.id}_txt_{i}")
+        
+        # Calculate and display calculated columns
+        if calculated_columns:
+            st.markdown("##### 🧮 Calculated Columns (Auto-computed)")
+            for calc_col in calculated_columns:
+                formula = calc_col.get("formula")
+                label = calc_col.get("label") or calc_col.get("name")
+                name = calc_col.get("name")
+                
+                calculated_value = _evaluate_formula(formula, row)
+                
+                if calculated_value is not None:
+                    st.metric(label, f"{calculated_value:.2f}")
+                    row[name] = calculated_value
+                else:
+                    operation = formula.get("operation", "N/A")
+                    cols_used = ", ".join(formula.get("columns", []))
+                    st.info(f"**{label}**: {operation.upper()}({cols_used}) - Will be calculated after input")
+                    row[name] = None
+        
+        submitted = st.form_submit_button("💾 Save Row", type="primary")
+    
+    if not submitted:
+        return
+    
+    # Validate required fields
+    errs = []
+    for col in columns:
+        if col.get("required", False):
+            nm = col["name"]
+            val = row.get(nm)
+            if col.get("formula"):
+                continue
+            if col.get("type") == "text" and (val is None or str(val).strip() == ""):
+                errs.append(f"'{col.get('label')}' is required.")
+            elif col.get("type") in ("number", "date") and val is None:
+                errs.append(f"'{col.get('label')}' is required.")
+    
+    if errs:
+        for e in errs:
+            st.error(e)
+        return
+    
+    # Recalculate all formulas before saving
+    for calc_col in calculated_columns:
+        formula = calc_col.get("formula")
+        name = calc_col.get("name")
+        calculated_value = _evaluate_formula(formula, row)
+        row[name] = calculated_value
+    
+    # Get tx_date
+    tx_date = None
+    if date_name and row.get(date_name):
+        tx_date = row[date_name]
+    
+    # Save to custom table
+    try:
+        CustomModel = get_custom_table_model(table_name)
+        
+        if CustomModel:
+            with get_session() as s:
+                # Prepare data for insertion
+                record_data = {
+                    "location_id": loc.id,
+                    "tx_date": tx_date,
+                    "created_by": (user or {}).get("username", "system"),
+                }
+                
+                # Add custom columns
+                for col in columns:
+                    col_name = col.get("name")
+                    if col_name and col_name in row:
+                        record_data[col_name] = row[col_name]
+                
+                # Create record
+                record = CustomModel(**record_data)
+                s.add(record)
+                s.commit()
+                
+                try:
+                    from security import SecurityManager
+                    SecurityManager.log_audit(
+                        s, (user or {}).get("username", "system"),
+                        "CREATE",
+                        resource_type=f"CustomTab:{tab_name}",
+                        resource_id=str(getattr(record, "id", "")),
+                        details=f"Custom tanker tab row saved: {row}",
+                        user_id=(user or {}).get("id"),
+                        location_id=loc.id,
+                        ip_address=st.session_state.get("client_ip"),
+                        success=True
+                    )
+                except Exception:
+                    pass
+                
+                st.success(f"Row saved to {tab_name}.")
+        else:
+            st.error(f"Database table `{table_name}` not found. Please contact administrator.")
+    except Exception as ex:
+        st.error(f"Failed to save: {ex}")

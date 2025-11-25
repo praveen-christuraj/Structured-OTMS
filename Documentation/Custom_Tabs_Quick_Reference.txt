@@ -1,0 +1,215 @@
+# Custom Tabs - Quick Reference
+
+## Creating a Custom Tab
+
+### Navigation
+Settings → Page Customization → Custom Tabs Management → Create New Custom Tab
+
+### Required Fields
+- **Target Page**: tank_transactions or tanker_transactions
+- **Tab Name**: Descriptive name for your tab
+- **At least 1 column** defined
+
+### Column Configuration
+Each column needs:
+- **Field Name**: `snake_case_name` (no spaces)
+- **Label**: Display name
+- **Type**: text | number | date
+- **Required**: checkbox
+
+### Optional: Formulas (for number columns only)
+1. Enable Formula checkbox
+2. Select Operation: sum | subtract | multiply | divide | percentage | maximum | minimum | average
+3. Select Columns to use in calculation
+4. Preview formula
+
+### Save
+Click "✅ Create Custom Tab" → Database table created automatically
+
+---
+
+## Managing Tabs
+
+### View Existing Tabs
+Settings → Page Customization → Manage Existing Custom Tabs
+
+### Actions Available
+- **⏸️ Deactivate**: Hide tab (keeps data)
+- **▶️ Activate**: Show tab again
+- **View Columns**: See configuration
+- **🗑️ Delete**: Remove tab (table preserved)
+
+---
+
+## Using Custom Tabs
+
+### Data Entry
+1. Go to Tank Transactions or Tanker Transactions
+2. Click your custom tab
+3. Fill manual entry fields
+4. View auto-calculated fields (if any)
+5. Click "💾 Save Row"
+
+---
+
+## Reporting with Custom Tabs
+
+### Create Report
+1. Settings → Report Customization → Create New Report
+2. Select Data Source → Your custom table appears as `custom_[name]_[location]`
+3. Select columns (includes all your custom fields)
+4. Configure filters, grouping, sorting
+5. Save report
+
+---
+
+## Formula Operations
+
+| Operation | Description | Example |
+|-----------|-------------|---------|
+| sum | Add columns | A + B + C |
+| subtract | Sequential subtraction | A - B - C |
+| multiply | Multiply columns | A × B × C |
+| divide | Sequential division | A ÷ B ÷ C |
+| percentage | (A ÷ B) × 100 | (Oil ÷ Total) × 100 |
+| maximum | Highest value | MAX(A, B, C) |
+| minimum | Lowest value | MIN(A, B, C) |
+| average | Mean value | AVG(A, B, C) |
+
+---
+
+## Naming Best Practices
+
+### Tab Names
+✅ "Daily Production Summary"
+✅ "Chemical Injection Log"
+✅ "Quality Control Data"
+❌ "Production" (too vague)
+❌ "Tab#1" (not descriptive)
+
+### Field Names
+✅ `crude_volume`, `water_cut_pct`, `total_production`
+❌ `Crude Volume` (spaces not allowed)
+❌ `col1`, `field_a` (not meaningful)
+
+### Labels
+✅ "Crude Volume (bbls)"
+✅ "Water Cut %"
+✅ "Total Production"
+❌ "crude_volume" (use proper case)
+❌ "Volume" (missing units)
+
+---
+
+## Common Use Cases
+
+### Production Tracking
+Columns: Date, Stream A, Stream B, Stream C, Total (calculated sum)
+
+### Quality Control
+Columns: Date, Sample ID, API, Density, Temperature, Pass/Fail
+
+### Chemical Inventory
+Columns: Date, Chemical Type, Opening Stock, Received, Consumed, Closing (calculated)
+
+### Equipment Performance
+Columns: Date, Equipment ID, Run Hours, Volume, Efficiency (calculated)
+
+---
+
+## Troubleshooting
+
+### Tab Not Visible
+- Check it's activated
+- Verify correct target page
+- Refresh browser
+
+### Formula Not Working
+- Check source columns have values
+- Verify numeric data types
+- Check for division by zero
+
+### Can't Save Data
+- Fill all required fields
+- Check calculated fields evaluate
+- Verify database table exists
+
+### Table Not in Reports
+- Refresh Report Customization page
+- Check tab is activated
+- Contact administrator
+
+---
+
+## Database Table Names
+
+Format: `custom_[tab_name]_[location_id]`
+
+Examples:
+- `custom_daily_production_summary_1`
+- `custom_chemical_injection_log_2`
+- `custom_quality_control_data_3`
+
+### Standard Columns (automatic)
+- `id` - Primary key
+- `location_id` - Location reference
+- `tx_date` - Transaction date
+- `created_by` - Username
+- `created_at` - Creation timestamp
+- `updated_at` - Update timestamp
+
+Plus all your custom columns
+
+---
+
+## Permissions
+
+### Create/Edit Tabs
+- admin-operations
+- admin-it
+- manager
+
+### Enter Data
+- Any user with operational page access
+- Location-specific
+
+### View Data
+- Same as entry permissions
+- Location filtered automatically
+
+---
+
+## Support Contacts
+
+**Configuration Issues**: System Administrator
+**Database Issues**: Database Administrator
+**User Training**: Operations Manager
+**Feature Requests**: IT Support Team
+
+---
+
+## Quick Tips
+
+💡 **Test First**: Create a test tab with sample data before rolling out
+💡 **Start Simple**: Begin with 3-5 columns, add more as needed
+💡 **Use Formulas**: Automate calculations to reduce errors
+💡 **Clear Labels**: Include units in labels (bbls, mcf, %, etc.)
+💡 **Date Column**: Always include a date column for time-series data
+💡 **Required Fields**: Mark essential fields as required
+💡 **Deactivate Not Delete**: Deactivate unused tabs instead of deleting
+💡 **Document Purpose**: Keep notes on what each tab is for
+💡 **Regular Review**: Check monthly if tabs are still needed
+💡 **Train Users**: Ensure team knows how to use calculated columns
+
+---
+
+## Version Information
+
+Feature: Custom Tabs
+Version: 1.0
+Release: November 2025
+Documentation: Custom_Tabs_Feature_Guide.txt (full guide)
+
+---
+
+Last Updated: November 25, 2025

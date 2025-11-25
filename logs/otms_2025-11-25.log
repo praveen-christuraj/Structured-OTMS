@@ -1,0 +1,487 @@
+2025-11-25 15:34:50 - OTMS - INFO - Saving production data to table 'flex_production_5' for location_id=5, username=admin
+2025-11-25 15:34:50 - OTMS - INFO - Attempting to create/verify table 'flex_production_5' with 6 columns
+2025-11-25 15:34:50 - OTMS - INFO - Attempting to create custom table 'flex_production_5' for location_id=5
+2025-11-25 15:34:50 - OTMS - INFO - Table 'flex_production_5' does not exist. Creating new table...
+2025-11-25 15:34:50 - OTMS - INFO - Processing 6 custom column definitions for table 'flex_production_5'
+2025-11-25 15:34:50 - OTMS - INFO - Added column 'date' (date) to table 'flex_production_5'
+2025-11-25 15:34:50 - OTMS - INFO - Added column 'okw_production' (number) to table 'flex_production_5'
+2025-11-25 15:34:50 - OTMS - INFO - Added column 'gpp1_production' (number) to table 'flex_production_5'
+2025-11-25 15:34:50 - OTMS - INFO - Added column 'gpp2_production' (number) to table 'flex_production_5'
+2025-11-25 15:34:50 - OTMS - INFO - Added column 'gpp_closing_stock' (number) to table 'flex_production_5'
+2025-11-25 15:34:50 - OTMS - INFO - Added column 'gpp_total_production' (number) to table 'flex_production_5'
+2025-11-25 15:34:50 - OTMS - INFO - Creating table 'flex_production_5' with 13 columns in database...
+2025-11-25 15:34:50 - OTMS - ERROR - ❌ Unexpected error creating custom table 'flex_production_5': Foreign key associated with column 'flex_production_5.location_id' could not find table 'locations' with which to generate a foreign key to target column 'id'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\models.py", line 1479, in create_custom_tab_table
+    metadata.create_all(engine)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\schema.py", line 5928, in create_all
+    bind._run_ddl_visitor(
+    ~~~~~~~~~~~~~~~~~~~~~^
+        ddl.SchemaGenerator, self, checkfirst=checkfirst, tables=tables
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 3252, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 2459, in _run_ddl_visitor
+    ).traverse_single(element)
+      ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\visitors.py", line 661, in traverse_single
+    return meth(obj, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\ddl.py", line 962, in visit_metadata
+    collection = sort_tables_and_constraints(
+        [t for t in tables if self._can_create_table(t)]
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\ddl.py", line 1394, in sort_tables_and_constraints
+    dependent_on = fkc.referred_table
+                   ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\schema.py", line 4799, in referred_table
+    return self.elements[0].column.table
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 1226, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\schema.py", line 3199, in column
+    return self._resolve_column()
+           ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\schema.py", line 3222, in _resolve_column
+    raise exc.NoReferencedTableError(
+    ...<5 lines>...
+    )
+sqlalchemy.exc.NoReferencedTableError: Foreign key associated with column 'flex_production_5.location_id' could not find table 'locations' with which to generate a foreign key to target column 'id'
+2025-11-25 15:34:50 - OTMS - INFO - Table creation result for 'flex_production_5': False
+2025-11-25 15:34:50 - OTMS - WARNING - Table 'flex_production_5' does not exist in database. Available tables: 45
+2025-11-25 15:34:50 - OTMS - ERROR - Failed to get model for table 'flex_production_5' even though creation returned False
+2025-11-25 15:39:53 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 45
+2025-11-25 15:39:53 - OTMS - WARNING - Table 'flex_production_5' does not exist in database. Available tables: 45
+2025-11-25 15:40:03 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 45
+2025-11-25 15:40:03 - OTMS - WARNING - Table 'flex_production_5' does not exist in database. Available tables: 45
+2025-11-25 15:40:51 - OTMS - INFO - Saving production data to table 'flex_production_5' for location_id=5, username=admin
+2025-11-25 15:40:51 - OTMS - INFO - Attempting to create/verify table 'flex_production_5' with 6 columns
+2025-11-25 15:40:51 - OTMS - INFO - Attempting to create custom table 'flex_production_5' for location_id=5
+2025-11-25 15:40:51 - OTMS - INFO - Database connection verified for table 'flex_production_5' creation
+2025-11-25 15:40:51 - OTMS - INFO - Table 'flex_production_5' does not exist. Creating new table...
+2025-11-25 15:40:51 - OTMS - INFO - Processing 6 custom column definitions for table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - Added column 'date' (date) to table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - Added column 'okw_production' (number) to table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - Added column 'gpp1_production' (number) to table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - Added column 'gpp2_production' (number) to table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - Added column 'gpp_closing_stock' (number) to table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - Added column 'gpp_total_production' (number) to table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - Creating table 'flex_production_5' with 13 columns in database...
+2025-11-25 15:40:51 - OTMS - INFO - ✅ Successfully created table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - Table 'flex_production_5' is ready for use
+2025-11-25 15:40:51 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:40:51 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - Successfully loaded model for table 'flex_production_5'. Proceeding to save data...
+2025-11-25 15:40:51 - OTMS - INFO - Inserting record into 'flex_production_5' with data: {'location_id': 5, 'tx_date': datetime.date(2025, 11, 25), 'created_by': 'admin', 'date': datetime.date(2025, 11, 25), 'okw_production': 21000.0, 'gpp1_production': 2000.0, 'gpp2_production': 1450.0, 'gpp_closing_stock': 12000.0, 'gpp_total_production': 3450.0}
+2025-11-25 15:40:51 - OTMS - INFO - ✅ Successfully saved record 1 to table 'flex_production_5'
+2025-11-25 15:40:51 - OTMS - INFO - User notified of successful save to 'flex_production_5'
+2025-11-25 15:40:55 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:40:55 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:40:55 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:41:07 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:41:07 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:41:07 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:48:50 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:48:50 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:48:50 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:49:09 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:49:09 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:49:09 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:49:40 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:49:40 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:49:40 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:52:49 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:52:49 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:52:49 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:53:16 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:53:16 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:53:16 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:53:33 - OTMS - INFO - Added 0 custom tables from location_config
+2025-11-25 15:53:33 - OTMS - INFO - Added 1 flex_* tables from database: ['flex_production_5']
+2025-11-25 15:53:33 - OTMS - INFO - Attempting to load custom table 'flex_production_5'
+2025-11-25 15:53:33 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:53:33 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:53:33 - OTMS - INFO - Successfully loaded custom table model for 'flex_production_5'
+2025-11-25 15:53:33 - OTMS - INFO - Retrieved 13 columns for data source 'flex_production_5'
+2025-11-25 15:53:38 - OTMS - INFO - Added 0 custom tables from location_config
+2025-11-25 15:53:38 - OTMS - INFO - Added 1 flex_* tables from database: ['flex_production_5']
+2025-11-25 15:53:38 - OTMS - INFO - Attempting to load custom table 'flex_production_5'
+2025-11-25 15:53:38 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:53:38 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:53:38 - OTMS - INFO - Successfully loaded custom table model for 'flex_production_5'
+2025-11-25 15:53:38 - OTMS - INFO - Retrieved 13 columns for data source 'flex_production_5'
+2025-11-25 15:53:57 - OTMS - INFO - Added 0 custom tables from location_config
+2025-11-25 15:53:57 - OTMS - INFO - Added 1 flex_* tables from database: ['flex_production_5']
+2025-11-25 15:53:57 - OTMS - INFO - Loading columns for standard data source 'vessels'
+2025-11-25 15:53:57 - OTMS - INFO - Retrieved 7 columns for data source 'vessels'
+2025-11-25 15:54:02 - OTMS - INFO - Added 0 custom tables from location_config
+2025-11-25 15:54:02 - OTMS - INFO - Added 1 flex_* tables from database: ['flex_production_5']
+2025-11-25 15:54:02 - OTMS - INFO - Loading columns for standard data source 'vessels'
+2025-11-25 15:54:02 - OTMS - INFO - Retrieved 7 columns for data source 'vessels'
+2025-11-25 15:54:39 - OTMS - INFO - Added 0 custom tables from location_config
+2025-11-25 15:54:39 - OTMS - INFO - Added 1 flex_* tables from database: ['flex_production_5']
+2025-11-25 15:54:39 - OTMS - INFO - Attempting to load custom table 'flex_production_5'
+2025-11-25 15:54:39 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:54:39 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:54:39 - OTMS - INFO - Successfully loaded custom table model for 'flex_production_5'
+2025-11-25 15:54:39 - OTMS - INFO - Retrieved 13 columns for data source 'flex_production_5'
+2025-11-25 15:54:49 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:54:49 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:54:49 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:55:06 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:55:06 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:55:06 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:59:23 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:59:23 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:59:23 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 15:59:54 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 15:59:54 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 15:59:54 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:00:11 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:00:11 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:00:11 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:01:06 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:01:06 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:01:06 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:01:17 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 16:01:17 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 16:01:17 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-25 16:01:17 - OTMS - INFO - Reflecting table 'audit_log' from database...
+2025-11-25 16:01:17 - OTMS - INFO - ✅ Successfully created model for table 'audit_log'
+2025-11-25 16:01:17 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-25 16:01:17 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-25 16:01:28 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 16:01:28 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 16:01:28 - OTMS - INFO - Attempting to load custom table 'flex_production_5'
+2025-11-25 16:01:28 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:01:28 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:01:28 - OTMS - INFO - Successfully loaded custom table model for 'flex_production_5'
+2025-11-25 16:01:28 - OTMS - INFO - Retrieved 13 columns for data source 'flex_production_5'
+2025-11-25 16:01:43 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 16:01:43 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 16:01:43 - OTMS - INFO - Attempting to load custom table 'otr_vessel'
+2025-11-25 16:01:43 - OTMS - INFO - Reflecting table 'otr_vessel' from database...
+2025-11-25 16:01:43 - OTMS - INFO - ✅ Successfully created model for table 'otr_vessel'
+2025-11-25 16:01:43 - OTMS - INFO - Successfully loaded custom table model for 'otr_vessel'
+2025-11-25 16:01:43 - OTMS - INFO - Retrieved 18 columns for data source 'otr_vessel'
+2025-11-25 16:01:54 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 16:01:54 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 16:01:54 - OTMS - INFO - Attempting to load custom table 'vessel_operations'
+2025-11-25 16:01:54 - OTMS - INFO - Reflecting table 'vessel_operations' from database...
+2025-11-25 16:01:54 - OTMS - INFO - ✅ Successfully created model for table 'vessel_operations'
+2025-11-25 16:01:54 - OTMS - INFO - Successfully loaded custom table model for 'vessel_operations'
+2025-11-25 16:01:54 - OTMS - INFO - Retrieved 5 columns for data source 'vessel_operations'
+2025-11-25 16:02:11 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 16:02:11 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 16:02:11 - OTMS - INFO - Attempting to load custom table 'tank_daily_statuses'
+2025-11-25 16:02:11 - OTMS - INFO - Reflecting table 'tank_daily_statuses' from database...
+2025-11-25 16:02:11 - OTMS - INFO - ✅ Successfully created model for table 'tank_daily_statuses'
+2025-11-25 16:02:11 - OTMS - INFO - Successfully loaded custom table model for 'tank_daily_statuses'
+2025-11-25 16:02:11 - OTMS - INFO - Retrieved 7 columns for data source 'tank_daily_statuses'
+2025-11-25 16:02:25 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:02:26 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:02:26 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:02:28 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:02:28 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:02:28 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:04:02 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:04:02 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:04:02 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:04:30 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:04:30 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:04:30 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:05:06 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:05:06 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:05:06 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:05:06 - OTMS - ERROR - Render production row 0 failed: `st.session_state.vt_production_edit_0` cannot be modified after the widget with key `vt_production_edit_0` is instantiated.
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\view_transactions.py", line 1565, in _flex_list
+    st.session_state[f"vt_{section}_edit_{i}"] = not st.session_state.get(f"vt_{section}_edit_{i}", False)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state_proxy.py", line 114, in __setitem__
+    get_session_state()[key] = value
+    ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\safe_session_state.py", line 109, in __setitem__
+    self._state[key] = value
+    ~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state.py", line 533, in __setitem__
+    raise StreamlitAPIException(
+    ...<2 lines>...
+    )
+streamlit.errors.StreamlitAPIException: `st.session_state.vt_production_edit_0` cannot be modified after the widget with key `vt_production_edit_0` is instantiated.
+2025-11-25 16:05:20 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:05:20 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:05:20 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:05:25 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:05:25 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:05:25 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:05:25 - OTMS - ERROR - Render production row 0 failed: `st.session_state.vt_production_edit_0` cannot be modified after the widget with key `vt_production_edit_0` is instantiated.
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\view_transactions.py", line 1565, in _flex_list
+    st.session_state[f"vt_{section}_edit_{i}"] = not st.session_state.get(f"vt_{section}_edit_{i}", False)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state_proxy.py", line 114, in __setitem__
+    get_session_state()[key] = value
+    ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\safe_session_state.py", line 109, in __setitem__
+    self._state[key] = value
+    ~~~~~~~~~~~^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\streamlit\runtime\state\session_state.py", line 533, in __setitem__
+    raise StreamlitAPIException(
+    ...<2 lines>...
+    )
+streamlit.errors.StreamlitAPIException: `st.session_state.vt_production_edit_0` cannot be modified after the widget with key `vt_production_edit_0` is instantiated.
+2025-11-25 16:07:46 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:07:46 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:07:46 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:09:32 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:09:32 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:09:32 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:09:33 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:09:33 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:09:33 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:09:43 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:09:43 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:09:43 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:09:43 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:09:43 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:09:43 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:09:47 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:09:47 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:09:47 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:09:48 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:09:48 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:09:48 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:09:53 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:09:53 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:09:53 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:09:54 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:09:54 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:09:54 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:12:07 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:12:07 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:12:07 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:15:02 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:15:02 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:15:02 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:15:08 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:15:08 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:15:08 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:15:09 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:15:09 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:15:09 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:15:12 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:15:12 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:15:12 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:15:13 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:15:13 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:15:13 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:15:22 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:15:22 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:15:22 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:15:22 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:15:22 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:16:56 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:16:56 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:16:56 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:18:09 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:18:10 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:18:10 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:18:52 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:18:52 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:18:52 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:18:53 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:18:53 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:18:53 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:19:13 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:19:13 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:19:13 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:19:13 - OTMS - INFO - Save button clicked for production record 1
+2025-11-25 16:19:13 - OTMS - INFO - Attempting to save production record ID: 1
+2025-11-25 16:19:13 - OTMS - INFO - Editable columns: ['date', 'gpp1_production', 'gpp2_production', 'gpp_closing_stock', 'gpp_total_production', 'okw_production', 'tx_date']
+2025-11-25 16:19:13 - OTMS - INFO - Edited values: {'date': '2025-11-25', 'gpp1_production': 2000.0, 'gpp2_production': 1460.0, 'gpp_closing_stock': 12000.0, 'gpp_total_production': 3450.0, 'okw_production': 21000.0, 'tx_date': '2025-11-25'}
+2025-11-25 16:19:13 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:19:13 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:19:13 - OTMS - INFO - Found record in database, updating fields...
+2025-11-25 16:19:13 - OTMS - INFO - Updated date: 2025-11-25 -> 2025-11-25
+2025-11-25 16:19:13 - OTMS - INFO - Updated gpp1_production: 2000.0 -> 2000.0
+2025-11-25 16:19:13 - OTMS - INFO - Updated gpp2_production: 1450.0 -> 1460.0
+2025-11-25 16:19:13 - OTMS - INFO - Updated gpp_closing_stock: 12000.0 -> 12000.0
+2025-11-25 16:19:13 - OTMS - INFO - Updated gpp_total_production: 3450.0 -> 3450.0
+2025-11-25 16:19:13 - OTMS - INFO - Updated okw_production: 21000.0 -> 21000.0
+2025-11-25 16:19:13 - OTMS - INFO - Updated tx_date: 2025-11-25 -> 2025-11-25
+2025-11-25 16:19:13 - OTMS - INFO - Set updated_by to admin
+2025-11-25 16:19:13 - OTMS - ERROR - Edit production failed: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+[SQL: UPDATE flex_production_5 SET tx_date=?, updated_by=?, date=?, gpp2_production=? WHERE flex_production_5.id = ?]
+[parameters: [{'updated_by': 'admin', 'gpp2_production': 1460.0, 'date': '2025-11-25', 'tx_date': '2025-11-25', 'flex_production_5_id': 1}]]
+Traceback (most recent call last):
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1815, in _execute_context
+    context = constructor(
+        dialect, self, conn, execution_options, *args, **kw
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 1493, in _init_compiled
+    flattened_processors[key](compiled_params[key])
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py", line 1287, in process
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: SQLite Date type only accepts Python date objects as input.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\view_transactions.py", line 1811, in _flex_list
+    s.commit()
+    ~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<string>", line 2, in commit
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "<string>", line 2, in _prepare_impl
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+    ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+    ~~~~~~~~~~~^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.mapper,
+        ^^^^^^^^^^^^
+        uow.states_for_mapper_hierarchy(self.mapper, False, False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        uow,
+        ^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 85, in save_obj
+    _emit_update_statements(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        base_mapper,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        update,
+        ^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 912, in _emit_update_statements
+    c = connection.execute(
+        statement, multiparams, execution_options=execution_options
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1821, in _execute_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str(statement), parameters, None, None
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1815, in _execute_context
+    context = constructor(
+        dialect, self, conn, execution_options, *args, **kw
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 1493, in _init_compiled
+    flattened_processors[key](compiled_params[key])
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py", line 1287, in process
+    raise TypeError(
+    ...<2 lines>...
+    )
+sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+[SQL: UPDATE flex_production_5 SET tx_date=?, updated_by=?, date=?, gpp2_production=? WHERE flex_production_5.id = ?]
+[parameters: [{'updated_by': 'admin', 'gpp2_production': 1460.0, 'date': '2025-11-25', 'tx_date': '2025-11-25', 'flex_production_5_id': 1}]]
+2025-11-25 16:19:56 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:19:56 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:19:56 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:20:13 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:20:13 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:20:13 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:20:39 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:20:39 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:20:39 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:20:40 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:20:40 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:20:40 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:20:50 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:20:50 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:20:50 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:20:50 - OTMS - INFO - Save button clicked for production record 1
+2025-11-25 16:20:50 - OTMS - INFO - Attempting to save production record ID: 1
+2025-11-25 16:20:50 - OTMS - INFO - Editable columns: ['date', 'gpp1_production', 'gpp2_production', 'gpp_closing_stock', 'gpp_total_production', 'okw_production', 'tx_date']
+2025-11-25 16:20:50 - OTMS - INFO - Edited values: {'date': datetime.date(2025, 11, 25), 'gpp1_production': 2000.0, 'gpp2_production': 1340.0, 'gpp_closing_stock': 12000.0, 'gpp_total_production': 3450.0, 'okw_production': 21000.0, 'tx_date': datetime.date(2025, 11, 25)}
+2025-11-25 16:20:50 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:20:50 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:20:50 - OTMS - INFO - Found record in database, updating fields...
+2025-11-25 16:20:50 - OTMS - INFO - Updated date: 2025-11-25 -> 2025-11-25
+2025-11-25 16:20:50 - OTMS - INFO - Updated gpp1_production: 2000.0 -> 2000.0
+2025-11-25 16:20:50 - OTMS - INFO - Updated gpp2_production: 1450.0 -> 1340.0
+2025-11-25 16:20:50 - OTMS - INFO - Updated gpp_closing_stock: 12000.0 -> 12000.0
+2025-11-25 16:20:50 - OTMS - INFO - Updated gpp_total_production: 3450.0 -> 3450.0
+2025-11-25 16:20:50 - OTMS - INFO - Updated okw_production: 21000.0 -> 21000.0
+2025-11-25 16:20:50 - OTMS - INFO - Updated tx_date: 2025-11-25 -> 2025-11-25
+2025-11-25 16:20:50 - OTMS - INFO - Set updated_by to admin
+2025-11-25 16:20:50 - OTMS - INFO - Successfully committed changes to database
+2025-11-25 16:20:50 - OTMS - INFO - Audit log created successfully
+2025-11-25 16:20:51 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:20:51 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:20:51 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:24:16 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:24:16 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:24:16 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:24:43 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:24:43 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:24:43 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:24:55 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:24:55 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:24:55 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 16:25:09 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
+2025-11-25 16:25:09 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
+2025-11-25 16:25:09 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'

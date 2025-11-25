@@ -1393,3 +1393,189 @@ class ReportAccess(Base):
 
 # Index for faster access control queries
 Index('idx_report_access_lookup', ReportAccess.report_id, ReportAccess.role, ReportAccess.user_id)
+
+
+# ============================================================================
+# DYNAMIC TABLE CREATION FOR CUSTOM TABS
+# ============================================================================
+
+def create_custom_tab_table(table_name: str, columns: list, location_id: int) -> bool:
+    """
+    Dynamically create a database table for a custom tab.
+    
+    Args:
+        table_name: Name of the table to create
+        columns: List of column definitions with name, label, type, formula
+        location_id: Location ID for the table
+    
+    Returns:
+        True if table was created successfully, False otherwise
+    """
+    from sqlalchemy import Table, MetaData, inspect
+    from sqlalchemy.exc import OperationalError, ProgrammingError, DatabaseError
+    from db import engine
+    from logger import log_info, log_error, log_warning
+    
+    log_info(f"Attempting to create custom table '{table_name}' for location_id={location_id}")
+    
+    if not engine:
+        log_error("Database engine not available. Check db.py configuration.")
+        raise RuntimeError("Database engine not available. Check db.py configuration.")
+    
+    # Test database connection
+    try:
+        with engine.connect() as conn:
+            log_info(f"Database connection verified for table '{table_name}' creation")
+    except Exception as conn_err:
+        log_error(f"Failed to connect to database: {str(conn_err)}", exc_info=True)
+        raise RuntimeError(f"Database connection failed: {str(conn_err)}")
+    
+    try:
+        # Check if table already exists
+        inspector = inspect(engine)
+        existing_tables = inspector.get_table_names()
+        
+        if table_name in existing_tables:
+            log_info(f"Table '{table_name}' already exists. Skipping creation.")
+            return True  # Table already exists
+        
+        log_info(f"Table '{table_name}' does not exist. Creating new table...")
+        
+        # Use the existing Base.metadata to ensure FK references work
+        metadata = Base.metadata
+        
+        # Define standard columns
+        table_columns = [
+            Column('id', Integer, primary_key=True, autoincrement=True),
+            Column('location_id', Integer, ForeignKey('locations.id'), nullable=False),
+            Column('tx_date', Date, nullable=True),
+            Column('created_by', String(64), nullable=True),
+            Column('created_at', DateTime, server_default=func.now()),
+            Column('updated_by', String(64), nullable=True),
+            Column('updated_at', DateTime, onupdate=func.now()),
+        ]
+        
+        log_info(f"Processing {len(columns)} custom column definitions for table '{table_name}'")
+        
+        # Add custom columns based on definitions
+        for col_def in columns:
+            col_name = col_def.get('name', '').strip()
+            col_type = col_def.get('type', 'text')
+            
+            if not col_name:
+                log_warning(f"Skipping column with empty name in table '{table_name}'")
+                continue
+                
+            if col_name in ['id', 'location_id', 'created_by', 'created_at', 'updated_at', 'tx_date', 'updated_by']:
+                log_warning(f"Skipping reserved column name '{col_name}' in table '{table_name}'")
+                continue  # Skip reserved names
+            
+            # Map column types
+            if col_type == 'date':
+                sql_type = Date
+            elif col_type == 'number':
+                sql_type = Float
+            else:  # text
+                sql_type = String(255)
+            
+            table_columns.append(Column(col_name, sql_type, nullable=True))
+            log_info(f"Added column '{col_name}' ({col_type}) to table '{table_name}'")
+        
+        # Create the table
+        log_info(f"Creating table '{table_name}' with {len(table_columns)} columns in database...")
+        custom_table = Table(table_name, metadata, *table_columns)
+        metadata.create_all(engine)
+        log_info(f"✅ Successfully created table '{table_name}'")
+        return True
+        
+    except OperationalError as e:
+        error_msg = f"Database operational error creating table '{table_name}': {str(e)}. Check database connection and permissions."
+        log_error(f"❌ {error_msg}", exc_info=True)
+        raise RuntimeError(error_msg) from e
+    except ProgrammingError as e:
+        error_msg = f"Database programming error creating table '{table_name}': {str(e)}. Check SQL syntax and column definitions."
+        log_error(f"❌ {error_msg}", exc_info=True)
+        raise RuntimeError(error_msg) from e
+    except DatabaseError as e:
+        error_msg = f"Database error creating table '{table_name}': {str(e)}. Check database configuration."
+        log_error(f"❌ {error_msg}", exc_info=True)
+        raise RuntimeError(error_msg) from e
+    except Exception as e:
+        error_msg = f"Unexpected error creating custom table '{table_name}': {str(e)}"
+        log_error(f"❌ {error_msg}", exc_info=True)
+        raise RuntimeError(error_msg) from e
+
+
+def get_custom_table_model(table_name: str):
+    """
+    Get a dynamic SQLAlchemy model for a custom tab table.
+    
+    Args:
+        table_name: Name of the custom table
+    
+    Returns:
+        A SQLAlchemy model class or None if table doesn't exist
+    """
+    from sqlalchemy import Table, MetaData, inspect
+    from sqlalchemy.exc import NoSuchTableError, DatabaseError
+    from db import engine
+    from logger import log_info, log_error, log_warning
+    
+    if not engine:
+        log_error(f"Database engine not available when trying to get model for table '{table_name}'")
+        return None
+    
+    try:
+        inspector = inspect(engine)
+        existing_tables = inspector.get_table_names()
+        
+        if table_name not in existing_tables:
+            log_warning(f"Table '{table_name}' does not exist in database. Available tables: {len(existing_tables)}")
+            return None
+            
+        log_info(f"Reflecting table '{table_name}' from database...")
+        metadata = MetaData()
+        table = Table(table_name, metadata, autoload_with=engine)
+        Model = type(f"Custom_{table_name}", (Base,), {"__table__": table})
+        log_info(f"✅ Successfully created model for table '{table_name}'")
+        return Model
+        
+    except NoSuchTableError as e:
+        log_error(f"❌ Table '{table_name}' not found in database: {str(e)}")
+        return None
+    except DatabaseError as e:
+        log_error(f"❌ Database error reflecting table '{table_name}': {str(e)}", exc_info=True)
+        return None
+    except Exception as e:
+        log_error(f"❌ Unexpected error reflecting custom table '{table_name}': {str(e)}", exc_info=True)
+        return None
+
+
+def drop_custom_tab_table(table_name: str) -> bool:
+    """
+    Drop a custom tab table from the database.
+    
+    Args:
+        table_name: Name of the table to drop
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    from sqlalchemy import Table, MetaData, inspect
+    from db import engine
+    
+    if not engine:
+        return False
+    
+    inspector = inspect(engine)
+    if table_name not in inspector.get_table_names():
+        return True  # Already doesn't exist
+    
+    try:
+        metadata = MetaData()
+        table = Table(table_name, metadata, autoload_with=engine)
+        table.drop(engine)
+        return True
+    except Exception as e:
+        print(f"Error dropping custom table {table_name}: {e}")
+        return False

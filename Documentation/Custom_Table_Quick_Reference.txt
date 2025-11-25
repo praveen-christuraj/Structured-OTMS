@@ -1,0 +1,199 @@
+=============================================================================
+CUSTOM TABLE SYSTEM - QUICK REFERENCE
+=============================================================================
+
+For: Developers adding new custom tables to OTMS
+Last Updated: November 25, 2025
+
+=============================================================================
+ZERO CODE CHANGES NEEDED FOR NEW CUSTOM TABLES
+=============================================================================
+
+When you create a new custom table using tank_transactions.py, the viewing
+and editing system AUTOMATICALLY works without any code modifications.
+
+=============================================================================
+HOW TO USE:
+=============================================================================
+
+1. CREATE YOUR CUSTOM TABLE (in tank_transactions.py or similar):
+   
+   Example columns:
+   - tx_date (Date)
+   - production_volume (Number)
+   - operator_name (Text)
+   - remarks (Text)
+   
+   Table will be created as: flex_{section}_{location_id}
+
+2. VIEW/EDIT THE TABLE (already done in view_transactions.py):
+   
+   Just call: _flex_list(location_id, section, user, title)
+   
+   Everything else is automatic:
+   - Column detection
+   - Input field generation
+   - Type conversion
+   - Save/edit operations
+   - Logging
+
+3. DONE! Your custom table now has:
+   ✓ View with filters (date, created_by, search)
+   ✓ Edit button (only for records < 24 hours old)
+   ✓ Appropriate input types (date picker, number input, text)
+   ✓ Edit tracking with "Edited by {user} on {date/time}" badge
+   ✓ Delete with confirmation
+   ✓ Complete error logging
+
+=============================================================================
+EDIT FEATURES AUTOMATICALLY AVAILABLE:
+=============================================================================
+
+✓ Date fields → Calendar picker (st.date_input)
+✓ Number fields → Number input with validation
+✓ Text fields (short) → Single line text input
+✓ Text fields (long >100 chars) → Multi-line text area
+✓ Boolean fields → Checkbox
+✓ Empty values → Treated as None (NULL in database)
+
+✓ Edit badge shows WHO edited and WHEN
+✓ 24-hour edit window with lock icon for old records
+✓ System columns (id, location_id, created_by, etc.) protected
+✓ SQLite type conversion automatic (string dates → date objects)
+✓ All operations logged with full details
+
+=============================================================================
+PROTECTED COLUMNS (AUTO-EXCLUDED FROM EDITING):
+=============================================================================
+
+- id
+- location_id
+- created_by
+- created_at
+- updated_by (auto-updated on save)
+- updated_at (auto-updated on save)
+
+All other columns are automatically editable.
+
+=============================================================================
+WHAT THE USER SEES:
+=============================================================================
+
+VIEWING:
+- Grid with all records
+- Date filter, Created By filter, Text search
+- Each row shows: Date | Custom Columns | Remarks | Created Info | Actions
+- ⚠️ badge if record was edited (hover shows who and when)
+
+EDITING (within 24 hours):
+- Click ✏️ Edit button
+- Form opens with individual fields for each column
+- Info message: "System columns are protected"
+- Each field has appropriate input type
+- 💾 Save button saves changes
+- ↩️ Cancel button closes form
+- Success message: "✅ Saved successfully!"
+- All changes logged
+
+EDITING (after 24 hours):
+- 🔒 icon shown instead of edit button
+- Hover tooltip: "Edit locked (>24hrs)"
+- Record is view-only
+
+=============================================================================
+ERROR HANDLING & LOGGING:
+=============================================================================
+
+All operations are logged to: logs/otms_YYYY-MM-DD.log
+
+Success logs:
+- "Save button clicked for {section} record {id}"
+- "Attempting to save {section} record ID: {id}"
+- "Editable columns: [...]"
+- "Edited values: {...}"
+- "Found record in database, updating fields..."
+- "Updated {column}: {old} -> {new}"
+- "Successfully committed changes to database"
+
+Error logs:
+- "Edit {section} failed: {error}" with full stack trace
+- "Failed to parse date string '{value}' for column {column}"
+- "Record with ID {id} not found in database"
+- "Could not load table model for flex_{section}_{location_id}"
+
+=============================================================================
+EXAMPLES OF AUTOMATIC HANDLING:
+=============================================================================
+
+EXAMPLE 1: Production Table (flex_production_5)
+Columns: tx_date, date, gpp2_production, gpp3_production, export_production
+Result: 
+- tx_date & date → Date pickers
+- All production fields → Number inputs
+- Automatic save with type conversion
+- Edit tracking with timestamps
+
+EXAMPLE 2: Meter Readings (flex_meters_3)
+Columns: tx_date, meter_id, reading_value, notes
+Result:
+- tx_date → Date picker
+- meter_id → Text input
+- reading_value → Number input
+- notes → Text input (or text area if long)
+- Everything automatic
+
+EXAMPLE 3: Condensate (flex_condensate_7) - NOT YET CREATED
+When created with columns: tx_date, volume, temperature, remarks
+Will automatically get:
+- Date picker for tx_date
+- Number inputs for volume and temperature
+- Text area for remarks
+- Full edit/view capability
+- NO CODE CHANGES NEEDED
+
+=============================================================================
+TROUBLESHOOTING:
+=============================================================================
+
+ISSUE: "Save failed. (Logged)"
+FIX: Check logs/otms_YYYY-MM-DD.log for exact error
+     Look for "Edit {section} failed:" with stack trace
+
+ISSUE: Date fields showing errors
+FIX: Verify column is named with date-related suffix:
+     tx_date, date, transaction_date, start_date, end_date
+     These are auto-detected for date conversion
+
+ISSUE: Edit button not appearing
+FIX: Record is older than 24 hours - this is by design
+     Only recent records can be edited
+
+ISSUE: Edit badge not showing edit time
+FIX: Already fixed! Badge now shows formatted timestamp
+     Format: "Edited by {user} on YYYY-MM-DD HH:MM"
+
+=============================================================================
+SYSTEM REQUIREMENTS:
+=============================================================================
+
+✓ Table must follow naming: flex_{section}_{location_id}
+✓ Table must have columns: id, location_id, created_by, created_at
+✓ Optional columns: updated_by, updated_at (for edit tracking)
+✓ Optional column: tx_date (for date filtering)
+✓ All other columns are custom and auto-handled
+
+=============================================================================
+THIS IS THE STANDARD - USE FOR ALL CUSTOM TABLES
+=============================================================================
+
+This system is the approved, standard method for:
+- All production tables
+- All meter reading tables
+- All condensate tables
+- All inspection tables
+- All future custom tables
+
+Do NOT create separate view/edit code for each table.
+Use this universal system - it's tested, logged, and maintained.
+
+=============================================================================

@@ -50,6 +50,10 @@ def render_create_report_form(user: dict, active_location_id: int):
     
     available_sources = get_available_data_sources()
     
+    if not available_sources:
+        st.error("⚠️ No data sources available. Please check database connection.")
+        return
+    
     # Create friendly names for display
     source_display_names = {
         'otr_records': 'OTR Records (Tank Transactions)',
@@ -63,21 +67,42 @@ def render_create_report_form(user: dict, active_location_id: int):
         'ofs_production': 'OFS Production & Evacuation',
         'tanks': 'Tank Master Data',
         'vessels': 'Vessel Master Data',
-        'locations': 'Location Master Data'
+        'locations': 'Location Master Data',
+        'users': 'Users',
+        'audit_log': 'Audit Log',
+        'tasks': 'Tasks',
+        'recycle_bin': 'Recycle Bin (Deleted Records)',
+        'page_customizations': 'Page Customizations',
+        'report_definitions': 'Report Definitions',
+        'report_access': 'Report Access Control',
     }
     
-    source_options = [source_display_names.get(s, s) for s in available_sources]
+    # Auto-generate display names for tables not in the manual map
+    def get_display_name(table_name: str) -> str:
+        if table_name in source_display_names:
+            return source_display_names[table_name]
+        # Handle flex_* tables
+        if table_name.startswith('flex_'):
+            parts = table_name.split('_')
+            if len(parts) >= 3:
+                section = parts[1].replace('_', ' ').title()
+                location_id = parts[-1]
+                return f"{section} (Custom - Location {location_id})"
+        # Generic conversion: underscores to spaces, title case
+        return table_name.replace('_', ' ').title()
+    
+    source_options = [get_display_name(s) for s in available_sources]
     selected_source_display = st.selectbox("Select Data Source *", options=source_options)
     
     # Get actual source name from display name
     selected_source = None
-    for key, value in source_display_names.items():
-        if value == selected_source_display:
-            selected_source = key
+    for src in available_sources:
+        if get_display_name(src) == selected_source_display:
+            selected_source = src
             break
     
     if not selected_source:
-        selected_source = available_sources[0]
+        selected_source = available_sources[0] if available_sources else None
     
     st.info(f"📊 Selected Table: `{selected_source}`")
     
@@ -257,6 +282,10 @@ def render_create_report_form(user: dict, active_location_id: int):
             
             # Save to database
             try:
+                from logger import log_info, log_error
+                
+                log_info(f"Creating report '{report_name}' (slug: {report_slug}) for location_id={active_location_id}")
+                
                 with get_session() as session:
                     # Create report definition
                     new_report = ReportDefinition(
@@ -271,6 +300,9 @@ def render_create_report_form(user: dict, active_location_id: int):
                     session.add(new_report)
                     session.flush()
                     
+                    report_id = new_report.id
+                    log_info(f"Created report definition with id={report_id}")
+                    
                     # Grant access to selected roles
                     for role in allowed_roles:
                         access = ReportAccess(
@@ -282,6 +314,7 @@ def render_create_report_form(user: dict, active_location_id: int):
                         session.add(access)
                     
                     session.commit()
+                    log_info(f"✅ Report '{report_name}' (id={report_id}) saved successfully with {len(allowed_roles)} role access grants")
                     
                     success_msg = f"✅ Report '{report_name}' created successfully!"
                     
@@ -290,6 +323,9 @@ def render_create_report_form(user: dict, active_location_id: int):
                         try:
                             from sqlalchemy import Table, Column, Integer, String, Float, Date, DateTime, Boolean, MetaData, Text
                             from db import engine
+                            from logger import log_info, log_error
+                            
+                            log_info(f"Creating database table '{custom_table_name}' for report '{report_name}'")
                             
                             metadata = MetaData()
                             
@@ -320,14 +356,25 @@ def render_create_report_form(user: dict, active_location_id: int):
                             new_table = Table(custom_table_name, metadata, *table_columns)
                             metadata.create_all(engine)
                             
+                            log_info(f"✅ Successfully created table '{custom_table_name}'")
                             success_msg += f"\n\n🗄️ Database table '{custom_table_name}' created successfully!"
+                            
                         except Exception as table_error:
+                            log_error(f"Failed to create table '{custom_table_name}': {str(table_error)}", exc_info=True)
                             st.warning(f"⚠️ Report created but table creation failed: {str(table_error)}")
+                            st.error("Please check:")
+                            st.markdown("- Database connection is active")
+                            st.markdown("- User has CREATE TABLE permissions")
+                            st.markdown("- Table name is not already in use")
+                            st.markdown("- All column types are valid")
                     
                     st.success(success_msg)
                     st.balloons()
             except Exception as e:
+                from logger import log_error
+                log_error(f"Failed to create report '{report_name}': {str(e)}", exc_info=True)
                 st.error(f"❌ Error creating report: {str(e)}")
+                st.info("💡 Check the logs folder for detailed error information.")
 
 
 def render_manage_reports(user: dict, active_location_id: int):
