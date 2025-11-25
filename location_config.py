@@ -17,7 +17,8 @@ DEFAULT_CONFIG = {
         "show_yade_transactions": False,    # Enabled only for specific locations
         "show_toa_yade": False,             # Enabled only for specific locations
         "show_fso_operations": False,       # FSO-Operations page
-        "show_reports": True,               # Reports page
+        "show_reports": True,               # Legacy Reports page
+        "show_material_balance": True,      # Material Balance page (per location)
     },
 
     "page_access": {

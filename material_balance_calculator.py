@@ -27,9 +27,12 @@ Rules:
 
 from __future__ import annotations
 from datetime import datetime, timedelta, time as dt_time
+import ast
 from typing import Iterable, List, Dict, Any, Optional
 
 M3_TO_BBL = 6.289
+DEFAULT_MB_START_TIME = dt_time(6, 1)
+DEFAULT_MB_END_TIME = dt_time(6, 0)
 
 try:
     from db import get_session
@@ -39,6 +42,14 @@ except Exception:
     OTRRecord = None        # type: ignore
     TankTransaction = None  # type: ignore
     Operation = None        # type: ignore
+
+try:
+    # Optional per-location Material Balance window configuration
+    from location_config import get_page_section_config as _get_mb_page_cfg
+    from location_config import list_operations as _list_ops
+except Exception:
+    _get_mb_page_cfg = None  # type: ignore
+    _list_ops = None  # type: ignore
 
 
 # ---------- normalization helpers ----------
@@ -64,6 +75,47 @@ def _norm_location(code: str) -> str:
     if c in {"utapate", "oml-13", "oml13"}:
         return "UTAPATE"
     return (code or "").upper()
+
+
+def _mb_window_for_location(location_id: Optional[int]) -> tuple[dt_time, dt_time]:
+    """
+    Resolve per-location Material Balance window.
+    Falls back to 06:01 (D) to 06:00 (D/ D+1) if no custom config.
+    """
+    start_time = DEFAULT_MB_START_TIME
+    end_time = DEFAULT_MB_END_TIME
+
+    if location_id is None or _get_mb_page_cfg is None or get_session is None:
+        return start_time, end_time
+
+    try:
+        with get_session() as s:
+            cfg = _get_mb_page_cfg(s, int(location_id), page="material_balance", section="window") or {}
+    except Exception:
+        cfg = {}
+
+    if not cfg or not cfg.get("use_custom_window"):
+        return start_time, end_time
+
+    def _parse_time(val: Any, default: dt_time) -> dt_time:
+        try:
+            txt = str(val or "").strip()
+            if not txt:
+                return default
+            parts = [int(p) for p in txt.split(":")]
+            if len(parts) == 2:
+                h, m = parts
+                return dt_time(h, m)
+            if len(parts) >= 3:
+                h, m, s = parts[0], parts[1], parts[2]
+                return dt_time(h, m, s)
+        except Exception:
+            return default
+        return default
+
+    start_time = _parse_time(cfg.get("start_time"), start_time)
+    end_time = _parse_time(cfg.get("end_time"), end_time)
+    return start_time, end_time
 
 from sqlalchemy import func
 from models import TankTransaction
@@ -330,6 +382,11 @@ class MaterialBalanceCalculator:
         """Fetch OTR rows from DB for the location & date range."""
         if get_session is None or OTRRecord is None or location_id is None:
             return []
+        try:
+            from models import ensure_otr_net_columns
+            ensure_otr_net_columns()
+        except Exception:
+            pass
         with get_session() as s:
             q = s.query(OTRRecord).filter(
                 OTRRecord.location_id == int(location_id),
@@ -494,12 +551,20 @@ class MaterialBalanceCalculator:
         # Track previous day's closing NSV per tank for net movement calculation
         prev_day_tank_nsv: dict[int, float] = {}
 
+        # Per-location daily window (may be customized)
+        win_start_time, win_end_time = _mb_window_for_location(location_id)
+
         is_bfs = code == "BFS"
         cur = date_from
         while cur <= date_to:
-            start = datetime.combine(cur, dt_time(6, 1))
-            end   = datetime.combine(cur + timedelta(days=1), dt_time(6, 0))
-            day_entries = MaterialBalanceCalculator._window_filter(entries, start, end)
+            # Build per-day window, allowing wrap into next day if end <= start
+            start_dt = datetime.combine(cur, win_start_time)
+            if win_end_time <= win_start_time:
+                end_dt = datetime.combine(cur + timedelta(days=1), win_end_time)
+            else:
+                end_dt = datetime.combine(cur, win_end_time)
+
+            day_entries = MaterialBalanceCalculator._window_filter(entries, start_dt, end_dt)
 
             if not day_entries:
                 # continuity: carry forward previous closing (or 0 on first day)
@@ -657,6 +722,343 @@ class MaterialBalanceCalculator:
             prev_closing = close_val
             prev_day_tank_nsv = closing_by_tank.copy()
 
+            cur += timedelta(days=1)
+
+        return rows
+
+    @staticmethod
+    def _get_custom_columns(location_id: Optional[int]) -> List[Dict[str, Any]]:
+        if location_id is None or _get_mb_page_cfg is None or get_session is None:
+            return []
+        try:
+            with get_session() as s:
+                cfg = _get_mb_page_cfg(s, int(location_id), page="material_balance", section="columns") or {}
+            cols = list(cfg.get("columns", []))
+            out = []
+            for c in cols:
+                label = (c.get("label") or "").strip()
+                ctype = (c.get("type") or "").strip().lower()
+                src = (c.get("data_source") or "").strip()
+                field = (c.get("field") or "").strip()
+                ops = list(c.get("operations", []))
+                formula = c.get("formula")
+                if label and ctype in {"receipt", "dispatch", "compute", "opening", "closing"}:
+                    out.append({
+                        "label": label,
+                        "type": ctype,
+                        "data_source": (src or None),
+                        "field": (field or None),
+                        "operations": ops,
+                        "formula": formula,
+                    })
+            return out
+        except Exception:
+            return []
+
+    @staticmethod
+    def _norm_ops_set(names: List[str]) -> set[str]:
+        return { _norm_text(n) for n in (names or []) if (n or "").strip() }
+
+    @staticmethod
+    def _sum_field_for_ops(entries: Iterable, field: str, ops_norm: set[str]) -> float:
+        total = 0.0
+        for e in entries:
+            if ops_norm:
+                op_norm = MaterialBalanceCalculator._op_name_norm(e)
+                if op_norm not in ops_norm:
+                    continue
+            try:
+                val = getattr(e, field)
+            except Exception:
+                val = None
+            try:
+                total += float(val or 0.0)
+            except Exception:
+                pass
+        return round(total, 2)
+
+    @staticmethod
+    def calculate_material_balance_custom(
+        entries: Optional[Iterable],
+        date_from,
+        date_to,
+        location_id: Optional[int] = None,
+        debug: bool = False
+    ) -> List[Dict[str, Any]]:
+        if not _is_iterable_entries(entries):
+            entries = MaterialBalanceCalculator._fetch_entries(location_id, date_from, date_to)
+        else:
+            entries = list(entries or [])
+
+        cols = MaterialBalanceCalculator._get_custom_columns(location_id)
+        if not cols:
+            return []
+
+        win_start_time, win_end_time = _mb_window_for_location(location_id)
+
+        rows: List[Dict[str, Any]] = []
+        prev_closing: Optional[float] = None
+        prev_day_tank_nsv: dict[int, float] = {}
+
+        cur = date_from
+        while cur <= date_to:
+            start_dt = datetime.combine(cur, win_start_time)
+            if win_end_time <= win_start_time:
+                end_dt = datetime.combine(cur + timedelta(days=1), win_end_time)
+            else:
+                end_dt = datetime.combine(cur, win_end_time)
+
+            day_entries_otr = MaterialBalanceCalculator._window_filter(entries, start_dt, end_dt)
+
+            if prev_closing is None:
+                opening = MaterialBalanceCalculator._opening_stock_for_first_day(day_entries_otr)
+            else:
+                opening = prev_closing
+
+            out = { "Date": cur.strftime("%Y-%m-%d") }
+
+            total_receipts = 0.0
+            total_dispatch = 0.0
+
+            def _get_model(src: str):
+                try:
+                    from models import get_custom_table_model
+                    return get_custom_table_model(src)
+                except Exception:
+                    return None
+
+            def _fetch_source(location_id: Optional[int], src: str, dfrom, dto) -> list:
+                Model = _get_model(src)
+                if Model is None or get_session is None:
+                    return []
+                with get_session() as s:
+                    q = s.query(Model)
+                    if hasattr(Model, 'location_id') and location_id is not None:
+                        q = q.filter(getattr(Model, 'location_id') == int(location_id))
+                    if hasattr(Model, 'date'):
+                        q = q.filter(getattr(Model, 'date') >= dfrom).filter(getattr(Model, 'date') <= dto)
+                    elif hasattr(Model, 'tx_date'):
+                        q = q.filter(getattr(Model, 'tx_date') >= dfrom).filter(getattr(Model, 'tx_date') <= dto)
+                    return list(q.all())
+
+            def _entry_dt_generic(e):
+                try:
+                    dt = None
+                    if hasattr(e, 'date'):
+                        d = getattr(e, 'date')
+                        t = getattr(e, 'time', None)
+                        if isinstance(t, str):
+                            parts = t.split(':'); hh = int(parts[0]); mm = int(parts[1]) if len(parts) > 1 else 0
+                            t = dt_time(hh, mm)
+                        dt = datetime.combine(d, t or dt_time(0,0))
+                    elif hasattr(e, 'tx_date'):
+                        d = getattr(e, 'tx_date')
+                        dt = datetime.combine(d, dt_time(0,0))
+                    return dt
+                except Exception:
+                    return None
+
+            def _tank_id(e):
+                for name in ('tank_id', 'tankid', 'tankID'):
+                    if hasattr(e, name):
+                        try:
+                            return int(getattr(e, name))
+                        except Exception:
+                            return getattr(e, name)
+                return None
+
+            def _is_closing_row(e):
+                try:
+                    if hasattr(e, 'operation'):
+                        op = str(getattr(e, 'operation') or '').lower()
+                        return ('closing' in op) or ('closing stock' in op) or ('close' in op)
+                except Exception:
+                    pass
+                return False
+
+            def _sum_first_by_tank(entries_list: list, field_name: str) -> float:
+                by_tank = {}
+                for e in entries_list:
+                    dt = _entry_dt_generic(e)
+                    if dt is None:
+                        continue
+                    tid = _tank_id(e)
+                    key = tid if tid is not None else '__global__'
+                    prev = by_tank.get(key)
+                    if prev is None or dt < prev[0]:
+                        by_tank[key] = (dt, e)
+                total = 0.0
+                for _, (_, e) in by_tank.items():
+                    try:
+                        total += float(getattr(e, field_name) or 0.0)
+                    except Exception:
+                        pass
+                return round(total, 2)
+
+            def _sum_last_by_tank(entries_list: list, field_name: str) -> float:
+                by_tank = {}
+                closing_candidates = {}
+                for e in entries_list:
+                    dt = _entry_dt_generic(e)
+                    if dt is None:
+                        continue
+                    tid = _tank_id(e)
+                    key = tid if tid is not None else '__global__'
+                    prev = by_tank.get(key)
+                    if prev is None or dt > prev[0]:
+                        by_tank[key] = (dt, e)
+                    if _is_closing_row(e):
+                        pc = closing_candidates.get(key)
+                        if pc is None or dt > pc[0]:
+                            closing_candidates[key] = (dt, e)
+                total = 0.0
+                for key in by_tank.keys():
+                    _, e = closing_candidates.get(key, by_tank[key])
+                    try:
+                        total += float(getattr(e, field_name) or 0.0)
+                    except Exception:
+                        pass
+                return round(total, 2)
+
+            opening_cfgs = [c for c in cols if (c.get("type") or "").strip().lower() == "opening"]
+            closing_cfgs = [c for c in cols if (c.get("type") or "").strip().lower() == "closing"]
+            opening_labels = [c.get("label") for c in opening_cfgs]
+            closing_labels = [c.get("label") for c in closing_cfgs]
+
+            if opening_labels:
+                if prev_closing is None and opening_cfgs and opening_cfgs[0].get('data_source') and opening_cfgs[0].get('field'):
+                    src = opening_cfgs[0]['data_source']
+                    fld = opening_cfgs[0]['field']
+                    src_entries = _fetch_source(location_id, src, date_from, date_to)
+                    day_src = []
+                    for e in src_entries:
+                        dt = _entry_dt_generic(e)
+                        if dt is None:
+                            continue
+                        if start_dt <= dt <= end_dt:
+                            day_src.append(e)
+                    opening = _sum_first_by_tank(day_src, fld)
+                out[opening_labels[0]] = round(opening, 2)
+            else:
+                out["Opening Stock"] = round(opening, 2)
+
+            for c in [x for x in cols if not x.get("formula") and (x.get("type") or "").strip().lower() in {"receipt", "dispatch"}]:
+                ops_norm = MaterialBalanceCalculator._norm_ops_set(c.get("operations") or [])
+                src = c.get("data_source")
+                if src:
+                    src_entries = _fetch_source(location_id, src, date_from, date_to)
+                    day_src = []
+                    for e in src_entries:
+                        dt = _entry_dt_generic(e)
+                        if dt is None:
+                            continue
+                        if start_dt <= dt <= end_dt:
+                            day_src.append(e)
+                    val = MaterialBalanceCalculator._sum_field_for_ops(day_src, (c.get("field") or ""), ops_norm)
+                else:
+                    val = MaterialBalanceCalculator._sum_field_for_ops(day_entries_otr, (c.get("field") or ""), ops_norm)
+                out[c.get("label")] = val
+                if c.get("type") == "receipt":
+                    total_receipts += val
+                elif c.get("type") == "dispatch":
+                    total_dispatch += val
+
+            for c in [x for x in cols if x.get("formula")]:
+                f = c.get("formula") or {}
+                op = (f.get("op") or "").strip().lower()
+                ref = list(f.get("cols") or [])
+                vals = [float(out.get(r, 0.0) or 0.0) for r in ref]
+                val = 0.0
+                if op == "sum":
+                    val = round(sum(vals), 2)
+                elif op == "subtract":
+                    if vals:
+                        val = round(vals[0] - sum(vals[1:]), 2)
+                elif op == "multiply":
+                    val = 1.0
+                    for v in vals:
+                        val *= v
+                    val = round(val, 2)
+                elif op == "divide":
+                    if vals:
+                        base = vals[0]
+                        for v in vals[1:]:
+                            try:
+                                base = base / v if v not in (0, None) else 0.0
+                            except Exception:
+                                base = 0.0
+                        val = round(base, 4)
+                elif op == "average":
+                    val = round((sum(vals) / len(vals)) if vals else 0.0, 2)
+                elif op == "percentage":
+                    if len(vals) >= 2 and vals[1] not in (0, None):
+                        val = round((vals[0] / vals[1]) * 100.0, 2)
+                    else:
+                        val = 0.0
+                elif op == "equation":
+                    expr = (f.get("expr") or "").strip()
+                    def _eval(node):
+                        if isinstance(node, ast.Expression):
+                            return _eval(node.body)
+                        if isinstance(node, ast.BinOp):
+                            a = _eval(node.left); b = _eval(node.right)
+                            if isinstance(node.op, ast.Add):
+                                return a + b
+                            if isinstance(node.op, ast.Sub):
+                                return a - b
+                            if isinstance(node.op, ast.Mult):
+                                return a * b
+                            if isinstance(node.op, ast.Div):
+                                try:
+                                    return a / b
+                                except Exception:
+                                    return 0.0
+                            return 0.0
+                        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+                            return -_eval(node.operand)
+                        if isinstance(node, ast.Num):
+                            return float(node.n)
+                        if isinstance(node, ast.Constant):
+                            return float(node.value) if isinstance(node.value, (int, float)) else 0.0
+                        if isinstance(node, ast.Name):
+                            return float(out.get(node.id, 0.0) or 0.0)
+                        return 0.0
+                    try:
+                        tree = ast.parse(expr, mode='eval')
+                        val = round(float(_eval(tree)), 2)
+                    except Exception:
+                        val = 0.0
+                out[c.get("label")] = val
+                if c.get("type") == "receipt":
+                    total_receipts += val
+                elif c.get("type") == "dispatch":
+                    total_dispatch += val
+
+            book = round(opening + total_receipts - total_dispatch, 2)
+            close_val, closing_by_tank = MaterialBalanceCalculator._closing_stock(day_entries_otr, prev_day_tank_nsv)
+            if closing_cfgs and closing_cfgs[0].get('data_source') and closing_cfgs[0].get('field'):
+                src = closing_cfgs[0]['data_source']
+                fld = closing_cfgs[0]['field']
+                src_entries = _fetch_source(location_id, src, date_from, date_to)
+                day_src = []
+                for e in src_entries:
+                    dt = _entry_dt_generic(e)
+                    if dt is None:
+                        continue
+                    if start_dt <= dt <= end_dt:
+                        day_src.append(e)
+                close_val = _sum_last_by_tank(day_src, fld)
+
+            out["Book Closing Stock"] = book
+            if closing_labels:
+                out[closing_labels[0]] = close_val
+            else:
+                out["Closing Stock"] = close_val
+            out["Loss/Gain"] = round(close_val - book, 2)
+
+            rows.append(out)
+            prev_closing = close_val
+            prev_day_tank_nsv = closing_by_tank.copy()
             cur += timedelta(days=1)
 
         return rows

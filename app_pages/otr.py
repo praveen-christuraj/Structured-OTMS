@@ -280,6 +280,11 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
             )
 
     # --- Load OTR from DB - FILTERED BY LOCATION ---
+    try:
+        from models import ensure_otr_net_columns
+        ensure_otr_net_columns()
+    except Exception:
+        pass
     rows = []
     use_tank_transactions = False
     
@@ -469,6 +474,43 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
     # --- Display ---
     st.dataframe(fdf, use_container_width=True, hide_index=True)
     
+    # --- Persist computed nets ---
+    try:
+        with get_session() as s:
+            for _, row in fdf.iterrows():
+                tid = str(row.get("Ticket ID") or "")
+                if not tid:
+                    continue
+                rx = s.query(OTRRecord).filter(OTRRecord.location_id == loc.id, OTRRecord.ticket_id == tid).first()
+                if not rx:
+                    continue
+                nv = row.get("Net Rece/Disp (bbls)")
+                wf = row.get("Net Water Rece/Disp (bbls)")
+                changed = False
+                if nv != "" and nv is not None:
+                    try:
+                        val = float(nv)
+                        if getattr(rx, "net_rece_disp_bbls", None) != val:
+                            setattr(rx, "net_rece_disp_bbls", val)
+                            changed = True
+                    except Exception:
+                        pass
+                if wf != "" and wf is not None:
+                    try:
+                        val = float(wf)
+                        if getattr(rx, "net_water_rece_disp_bbls", None) != val:
+                            setattr(rx, "net_water_rece_disp_bbls", val)
+                            changed = True
+                    except Exception:
+                        pass
+                if changed:
+                    try:
+                        s.commit()
+                    except Exception:
+                        s.rollback()
+    except Exception:
+        pass
+
     # --- Export controls (CSV / XLSX / PDF) ---
     st.markdown("---")
     st.markdown("#### Export Options")

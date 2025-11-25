@@ -25,12 +25,12 @@ init_db()
 ICONS = {
     "Home": "🏠",
     "My Tasks": "✅",
-    "Manage Locations": "🌍",
+    "Manage Locations": "📍",
     "Manage Users": "👥",
     "Audit Log": "🧾",
-    "Location Settings": "🧩",
-    "Asset Management": "🧺",
-    "Page Customization": "⚙️",
+    "Location Settings": "📍⚙️",
+    "Asset Management": "🧰",
+    "Page Customization": "🛠️",
     "Tank Transactions": "🛢️",
     "Tanker Transactions": "🚚",
     "Yade Transactions": "⛴️",
@@ -38,11 +38,13 @@ ICONS = {
     "FSO-Operations": "⚓",
     "Reports": "📄",
     "Reporting": "📊",
-    "Report Customization": "⚙️",
+    "Report Customization": "🛠️",
+    "MB Customization": "🛠️",
     "Settings": "⚙️",
     "View Transactions": "🗂️",
     "OTR": "📊",
     "Deleted Records": "🗑️",
+    "Material Balance": "🧮",
 }
 
 ROLE_ICONS = USER_ROLE_ICONS
@@ -183,6 +185,7 @@ def get_pages(user, active_location_id):
             "Location Settings",
             "Asset Management",
             "Page Customization",
+            "MB Customization",
             "Report Customization",
             "Deleted Records",
         ]
@@ -198,7 +201,6 @@ def get_pages(user, active_location_id):
             loc_flags = {}
 
     # Mapping: flag -> (page title, module path)
-        # Mapping: flag -> (page title, module path)
     ops = [
         ("show_tank_transactions",   ("Tank Transactions",   "app_pages.tank_transactions")),
         ("show_tanker_transactions", ("Tanker Transactions", "app_pages.tanker_transactions")),
@@ -209,13 +211,14 @@ def get_pages(user, active_location_id):
         ("show_vessel_operations",   ("Vessel Operations",   "app_pages.vessel_operations")),
         ("show_reports",             ("Reports",             "app_pages.reports")),
         ("show_reporting",           ("Reporting",           "app_pages.reporting")),
+        ("show_material_balance",    ("Material Balance",    "app_pages.material_balance")),
     ]
 
     if role_ok:
         for flag, (title, mod) in ops:
-            # For OTR, default to True if flag is missing so it appears now,
-            # but can still be controlled later from Location Settings.
-            if flag in ["show_otr", "show_reporting"]:
+            # For OTR, Reporting, and Material Balance, default to True if flag
+            # is missing so they appear now, but can still be controlled later.
+            if flag in ["show_otr", "show_reporting", "show_material_balance"]:
                 allow = loc_flags.get(flag, True)
             else:
                 allow = loc_flags.get(flag, False)
@@ -450,6 +453,10 @@ def main():
     elif current_page == "Page Customization":
         render_page_customization(user)
 
+    elif current_page == "MB Customization":
+        from app_pages.mb_customization import render_mb_customization_page
+        render_mb_customization_page(user)
+
     elif current_page == "Tank Transactions":
         from app_pages.tank_transactions import render_tank_transactions_page
         render_tank_transactions_page(active_location_id, user)
@@ -478,6 +485,10 @@ def main():
     elif current_page == "OTR":
         from app_pages.otr import render_otr_page
         render_otr_page(active_location_id, user)
+
+    elif current_page == "Material Balance":
+        from app_pages.material_balance import render_material_balance_page
+        render_material_balance_page(active_location_id, user)
     
     elif current_page == "Reporting":
         from app_pages.reporting import render_reporting_page

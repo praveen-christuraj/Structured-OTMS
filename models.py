@@ -1007,11 +1007,39 @@ class OTRRecord(Base):
     nsv_bbl = Column(Float, nullable=True)
     lt = Column(Float, nullable=True)
     mt = Column(Float, nullable=True)
+    net_rece_disp_bbls = Column(Float, nullable=True)
+    net_water_rece_disp_bbls = Column(Float, nullable=True)
     
     created_at = Column(DateTime, server_default=func.now())
     
     # Relationship
     location = relationship("Location", back_populates="otr_records")
+
+def ensure_otr_net_columns():
+    from sqlalchemy import inspect
+    from db import engine
+    if not engine:
+        return False
+    insp = inspect(engine)
+    cols = set()
+    try:
+        cols = set([c["name"] if isinstance(c, dict) else c for c in insp.get_columns("otr_records")])
+    except Exception:
+        pass
+    to_add = []
+    if "net_rece_disp_bbls" not in cols:
+        to_add.append("net_rece_disp_bbls")
+    if "net_water_rece_disp_bbls" not in cols:
+        to_add.append("net_water_rece_disp_bbls")
+    if not to_add:
+        return True
+    try:
+        with engine.begin() as conn:
+            for col in to_add:
+                conn.execute(f"ALTER TABLE otr_records ADD COLUMN {col} FLOAT")
+        return True
+    except Exception:
+        return False
 
 # ============================================================================
 # OTR VESSEL (NEW)

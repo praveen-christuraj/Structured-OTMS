@@ -485,3 +485,161 @@ sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accept
 2025-11-25 16:25:09 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in database. Available tables: 46
 2025-11-25 16:25:09 - OTMS - INFO - Reflecting table 'flex_production_5' from database...
 2025-11-25 16:25:09 - OTMS - INFO - ✅ Successfully created model for table 'flex_production_5'
+2025-11-25 17:18:07 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 46
+2025-11-25 17:18:07 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 46
+2025-11-25 17:18:07 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 46
+2025-11-25 17:18:07 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 46
+2025-11-25 17:47:07 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 17:47:07 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 17:47:07 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-25 17:47:07 - OTMS - INFO - Reflecting table 'audit_log' from database...
+2025-11-25 17:47:07 - OTMS - INFO - ✅ Successfully created model for table 'audit_log'
+2025-11-25 17:47:07 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-25 17:47:07 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-25 18:35:40 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:35:40 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:35:40 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-25 18:35:40 - OTMS - INFO - Reflecting table 'audit_log' from database...
+2025-11-25 18:35:40 - OTMS - INFO - ✅ Successfully created model for table 'audit_log'
+2025-11-25 18:35:40 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-25 18:35:40 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-25 18:35:46 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:35:46 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:35:46 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:35:46 - OTMS - INFO - Retrieved 20 columns for data source 'otr_records'
+2025-11-25 18:42:19 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:42:19 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:42:19 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:42:19 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 18:49:20 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:49:20 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:49:20 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:49:20 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 18:49:34 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:49:34 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:49:34 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:49:34 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 18:49:48 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:49:48 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:49:48 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:49:48 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 18:50:07 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:50:07 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:50:07 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:50:07 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 18:57:10 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:57:10 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:57:10 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:57:10 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 18:57:24 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:57:24 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:57:24 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:57:24 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 18:57:43 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:57:43 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:57:43 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:57:43 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 18:58:30 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:58:30 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:58:30 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:58:30 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 18:58:40 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 18:58:40 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 18:58:40 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 18:58:40 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:00:48 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:00:48 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:00:48 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:00:48 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:00:59 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:00:59 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:00:59 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:00:59 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:01:08 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:01:08 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:01:08 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:01:08 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:01:53 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:01:53 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:01:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:01:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:01:55 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:01:55 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:01:55 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:01:55 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:01:56 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:01:56 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:01:56 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:01:56 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:01:58 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:01:58 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:01:58 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:01:58 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:07:28 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:07:28 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:07:28 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:07:28 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:07:39 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:07:39 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:07:39 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:07:39 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:07:47 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:07:47 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:07:47 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:07:47 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:07:56 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:07:56 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:07:56 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:07:56 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:08:32 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:08:32 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:08:40 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:08:40 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:08:41 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:08:41 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:08:41 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:08:41 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:08:43 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:08:43 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:08:46 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:08:46 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:08:46 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:08:46 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:13:13 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:13:13 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:13:13 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:13:13 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:13:52 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:13:52 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:13:52 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:13:52 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:13:58 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:13:58 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:14:04 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:14:04 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:15:48 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:15:48 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:15:48 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:15:48 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:16:08 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:16:08 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:16:08 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:16:08 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:16:10 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:16:10 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:16:10 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-25 19:16:10 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-25 19:16:13 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:16:13 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:18:48 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:18:48 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:18:58 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:18:58 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:19:25 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:19:25 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 19:19:32 - OTMS - INFO - Loaded 46 tables from database
+2025-11-25 19:19:32 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-25 20:16:03 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 46
+2025-11-25 20:16:03 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 46
+2025-11-25 20:16:03 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 46
+2025-11-25 20:16:03 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 46

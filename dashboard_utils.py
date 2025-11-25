@@ -12,6 +12,10 @@ from models import (
     Location, Tank, TankTransaction, YadeVoyage, YadeBarge,
     TankerTransaction, OTRRecord, User, Operation
 )
+try:
+    from models import ensure_otr_net_columns as _ensure_otr_cols
+except Exception:
+    _ensure_otr_cols = None
 
 class DashboardMetrics:
     """Calculate dashboard metrics and analytics"""
@@ -46,6 +50,11 @@ class DashboardMetrics:
         ).count()
         
         # Latest OTR records for current stock
+        try:
+            if _ensure_otr_cols:
+                _ensure_otr_cols()
+        except Exception:
+            pass
         latest_otrs = session.query(OTRRecord).filter(
             OTRRecord.location_id == location_id
         ).order_by(OTRRecord.date.desc(), OTRRecord.time.desc()).limit(10).all()
@@ -118,6 +127,11 @@ class DashboardMetrics:
         
         stock_levels = []
         
+        try:
+            if _ensure_otr_cols:
+                _ensure_otr_cols()
+        except Exception:
+            pass
         for tank in tanks:
             # Get latest OTR for this tank
             latest_otr = session.query(OTRRecord).filter(
@@ -303,6 +317,11 @@ class DashboardMetrics:
             Tank.status == "ACTIVE"  # ← FIXED: Use string
         ).all()
         
+        try:
+            if _ensure_otr_cols:
+                _ensure_otr_cols()
+        except Exception:
+            pass
         for tank in tanks:
             # Get latest OTR
             latest_otr = session.query(OTRRecord).filter(

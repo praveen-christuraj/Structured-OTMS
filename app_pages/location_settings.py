@@ -21,6 +21,7 @@ DEFAULT_FLAGS = {
     "show_fso_operations": True,
     "show_reports": True,
     "show_otr": True,
+    "show_material_balance": True,
 }
 
 

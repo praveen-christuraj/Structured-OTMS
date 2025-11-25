@@ -529,6 +529,26 @@ def _render_tab_tank_entry(loc, loc_label, user):
                 try:
                     if selected_label and ("condensate" not in selected_label.lower()):
                         from models import OTRRecord
+                        from models import ensure_otr_net_columns
+                        try:
+                            ensure_otr_net_columns()
+                        except Exception:
+                            pass
+                        prev_nsv, prev_fw = None, None
+                        try:
+                            prev = (
+                                session.query(OTRRecord)
+                                .filter(OTRRecord.location_id == loc.id, OTRRecord.tank_id == str(tnk.id))
+                                .order_by(OTRRecord.date.desc(), OTRRecord.time.desc())
+                                .first()
+                            )
+                            if prev:
+                                prev_nsv = float(getattr(prev, "nsv_bbl", 0.0) or 0.0)
+                                prev_fw = float(getattr(prev, "free_water_bbl", 0.0) or 0.0)
+                        except Exception:
+                            prev_nsv, prev_fw = None, None
+                        net_nsv = None if prev_nsv is None else float(nsv_bbl or 0.0) - prev_nsv
+                        net_fw = None if prev_fw is None else float(fw_bbl or 0.0) - prev_fw
                         otr = OTRRecord(
                             location_id=loc.id,
                             ticket_id=ticket_id,
@@ -548,6 +568,8 @@ def _render_tab_tank_entry(loc, loc_label, user):
                             nsv_bbl=float(nsv_bbl or 0.0),
                             lt=float(lt or 0.0),
                             mt=float(mt or 0.0),
+                            net_rece_disp_bbls=net_nsv,
+                            net_water_rece_disp_bbls=net_fw,
                         )
                         session.add(otr)
                         session.commit()

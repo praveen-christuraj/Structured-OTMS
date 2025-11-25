@@ -46,5 +46,15 @@ def _ensure_schema_updates():
                 conn.execute(text("ALTER TABLE tanker_calibration ADD COLUMN tanker_id INTEGER"))
             if "chassis_no" not in cols_tanker_cal:
                 conn.execute(text("ALTER TABLE tanker_calibration ADD COLUMN chassis_no VARCHAR(100)"))
+
+            # Ensure new OTR net columns exist (added after initial table creation)
+            try:
+                cols_otr = {row[1] for row in conn.execute(text("PRAGMA table_info('otr_records')")).fetchall()}
+                if "net_rece_disp_bbls" not in cols_otr:
+                    conn.execute(text("ALTER TABLE otr_records ADD COLUMN net_rece_disp_bbls FLOAT"))
+                if "net_water_rece_disp_bbls" not in cols_otr:
+                    conn.execute(text("ALTER TABLE otr_records ADD COLUMN net_water_rece_disp_bbls FLOAT"))
+            except Exception:
+                pass
     except Exception:
         pass
