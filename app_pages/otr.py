@@ -446,9 +446,9 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
     prev_nsv = fdf_sorted.groupby("Tank")["NSV (bbl)"].shift(1)
     prev_fw  = fdf_sorted.groupby("Tank")["Free Water (bbl)"].shift(1)
 
-    # Deltas = current - previous
-    net_nsv  = fdf_sorted["NSV (bbl)"] - prev_nsv
-    net_fw   = fdf_sorted["Free Water (bbl)"] - prev_fw
+    # Deltas = current - previous (absolute values)
+    net_nsv  = (fdf_sorted["NSV (bbl)"] - prev_nsv).abs()
+    net_fw   = (fdf_sorted["Free Water (bbl)"] - prev_fw).abs()
 
     # First entries per tank → blank
     first_of_tank_mask = prev_nsv.isna()

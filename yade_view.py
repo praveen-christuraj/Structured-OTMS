@@ -693,7 +693,7 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
             c = st.columns(3)
             view_btn = c[0].button("👁️", key=f"yade_view_{v.id}")
             del_btn  = c[1].button("🗑️", key=f"yade_del_{v.id}")
-            pdf_btn  = c[2].button("📄", key=f"yade_pdf_{v.id}")
+            pdf_btn  = c[2].button("📕", key=f"yade_pdf_{v.id}")
 
         # PDF
         if pdf_btn:
