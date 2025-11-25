@@ -38,10 +38,11 @@ ICONS = {
     "FSO-Operations": "⚓",
     "Reports": "📄",
     "Reporting": "📊",
+    "Report Customization": "⚙️",
     "Settings": "⚙️",
     "View Transactions": "🗂️",
     "OTR": "📊",
-    "Recycle Bin": "♻️",
+    "Deleted Records": "🗑️",
 }
 
 ROLE_ICONS = USER_ROLE_ICONS
@@ -182,7 +183,8 @@ def get_pages(user, active_location_id):
             "Location Settings",
             "Asset Management",
             "Page Customization",
-            "Recycle Bin",
+            "Report Customization",
+            "Deleted Records",
         ]
 
     # ---- Operational pages (role + location flags + module present) ----
@@ -470,16 +472,20 @@ def main():
     elif current_page == "FSO-Operations":
         from app_pages.fso_operations import render_fso_operations_page
         render_fso_operations_page(active_location_id, user)
-    elif current_page == "Recycle Bin":
+    elif current_page == "Deleted Records":
         from app_pages.recycle_bin_page import render_recycle_bin_page
         render_recycle_bin_page(active_location_id, user)
     elif current_page == "OTR":
         from app_pages.otr import render_otr_page
         render_otr_page(active_location_id, user)
+    
     elif current_page == "Reporting":
         from app_pages.reporting import render_reporting_page
         render_reporting_page(active_location_id, user)
-        
+    
+    elif current_page == "Report Customization":
+        from app_pages.report_customization import render_report_customization_page
+        render_report_customization_page(user, active_location_id)   
     # elif current_page == "FSO-Operations":
     #     from app_pages.fso_operations import render_fso_operations_page
     #     render_fso_operations_page(active_location_id, user)

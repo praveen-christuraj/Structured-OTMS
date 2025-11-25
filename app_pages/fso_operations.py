@@ -82,7 +82,7 @@ try:
                     "DELETE",
                     resource_type=resource_type,
                     resource_id=str(label or getattr(record, "id", "")),
-                    details=reason or f"Moved {resource_type} to Recycle Bin",
+                    details=reason or f"Moved {resource_type} to Deleted Records",
                     user_id=user_id,
                     location_id=location_id,
                 )
@@ -1419,7 +1419,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                         user.get("username", "unknown"),
                                         notes=f"Approved by {approver_label}",
                                     )
-                                    st.success("Entry moved to Recycle Bin")
+                                    st.success("Entry moved to Deleted Records")
                                     del st.session_state[f"confirm_delete_fso_{entry_id}"]
                                     import time
 

@@ -1,4 +1,4 @@
-﻿# oil_app_ui.py
+# oil_app_ui.py
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, time, timedelta
@@ -5980,7 +5980,7 @@ else:
             "Manage Locations",
             "Manage Users",
             "Audit Log",
-            "Recycle Bin",
+            "Deleted Records",
             "Backup & Recovery",
             "Location Settings"
         ])
@@ -6017,7 +6017,7 @@ else:
             if not page_vis.get("show_toa_yade", False) and "TOA-Yade" in base_pages:
                 base_pages.remove("TOA-Yade")
             for _p in list(base_pages):
-                if _p in {"Home", "Add Asset", "Manage Locations", "Manage Users", "Audit Log", "Recycle Bin", "Backup & Recovery", "Location Settings", "My Tasks", "2FA Settings", "Login History", "View Transactions"}:
+                if _p in {"Home", "Add Asset", "Manage Locations", "Manage Users", "Audit Log", "Deleted Records", "Backup & Recovery", "Location Settings", "My Tasks", "2FA Settings", "Login History", "View Transactions"}:
                     continue
                 if page_access.get(_p) is False and _p in base_pages:
                     base_pages.remove(_p)
@@ -6047,7 +6047,7 @@ ICONS = {
     "Manage Locations": "🌍",
     "Manage Users": "👥",
     "Audit Log": "📜",
-    "Recycle Bin": "🗑️",
+    "Deleted Records": "🗑️",
     "Backup & Recovery": "💾",
     "Location Settings": "⚙️",
     "2FA Settings": "🔐",
@@ -24180,7 +24180,7 @@ elif page == "Location Settings":
                     "Manage Locations",
                     "Manage Users",
                     "Audit Log",
-                    "Recycle Bin",
+                    "Deleted Records",
                     "Backup & Recovery",
                     "Location Settings",
                     "My Tasks",
@@ -24864,15 +24864,15 @@ elif page == "Location Settings":
         with st.expander("View JSON Configuration", expanded=False):
             st.json(current_config)
 
-# ============================= Recycle Bin (admin only) ==========================
-elif page == "Recycle Bin":
+# ============================= Deleted Records (admin only) ==========================
+elif page == "Deleted Records":
     if st.session_state.get("auth_user", {}).get("role") != "admin-operations":
-        header("Recycle Bin")
+        header("Deleted Records")
         st.error("You do not have permission to access this page. Admin-Operations only.")
         st.stop()
 
-    header("Recycle Bin")
-    st.caption("View soft-deleted records stored in the recycle bin.")
+    header("Deleted Records")
+    st.caption("View soft-deleted records stored as deleted records.")
 
     with get_session() as s:
         type_rows = s.query(RecycleBinEntry.resource_type).distinct().all()

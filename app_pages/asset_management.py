@@ -223,10 +223,10 @@ def _tab_tanks(active_location_id, user):
                                             )
                                             SecurityManager.log_audit(None,(user or {}).get("username","system"),"DELETE",
                                                 resource_type="Tank", resource_id=str(t.id),
-                                                details=f"Moved tank '{t.name}' to recycle bin",
+                                                details=f"Moved tank '{t.name}' to deleted records",
                                                 user_id=(user or {}).get("id"), location_id=loc.id)
                                             s.commit()
-                                            st.success("Tank moved to Recycle Bin"); st.session_state.pop(f"confirm_del_tank_{t.id}", None); st.rerun()
+                                            st.success("Tank moved to Deleted Records"); st.session_state.pop(f"confirm_del_tank_{t.id}", None); st.rerun()
                                         except Exception:
                                             s.delete(obj); s.commit()
                                             st.success("Deleted."); st.session_state.pop(f"confirm_del_tank_{t.id}", None); st.rerun()
@@ -437,10 +437,10 @@ def _tab_vessels_assign(active_location_id, user):
                                             )
                                             SecurityManager.log_audit(None,(user or {}).get("username","system"),"DELETE",
                                                 resource_type="Vessel", resource_id=str(v.id),
-                                                details=f"Moved vessel '{v.name}' to recycle bin",
+                                                details=f"Moved vessel '{v.name}' to deleted records",
                                                 user_id=(user or {}).get("id"))
                                             s.commit()
-                                            st.success("Vessel moved to Recycle Bin"); st.session_state.pop(f"confirm_del_vessel_{v.id}", None); st.rerun()
+                                            st.success("Vessel moved to Deleted Records"); st.session_state.pop(f"confirm_del_vessel_{v.id}", None); st.rerun()
                                         except Exception:
                                             s.delete(obj); s.commit()
                                             st.success("Deleted."); st.session_state.pop(f"confirm_del_vessel_{v.id}", None); st.rerun()

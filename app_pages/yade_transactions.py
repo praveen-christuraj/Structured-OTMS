@@ -1260,7 +1260,7 @@ def _render_yade_list(location_id: int, user: Dict[str, Any] | None):
                                         "DELETE",
                                         resource_type="YadeVoyage",
                                         resource_id=str(v.id),
-                                        details=f"Moved YADE voyage {v.voyage_no or v.id} to recycle bin",
+                                        details=f"Moved YADE voyage {v.voyage_no or v.id} to deleted records",
                                         user_id=u.get("id"),
                                         location_id=st.session_state.get("active_location_id"),
                                     )

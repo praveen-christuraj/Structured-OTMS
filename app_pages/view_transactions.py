@@ -1310,7 +1310,7 @@ def _render_tank_list(location_id: int, user: dict | None):
                                             "DELETE",
                                             resource_type="TankTransaction",
                                             resource_id=str(rec_id),
-                                            details=f"Moved ticket {r.get('Ticket ID')} to recycle bin",
+                                        details=f"Moved ticket {r.get('Ticket ID')} to deleted records",
                                             user_id=(user or {}).get("id"),
                                             location_id=location_id,
                                             ip_address=_get_client_ip(),
@@ -1329,7 +1329,7 @@ def _render_tank_list(location_id: int, user: dict | None):
                                     {"id_val": rec_id},
                                 )
                                 s.commit()
-                        st.success("Ticket moved to Recycle Bin")
+                        st.success("Ticket moved to Deleted Records")
                         st.session_state[f"vt_tank_del_confirm_{idx}"] = False
                         st.rerun()
                     except Exception as ex:
@@ -1475,7 +1475,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                                         "DELETE",
                                         resource_type=f"FlexibleRecord:{section}",
                                         resource_id=str(getattr(r, "id", "")),
-                                        details=f"Moved {section} record to recycle bin",
+                                        details=f"Moved {section} record to deleted records",
                                         user_id=(user or {}).get("id"),
                                         location_id=location_id,
                                         ip_address=_get_client_ip(),
@@ -1488,7 +1488,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                             else:
                                 s.delete(r)
                                 s.commit()
-                        st.success("Record moved to Recycle Bin")
+                        st.success("Record moved to Deleted Records")
                         st.session_state[f"vt_{section}_del_confirm_{i}"] = False
                         st.rerun()
                     except Exception as ex:

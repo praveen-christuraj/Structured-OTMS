@@ -23,10 +23,10 @@ def _guard_location(active_location_id):
 
 
 def render_recycle_bin_page(active_location_id, user):
-    st.markdown("### ♻️ Recycle Bin")
+    st.markdown("### 🗑️ Deleted Records")
 
     if not _is_admin(user):
-        st.warning("Only admin users can access the Recycle Bin.")
+        st.warning("Only admin users can access Deleted Records.")
         return
 
     loc, loc_label = _guard_location(active_location_id)
@@ -62,7 +62,7 @@ def render_recycle_bin_page(active_location_id, user):
     st.caption(f"Entries: {len(entries)}")
 
     if not entries:
-        st.info("Recycle Bin is empty for current filters.")
+        st.info("No deleted records for current filters.")
         return
 
     # List entries
@@ -75,7 +75,7 @@ def render_recycle_bin_page(active_location_id, user):
             c4.caption(f"Deleted: {e.deleted_at:%Y-%m-%d %H:%M}")
             with c5:
                 view_btn = st.button("👁️", key=f"rb_view_{e.id}", help="View payload", use_container_width=True)
-                del_btn = st.button("♻️", key=f"rb_del_{e.id}", help="Permanent delete", use_container_width=True)
+                del_btn = st.button("🗑️", key=f"rb_del_{e.id}", help="Permanent delete", use_container_width=True)
 
             if view_btn:
                 try:

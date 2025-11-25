@@ -353,8 +353,8 @@ def _user_maintenance_section():
 
     st.markdown("---")
 
-    # --- 5) Delete user (moves to Recycle Bin; purge from Recycle Bin only) ---
-    st.markdown("##### 🗑️ Delete User (Moves to Recycle Bin)")
+    # --- 5) Delete user (moves to Deleted Records; purge from Deleted Records only) ---
+    st.markdown("##### 🗑️ Delete User (Moves to Deleted Records)")
 
     col_d1, col_d2 = st.columns([2, 1])
     with col_d1:
@@ -388,7 +388,7 @@ def _user_maintenance_section():
                             )
                             session.commit()
                             st.success(
-                                f"User '{u.username}' ({role_with_icon(u.role)}) moved to Recycle Bin."
+                                f"User '{u.username}' ({role_with_icon(u.role)}) moved to Deleted Records."
                             )
                             SecurityManager.log_audit(
                                 None,
@@ -396,7 +396,7 @@ def _user_maintenance_section():
                                 "DELETE",
                                 resource_type="User",
                                 resource_id=str(u.id),
-                                details=f"Moved user {u.username} to recycle bin.",
+                                details=f"Moved user {u.username} to deleted records.",
                                 user_id=(st.session_state.get("auth_user") or {}).get("id"),
                                 location_id=u.location_id,
                             )

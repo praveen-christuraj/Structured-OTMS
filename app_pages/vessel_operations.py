@@ -604,7 +604,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                                                     resource_type="VesselOpsEntry",
                                                     resource_id=str(entry.id),
                                                     location_id=active_location_id,
-                                                    details=f"Moved vessel entry {entry.id} to recycle bin",
+                                                    details=f"Moved vessel entry {entry.id} to deleted records",
                                                     user_id=user.get("id"),
                                                 )
                                                 s.commit()
@@ -631,7 +631,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                                                 user_id=user.get("id")
                                             )
                                             s.commit()
-                            st.success("Entry moved to Recycle Bin")
+                            st.success("Entry moved to Deleted Records")
                             st.session_state.pop(f"vop_deleting_{entry.id}", None)
                             _st_safe_rerun()
                         except Exception as ex:
