@@ -988,6 +988,104 @@ def render_page_customization(user: Dict[str, Any]):
                 except Exception as ex:
                     st.error(f"❌ Failed to create custom tab: {ex}")
     
+    # ============================
+    # 📍 YADE Tracking — Custom Tables & Filters (per location)
+    # ==============================
+    with st.expander("📍 YADE Tracking — Custom Tables & Filters (per location)", expanded=False):
+        st.caption("Define tables, map columns to YADE data sources, and add filters.")
+        _SRC_FIELDS = {
+            "voyage.date": "Voyage Date",
+            "voyage.convoy_no": "Convoy No",
+            "voyage.yade_name": "Yade No",
+            "voyage.loading_berth": "Loading Berth",
+            "toa.before.nsv_bbl": "TOA Before NSV (bbl)",
+            "toa.after.nsv_bbl": "TOA After NSV (bbl)",
+        }
+        _TARGET_KEYS = ["ASEMOKU", "NDONI", "AGGE"]
+
+        with get_session() as s:
+            yt_cfg = get_page_section_config(s, loc.id, page="yade_tracking", section="customization") or {}
+        tables = list(yt_cfg.get("tables") or [])
+
+        n_tables = st.number_input("Number of tables", min_value=1, max_value=6, value=max(2, len(tables) or 2), step=1, key=f"pc_yt_count_{loc_key}")
+        if len(tables) < n_tables:
+            for i in range(len(tables), n_tables):
+                tables.append({
+                    "id": f"t{i+1}",
+                    "title": f"Table {i+1}",
+                    "sources": ["ASEMOKU", "NDONI"] if i == 0 else ["AGGE"],
+                    "columns": [
+                        {"label": "Date", "source": "voyage.date"},
+                        {"label": "Convoy No", "source": "voyage.convoy_no"},
+                        {"label": "Yade No", "source": "voyage.yade_name"},
+                        {"label": "ROB qty", "source": "toa.before.nsv_bbl"},
+                        {"label": "TOB qty", "source": "toa.after.nsv_bbl"},
+                        {"label": "Loading berth", "source": "voyage.loading_berth"},
+                    ],
+                    "filters": [
+                        {"label": "Date", "source": "voyage.date"},
+                        {"label": "Convoy No", "source": "voyage.convoy_no"},
+                        {"label": "Yade No", "source": "voyage.yade_name"},
+                        {"label": "Loading berth", "source": "voyage.loading_berth"},
+                    ],
+                })
+        elif len(tables) > n_tables:
+            tables = tables[:n_tables]
+
+        for i in range(n_tables):
+            t = tables[i]
+            st.markdown(f"#### Table {i+1}")
+            c1, c2 = st.columns([0.5, 0.5])
+            with c1:
+                t["title"] = st.text_input("Table Title", value=t.get("title", f"Table {i+1}"), key=f"pc_yt_title_{loc_key}_{i}")
+            with c2:
+                t["sources"] = st.multiselect("Data Sources (locations)", options=_TARGET_KEYS, default=[x for x in t.get("sources", []) if x in _TARGET_KEYS], key=f"pc_yt_src_{loc_key}_{i}")
+
+            st.markdown("##### Columns")
+            cols = list(t.get("columns") or [])
+            n_cols = st.number_input("Columns", min_value=1, max_value=20, value=max(1, len(cols) or 6), step=1, key=f"pc_yt_cols_{loc_key}_{i}")
+            if len(cols) < n_cols:
+                for j in range(len(cols), n_cols):
+                    cols.append({"label": f"Column {j+1}", "source": "voyage.date"})
+            elif len(cols) > n_cols:
+                cols = cols[:n_cols]
+            for j in range(n_cols):
+                cj = cols[j]
+                e = st.columns([0.6, 0.4])
+                with e[0]:
+                    cj["label"] = st.text_input("Label", value=cj.get("label", f"Column {j+1}"), key=f"pc_yt_col_lbl_{loc_key}_{i}_{j}")
+                with e[1]:
+                    cj["source"] = st.selectbox("Source Field", options=list(_SRC_FIELDS.keys()), index=list(_SRC_FIELDS.keys()).index(cj.get("source", "voyage.date")), format_func=lambda k: _SRC_FIELDS[k], key=f"pc_yt_col_src_{loc_key}_{i}_{j}")
+            t["columns"] = cols
+
+            st.markdown("##### Filters")
+            fltrs = list(t.get("filters") or [])
+            n_fltrs = st.number_input("Filters", min_value=0, max_value=10, value=len(fltrs or []), step=1, key=f"pc_yt_fltrs_{loc_key}_{i}")
+            if len(fltrs) < n_fltrs:
+                for j in range(len(fltrs), n_fltrs):
+                    fltrs.append({"label": f"Filter {j+1}", "source": "voyage.date"})
+            elif len(fltrs) > n_fltrs:
+                fltrs = fltrs[:n_fltrs]
+            for j in range(n_fltrs):
+                fj = fltrs[j]
+                e = st.columns([0.6, 0.4])
+                with e[0]:
+                    fj["label"] = st.text_input("Label", value=fj.get("label", f"Filter {j+1}"), key=f"pc_yt_f_lbl_{loc_key}_{i}_{j}")
+                with e[1]:
+                    fj["source"] = st.selectbox("Source Field", options=list(_SRC_FIELDS.keys()), index=list(_SRC_FIELDS.keys()).index(fj.get("source", "voyage.date")), format_func=lambda k: _SRC_FIELDS[k], key=f"pc_yt_f_src_{loc_key}_{i}_{j}")
+            t["filters"] = fltrs
+
+            tables[i] = t
+
+        if st.button("💾 Save YADE Tracking Customization", key=f"pc_yt_save_{loc_key}"):
+            try:
+                with get_session() as s:
+                    set_page_section_config(s, loc.id, page="yade_tracking", section="customization", cfg={"tables": tables})
+                st.success("YADE Tracking customization saved.")
+                st.rerun()
+            except Exception as ex:
+                st.error(f"Save failed: {ex}")
+
     # Manage existing custom tabs
     with st.expander("📋 Manage Existing Custom Tabs", expanded=True):
         st.markdown("### Existing Custom Tabs")

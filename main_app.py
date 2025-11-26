@@ -31,9 +31,11 @@ ICONS = {
     "Location Settings": "📍⚙️",
     "Asset Management": "🧰",
     "Page Customization": "🛠️",
+    "Dashboard Customization": "📊⚙️",
     "Tank Transactions": "🛢️",
     "Tanker Transactions": "🚚",
-    "Yade Transactions": "⛴️",
+    "Yade Transactions": "⛴️", 
+    "Yade Tracking": "📍",
     "Vessel Operations": "🛳️", 
     "FSO-Operations": "⚓",
     "Reports": "📄",
@@ -45,6 +47,8 @@ ICONS = {
     "OTR": "📊",
     "Deleted Records": "🗑️",
     "Material Balance": "🧮",
+    "2FA Settings": "🔐",
+    "Login History": "📜",
 }
 
 ROLE_ICONS = USER_ROLE_ICONS
@@ -174,7 +178,7 @@ def get_pages(user, active_location_id):
       - Per-location page visibility (Location Settings)
       - Module presence (only show pages that actually exist)
     """
-    pages = ["Home", "My Tasks"]
+    pages = ["Home", "My Tasks", "2FA Settings", "Login History"]
 
     # ---- Management pages (admins only) ----
     if user and PermissionManager.can_access_management_pages(user):
@@ -185,6 +189,7 @@ def get_pages(user, active_location_id):
             "Location Settings",
             "Asset Management",
             "Page Customization",
+            "Dashboard Customization",
             "MB Customization",
             "Report Customization",
             "Deleted Records",
@@ -206,6 +211,7 @@ def get_pages(user, active_location_id):
         ("show_tanker_transactions", ("Tanker Transactions", "app_pages.tanker_transactions")),
         ("show_tank_transactions",   ("View Transactions",   "app_pages.view_transactions")),
         ("show_yade_transactions",   ("Yade Transactions",   "app_pages.yade_transactions")),
+        ("show_yade_tracking",       ("Yade Tracking",       "app_pages.yade_tracking")),
         ("show_otr",                 ("OTR",                 "app_pages.otr")),
         ("show_fso_operations",      ("FSO-Operations",      "app_pages.fso_operations")),
         ("show_vessel_operations",   ("Vessel Operations",   "app_pages.vessel_operations")),
@@ -453,6 +459,10 @@ def main():
     elif current_page == "Page Customization":
         render_page_customization(user)
 
+    elif current_page == "Dashboard Customization":
+        from app_pages.dashboard_customization import render_dashboard_customization
+        render_dashboard_customization()
+
     elif current_page == "MB Customization":
         from app_pages.mb_customization import render_mb_customization_page
         render_mb_customization_page(user)
@@ -468,6 +478,10 @@ def main():
     elif current_page == "Yade Transactions":
         from app_pages.yade_transactions import render_yade_transactions_page
         render_yade_transactions_page(active_location_id, user)
+
+    elif current_page == "Yade Tracking":
+        from app_pages.yade_tracking import render_yade_tracking_page
+        render_yade_tracking_page(active_location_id, user)
 
     elif current_page == "View Transactions":
         from app_pages.view_transactions import render_view_transactions_page
@@ -496,7 +510,15 @@ def main():
     
     elif current_page == "Report Customization":
         from app_pages.report_customization import render_report_customization_page
-        render_report_customization_page(user, active_location_id)   
+        render_report_customization_page(user, active_location_id)
+        
+    elif current_page == "2FA Settings":
+        from app_pages.twofa_settings import render_twofa_settings_page
+        render_twofa_settings_page(active_location_id, user)
+
+    elif current_page == "Login History":
+        from app_pages.login_history import render_login_history_page
+        render_login_history_page(active_location_id, user)
     # elif current_page == "FSO-Operations":
     #     from app_pages.fso_operations import render_fso_operations_page
     #     render_fso_operations_page(active_location_id, user)

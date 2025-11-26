@@ -15,6 +15,7 @@ DEFAULT_CONFIG = {
         "show_tank_transactions": True,
         "show_tanker_transactions": False,  # Enabled only for specific locations
         "show_yade_transactions": False,    # Enabled only for specific locations
+        "show_yade_tracking": False,        # Yade Tracking page visibility per location
         "show_toa_yade": False,             # Enabled only for specific locations
         "show_fso_operations": False,       # FSO-Operations page
         "show_reports": True,               # Legacy Reports page
