@@ -643,6 +643,12 @@ class MaterialBalanceCalculator:
                 book = round(opening + total_receipts - total_dispatch, 2)
                 close_val, closing_by_tank = MaterialBalanceCalculator._closing_stock(day_entries, prev_day_tank_nsv)
 
+                # Forward-fill closing when no receipts/dispatches occurred
+                if abs(total_receipts) < 1e-9 and abs(total_dispatch) < 1e-9:
+                    if prev_day_tank_nsv:
+                        close_val = round(sum(prev_day_tank_nsv.values()), 2)
+                        closing_by_tank = prev_day_tank_nsv.copy()
+
                 out = {
                     "Date": cur.strftime("%Y-%m-%d"),
                     "Opening Stock": round(opening, 2),
@@ -664,6 +670,12 @@ class MaterialBalanceCalculator:
                 total_dispatch = d_jetty
                 book = round(opening + total_receipts - total_dispatch, 2)
                 close_val, closing_by_tank = MaterialBalanceCalculator._closing_stock(day_entries, prev_day_tank_nsv)
+
+                # Presence check uses both receipt components for forward-fill decision
+                if abs(r_commingled + r_cond) < 1e-9 and abs(d_jetty) < 1e-9:
+                    if prev_day_tank_nsv:
+                        close_val = round(sum(prev_day_tank_nsv.values()), 2)
+                        closing_by_tank = prev_day_tank_nsv.copy()
 
                 out = {
                     "Date": cur.strftime("%Y-%m-%d"),
@@ -687,6 +699,11 @@ class MaterialBalanceCalculator:
                 book = round(opening + total_receipts - total_dispatch, 2)
                 close_val, closing_by_tank = MaterialBalanceCalculator._closing_stock(day_entries, prev_day_tank_nsv)
 
+                if abs(total_receipts) < 1e-9 and abs(total_dispatch) < 1e-9:
+                    if prev_day_tank_nsv:
+                        close_val = round(sum(prev_day_tank_nsv.values()), 2)
+                        closing_by_tank = prev_day_tank_nsv.copy()
+
                 out = {
                     "Date": cur.strftime("%Y-%m-%d"),
                     "Opening Stock": round(opening, 2),
@@ -707,6 +724,11 @@ class MaterialBalanceCalculator:
                 total_dispatch = d
                 book = round(opening + total_receipts - total_dispatch, 2)
                 close_val, closing_by_tank = MaterialBalanceCalculator._closing_stock(day_entries, prev_day_tank_nsv)
+
+                if abs(total_receipts) < 1e-9 and abs(total_dispatch) < 1e-9:
+                    if prev_day_tank_nsv:
+                        close_val = round(sum(prev_day_tank_nsv.values()), 2)
+                        closing_by_tank = prev_day_tank_nsv.copy()
 
                 out = {
                     "Date": cur.strftime("%Y-%m-%d"),
@@ -1048,6 +1070,12 @@ class MaterialBalanceCalculator:
                     if start_dt <= dt <= end_dt:
                         day_src.append(e)
                 close_val = _sum_last_by_tank(day_src, fld)
+
+            # Forward-fill closing when no receipts/dispatches occurred in configured columns
+            if abs(total_receipts) < 1e-9 and abs(total_dispatch) < 1e-9:
+                if prev_day_tank_nsv:
+                    close_val = round(sum(prev_day_tank_nsv.values()), 2)
+                    closing_by_tank = prev_day_tank_nsv.copy()
 
             out["Book Closing Stock"] = book
             if closing_labels:

@@ -323,17 +323,33 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
     except Exception:
         custom_cols = []
     src_first = _get_first_date_for_sources(loc.id, custom_cols) if custom_cols else None
-    default_from = src_first or otr_first or (date.today() - timedelta(days=7))
+    earliest_candidates = [d for d in [src_first, otr_first] if d]
+    earliest_first = min(earliest_candidates) if earliest_candidates else (date.today() - timedelta(days=7))
+    default_from = earliest_first
+    today = date.today()
 
     with col_from:
         mb_from = st.date_input(
             "From Date",
             value=st.session_state.get("mb_from", default_from),
-            min_value=otr_first or default_from,
+            min_value=earliest_first,
+            max_value=today,
             key="mb_from",
         )
     with col_to:
-        mb_to = st.date_input("To Date", value=date.today(), key="mb_to")
+        mb_to = st.date_input(
+            "To Date",
+            value=st.session_state.get("mb_to", today),
+            min_value=mb_from or earliest_first,
+            max_value=today,
+            key="mb_to",
+        )
+
+    # Clamp selected dates within allowed bounds
+    if mb_from and mb_from < earliest_first:
+        mb_from = earliest_first
+    if mb_to and mb_to > today:
+        mb_to = today
 
     with col_tank:
         if Tank is not None:
@@ -355,15 +371,16 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
     earliest_otr = _get_otr_first_date(loc.id)
 
     try:
-        calc_from = mb_from
-        if earliest_otr and earliest_otr < calc_from:
-            calc_from = earliest_otr
+        earliest_allowed = earliest_first
+        calc_from = mb_from if (mb_from and mb_from >= earliest_allowed) else earliest_allowed
+        # Ensure end date is not in the future
+        calc_to = mb_to if (mb_to and mb_to <= today) else today
 
         if use_custom:
             mb_rows = MaterialBalanceCalculator.calculate_material_balance_custom(
                 entries=None,
                 date_from=calc_from,
-                date_to=mb_to,
+                date_to=calc_to,
                 location_id=loc.id,
             )
         else:
@@ -371,7 +388,7 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
                 entries=None,
                 location_code=location_code,
                 date_from=calc_from,
-                date_to=mb_to,
+                date_to=calc_to,
                 location_id=loc.id,
             )
 
