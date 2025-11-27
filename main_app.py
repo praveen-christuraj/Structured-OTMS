@@ -25,9 +25,11 @@ init_db()
 ICONS = {
     "Home": "🏠",
     "My Tasks": "✅",
+    "Profile Settings": "👤",
     "Manage Locations": "📍",
     "Manage Users": "👥",
     "Audit Log": "🧾",
+    "Error Monitoring": "🔍",
     "Location Settings": "📍⚙️",
     "Asset Management": "🧰",
     "Page Customization": "🛠️",
@@ -178,7 +180,7 @@ def get_pages(user, active_location_id):
       - Per-location page visibility (Location Settings)
       - Module presence (only show pages that actually exist)
     """
-    pages = ["Home", "My Tasks", "2FA Settings", "Login History"]
+    pages = ["Home", "My Tasks", "Profile Settings", "2FA Settings", "Login History"]
 
     # ---- Management pages (admins only) ----
     if user and PermissionManager.can_access_management_pages(user):
@@ -186,6 +188,7 @@ def get_pages(user, active_location_id):
             "Manage Locations",
             "Manage Users",
             "Audit Log",
+            "Error Monitoring",
             "Location Settings",
             "Asset Management",
             "Page Customization",
@@ -275,6 +278,16 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
             st.markdown(f"📍 **Location:** {loc_label}")
         else:
             st.markdown("**Not logged in**")
+
+    # ---------- Task Notifications ----------
+    if user:
+        from ui import render_task_notification_badge, render_error_summary_for_admin
+        
+        # Show pending task notifications
+        render_task_notification_badge(user)
+        
+        # Show error summary for admin users
+        render_error_summary_for_admin(user)
 
     # ---------- Logout with confirmation ----------
     if user:
@@ -412,6 +425,31 @@ def main():
     user["last_activity"] = datetime.utcnow().isoformat()
     st.session_state["auth_user"] = user
 
+    # ================= ENFORCE PASSWORD/2FA REQUIREMENTS ================= #
+    # Check if user must change password or setup 2FA
+    must_change_password = st.session_state.get("must_change_password", False)
+    must_setup_2fa = st.session_state.get("must_setup_2fa", False)
+    password_expired = st.session_state.get("password_expired", False)
+    
+    if must_change_password or must_setup_2fa:
+        # Force redirect to Profile Settings
+        if st.session_state.get("current_page") != "Profile Settings":
+            st.session_state["current_page"] = "Profile Settings"
+        
+        # Show warning
+        if password_expired:
+            st.error("🔐 Your password has expired. You must change it before accessing other pages.")
+        elif must_change_password:
+            st.warning("🔐 You must change your password before accessing other pages.")
+        
+        if must_setup_2fa:
+            st.warning("🔒 2FA setup is mandatory. Please complete it before accessing other pages.")
+        
+        # Only allow access to Profile Settings
+        from app_pages.profile_settings import render
+        render()
+        st.stop()
+
     # ================= NORMAL APP FLOW ================= #
     active_location_id = st.session_state.get("active_location_id")
     current_page = st.session_state.get("current_page", "Home")
@@ -435,6 +473,10 @@ def main():
     elif current_page == "My Tasks":
         from app_pages.my_tasks import render_my_tasks_page
         render_my_tasks_page(active_location_id, user)
+    
+    elif current_page == "Profile Settings":
+        from app_pages.profile_settings import render
+        render()
 
     elif current_page == "Manage Locations":
         from app_pages.manage_locations import render_manage_locations_page
@@ -447,6 +489,10 @@ def main():
     elif current_page == "Audit Log":
         from app_pages.audit_log import render_audit_log_page
         render_audit_log_page(active_location_id, user)
+    
+    elif current_page == "Error Monitoring":
+        from error_monitoring import render_error_monitoring_dashboard
+        render_error_monitoring_dashboard(user)
 
     elif current_page == "Location Settings":
         from app_pages.location_settings import render_location_settings_page

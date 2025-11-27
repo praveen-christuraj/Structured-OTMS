@@ -12,6 +12,7 @@ from sqlalchemy import func
 from db import get_session
 from models import YadeVoyage, YadeDip, TOAYadeSummary
 from security import SecurityManager
+from deletion_approval import render_deletion_ui, DeletionApprovalManager
 
 from toa_yade_calculator import (
     preview_or_summary_totals,
@@ -702,59 +703,53 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
                 _open_pdf_blob_inline(pdf)
 
         if del_btn:
-            st.session_state[f"yade_del_confirm_{v.id}"] = True
+            st.session_state[f"yade_show_delete_ui_{v.id}"] = True
 
-        if st.session_state.get(f"yade_del_confirm_{v.id}"):
-            st.error(f"Delete YADE voyage {v.voyage_no or v.id}? This cannot be undone.")
-            dc1, dc2 = st.columns(2)
-            if dc1.button("✅ Yes", key=f"yade_del_yes_{v.id}"):
-                try:
-                    with get_session() as s:
-                        obj = s.query(YadeVoyage).filter(YadeVoyage.id == v.id).one_or_none()
-                        if obj:
-                            from recycle_bin import RecycleBinManager
-                            from models import YadeDip, YadeSampleParam, YadeSealDetail, TOAYadeSummary
-                            u = user or {}
-                            dips = s.query(YadeDip).filter(YadeDip.voyage_id == v.id).all()
-                            sample_params = s.query(YadeSampleParam).filter(YadeSampleParam.voyage_id == v.id).all()
-                            seals = s.query(YadeSealDetail).filter(YadeSealDetail.voyage_id == v.id).all()
-                            toa = s.query(TOAYadeSummary).filter(TOAYadeSummary.voyage_id == v.id).all()
-                            payload = RecycleBinManager.snapshot_record(obj)
-                            payload["_related_dips"] = [RecycleBinManager.snapshot_record(d) for d in dips]
-                            payload["_related_sample_params"] = [RecycleBinManager.snapshot_record(sp) for sp in sample_params]
-                            payload["_related_seals"] = [RecycleBinManager.snapshot_record(seal) for seal in seals]
-                            payload["_related_toa"] = [RecycleBinManager.snapshot_record(t) for t in toa]
-                            RecycleBinManager.archive_payload(
-                                session=s,
-                                resource_type="YadeVoyage",
-                                resource_id=str(v.id),
-                                payload=payload,
-                                username=u.get("username", "unknown"),
-                                user_id=u.get("id"),
-                                location_id=st.session_state.get("active_location_id"),
-                                reason="User deleted from View Transactions",
-                                label=f"Voyage {v.voyage_no or v.id}"
-                            )
-                            s.delete(obj)
-                            try:
-                                SecurityManager.log_audit(
-                                    s, u.get("username", "unknown"), "DELETE",
-                                    resource_type="YadeVoyage",
-                                    resource_id=str(v.id),
-                                    details=f"Moved YADE voyage {v.voyage_no or v.id} to recycle bin",
-                                    user_id=u.get("id"),
-                                    location_id=st.session_state.get("active_location_id"),
-                                )
-                            except Exception:
-                                pass
-                            s.commit()
-                    st.success("Moved to recycle bin.")
-                    st.session_state.pop(f"yade_del_confirm_{v.id}", None)
-                    st.rerun()
-                except Exception as ex:
-                    st.error(f"Delete failed: {ex}")
-            if dc2.button("✖️ No", key=f"yade_del_no_{v.id}"):
-                st.session_state.pop(f"yade_del_confirm_{v.id}", None)
+        # Deletion approval UI
+        if st.session_state.get(f"yade_show_delete_ui_{v.id}"):
+            def delete_yade_record():
+                with get_session() as s:
+                    obj = s.query(YadeVoyage).filter(YadeVoyage.id == v.id).one_or_none()
+                    if obj:
+                        from recycle_bin import RecycleBinManager
+                        from models import YadeDip, YadeSampleParam, YadeSealDetail, TOAYadeSummary
+                        u = user or {}
+                        dips = s.query(YadeDip).filter(YadeDip.voyage_id == v.id).all()
+                        sample_params = s.query(YadeSampleParam).filter(YadeSampleParam.voyage_id == v.id).all()
+                        seals = s.query(YadeSealDetail).filter(YadeSealDetail.voyage_id == v.id).all()
+                        toa = s.query(TOAYadeSummary).filter(TOAYadeSummary.voyage_id == v.id).all()
+                        payload = RecycleBinManager.snapshot_record(obj)
+                        payload["_related_dips"] = [RecycleBinManager.snapshot_record(d) for d in dips]
+                        payload["_related_sample_params"] = [RecycleBinManager.snapshot_record(sp) for sp in sample_params]
+                        payload["_related_seals"] = [RecycleBinManager.snapshot_record(seal) for seal in seals]
+                        payload["_related_toa"] = [RecycleBinManager.snapshot_record(t) for t in toa]
+                        RecycleBinManager.archive_payload(
+                            session=s,
+                            resource_type="YadeVoyage",
+                            resource_id=str(v.id),
+                            payload=payload,
+                            username=u.get("username", "unknown"),
+                            user_id=u.get("id"),
+                            location_id=st.session_state.get("active_location_id"),
+                            reason="User deleted from View Transactions",
+                            label=f"Voyage {v.voyage_no or v.id}"
+                        )
+                        s.delete(obj)
+                        s.commit()
+            
+            if render_deletion_ui(
+                resource_type="YadeVoyage",
+                resource_id=v.id,
+                resource_label=f"YADE Voyage {v.voyage_no or v.id}",
+                delete_func=delete_yade_record,
+                user=user,
+                location_id=st.session_state.get("active_location_id"),
+                on_success_message="YADE voyage moved to recycle bin",
+                metadata={"voyage_no": v.voyage_no, "convoy_no": v.convoy_no},
+                button_key_prefix=f"yade_{v.id}"
+            ):
+                st.session_state.pop(f"yade_show_delete_ui_{v.id}", None)
+                st.rerun()
 
         # View / Inline editor - COMPACT VERSION
         if view_btn or (edit_id == v.id):

@@ -48,6 +48,33 @@ def render_login_page():
             st.error("Invalid username or password.")
             return
 
+        # Check for forced password change or 2FA setup
+        with get_session() as session:
+            from models import User
+            from datetime import timedelta
+            
+            user = session.query(User).filter(User.id == user_dict["id"]).first()
+            
+            # Check if password expired (30-day rule for non-admins)
+            password_expired = False
+            if not user.password_never_expires:
+                if user.password_changed_at:
+                    password_age = (datetime.utcnow() - user.password_changed_at).days
+                    expiry_days = user.password_expiry_days or 30
+                    if password_age >= expiry_days:
+                        password_expired = True
+                else:
+                    # Password never changed
+                    password_expired = True
+            
+            # Store flags in session for post-login checks
+            if user.force_password_change or password_expired:
+                st.session_state["must_change_password"] = True
+                st.session_state["password_expired"] = password_expired
+            
+            if user.force_2fa and not user.totp_enabled:
+                st.session_state["must_setup_2fa"] = True
+
         # Track last activity in session (for idle timeout)
         user_dict["last_activity"] = datetime.utcnow().isoformat()
 

@@ -238,3 +238,96 @@
 2025-11-26 10:21:49 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
 2025-11-26 10:21:49 - OTMS - INFO - Reflecting table 'otr_records' from database...
 2025-11-26 10:21:49 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-26 21:18:49 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:49 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:49 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:49 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:57 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:57 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:57 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:57 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:59 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:59 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:59 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:18:59 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:04 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:04 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:04 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:04 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:07 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:07 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:07 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:07 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:10 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:10 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:10 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:19:10 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:38 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:38 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:38 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:38 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:40 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:40 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:40 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:40 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:48 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:48 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:48 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:48 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:48 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:48 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:48 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:48 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:56 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:56 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:56 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:56 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:57 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:57 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:57 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:20:57 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:09 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:09 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:09 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:09 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:12 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:12 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:12 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:12 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:27 - OTMS - WARNING - Table 'flex_meters_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:27 - OTMS - WARNING - Table 'flex_condensate_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:27 - OTMS - WARNING - Table 'flex_produced_water_1' does not exist in database. Available tables: 48
+2025-11-26 21:21:27 - OTMS - WARNING - Table 'flex_production_1' does not exist in database. Available tables: 48
+2025-11-26 21:29:11 - OTMS - INFO - Loaded 48 tables from database
+2025-11-26 21:29:11 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-26 21:29:11 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-26 21:29:11 - OTMS - INFO - Reflecting table 'audit_log' from database...
+2025-11-26 21:29:11 - OTMS - INFO - ✅ Successfully created model for table 'audit_log'
+2025-11-26 21:29:11 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-26 21:29:11 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-26 21:29:53 - OTMS - INFO - Loaded 48 tables from database
+2025-11-26 21:29:53 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-26 21:29:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-26 21:29:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-26 21:29:59 - OTMS - INFO - Loaded 48 tables from database
+2025-11-26 21:29:59 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-26 21:29:59 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-26 21:29:59 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-26 21:30:07 - OTMS - INFO - Loaded 48 tables from database
+2025-11-26 21:30:07 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-26 21:30:07 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-26 21:30:07 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-26 21:30:34 - OTMS - INFO - Loaded 48 tables from database
+2025-11-26 21:30:34 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-26 21:30:34 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-26 21:30:34 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-26 21:30:54 - OTMS - INFO - Loaded 48 tables from database
+2025-11-26 21:30:54 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-26 21:30:54 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-26 21:30:54 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-26 21:31:00 - OTMS - INFO - Loaded 48 tables from database
+2025-11-26 21:31:00 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-26 21:31:00 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-26 21:31:00 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-26 21:36:08 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 48
+2025-11-26 21:36:08 - OTMS - WARNING - Table 'flex_produced_water_2' does not exist in database. Available tables: 48

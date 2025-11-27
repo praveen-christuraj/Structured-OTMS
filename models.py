@@ -92,6 +92,8 @@ class TaskType(enum.Enum):
     DELETE_REQUEST = "DELETE_REQUEST"
     ERROR_ALERT = "ERROR_ALERT"
     PASSWORD_RESET = "PASSWORD_RESET"
+    FORGOT_PASSWORD = "FORGOT_PASSWORD"
+    USER_CREATION = "USER_CREATION"
     INFO = "INFO"
 
 
@@ -346,9 +348,15 @@ class User(Base):
     account_locked_until = Column(DateTime, nullable=True)
     last_activity = Column(DateTime, nullable=True)
     
+    # Password policy fields
+    force_password_change = Column(Boolean, default=True, nullable=False)  # Mandatory password change on first login
+    password_never_expires = Column(Boolean, default=False, nullable=False)  # Admins can be exempt from 30-day rule
+    password_expiry_days = Column(Integer, default=30, nullable=False)  # Days before password expires
+    
     # 2FA fields
     totp_secret = Column(String(32), nullable=True)
     totp_enabled = Column(Boolean, default=False, nullable=False)
+    force_2fa = Column(Boolean, default=True, nullable=False)  # Mandatory 2FA enforcement
     backup_codes = Column(String(500), nullable=True)
     supervisor_code_hash = Column(String(255), nullable=True)
     supervisor_code_set_at = Column(DateTime, nullable=True)

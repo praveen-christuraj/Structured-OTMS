@@ -17,6 +17,7 @@ except Exception:
 
 from yade_view import render_yade_transactions_view
 from tanker_view import render_tanker_transactions_view
+from deletion_approval import render_deletion_ui, DeletionApprovalManager
 
 # Optional permissions
 try:
@@ -1272,74 +1273,61 @@ def _render_tank_list(location_id: int, user: dict | None):
                     st.session_state[f"vt_tank_view_open_{idx}"] = False
             with a3:
                 if st.button("🗑️", key=f"vt_tank_del_{idx}", help="Delete"):
-                    st.session_state[f"vt_tank_del_confirm_{idx}"] = True
+                    st.session_state[f"vt_tank_show_delete_ui_{idx}"] = True
 
-        # delete confirm
-        if st.session_state.get(f"vt_tank_del_confirm_{idx}"):
+        # Deletion approval UI
+        if st.session_state.get(f"vt_tank_show_delete_ui_{idx}"):
             from sqlalchemy import text as sql_text
 
-            d1, d2 = st.columns([0.10, 0.90])
-            with d1:
-                if st.button("✅ Yes", key=f"vt_tank_del_yes_{idx}"):
-                    try:
-                        data_row = r["_row"]
-                        table = TankTransaction.__table__
-                        # primary key column
-                        pk_col = list(table.primary_key.columns)[0].name if table.primary_key.columns else "id"
-                        rec_id = data_row.get(pk_col, data_row.get("id"))
-                        if rec_id is None:
-                            raise RuntimeError("Record id not found for delete.")
-                        with get_session() as s:
-                            if TankTransaction and RecycleBinManager:
-                                try:
-                                    obj = s.query(TankTransaction).get(rec_id)
-                                    if obj:
-                                        RecycleBinManager.archive_record(
-                                            s,
-                                            obj,
-                                            "TankTransaction",
-                                            username=(user or {}).get("username", "system"),
-                                            user_id=(user or {}).get("id"),
-                                            location_id=location_id,
-                                            reason=f"Deleted ticket {r.get('Ticket ID')}",
-                                            label=str(rec_id),
-                                        )
-                                        SecurityManager.log_audit(
-                                            s,
-                                            (user or {}).get("username", "system"),
-                                            "DELETE",
-                                            resource_type="TankTransaction",
-                                            resource_id=str(rec_id),
-                                        details=f"Moved ticket {r.get('Ticket ID')} to deleted records",
-                                            user_id=(user or {}).get("id"),
-                                            location_id=location_id,
-                                            ip_address=_get_client_ip(),
-                                            success=True,
-                                        )
-                                        s.commit()
-                                except Exception:
-                                    s.execute(
-                                        sql_text(f"DELETE FROM {table.name} WHERE {pk_col} = :id_val"),
-                                        {"id_val": rec_id},
+            data_row = r["_row"]
+            table = TankTransaction.__table__
+            pk_col = list(table.primary_key.columns)[0].name if table.primary_key.columns else "id"
+            rec_id = data_row.get(pk_col, data_row.get("id"))
+            
+            if rec_id is None:
+                st.error("Record ID not found for deletion")
+            else:
+                def delete_tank_record():
+                    with get_session() as s:
+                        if TankTransaction and RecycleBinManager:
+                            try:
+                                obj = s.query(TankTransaction).get(rec_id)
+                                if obj:
+                                    RecycleBinManager.archive_record(
+                                        s, obj, "TankTransaction",
+                                        username=(user or {}).get("username", "system"),
+                                        user_id=(user or {}).get("id"),
+                                        location_id=location_id,
+                                        reason=f"Deleted ticket {r.get('Ticket ID')}",
+                                        label=str(rec_id)
                                     )
                                     s.commit()
-                            else:
+                            except Exception:
                                 s.execute(
                                     sql_text(f"DELETE FROM {table.name} WHERE {pk_col} = :id_val"),
-                                    {"id_val": rec_id},
+                                    {"id_val": rec_id}
                                 )
                                 s.commit()
-                        st.success("Ticket moved to Deleted Records")
-                        st.session_state[f"vt_tank_del_confirm_{idx}"] = False
-                        st.rerun()
-                    except Exception as ex:
-                        _audit_error(f"Delete failed: {ex}", user, location_id)
-                        st.error("Delete failed. (Logged)")
-            with d2:
-                if st.button("❌ Cancel", key=f"vt_tank_del_no_{idx}"):
-                    st.session_state[f"vt_tank_del_confirm_{idx}"] = False
-
-        # inline viewer/editor rows
+                        else:
+                            s.execute(
+                                sql_text(f"DELETE FROM {table.name} WHERE {pk_col} = :id_val"),
+                                {"id_val": rec_id}
+                            )
+                            s.commit()
+                
+                if render_deletion_ui(
+                    resource_type="TankTransaction",
+                    resource_id=rec_id,
+                    resource_label=f"Tank Transaction Ticket #{r.get('Ticket ID', rec_id)}",
+                    delete_func=delete_tank_record,
+                    user=user,
+                    location_id=location_id,
+                    on_success_message="Tank transaction moved to Deleted Records",
+                    metadata={"ticket_id": r.get('Ticket ID'), "tank_name": r.get('Tank Name')},
+                    button_key_prefix=f"vt_tank_{idx}"
+                ):
+                    st.session_state[f"vt_tank_show_delete_ui_{idx}"] = False
+                    st.rerun()        # inline viewer/editor rows
         if st.session_state.get(f"vt_tank_view_open_{idx}", False):
             _inline_tank_viewer(idx, r, user, location_id)
         if st.session_state.get(f"vt_tank_edit_open_{idx}", False):
@@ -1620,7 +1608,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                             st.button("🔒", key=f"vt_{section}_edit_{i}_locked", help="Edit locked (>24hrs)", disabled=True)
                     with act3:
                         if st.button("🗑️", key=f"vt_{section}_del_{i}", help="Delete"):
-                            st.session_state[f"vt_{section}_del_confirm_{i}"] = True
+                            st.session_state[f"vt_{section}_show_delete_ui_{i}"] = True
             else:
                 c1, c2, c3, c4, c5 = st.columns([0.18, 0.42, 0.20, 0.20, 0.10], gap="small")
                 with c1:
@@ -1647,7 +1635,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                                 st.button("🔒", key=f"vt_{section}_edit2_{i}_locked", help="Edit locked (>24hrs)", disabled=True)
                         with a2:
                             if st.button("🗑️", key=f"vt_{section}_del2_{i}", help="Delete"):
-                                st.session_state[f"vt_{section}_del_confirm_{i}"] = True
+                                st.session_state[f"vt_{section}_show_delete_ui_{i}"] = True
                     else:
                         # Other sections: View, Edit, Delete buttons
                         a1, a2, a3 = st.columns([0.34, 0.33, 0.33], gap="small")
@@ -1670,76 +1658,50 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                                 st.button("🔒", key=f"vt_{section}_edit2_{i}_locked", help="Edit locked (>24hrs)", disabled=True)
                         with a3:
                             if st.button("🗑️", key=f"vt_{section}_del2_{i}", help="Delete"):
-                                st.session_state[f"vt_{section}_del_confirm_{i}"] = True
+                                st.session_state[f"vt_{section}_show_delete_ui_{i}"] = True
 
-            if st.session_state.get(f"vt_{section}_del_confirm_{i}"):
-                d1c, d2c = st.columns([0.10, 0.90])
-                with d1c:
-                    if st.button("✅ Yes", key=f"vt_{section}_del_yes_{i}"):
-                        try:
-                            with get_session() as s:
-                                if is_custom:
-                                    M = get_custom_table_model(f"flex_{section}_{location_id}")
-                                    rec = s.query(M).get(getattr(r, "id")) if M else None
-                                    if rec:
-                                        s.delete(rec)
-                                        s.commit()
-                                        try:
-                                            SecurityManager.log_audit(
-                                                s,
-                                                (user or {}).get("username", "system"),
-                                                "DELETE",
-                                                resource_type=f"Custom:{section}",
-                                                resource_id=str(getattr(r, "id", "")),
-                                                details="Deleted via View Transactions",
-                                                user_id=(user or {}).get("id"),
-                                                location_id=location_id,
-                                                ip_address=_get_client_ip(),
-                                                success=True,
-                                            )
-                                        except Exception:
-                                            pass
-                                else:
-                                    if RecycleBinManager:
-                                        try:
-                                            RecycleBinManager.archive_record(
-                                                s,
-                                                r,
-                                                f"FlexibleRecord:{section}",
-                                                username=(user or {}).get("username", "system"),
-                                                user_id=(user or {}).get("id"),
-                                                location_id=location_id,
-                                                reason=f"Deleted {section} record on {getattr(r,'tx_date', '')}",
-                                                label=str(getattr(r, "id", "")),
-                                            )
-                                            SecurityManager.log_audit(
-                                                s,
-                                                (user or {}).get("username", "system"),
-                                                "DELETE",
-                                                resource_type=f"FlexibleRecord:{section}",
-                                                resource_id=str(getattr(r, "id", "")),
-                                                details=f"Moved {section} record to deleted records",
-                                                user_id=(user or {}).get("id"),
-                                                location_id=location_id,
-                                                ip_address=_get_client_ip(),
-                                                success=True,
-                                            )
-                                            s.commit()
-                                        except Exception:
-                                            s.delete(r)
-                                            s.commit()
-                                    else:
-                                        s.delete(r)
-                                        s.commit()
-                            st.success("Record removed")
-                            st.session_state[f"vt_{section}_del_confirm_{i}"] = False
-                            st.rerun()
-                        except Exception as ex:
-                            _audit_error(f"Delete {section} failed: {ex}", user, location_id)
-                            st.error("Delete failed. (Logged)")
-                with d2c:
-                    if st.button("❌ Cancel", key=f"vt_{section}_del_no_{i}"):
-                        st.session_state[f"vt_{section}_del_confirm_{i}"] = False
+            # Deletion approval UI for flexible records
+            if st.session_state.get(f"vt_{section}_show_delete_ui_{i}"):
+                def delete_flex_record():
+                    with get_session() as s:
+                        if is_custom:
+                            M = get_custom_table_model(f"flex_{section}_{location_id}")
+                            rec = s.query(M).get(getattr(r, "id")) if M else None
+                            if rec:
+                                s.delete(rec)
+                                s.commit()
+                        else:
+                            if RecycleBinManager:
+                                try:
+                                    RecycleBinManager.archive_record(
+                                        s, r, f"FlexibleRecord:{section}",
+                                        username=(user or {}).get("username", "system"),
+                                        user_id=(user or {}).get("id"),
+                                        location_id=location_id,
+                                        reason=f"Deleted {section} record on {getattr(r,'tx_date', '')}",
+                                        label=str(getattr(r, "id", ""))
+                                    )
+                                    s.commit()
+                                except Exception:
+                                    s.delete(r)
+                                    s.commit()
+                            else:
+                                s.delete(r)
+                                s.commit()
+                
+                if render_deletion_ui(
+                    resource_type=f"FlexibleRecord:{section}",
+                    resource_id=getattr(r, "id"),
+                    resource_label=f"{section.title()} Record #{getattr(r, 'id')}",
+                    delete_func=delete_flex_record,
+                    user=user,
+                    location_id=location_id,
+                    on_success_message=f"{section.title()} record deleted successfully",
+                    metadata={"section": section, "tx_date": str(getattr(r, 'tx_date', ''))},
+                    button_key_prefix=f"vt_{section}_{i}"
+                ):
+                    st.session_state[f"vt_{section}_show_delete_ui_{i}"] = False
+                    st.rerun()
 
             if st.session_state.get(f"vt_{section}_open_{i}", False):
                 with st.container():

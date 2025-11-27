@@ -1,0 +1,99 @@
+OTMS-Rebuild — Main Application Structure
+
+Overview
+- The application is a Streamlit-based operational tracking tool with per-location configuration, role-based access, and highly customizable pages.
+- Primary entry: `d:\Project OTMS-Rebuild\main_app.py`.
+
+Main App File (main_app.py)
+- Initialization:
+  - Imports: Streamlit, datetime utilities, dynamic import utilities.
+  - DB bootstrap: `init_db()` prepares all tables.
+  - Security: `SecurityManager.SESSION_TIMEOUT_MINUTES` set (e.g., 30).
+- Icons:
+  - `ICONS` maps page names to emojis (Home, Management, Operations, Customization).
+  - Includes `📍 Yade Tracking` icon.
+- Page List Composition: `main_app.py:180–235`
+  - Fixed pages: Home, My Tasks, 2FA Settings, Login History.
+  - Management pages added if `PermissionManager.can_access_management_pages(user)`.
+  - Operational pages gated by location flags via `get_location_page_visibility(session, active_location_id)`.
+  - Mapping uses tuples of `(flag_name, (page_title, module_path))`, e.g.:
+    - `show_tank_transactions` → `("Tank Transactions", "app_pages.tank_transactions")`.
+    - `show_yade_tracking` → `("Yade Tracking", "app_pages.yade_tracking")`.
+- Sidebar Render: `_render_sidebar_nav(...)` draws logo and user info; shows active location label using `Location` lookup.
+- Page Routing:
+  - On selection, `main_app` imports page module and calls its `render_*_page` function.
+  - Routing blocks for YADE and others (e.g., `render_yade_tracking_page(active_location_id, user)`).
+- Session:
+  - Relies on `st.session_state` to keep `active_location_id`, auth user details.
+
+Helpers & Services (high-level)
+- `db.py`: Provides `get_session()` context manager for SQLAlchemy sessions and `init_db()` for startup.
+- `auth.py`: `AuthManager` helpers for location access and roles.
+- `permission_manager.py`: `PermissionManager` utilities for management vs operations access and per-feature checks.
+- `location_config.py`: Central configuration store (JSON per location) with APIs:
+  - `get_location_page_visibility`, `LocationConfig.get_config/save_config/reset_to_default`.
+  - Per-tab visibility for Tank Transactions.
+  - Page section config: `get_page_section_config/set_page_section_config` for soft-coded UI.
+  - Dynamic table definitions: `get_dynamic_table_def/set_dynamic_table_def`.
+  - Operations catalogs: `list_operations/add_operation/delete_operation/set_operation_active`.
+  - Custom tabs: `get_custom_tabs/add_custom_tab/update_custom_tab/delete_custom_tab`.
+- `location_manager.py`: Location read helpers (e.g., `get_location_by_id(session, id)`).
+- `security.py`: Session timeout and audit logging via `SecurityManager.log_audit(...)`.
+- `ui.py`: UI primitives like `header(...)`.
+- `models.py`: ORM models (e.g., `User`, `Location`, `YadeVoyage`, `TOAYadeStage`, and custom tab table operations).
+- `dashboard_utils.py`: Dashboard data (e.g., recent activity overview).
+- `ip_service.py`: IP geolocation and user-agent parsing.
+
+Pages (short index)
+- Each page module under `app_pages/` implements a `render_*_page` function.
+- Rendering functions include role checks, location access checks, and data/UI composition.
+- Key entries:
+  - `home.py:279` → `render_home_page`.
+  - `login.py:11` → `render_login_page`.
+  - `login_history.py:33` → `render_login_history_page`.
+  - `twofa_settings.py:29` → `render_twofa_settings_page`.
+  - `manage_locations.py:82` → `render_manage_locations_page`.
+  - `manage_users.py:444` → `render_manage_users_page`.
+  - `audit_log.py:10` → `render_audit_log_page`.
+  - `location_settings.py:38` → `render_location_settings_page`.
+  - `asset_management.py:1138` → `render_asset_management_page`.
+  - `page_customization.py` → `render_page_customization`.
+  - `dashboard_customization.py` → `render_dashboard_customization`.
+  - `mb_customization.py:65` → `render_mb_customization_page`.
+  - `material_balance.py:264` → `render_material_balance_page`.
+  - `otr.py:230` → `render_otr_page`.
+  - `vessel_operations.py:197` → `render_vessel_operations_page`.
+  - `fso_operations.py:681` → `render_fso_operations_page`.
+  - `tank_transactions.py:1347` → `render_tank_transactions_page`.
+  - `tanker_transactions.py:1372` → `render_tanker_transactions_page`.
+  - `view_transactions.py:2017` → `render_view_transactions_page`.
+  - `tank_transactions_view.py:270` → `render_tank_transactions_view_page`.
+  - `reporting.py:166` → `render_reporting_page`.
+  - `report_customization.py:15` → `render_report_customization_page`.
+  - `recycle_bin_page.py:25` → `render_recycle_bin_page`.
+  - `yade_transactions.py:1284` → `render_yade_transactions_page`.
+  - `yade_tracking.py:111` → `render_yade_tracking_page`.
+  - `my_tasks.py:10` → `render_my_tasks_page`.
+
+Access & Visibility Model
+- Per-location flags determine which operational pages appear:
+  - Read via `get_location_page_visibility(session, location_id)`.
+  - Flags include `show_tank_transactions`, `show_tanker_transactions`, `show_yade_transactions`, `show_yade_tracking`, `show_vessel_operations`, `show_fso_operations`, `show_reports`, `show_otr`, `show_material_balance`, `show_reporting`.
+- Page-level access (fine-grained) under `LocationConfig.get_config(...)["page_access"]` (e.g., “Yade Tracking”).
+- Management vs Operations gating via `PermissionManager`.
+- Location access enforcement via `AuthManager.can_access_location(user, location_id)`.
+
+Customization Flow (examples)
+- Tank Transactions tables (Produced Water / Production) use `get_dynamic_table_def` to render soft-coded columns and formulas.
+- Page Customization saves per-location settings to `LocationPageConfig` as JSON via `set_page_section_config`.
+- Yade Tracking reads its per-location tables/filters/titles from `page="yade_tracking", section="customization"` in the config.
+- Report Customization references custom tables created via Custom Tabs in `location_config`.
+
+Audit & Security
+- Important actions (create/update/delete configs or tabs) log to audit with `SecurityManager.log_audit(...)` including `username`, `resource_type`, `resource_id`, `location_id`, and `ip_address` from `st.session_state["client_ip"]` when available.
+
+Data & Models (high-level links)
+- Core transaction models: TankTransaction, YadeVoyage, TOAYadeStage, etc.
+- Custom Tabs: `LocationConfig` stores schema and `models` create/drop tables.
+- Operations catalogs: stored in `LocationConfig` JSON (`operations` tree), consumed by pages to build dropdowns consistently.
+

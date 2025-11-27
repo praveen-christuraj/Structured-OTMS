@@ -1,0 +1,165 @@
+OTMS-Rebuild — Helpers & Core Modules Documentation
+
+This document provides file-by-file coverage for helper modules and core services in the repository. For page modules, see `Pages_Documentation.txt`. For overall structure and routing, see `Main_Documentation.txt`.
+
+auth.py
+- Purpose: Role and location access utilities for authenticated users.
+- Key: `AuthManager.can_access_location(user, location_id)` used widely in pages to enforce location access.
+- Inputs: `user` dict from session state; `location_id` active selection.
+- Outputs: Boolean access decisions.
+- Notes: Works with `PermissionManager` for role gates.
+
+permission_manager.py
+- Purpose: Role-based feature access and page gating.
+- Key APIs:
+  - `PermissionManager.can_access_management_pages(user)` controls access to management pages.
+  - `PermissionManager.can_access_operational_pages(user)` controls access to ops pages.
+  - `PermissionManager.can_access_feature(session, location_id, feature_key, role)` used for fine-grained feature checks.
+- Used by: `main_app.py` page listing and many `render_*_page` implementations.
+
+db.py
+- Purpose: Database bootstrap and session management for SQLAlchemy ORM.
+- Key APIs:
+  - `init_db()` called at import by `main_app.py` to ensure tables exist.
+  - `get_session()` context manager used everywhere for DB operations.
+- Behavior: Ensures connection lifecycle; commit/rollback patterns used by pages and config helpers.
+
+models.py
+- Purpose: SQLAlchemy ORM models and helper DDL for runtime-created tables (e.g., Custom Tabs).
+- Typical Entities: `User`, `Location`, `LocationConfiguration`, operational entities like `TankTransaction`, `YadeVoyage`, `TOAYadeStage`.
+- Utilities: Functions to create/drop custom tab tables referenced from Page Customization.
+
+location_config.py
+- Purpose: Central per-location JSON configuration registry and helper APIs.
+- Structure:
+  - `DEFAULT_CONFIG` includes `page_visibility`, `page_access`, `tabs_access`, domain config (`tank_transactions`, `yade_transactions`, `otr`, `ui_customization`).
+  - `LocationConfig.get_config(session, location_id)` merges defaults + location-based defaults + DB overrides.
+  - `LocationConfig.save_config(session, location_id, cfg)` persists JSON.
+  - `get_location_page_visibility(session, location_id)` returns visibility flags for routing and sidebar.
+  - Tank Transactions tab visibility helpers: `get_tank_transactions_tab_visibility`, `save_tank_transactions_tab_visibility`.
+  - Per-page section config: `get_page_section_config`, `set_page_section_config` store JSON under `LocationPageConfig` rows.
+  - Dynamic tables: `get_dynamic_table_def`, `set_dynamic_table_def` operate under `cfg["page_customization"][page][section]`.
+  - Operations catalog: `list_operations`, `add_operation`, `set_operation_active`, `delete_operation`, `get_active_operation_names`.
+  - Custom tabs: `get_custom_tabs`, `add_custom_tab`, `update_custom_tab`, `delete_custom_tab`, `get_all_custom_table_names`.
+- Referenced by: Page Customization, Tank Transactions, Location Settings, Reporting.
+
+location_manager.py
+- Purpose: Convenience wrappers for common location queries.
+- Key: `LocationManager.get_location_by_id(session, location_id)` used in pages like Yade Tracking.
+
+security.py
+- Purpose: Session security and audit logging.
+- Key:
+  - `SecurityManager.SESSION_TIMEOUT_MINUTES` set by `main_app.py`.
+  - `SecurityManager.log_audit(session, username, action, ...)` records changes to configuration, tabs, meters, etc.
+- Used by: Page Customization, Location Settings, other settings pages.
+
+ui.py
+- Purpose: Small UI helpers.
+- Key: `header(title)` used by many pages to render consistent headers.
+
+ip_service.py
+- Purpose: Client IP geolocation and user-agent parsing.
+- Used by: `login.py`, `twofa_settings.py`, `login_history.py` to display network details and store audit metadata.
+
+dashboard_utils.py
+- Purpose: Assemble dashboard activity and aggregates.
+- Key:
+  - `DashboardUtils.get_recent_activity(session, location_id, days=7, limit=20)` builds a mixed list of recent tank transactions and YADE voyages.
+- Feeds: Home/Dashboard widgets.
+
+dashboard_config.py
+- Purpose: Configuration for dashboard layout and widget display.
+- Content: Declarative definitions for cards, recent lists, KPIs.
+
+dashboard_widgets.py
+- Purpose: Widget renderer functions referenced from dashboard pages.
+- Content: Functions producing Streamlit components for configured cards.
+
+logger.py
+- Purpose: File-based logging utilities; writes under `logs/`.
+- Usage: Imported by long-running processes and critical flows.
+
+task_manager.py
+- Purpose: Internal task tracking utilities for the app; distinct from Streamlit session tasks.
+- Usage: Hooks from pages like My Tasks and background features.
+
+report_engine.py
+- Purpose: Reporting data extraction, query assembly, and CSV/JSON generation.
+- Used by: `reporting.py`, `report_customization.py` to resolve configured sources and columns.
+
+recycle_bin.py
+- Purpose: Deleted-records persistence and restoration mechanics.
+- Used by: `recycle_bin_page.py` to list and restore deleted items.
+
+material_balance_calculator.py
+- Purpose: Core MB computations, conversions, and rollups.
+- Used by: `material_balance.py` for displayed MB sheets.
+
+material_balance_config.py
+- Purpose: Configuration for MB rules, precision, units, reference densities/temperatures.
+- Used by: MB calculator and Material Balance page.
+
+fso_config.py
+- Purpose: Configuration for FSO operations and mapping.
+- Used by: `fso_operations.py`.
+
+backup_manager.py
+- Purpose: Manual backup orchestration of DB and configuration outputs.
+
+backup_scheduler.py
+- Purpose: Scheduling helpers for periodic backups.
+
+unique_id_generator.py
+- Purpose: Utility to generate short, unique IDs for tickets/records.
+
+timezone_utils.py
+- Purpose: Timezone conversions and helpers for timestamp normalization.
+
+utils_calc.py
+- Purpose: Shared numeric utilities: rounding, safe arithmetic, unit conversions.
+- Used broadly by calculators and pages.
+
+twofa.py
+- Purpose: Two-factor authentication helpers and state management.
+- Integrations: `twofa_settings.py` UI.
+
+yade_toa_calculator.py
+- Purpose: Compute transfer-of-account (TOA) stage metrics for YADE voyages.
+- Inputs: Voyage and stage rows; Outputs: NSV and other derived quantities.
+
+toa_yade_calculator.py
+- Purpose: Similar calculator for TOA/YADE depending on data orientation.
+- Note: A `.backup` file exists; primary is `toa_yade_calculator.py`.
+
+tanker_view.py
+- Purpose: Aggregated view utilities for tanker transactions.
+- Used by: `tanker_transactions.py` and reporting.
+
+yade_view.py
+- Purpose: Aggregated view utilities for YADE transactions.
+- Used by: `yade_transactions.py`, `yade_tracking.py` (indirectly), reporting.
+
+reporting utilities (scripts)
+- `create_sample_report.py`: Seeds a sample report definition for testing.
+- `get_browser_info.py`: Reads client browser info (User-Agent) for diagnostics.
+- `health_check.py`: Lightweight sanity checks for DB and configuration.
+
+migrations / setup scripts
+- `migrate_toa_restructure.py`, `migrate_toa_yade_summary.py`: One-off data migrations for TOA/YADE schema changes.
+- `setup_fso_permissions.py`: Initializes FSO permissions and location flags.
+- `tools/repair_ops_enum.py`: Fixes enum values in operations when needed.
+
+legacy
+- `oil_app_ui.py`: Legacy app file; serves as reference for features ported into `app_pages/`.
+
+entry & assets
+- `Launch_OTMS.bat`: Windows batch to launch the app (wraps Streamlit run).
+- `assets/` contains images/icons used by UI.
+- `otms.db` is the SQLite database (do not edit directly).
+
+Cross-References
+- Page customization and dynamic tables: See `Documentation/Custom_Tabs_Feature_Guide.txt`, `Custom_Table_Quick_Reference.txt`, `Custom_Column_Calculations_Guide.txt`.
+- Tank Transactions deep-dive: See `Documentation/OTMS-Rebuild_Doc_Phase2-2_TankTx.txt` and `OTMS-Rebuild_Doc_Phase2-3_TankTx.txt`.
+- Phase notes and checklist: See `OTMS_Phase1_Documentation.txt` and `OTMS_Phase2_Polish_Test_Checklist.txt`.
+

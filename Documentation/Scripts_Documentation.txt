@@ -1,0 +1,83 @@
+OTMS-Rebuild — Scripts & Utilities Documentation
+
+This document covers standalone scripts, migration tools, and small utilities. For pages, see `Pages_Documentation.txt`. For helpers/core modules, see `Helpers_Documentation.txt`.
+
+Launch_OTMS.bat
+- Purpose: Entry point for Windows environments to launch the Streamlit app.
+- Behavior: Wraps `streamlit run main_app.py` and sets environment as needed.
+
+create_sample_report.py
+- Purpose: Generates a sample report configuration and persists it to the DB for testing.
+- Dependencies: `report_engine.py`, `location_config.py`.
+
+get_browser_info.py
+- Purpose: Reads and prints client browser/user-agent details.
+- Usage: Diagnostics and debugging of client context.
+
+health_check.py
+- Purpose: Basic system checks (DB connectivity, table presence, essential configs).
+- Outputs: Console log suitable for CI or operator verification.
+
+migrate_toa_restructure.py
+- Purpose: One-off migration to restructure TOA-related tables/fields.
+- Notes: Run once; read code to understand exact transformations before executing.
+
+migrate_toa_yade_summary.py
+- Purpose: Creates or updates summary tables for YADE/TOA analytics.
+- Notes: Use with caution; follow backup procedures.
+
+setup_fso_permissions.py
+- Purpose: Initialize permissions and location flags related to FSO.
+- Dependencies: `location_config.py`, `permission_manager.py`.
+
+tools/repair_ops_enum.py
+- Purpose: Repairs enum values across operations catalog when schema or validation changes.
+- Usage: Rare; ensure backups and audit.
+
+tanker_view.py
+- Purpose: Utility to render or aggregate tanker data for views; referenced by pages.
+- See: `Helpers_Documentation.txt` for broader context.
+
+yade_view.py
+- Purpose: Utility to render or aggregate YADE data for views; referenced by pages.
+- See: `Helpers_Documentation.txt`.
+
+timezone_utils.py
+- Purpose: Conversions and helpers for timestamps across timezones.
+- Important for audit/log coherence and cross-location reporting.
+
+unique_id_generator.py
+- Purpose: Generates compact unique IDs to use as ticket or reference numbers.
+
+logger.py
+- Purpose: Configures file logging under `logs/`. Commonly imported by scripts.
+
+backup_manager.py / backup_scheduler.py
+- Purpose: Create and schedule backups of the database and selected configuration outputs.
+- Recommendations: Verify paths, schedule frequency, and retention policy.
+
+report_engine.py
+- Purpose: Backend engine for composing and executing report queries based on user-configured report definitions.
+- Interfaces with `Report Customization` page definitions and returns tabular outputs.
+
+fso_config.py
+- Purpose: Defines FSO operational configuration options; consumed by `fso_operations.py` and potentially reporting.
+
+material_balance_config.py
+- Purpose: Material balance settings and defaults (precision, units, references).
+- Used by `material_balance_calculator.py` and `material_balance.py`.
+
+utils_calc.py
+- Purpose: Common numeric utility functions (safe ops, conversions) used across scripts.
+
+twofa.py
+- Purpose: Two-factor auth helpers; works with UI in `twofa_settings.py`.
+
+oil_app_ui.py (legacy)
+- Purpose: Previous generation Streamlit UI; serves as a historical reference for features migrated into `app_pages/` modules.
+
+Notes
+- Always perform a backup before running migration scripts.
+- Refer to audit logs to confirm changes, using `SecurityManager.log_audit(...)` patterns from helpers.
+- For report data sources using custom tabs, review `Documentation/Custom_Tabs_Feature_Guide.txt` first.
+

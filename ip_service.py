@@ -52,13 +52,14 @@ class IPService:
                 hostname = "Local Machine"
             
             return {
-                "country": "Local Network",
+                "country": "Local Network (LAN)",
                 "city": hostname,  # Show computer name
                 "region": "Development/LAN",
                 "timezone": "Local Time",
                 "isp": "Local Network",
                 "lat": None,
                 "lon": None,
+                "country_code": None,
             }
         
         try:
@@ -77,6 +78,7 @@ class IPService:
                         "isp": data.get("isp", "Unknown"),
                         "lat": data.get("lat"),
                         "lon": data.get("lon"),
+                        "country_code": data.get("countryCode"),
                     }
         except Exception as e:
             print(f"IP geolocation failed: {e}")
@@ -90,6 +92,7 @@ class IPService:
             "isp": "Unknown",
             "lat": None,
             "lon": None,
+            "country_code": None,
         }
     
     @staticmethod
@@ -201,6 +204,29 @@ class IPService:
         """Generate unique session ID"""
         data = f"{username}:{ip_address}:{timestamp.isoformat()}"
         return hashlib.sha256(data.encode()).hexdigest()[:16]
+
+    @staticmethod
+    def get_flag_emoji(country_or_code: Optional[str]) -> str:
+        """Return a flag emoji for a country name or ISO code. Falls back to white flag."""
+        if not country_or_code:
+            return "🏳️"
+        val = country_or_code.strip()
+        if len(val) == 2 and val.isalpha():  # ISO code
+            code = val.upper()
+        else:
+            # Minimal name->code map (extend as needed)
+            name_map = {
+                "Nigeria": "NG",
+                "United States": "US",
+                "United Kingdom": "GB",
+                "Canada": "CA",
+                "India": "IN",
+            }
+            code = name_map.get(val, "")
+        if len(code) != 2:
+            return "🏳️"
+        # Convert ASCII A-Z to regional indicator symbols
+        return chr(ord(code[0].upper()) + 127397) + chr(ord(code[1].upper()) + 127397)
     
     @staticmethod
     def is_suspicious_login(

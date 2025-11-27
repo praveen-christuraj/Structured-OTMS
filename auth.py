@@ -127,6 +127,9 @@ class AuthManager:
         role: str,
         location_id: Optional[int] = None,
         supervisor_code: Optional[str] = None,
+        force_password_change: bool = True,
+        force_2fa: bool = True,
+        password_never_expires: bool = False,
     ) -> Dict:
         """
         Create a new user account.
@@ -158,7 +161,12 @@ class AuthManager:
             full_name=full_name,
             role=role,
             location_id=location_id,
-            is_active=True
+            is_active=True,
+            force_password_change=force_password_change,
+            force_2fa=force_2fa,
+            password_never_expires=password_never_expires,
+            must_change_password=force_password_change,  # Legacy field for compatibility
+            password_changed_at=None if force_password_change else datetime.utcnow()
         )
         if role == "supervisor" and supervisor_code:
             user.supervisor_code_hash = AuthManager.hash_password(supervisor_code)

@@ -71,6 +71,36 @@ def _create_user_form():
             type="password",
             help="Supervisor code is required for supervisor accounts.",
         )
+        
+        st.markdown("---")
+        st.markdown("**Password & 2FA Policy**")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            force_password_change = st.checkbox(
+                "🔐 Mandatory Password Change on First Login",
+                value=True,
+                help="If enabled, user must change the default password on first login"
+            )
+        
+        with col2:
+            force_2fa = st.checkbox(
+                "🔒 Mandatory 2FA",
+                value=True,
+                help="If enabled, user must setup 2FA on first login"
+            )
+        
+        # Password expiry settings
+        is_admin = raw_role in ["admin-it", "admin-operations"]
+        if is_admin:
+            password_never_expires = st.checkbox(
+                "⏳ Password Never Expires (Admin Privilege)",
+                value=True,
+                help="Admins can be exempt from 30-day password expiry"
+            )
+        else:
+            password_never_expires = False
+            st.info("ℹ️ Non-admin users must change password every 30 days")
 
         submitted = st.form_submit_button("Create User")
 
@@ -97,6 +127,9 @@ def _create_user_form():
                     role=raw_role,
                     location_id=location_id,
                     supervisor_code=supervisor_code or None,
+                    force_password_change=force_password_change,
+                    force_2fa=force_2fa,
+                    password_never_expires=password_never_expires,
                 )
 
             st.success(
@@ -371,7 +404,6 @@ def _user_maintenance_section():
         else:
             try:
                 with get_session() as session:
-                    from models import User
                     u = session.query(User).get(selected_user.id)
                     if u:
                         try:

@@ -23,3 +23,107 @@ def header(title: str):
         )
 
     st.divider()
+
+
+def render_task_notification_badge(user):
+    """
+    Render a notification badge showing pending/new task counts
+    Returns the count of pending tasks for the user
+    """
+    if not user:
+        return 0
+    
+    try:
+        from task_manager import TaskManager
+        
+        # Get pending task count
+        pending_count = TaskManager.count_pending_tasks_for_user(user)
+        
+        if pending_count > 0:
+            # Show notification badge
+            badge_color = "#ef4444" if pending_count > 5 else "#f59e0b"
+            st.sidebar.markdown(
+                f"""
+                <div style="
+                    background: {badge_color};
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    text-align: center;
+                    margin: 10px 0;
+                    font-weight: bold;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                ">
+                    🔔 {pending_count} Pending Task{"s" if pending_count != 1 else ""}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        
+        return pending_count
+        
+    except Exception as e:
+        # Silently fail - don't break UI if task counting fails
+        return 0
+
+
+def render_error_summary_for_admin(user):
+    """
+    Show error summary widget for admin users
+    Displays recent error tasks and system health indicators
+    """
+    if not user:
+        return
+    
+    role = user.get("role", "")
+    if role not in ["admin-it", "admin-operations"]:
+        return
+    
+    try:
+        from task_manager import TaskManager
+        from db import get_session
+        from models import Task, TaskType, TaskStatus
+        from datetime import datetime, timedelta
+        
+        with get_session() as session:
+            # Get error tasks from last 24 hours
+            yesterday = datetime.utcnow() - timedelta(days=1)
+            error_tasks = session.query(Task).filter(
+                Task.task_type == TaskType.ERROR_ALERT.value,
+                Task.raised_at >= yesterday,
+                Task.status == TaskStatus.PENDING.value
+            ).order_by(Task.raised_at.desc()).limit(10).all()
+            
+            error_count = len(error_tasks)
+            
+            if error_count > 0:
+                # Show error summary
+                severity_color = "#dc2626" if error_count >= 5 else "#f59e0b" if error_count >= 2 else "#3b82f6"
+                
+                st.sidebar.markdown(
+                    f"""
+                    <div style="
+                        background: {severity_color};
+                        color: white;
+                        padding: 10px;
+                        border-radius: 8px;
+                        margin: 10px 0;
+                    ">
+                        <div style="font-weight: bold; font-size: 14px;">
+                            ⚠️ System Errors (24h)
+                        </div>
+                        <div style="font-size: 24px; margin: 5px 0;">
+                            {error_count}
+                        </div>
+                        <div style="font-size: 11px; opacity: 0.9;">
+                            Requires attention
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+    
+    except Exception:
+        # Silently fail - don't break UI
+        pass
+

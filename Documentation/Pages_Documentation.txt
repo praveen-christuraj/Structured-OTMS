@@ -1,0 +1,145 @@
+OTMS-Rebuild — Pages Documentation
+
+This document describes every page module under `app_pages/`: purpose, entry function, access rules, core UI/data behavior, and important configuration dependencies. Line references use the pattern `file_path:line_number` for quick navigation.
+
+Home
+- Entry: `app_pages/home.py:279` → `render_home_page(active_location_id, user)`
+- Purpose: Landing dashboard for location selection, user overview, and quick navigation.
+- Access: All signed-in roles; content adapts by `user.role` and active location.
+- Key: Displays location picker, session info, and summaries.
+
+Login
+- Entry: `app_pages/login.py:11` → `render_login_page()`
+- Purpose: Sign-in UI with session bootstrap.
+- Notes: Captures client IP and user-agent (integrated elsewhere for 2FA/Login History).
+
+Login History
+- Entry: `app_pages/login_history.py:33` → `render_login_history_page(...)`
+- Purpose: Shows recent login attempts with IP and geolocation details.
+- Access: Admin/Managers; reads from audit/auth models.
+
+2FA Settings
+- Entry: `app_pages/twofa_settings.py:29` → `render_twofa_settings_page(active_location_id, user)`
+- Purpose: Manage second-factor settings; displays current device/network info.
+- Access: All signed-in users; sensitive actions gated.
+
+My Tasks
+- Entry: `app_pages/my_tasks.py:10` → `render_my_tasks_page(active_location_id, user)`
+- Purpose: Lightweight task list for operational follow-ups per user.
+
+Manage Locations
+- Entry: `app_pages/manage_locations.py:82` → `render_manage_locations_page(active_location_id, user)`
+- Purpose: CRUD for locations and codes.
+- Access: Management pages only.
+
+Manage Users
+- Entry: `app_pages/manage_users.py:444` → `render_manage_users_page(active_location_id, user)`
+- Purpose: User/role management, assignment to locations, and status toggles.
+- Access: Management.
+
+Audit Log
+- Entry: `app_pages/audit_log.py:10` → `render_audit_log_page(active_location_id, user)`
+- Purpose: Read-only event log for security/audit trails.
+- Access: Management.
+
+Location Settings
+- Entry: `app_pages/location_settings.py:38` → `render_location_settings_page(active_location_id, user)`
+- Purpose: Per-location configuration:
+  - Page Access toggles (e.g., Tank, YADE, OTR, Vessel, FSO, Reports, YADE Tracking).
+  - Tank Transactions Tab Visibility.
+  - Operations config (Destination, Loading Berth, Cargo Types, etc.).
+- Dependencies: `location_config.py` getters/setters.
+
+Asset Management
+- Entry: `app_pages/asset_management.py:1138` → `render_asset_management_page(active_location_id, user)`
+- Purpose: Manage assets (tanks, vessels, FSO assignment, tankers, YADE barges).
+- Access: Admin.
+
+Page Customization
+- Entry: `app_pages/page_customization.py` → top-level function `render_page_customization(user)` (near file start)
+- Purpose: Configure per-location page sections and dynamic tables:
+  - Condensate Meter definitions.
+  - Produced Water dynamic table (columns, types, formulas).
+  - Production dynamic table (columns, types, formulas).
+  - Meter Records config.
+  - Custom Tabs management for Tank/Tanker pages.
+  - YADE Tracking customization (tables, columns mapped to source fields, filters, titles).
+- Dependencies: `location_config.py` (`get_page_section_config`, `set_page_section_config`, `get_dynamic_table_def`, `set_dynamic_table_def`, custom tabs APIs).
+
+Dashboard Customization
+- Entry: `app_pages/dashboard_customization.py` (render function present near top)
+- Purpose: Configure dashboard cards/widgets per role/location.
+
+MB Customization
+- Entry: `app_pages/mb_customization.py:65` → `render_mb_customization_page(user)`
+- Purpose: Configure Material Balance model and UI options.
+
+Material Balance
+- Entry: `app_pages/material_balance.py:264` → `render_material_balance_page(active_location_id, user)`
+- Purpose: Compute and present material balance sheets per location.
+- Dependencies: Tank transactions, OTR, conversion utilities.
+
+OTR
+- Entry: `app_pages/otr.py:230` → `render_otr_page(active_location_id, user)`
+- Purpose: Operational Tank Reconciliation views and calculators.
+
+Vessel Operations
+- Entry: `app_pages/vessel_operations.py:197` → `render_vessel_operations_page(active_location_id, user)`
+- Purpose: Vessel mooring, operations workflow and records.
+
+FSO-Operations
+- Entry: `app_pages/fso_operations.py:681` → `render_fso_operations_page(active_location_id, user)`
+- Purpose: Floating Storage Operations; assignments and transactions.
+
+Tank Transactions
+- Entry: `app_pages/tank_transactions.py:1347` → `render_tank_transactions_page(active_location_id, user)`
+- Purpose: Main tank ledger with tabs: Tank Entry, Meter Records, Condensate, Produced Water, Production.
+- Customization: Reads dynamic table definitions via `location_config.get_dynamic_table_def`.
+- Dependencies: Operations config for dropdowns (Destination, Loading Berth, Cargo Type).
+
+Tanker Transactions
+- Entry: `app_pages/tanker_transactions.py:1372` → `render_tanker_transactions_page(active_location_id, user)`
+- Purpose: Road tanker movements, seals, tickets.
+- Custom Tabs: Managed from Page Customization.
+
+View Transactions
+- Entry: `app_pages/view_transactions.py:2017` → `render_view_transactions_page(active_location_id, user)`
+- Purpose: Read-only list/views for all transactions with filters.
+
+Tank Transactions View
+- Entry: `app_pages/tank_transactions_view.py:270` → `render_tank_transactions_view_page(active_location_id, user)`
+- Purpose: Alternative presentation of tank data with aggregations.
+
+Reporting
+- Entry: `app_pages/reporting.py:166` → `render_reporting_page(active_location_id, user)`
+- Purpose: System reports UI using configured sources and filters.
+
+Report Customization
+- Entry: `app_pages/report_customization.py:15` → `render_report_customization_page(user, active_location_id)`
+- Purpose: Define custom reports, data sources (including custom tabs), and edit settings.
+
+Recycle Bin
+- Entry: `app_pages/recycle_bin_page.py:25` → `render_recycle_bin_page(active_location_id, user)`
+- Purpose: View and restore deleted records.
+
+Yade Transactions
+- Entry: `app_pages/yade_transactions.py:1284` → `render_yade_transactions_page(active_location_id, user)`
+- Purpose: Capture YADE voyages; cargo type/destination, stages, seals.
+- Dependencies: Operations config for Destination/Loading Berth; location permissions.
+
+Yade Tracking
+- Entry: `app_pages/yade_tracking.py:111` → `render_yade_tracking_page(active_location_id, user)`
+- Purpose: Track Voyage NSV across Jetty Departure vs Agge Arrival; fully customizable:
+  - Admin defines tables, titles, columns mapped to source fields, and filters under Page Customization.
+  - Page reads config and renders per-table filters and columns.
+- Visibility: Controlled via `Location Settings → Page Access → 📍 YADE Tracking`.
+- Sources: Location tokens matched for `ASEMOKU`, `NDONI`, `AGGE`.
+
+Vessel Operations (duplicate note)
+- Already covered above; included in sidebar mapping and visibility rules.
+
+Notes on Access & Visibility
+- Operational pages appear based on `location_config.get_location_page_visibility` flags per location.
+- Management pages require `PermissionManager.can_access_management_pages(user)`.
+- Most pages gate content with `PermissionManager.can_access_operational_pages(user)` and `AuthManager.can_access_location(user, location_id)`.
+

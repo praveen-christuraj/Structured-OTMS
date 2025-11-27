@@ -458,31 +458,9 @@ def _render_main_tanker_view(user: Dict[str, Any] | None, location_id: Optional[
                         pass
                     st.rerun()
             with a2:
-                # delete with confirm toggle
-                confirm_key = f"confirm_del_{r.id}"
-                if st.session_state.get(confirm_key):
-                    if st.button("✅", key=f"{confirm_key}_yes", help="Confirm delete"):
-                        try:
-                            _delete_tanker_transaction(r.id, user or {})
-                            SecurityManager.log_audit(
-                                None, (user or {}).get("username","system"), "DELETE",
-                                resource_type="TankerTransaction", resource_id=str(r.id),
-                                details="Delete tanker transaction", user_id=(user or {}).get("id"),
-                                location_id=location_id, success=True)
-                        except Exception as ex:
-                            SecurityManager.log_audit(
-                                None, (user or {}).get("username","system"), "DELETE",
-                                resource_type="TankerTransaction", resource_id=str(r.id),
-                                details=f"Delete failed: {ex}", user_id=(user or {}).get("id"),
-                                location_id=location_id, success=False)
-                            st.error(f"Delete failed: {ex}")
-                        finally:
-                            st.session_state.pop(confirm_key, None)
-                            st.rerun()
-                else:
-                    if st.button("🗑️", key=f"tdel_{r.id}", help="Delete"):
-                        st.session_state[confirm_key] = True
-                        st.rerun()
+                # Delete button triggers deletion UI
+                if st.button("🗑️", key=f"tdel_{r.id}", help="Delete"):
+                    st.session_state[f"tanker_show_delete_ui_{r.id}"] = True
             with a3:
                 if st.button("🧾", key=f"tpdf_{r.id}", help="Open PDF"):
                     try:
@@ -500,6 +478,25 @@ def _render_main_tanker_view(user: Dict[str, Any] | None, location_id: Optional[
                             details=f"PDF error: {ex}", user_id=(user or {}).get("id"),
                             location_id=location_id, success=False)
                         st.error(f"PDF generation failed: {ex}")
+        
+        # Deletion approval UI
+        if st.session_state.get(f"tanker_show_delete_ui_{r.id}"):
+            def delete_tanker_record():
+                _delete_tanker_transaction(r.id, user or {})
+            
+            if render_deletion_ui(
+                resource_type="TankerTransaction",
+                resource_id=r.id,
+                resource_label=f"Tanker Transaction {r.tanker_name or r.id}",
+                delete_func=delete_tanker_record,
+                user=user,
+                location_id=location_id,
+                on_success_message="Tanker transaction deleted successfully",
+                metadata={"tanker_name": r.tanker_name, "date": str(getattr(r, 'transaction_date', ''))},
+                button_key_prefix=f"tanker_{r.id}"
+            ):
+                st.session_state.pop(f"tanker_show_delete_ui_{r.id}", None)
+                st.rerun()
 
     # detail panel
     current_id = st.session_state.get("tanker_view_selected")

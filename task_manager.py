@@ -283,6 +283,155 @@ class TaskManager:
         finally:
             TaskManager._close_session(session, owns_session)
 
+    @staticmethod
+    def create_error_task(
+        error_message: str,
+        context: str,
+        user: Optional[Dict[str, Any]] = None,
+        location_id: Optional[int] = None,
+        severity: str = "HIGH",
+        stack_trace: Optional[str] = None,
+        additional_info: Optional[str] = None,
+        session: Optional[Session] = None,
+    ) -> None:
+        """
+        Create error tasks for both Admin-IT and Admin-Operations
+        
+        This creates tasks that route to both admin roles to ensure
+        errors are seen by the appropriate team members.
+        
+        Args:
+            error_message: The error message
+            context: Description of where the error occurred
+            user: User who encountered the error
+            location_id: Location where error occurred
+            severity: HIGH, MEDIUM, or LOW
+            stack_trace: Full stack trace if available
+            additional_info: Any additional context
+            session: Database session
+        """
+        normalized = (error_message or "").strip()
+        if not normalized:
+            return
+
+        session, owns_session = TaskManager._ensure_session(session)
+        try:
+            # Check for recent duplicate errors (within 10 minutes)
+            title = f"[{severity}] {context}: {normalized[:150]}"
+            recent = (
+                session.query(Task)
+                .filter(
+                    Task.task_type == TaskType.ERROR_ALERT.value,
+                    Task.status == TaskStatus.PENDING.value,
+                    Task.title == title,
+                )
+                .order_by(Task.raised_at.desc())
+                .first()
+            )
+            if recent and recent.raised_at:
+                if datetime.utcnow() - recent.raised_at < timedelta(minutes=10):
+                    return  # Avoid duplicate error tasks
+
+            raised_by = (user or {}).get("username", "system")
+            raised_role = (user or {}).get("role", "system")
+            
+            # Build comprehensive description
+            description = f"**Error Context:** {context}\n\n"
+            description += f"**Error Message:** {normalized}\n\n"
+            if user:
+                description += f"**User:** {user.get('username')} ({user.get('role')})\n"
+            if location_id:
+                description += f"**Location ID:** {location_id}\n"
+            if additional_info:
+                description += f"\n**Additional Info:**\n{additional_info}\n"
+            if stack_trace:
+                description += f"\n**Stack Trace:**\n```\n{stack_trace[:1000]}\n```"
+            
+            # Build metadata
+            meta = {
+                "context": context,
+                "severity": severity,
+                "error_type": "system_error",
+                "stack_trace": stack_trace[:2000] if stack_trace else None,
+                "additional_info": additional_info,
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+
+            # Determine target roles based on error context
+            # Database/system errors go to Admin-IT
+            # Business logic errors go to Admin-Operations
+            is_system_error = any(keyword in context.lower() for keyword in 
+                                 ['database', 'connection', 'sql', 'server', 'network', 'timeout'])
+            
+            # Create task for Admin-IT if system error
+            if is_system_error or severity == "CRITICAL":
+                task_it = Task(
+                    title=f"[IT] {title}",
+                    description=description,
+                    task_type=TaskType.ERROR_ALERT.value,
+                    status=TaskStatus.PENDING.value,
+                    priority=severity,
+                    target_role="admin-it",
+                    resource_type="System",
+                    resource_id=None,
+                    location_id=location_id,
+                    raised_by=raised_by,
+                    raised_by_role=raised_role,
+                    metadata_json=TaskManager._serialize_metadata(meta),
+                )
+                session.add(task_it)
+                session.flush()
+                TaskManager._add_activity(
+                    session,
+                    task_it,
+                    raised_by,
+                    "CREATED",
+                    f"System error in {context}",
+                )
+            
+            # Create task for Admin-Operations (always)
+            task_ops = Task(
+                title=f"[OPS] {title}",
+                description=description,
+                task_type=TaskType.ERROR_ALERT.value,
+                status=TaskStatus.PENDING.value,
+                priority=severity,
+                target_role="admin-operations",
+                resource_type="Application",
+                resource_id=None,
+                location_id=location_id,
+                raised_by=raised_by,
+                raised_by_role=raised_role,
+                metadata_json=TaskManager._serialize_metadata(meta),
+            )
+            session.add(task_ops)
+            session.flush()
+            TaskManager._add_activity(
+                session,
+                task_ops,
+                raised_by,
+                "CREATED",
+                f"Application error in {context}",
+            )
+            
+            # Log to audit trail
+            SecurityManager.log_audit(
+                session,
+                raised_by,
+                "ERROR_TASK_CREATE",
+                resource_type="Task",
+                resource_id=str(task_ops.id),
+                details=f"Error task created: {title}",
+                location_id=location_id,
+            )
+            
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            log_error(f"Failed to create error task: {e}", exc_info=True)
+        finally:
+            TaskManager._close_session(session, owns_session)
+
     # --------------------------------------------------------------------- #
     # Status helpers
     # --------------------------------------------------------------------- #
@@ -416,19 +565,30 @@ class TaskManager:
             location_id = (user or {}).get("location_id")
 
             if role in ["admin-operations", "admin-it"]:
-                # Admins see all tasks
-                pass
+                # Admins see all tasks (admin-operations sees everything, admin-it sees IT-related)
+                if role == "admin-it":
+                    query = query.filter(
+                        or_(
+                            Task.target_role == "admin-it",
+                            Task.task_type.in_([
+                                TaskType.PASSWORD_RESET.value,
+                                TaskType.USER_CREATION.value,
+                                TaskType.ERROR_ALERT.value
+                            ])
+                        )
+                    )
             elif role == "supervisor":
+                # Supervisors see tasks for their location (deletion requests, etc.)
                 query = query.filter(
-                    or_(Task.location_id == location_id, Task.location_id.is_(None))
-                ).filter(Task.target_role.in_(["supervisor", "admin-it", "all"]))
+                    Task.location_id == location_id,
+                    Task.target_role == "supervisor"
+                )
             elif role == "manager":
-                # Managers cannot see any tasks (not assignable to tasks)
+                # Managers cannot see any tasks (not assignable to tasks, view-only role)
                 return []
             else:
-                query = query.filter(
-                    or_(Task.raised_by == username, Task.target_role == "operator")
-                )
+                # Operators see their own raised tasks
+                query = query.filter(Task.raised_by == username)
 
             tasks = (
                 query.order_by(Task.raised_at.desc()).limit(500).all()
@@ -454,19 +614,30 @@ class TaskManager:
             location_id = user.get("location_id")
 
             if role in ["admin-operations", "admin-it"]:
-                # Admins see all pending tasks
-                pass
+                # Admins see all pending tasks (admin-operations sees everything, admin-it sees IT-related)
+                if role == "admin-it":
+                    query = query.filter(
+                        or_(
+                            Task.target_role == "admin-it",
+                            Task.task_type.in_([
+                                TaskType.PASSWORD_RESET.value,
+                                TaskType.USER_CREATION.value,
+                                TaskType.ERROR_ALERT.value
+                            ])
+                        )
+                    )
             elif role == "supervisor":
+                # Supervisors see tasks for their location (deletion requests, etc.)
                 query = query.filter(
-                    or_(Task.location_id == location_id, Task.location_id.is_(None))
-                ).filter(Task.target_role.in_(["supervisor", "admin-it", "all"]))
+                    Task.location_id == location_id,
+                    Task.target_role == "supervisor"
+                )
             elif role == "manager":
                 # Managers cannot see any tasks
                 return 0
             else:
-                query = query.filter(
-                    or_(Task.raised_by == username, Task.target_role == "operator")
-                )
+                # Operators see their own raised tasks
+                query = query.filter(Task.raised_by == username)
             return int(query.scalar() or 0)
         finally:
             TaskManager._close_session(session, owns_session)
