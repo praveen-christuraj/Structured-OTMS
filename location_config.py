@@ -13,13 +13,21 @@ import uuid
 DEFAULT_CONFIG = {
     "page_visibility": {
         "show_tank_transactions": True,
-        "show_tanker_transactions": False,  # Enabled only for specific locations
-        "show_yade_transactions": False,    # Enabled only for specific locations
-        "show_yade_tracking": False,        # Yade Tracking page visibility per location
-        "show_toa_yade": False,             # Enabled only for specific locations
-        "show_fso_operations": False,       # FSO-Operations page
-        "show_reports": True,               # Legacy Reports page
-        "show_material_balance": True,      # Material Balance page (per location)
+        "show_tanker_transactions": True,
+        "show_yade_transactions": True,
+        "show_yade_vessel_mapping": True,
+        "show_yade_tracking": True,
+        "show_view_transactions": True,
+        "show_vessel_operations": True,
+        "show_fso_operations": True,
+        "show_otr": True,
+        "show_reporting": True,
+        "show_reports": True,
+        "show_material_balance": True,
+        "show_bccr": True,
+        "show_convoy_status": True,
+        "show_toa_yade": True,
+        "show_sharing": True,
     },
 
     "page_access": {
@@ -108,7 +116,14 @@ DEFAULT_CONFIG = {
         "show_quick_entry_mode": True,
         "enable_bulk_upload": False,
         "default_date": "today"
+    },
+
+    "convoy_status": {
+        "yade_statuses": [],
+        "vessel_statuses": [],
     }
+    ,
+    "service_types": []
 }
 
 
@@ -292,6 +307,31 @@ def get_location_page_visibility(session: Session, location_id: int) -> Dict[str
     """
     config = LocationConfig.get_config(session, location_id)
     return config.get("page_visibility", {})
+
+
+def get_service_types(session: Session, location_id: int) -> List[str]:
+    cfg = LocationConfig.get_config(session, location_id)
+    types = cfg.get("service_types", []) or []
+    return [str(t) for t in types]
+
+def add_service_type(session: Session, location_id: int, name: str) -> None:
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("Service type name required")
+    cfg = LocationConfig.get_config(session, location_id)
+    types = list(cfg.get("service_types", []) or [])
+    if any(str(t).strip().lower() == name.lower() for t in types):
+        raise ValueError("Service type already exists")
+    types.append(name)
+    cfg["service_types"] = types
+    LocationConfig.save_config(session, location_id, cfg)
+
+def delete_service_type(session: Session, location_id: int, name: str) -> None:
+    cfg = LocationConfig.get_config(session, location_id)
+    types = list(cfg.get("service_types", []) or [])
+    types = [t for t in types if str(t).strip().lower() != (name or "").strip().lower()]
+    cfg["service_types"] = types
+    LocationConfig.save_config(session, location_id, cfg)
 
 
 # ==================== TANK TRANSACTIONS TAB VISIBILITY ====================

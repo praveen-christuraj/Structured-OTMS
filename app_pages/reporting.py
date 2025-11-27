@@ -14,6 +14,7 @@ from models import ReportDefinition, ReportAccess, Location, Tank
 from report_engine import ReportEngine
 from permission_manager import PermissionManager
 from security import SecurityManager
+from location_config import LocationConfig
 
 def get_user_reports(user: dict, location_id: int = None):
     """
@@ -176,6 +177,22 @@ def render_reporting_page(active_location_id: int, user: dict):
     
     # Check if user has access to any reports
     available_reports = get_user_reports(user, active_location_id)
+
+    # Apply per-location Reporting tab visibility from Location Settings
+    try:
+        with get_session() as s:
+            cfg = LocationConfig.get_config(s, active_location_id) if active_location_id else None
+        if cfg:
+            tabs_access = cfg.get("tabs_access", {})
+            rep_map = tabs_access.get("Reporting", {})
+            if rep_map:
+                def _is_enabled(r):
+                    slug = r.get('slug') or str(r.get('id'))
+                    val = rep_map.get(slug)
+                    return True if val is None else bool(val)
+                available_reports = [r for r in available_reports if _is_enabled(r)]
+    except Exception:
+        pass
     
     if not available_reports:
         st.info("📭 No reports are available for you at this time. Please contact your administrator.")

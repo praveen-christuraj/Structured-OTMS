@@ -4,10 +4,12 @@ from typing import Dict, Any, List
 from db import get_session
 from models import Location
 from permission_manager import PermissionManager
+from security import SecurityManager
 
 from location_config import (
     get_page_section_config,
     set_page_section_config,
+    LocationConfig,
 )
 from location_config import (
     get_dynamic_table_def, set_dynamic_table_def,
@@ -1085,6 +1087,52 @@ def render_page_customization(user: Dict[str, Any]):
                 st.rerun()
             except Exception as ex:
                 st.error(f"Save failed: {ex}")
+
+    with st.expander("🗺️ Yade-Vessel Mapping — Tab Visibility", expanded=False):
+        st.caption("Enable or disable the Mapping and Comparison tabs for this location.")
+        with get_session() as s:
+            cfg = LocationConfig.get_config(s, loc.id)
+        tabs_access = (cfg.get("tabs_access", {}) or {}).get("Yade-Vessel Mapping", {}) or {}
+        show_mapping = st.toggle(
+            "Show Mapping tab",
+            value=tabs_access.get("Mapping", True),
+            key=f"pc_yvm_tab_map_{loc_key}",
+        )
+        show_comparison = st.toggle(
+            "Show Comparison tab",
+            value=tabs_access.get("Comparison", True),
+            key=f"pc_yvm_tab_comp_{loc_key}",
+        )
+        if st.button("💾 Save Yade-Vessel Tabs", key=f"pc_yvm_tab_save_{loc_key}"):
+            try:
+                with get_session() as s:
+                    fresh_cfg = LocationConfig.get_config(s, loc.id)
+                    tabs = fresh_cfg.get("tabs_access", {}).copy()
+                    yvm_tabs = tabs.get("Yade-Vessel Mapping", {}).copy()
+                    yvm_tabs["Mapping"] = bool(show_mapping)
+                    yvm_tabs["Comparison"] = bool(show_comparison)
+                    tabs["Yade-Vessel Mapping"] = yvm_tabs
+                    fresh_cfg["tabs_access"] = tabs
+                    LocationConfig.save_config(s, loc.id, fresh_cfg)
+                    try:
+                        SecurityManager.log_audit(
+                            s,
+                            (user or {}).get("username", "system"),
+                            "UPDATE",
+                            resource_type="PageCustomization:YadeVesselTabs",
+                            resource_id=str(loc.id),
+                            details=f"Mapping={show_mapping}, Comparison={show_comparison}",
+                            user_id=(user or {}).get("id"),
+                            location_id=loc.id,
+                            success=True,
+                            ip_address=st.session_state.get("client_ip"),
+                        )
+                    except Exception:
+                        pass
+                st.success("Yade-Vessel Mapping tabs updated for this location.")
+                st.rerun()
+            except Exception as ex:
+                st.error(f"Failed to update Yade-Vessel Mapping tabs: {ex}")
 
     # Manage existing custom tabs
     with st.expander("📋 Manage Existing Custom Tabs", expanded=True):

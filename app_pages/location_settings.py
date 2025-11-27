@@ -17,11 +17,18 @@ DEFAULT_FLAGS = {
     "show_tank_transactions": True,
     "show_tanker_transactions": True,
     "show_yade_transactions": True,
+    "show_yade_vessel_mapping": True,
+    "show_yade_tracking": True,
+    "show_view_transactions": True,
     "show_vessel_operations": True,
     "show_fso_operations": True,
-    "show_reports": True,
     "show_otr": True,
+    "show_reporting": True,
+    "show_reports": True,
     "show_material_balance": True,
+    "show_bccr": True,
+    "show_convoy_status": True,
+    "show_sharing": True,
 }
 
 
@@ -70,7 +77,7 @@ def render_location_settings_page(active_location_id, user):
     # -------- section switcher --------
     section = st.radio(
         "Configure Section",
-        ["Page Access", "Tank Tx Tabs", "Operations"],
+        ["Page Access", "Tank Tx Tabs", "Reporting Tabs", "Convoy Status", "Service Types", "Operations"],
         horizontal=True,
         key="ls_section_switch",
     )
@@ -80,6 +87,13 @@ def render_location_settings_page(active_location_id, user):
 
     elif section == "Tank Tx Tabs":
         _render_tank_tx_tabs(sel_location_id, user)
+
+    elif section == "Reporting Tabs":
+        _render_reporting_tabs(sel_location_id, user)
+    elif section == "Convoy Status":
+        _render_convoy_status_settings(sel_location_id, user)
+    elif section == "Service Types":
+        _render_service_types(sel_location_id, user)
 
     else:  # "Operations" (this is where you also add Cargo Type / Destination / Loading Berth via categories)
         _render_operations_config(sel_location_id, user)
@@ -120,21 +134,56 @@ def _render_page_access(sel_location_id: int, user):
             value=cfg.get("show_otr", True),
             key="ls_flag_otr",
         )
+        show_reporting = st.toggle(
+            "📊 Reporting",
+            value=cfg.get("show_reporting", True),
+            key="ls_flag_reporting",
+        )
+        show_material_balance = st.toggle(
+            "🧮 Material Balance",
+            value=cfg.get("show_material_balance", True),
+            key="ls_flag_mb",
+        )
     with col2:
         show_yade = st.toggle(
             "⛴️ YADE Transactions",
             value=cfg.get("show_yade_transactions", True),
             key="ls_flag_yade",
         )
-        show_yade_tracking = st.toggle(
-            "📍 YADE Tracking",
-            value=cfg.get("show_yade_tracking", False),
-            key="ls_flag_yade_tracking",
+        show_yvm = st.toggle(
+            "🗺️ Yade-Vessel Mapping",
+            value=cfg.get("show_yade_vessel_mapping", True),
+            key="ls_flag_yvm",
         )
         show_rpts = st.toggle(
             "📄 Reports",
             value=cfg.get("show_reports", True),
             key="ls_flag_reports",
+        )
+        show_yade_tracking = st.toggle(
+            "📍 Yade Tracking",
+            value=cfg.get("show_yade_tracking", True),
+            key="ls_flag_yade_tracking",
+        )
+        show_view_tx = st.toggle(
+            "🗂️ View Transactions",
+            value=cfg.get("show_view_transactions", True),
+            key="ls_flag_view_tx",
+        )
+        show_convoy_status = st.toggle(
+            "🧭 Convoy Status",
+            value=cfg.get("show_convoy_status", True),
+            key="ls_flag_convoy",
+        )
+        show_bccr = st.toggle(
+            "📋 BCCR",
+            value=cfg.get("show_bccr", True),
+            key="ls_flag_bccr",
+        )
+        show_sharing = st.toggle(
+            "🔗 Sharing",
+            value=cfg.get("show_sharing", True),
+            key="ls_flag_sharing",
         )
 
     st.caption("These switches control which operational pages this location can access.")
@@ -144,11 +193,18 @@ def _render_page_access(sel_location_id: int, user):
             "show_tank_transactions": bool(show_tank),
             "show_tanker_transactions": bool(show_tanker),
             "show_yade_transactions": bool(show_yade),
+            "show_yade_vessel_mapping": bool(show_yvm),
             "show_yade_tracking": bool(show_yade_tracking),
+            "show_view_transactions": bool(show_view_tx),
             "show_vessel_operations": bool(show_vessel_ops),
             "show_fso_operations": bool(show_fso),
-            "show_reports": bool(show_rpts),
             "show_otr": bool(show_otr),
+            "show_reporting": bool(show_reporting),
+            "show_reports": bool(show_rpts),
+            "show_material_balance": bool(show_material_balance),
+            "show_convoy_status": bool(show_convoy_status),
+            "show_bccr": bool(show_bccr),
+            "show_sharing": bool(show_sharing),
         }
         try:
             with get_session() as session:
@@ -261,6 +317,200 @@ def _render_tank_tx_tabs(sel_location_id: int, user):
             st.error(f"Failed to save tab visibility: {ex}")
 
 
+# ===================== Reporting tabs =====================
+def _render_reporting_tabs(sel_location_id: int, user):
+    st.markdown("### 📊 Reporting (Tabs)")
+    st.caption("Control which reports are visible for this location. New reports appear automatically here.")
+
+    from models import ReportDefinition
+    with get_session() as s:
+        reports = (
+            s.query(ReportDefinition)
+            .filter(ReportDefinition.is_active == True)
+            .order_by(ReportDefinition.name.asc())
+            .all()
+        )
+
+    if not reports:
+        st.info("No active reports defined.")
+        return
+
+    with get_session() as s:
+        cfg = LocationConfig.get_config(s, sel_location_id)
+    tabs_access = cfg.setdefault("tabs_access", {})
+    rep_map = tabs_access.setdefault("Reporting", {})
+
+    cols = st.columns(2)
+    toggles = {}
+    for i, rep in enumerate(reports):
+        col = cols[i % 2]
+        slug = rep.slug or str(rep.id)
+        label = rep.name or slug
+        cur = bool(rep_map.get(slug, True))
+        toggles[slug] = col.toggle(label, value=cur, key=f"ls_rep_tab_{slug}")
+
+    if st.button("💾 Save Reporting Tabs", type="primary", key="ls_rep_tabs_save"):
+        try:
+            with get_session() as s:
+                cfg = LocationConfig.get_config(s, sel_location_id)
+                tabs_access = cfg.setdefault("tabs_access", {})
+                rep_map = tabs_access.setdefault("Reporting", {})
+                rep_map.update({k: bool(v) for k, v in toggles.items()})
+                cfg["tabs_access"] = tabs_access
+                LocationConfig.save_config(s, sel_location_id, cfg)
+            SecurityManager.log_audit(
+                None,
+                (user or {}).get("username", "system"),
+                "UPDATE",
+                resource_type="LocationSettings.ReportingTabs",
+                resource_id=str(sel_location_id),
+                details=f"Updated Reporting tabs: {list(toggles.items())}",
+                user_id=(user or {}).get("id"),
+                location_id=sel_location_id,
+            )
+            st.success("Reporting tab visibility saved for this location.")
+        except Exception as ex:
+            st.error(f"Failed to save Reporting tabs: {ex}")
+
+
+# ===================== Convoy Status settings =====================
+def _render_convoy_status_settings(sel_location_id: int, user):
+    st.markdown("### 🧭 Convoy Status (Dropdowns)")
+    st.caption("Define status options for YADE and Vessel on the Convoy Status page.")
+
+    with get_session() as s:
+        cfg = LocationConfig.get_config(s, sel_location_id)
+    cs = cfg.setdefault("convoy_status", {})
+    yade_statuses = list(cs.get("yade_statuses", []))
+    vessel_statuses = list(cs.get("vessel_statuses", []))
+
+    if not yade_statuses and not vessel_statuses:
+        st.info("No status options configured. If none are added, the page will show 'N/A'.")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("**YADE Status Options**")
+        new_yade = st.text_input("Add YADE status", key="ls_convoy_yade_new")
+        if st.button("➕ Add YADE Status", key="ls_convoy_yade_add"):
+            val = (new_yade or "").strip()
+            if val:
+                yade_statuses = yade_statuses + [val]
+                st.success(f"Added '{val}'")
+            else:
+                st.error("Enter a valid status name.")
+        for i, name in enumerate(yade_statuses):
+            c = st.columns([0.8, 0.2])
+            c[0].write(name)
+            if c[1].button("🗑️", key=f"ls_convoy_yade_del_{i}"):
+                yade_statuses = [n for n in yade_statuses if n != name]
+                st.success(f"Removed '{name}'")
+    with col2:
+        st.markdown("**Vessel Status Options**")
+        new_vessel = st.text_input("Add Vessel status", key="ls_convoy_vessel_new")
+        if st.button("➕ Add Vessel Status", key="ls_convoy_vessel_add"):
+            val = (new_vessel or "").strip()
+            if val:
+                vessel_statuses = vessel_statuses + [val]
+                st.success(f"Added '{val}'")
+            else:
+                st.error("Enter a valid status name.")
+        for i, name in enumerate(vessel_statuses):
+            c = st.columns([0.8, 0.2])
+            c[0].write(name)
+            if c[1].button("🗑️", key=f"ls_convoy_vessel_del_{i}"):
+                vessel_statuses = [n for n in vessel_statuses if n != name]
+                st.success(f"Removed '{name}'")
+
+    if st.button("💾 Save Convoy Status", type="primary", key="ls_convoy_save"):
+        try:
+            with get_session() as s:
+                cfg = LocationConfig.get_config(s, sel_location_id)
+                cs = cfg.setdefault("convoy_status", {})
+                cs["yade_statuses"] = yade_statuses
+                cs["vessel_statuses"] = vessel_statuses
+                cfg["convoy_status"] = cs
+                LocationConfig.save_config(s, sel_location_id, cfg)
+            SecurityManager.log_audit(
+                None,
+                (user or {}).get("username", "system"),
+                "UPDATE",
+                resource_type="LocationSettings.ConvoyStatus",
+                resource_id=str(sel_location_id),
+                details=f"Updated Convoy Status options",
+                user_id=(user or {}).get("id"),
+                location_id=sel_location_id,
+            )
+            st.success("Convoy Status options saved.")
+        except Exception as ex:
+            st.error(f"Failed to save Convoy Status options: {ex}")
+
+
+def _render_service_types(sel_location_id: int, user):
+    st.markdown("### 🛠️ Service Types")
+    st.caption("Manage service types used in the Services page for this location.")
+
+    from location_config import get_service_types, add_service_type, delete_service_type
+
+    with get_session() as s:
+        types = get_service_types(s, sel_location_id)
+
+    if not types:
+        st.info("No service types configured. If none are added, dropdown will show 'N/A'.")
+
+    new_type = st.text_input("Add Service Type", key="ls_service_type_new")
+    colA, colB = st.columns([0.25, 0.75])
+    with colA:
+        if st.button("➕ Add", key="ls_service_type_add", type="primary"):
+            val = (new_type or "").strip()
+            if not val:
+                st.error("Enter a valid service type name.")
+            else:
+                try:
+                    with get_session() as s:
+                        add_service_type(s, sel_location_id, val)
+                        SecurityManager.log_audit(
+                            s,
+                            (user or {}).get("username", "system"),
+                            "CREATE",
+                            resource_type="LocationSettings.ServiceType",
+                            resource_id=val,
+                            details="Added service type",
+                            user_id=(user or {}).get("id"),
+                            location_id=sel_location_id,
+                            ip_address=st.session_state.get("client_ip"),
+                            success=True,
+                        )
+                        s.commit()
+                    st.success(f"Added '{val}'")
+                    st.rerun()
+                except Exception as ex:
+                    st.error(f"Failed to add: {ex}")
+
+    st.markdown("#### Existing Service Types")
+    for i, name in enumerate(types):
+        c = st.columns([0.8, 0.2])
+        c[0].write(name)
+        if c[1].button("🗑️ Delete", key=f"ls_service_type_del_{i}"):
+            try:
+                with get_session() as s:
+                    delete_service_type(s, sel_location_id, name)
+                    SecurityManager.log_audit(
+                        s,
+                        (user or {}).get("username", "system"),
+                        "DELETE",
+                        resource_type="LocationSettings.ServiceType",
+                        resource_id=name,
+                        details="Deleted service type",
+                        user_id=(user or {}).get("id"),
+                        location_id=sel_location_id,
+                        ip_address=st.session_state.get("client_ip"),
+                        success=True,
+                    )
+                    s.commit()
+                st.success(f"Deleted '{name}'")
+                st.rerun()
+            except Exception as ex:
+                st.error(f"Delete failed: {ex}")
 # ===================== Operations config =====================
 def _render_operations_config(selected_location_id, user):
     """

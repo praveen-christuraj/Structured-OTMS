@@ -9,7 +9,7 @@ import enum
 
 from sqlalchemy import (
     Column, Integer, Float, String, Date, Time, DateTime, Boolean, Text,
-    ForeignKey, Enum as SAEnum, UniqueConstraint, Index
+    ForeignKey, Enum as SAEnum, UniqueConstraint, Index, LargeBinary
 )
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.sql import func
@@ -95,6 +95,7 @@ class TaskType(enum.Enum):
     FORGOT_PASSWORD = "FORGOT_PASSWORD"
     USER_CREATION = "USER_CREATION"
     INFO = "INFO"
+    SERVICE_REQUEST = "SERVICE_REQUEST"
 
 
 class TaskStatus(enum.Enum):
@@ -1235,13 +1236,43 @@ class Task(Base):
     resolved_at = Column(DateTime, nullable=True)
     resolution_notes = Column(Text, nullable=True)
     metadata_json = Column(Text, nullable=True)
-    last_updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    location = relationship("Location")
+
+    # Relationships
     activities = relationship("TaskActivity", back_populates="task", cascade="all, delete-orphan")
-    
+
+
+# ============================================================================
+# SHARING (FILE UPLOADS)
+# ============================================================================
+
+class SharedFile(Base):
+    """Internal file sharing storage."""
+    __tablename__ = "shared_files"
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    unique_id = Column(String(64), nullable=False, unique=True, index=True)
+
+    location_id = Column(Integer, ForeignKey("locations.id"), nullable=True, index=True)
+    filename = Column(String(255), nullable=False)
+    mime_type = Column(String(100), nullable=True)
+    size_bytes = Column(Integer, nullable=True)
+    data = Column(LargeBinary, nullable=False)
+    remarks = Column(Text, nullable=True)
+
+    uploaded_by = Column(String(100), nullable=False)
+    uploaded_by_role = Column(String(30), nullable=True)
+    uploaded_at = Column(DateTime, server_default=func.now())
+
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    deleted_by = Column(String(100), nullable=True)
+    deleted_at = Column(DateTime, nullable=True)
+
+    last_updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    location = relationship("Location")
+
     def __repr__(self):
-        return f"<Task(id={self.id}, type='{self.task_type}', status='{self.status}')>"
+        return f"<SharedFile(unique_id={self.unique_id}, filename='{self.filename}', size={self.size_bytes})>"
 
 
 class TaskActivity(Base):

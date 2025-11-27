@@ -13,6 +13,7 @@ from location_config import get_location_page_visibility
 from app_pages.page_customization import render_page_customization
 from app_pages.tanker_transactions import render_tanker_transactions_page
 from app_pages.vessel_operations import render_vessel_operations_page
+from app_pages.yade_vessel_mapping import render_yade_vessel_mapping_page
 from location_config import get_page_section_config  # (kept in case other pages use it)
 
 # Session timeout (minutes)
@@ -36,9 +37,10 @@ ICONS = {
     "Dashboard Customization": "📊⚙️",
     "Tank Transactions": "🛢️",
     "Tanker Transactions": "🚚",
-    "Yade Transactions": "⛴️", 
+    "Yade Transactions": "⛴️",
     "Yade Tracking": "📍",
-    "Vessel Operations": "🛳️", 
+    "Yade-Vessel Mapping": "🚩",
+    "Vessel Operations": "🛳️",
     "FSO-Operations": "⚓",
     "Reports": "📄",
     "Reporting": "📊",
@@ -51,7 +53,12 @@ ICONS = {
     "Material Balance": "🧮",
     "2FA Settings": "🔐",
     "Login History": "📜",
-}
+    "Convoy Status": "ℹ️",
+    "BCCR": "🗃️",
+    "Sharing": "🔗",
+    "Services": "🛠️",
+    "Backup & Recovery": "💾",
+    }
 
 ROLE_ICONS = USER_ROLE_ICONS
 
@@ -180,7 +187,7 @@ def get_pages(user, active_location_id):
       - Per-location page visibility (Location Settings)
       - Module presence (only show pages that actually exist)
     """
-    pages = ["Home", "My Tasks", "Profile Settings", "2FA Settings", "Login History"]
+    pages = ["Home", "My Tasks", "Profile Settings", "2FA Settings", "Login History", "Sharing", "Services"]
 
     # ---- Management pages (admins only) ----
     if user and PermissionManager.can_access_management_pages(user):
@@ -196,6 +203,7 @@ def get_pages(user, active_location_id):
             "MB Customization",
             "Report Customization",
             "Deleted Records",
+            "Backup & Recovery",
         ]
 
     # ---- Operational pages (role + location flags + module present) ----
@@ -215,25 +223,27 @@ def get_pages(user, active_location_id):
         ("show_tank_transactions",   ("View Transactions",   "app_pages.view_transactions")),
         ("show_yade_transactions",   ("Yade Transactions",   "app_pages.yade_transactions")),
         ("show_yade_tracking",       ("Yade Tracking",       "app_pages.yade_tracking")),
+        ("show_yade_vessel_mapping", ("Yade-Vessel Mapping", "app_pages.yade_vessel_mapping")),
         ("show_otr",                 ("OTR",                 "app_pages.otr")),
         ("show_fso_operations",      ("FSO-Operations",      "app_pages.fso_operations")),
         ("show_vessel_operations",   ("Vessel Operations",   "app_pages.vessel_operations")),
         ("show_reports",             ("Reports",             "app_pages.reports")),
         ("show_reporting",           ("Reporting",           "app_pages.reporting")),
         ("show_material_balance",    ("Material Balance",    "app_pages.material_balance")),
+        ("show_bccr",                ("BCCR",                "app_pages.bccr")),
+        ("show_convoy_status",       ("Convoy Status",       "app_pages.convoy_status")),
+        ("show_sharing",             ("Sharing",             "app_pages.sharing")),
     ]
 
     if role_ok:
         for flag, (title, mod) in ops:
-            # For OTR, Reporting, and Material Balance, default to True if flag
-            # is missing so they appear now, but can still be controlled later.
-            if flag in ["show_otr", "show_reporting", "show_material_balance"]:
-                allow = loc_flags.get(flag, True)
-            else:
-                allow = loc_flags.get(flag, False)
+            # Default-visible pages when location flag is missing
+            default_true = {"show_otr", "show_reporting", "show_material_balance", "show_yade_vessel_mapping"}
+            allow = loc_flags.get(flag, flag in default_true)
 
             if allow and _module_exists(mod):
-                pages.append(title)
+                if title not in pages:
+                    pages.append(title)
 
     return pages
 
@@ -529,6 +539,9 @@ def main():
         from app_pages.yade_tracking import render_yade_tracking_page
         render_yade_tracking_page(active_location_id, user)
 
+    elif current_page == "Yade-Vessel Mapping":
+        render_yade_vessel_mapping_page(active_location_id, user)
+
     elif current_page == "View Transactions":
         from app_pages.view_transactions import render_view_transactions_page
         render_view_transactions_page(active_location_id, user)
@@ -553,10 +566,19 @@ def main():
     elif current_page == "Reporting":
         from app_pages.reporting import render_reporting_page
         render_reporting_page(active_location_id, user)
-    
+
     elif current_page == "Report Customization":
         from app_pages.report_customization import render_report_customization_page
         render_report_customization_page(user, active_location_id)
+    elif current_page == "BCCR":
+        from app_pages.bccr import render_bccr_page
+        render_bccr_page(active_location_id, user)
+    elif current_page == "Convoy Status":
+        from app_pages.convoy_status import render_convoy_status_page
+        render_convoy_status_page(active_location_id, user)
+    elif current_page == "Sharing":
+        from app_pages.sharing import render_sharing_page
+        render_sharing_page(active_location_id, user)
         
     elif current_page == "2FA Settings":
         from app_pages.twofa_settings import render_twofa_settings_page
@@ -565,6 +587,12 @@ def main():
     elif current_page == "Login History":
         from app_pages.login_history import render_login_history_page
         render_login_history_page(active_location_id, user)
+    elif current_page == "Services":
+        from app_pages.services import render_services_page
+        render_services_page(active_location_id, user)
+    elif current_page == "Backup & Recovery":
+        from app_pages.backup_recovery import render_backup_recovery_page
+        render_backup_recovery_page(active_location_id, user)
     # elif current_page == "FSO-Operations":
     #     from app_pages.fso_operations import render_fso_operations_page
     #     render_fso_operations_page(active_location_id, user)
