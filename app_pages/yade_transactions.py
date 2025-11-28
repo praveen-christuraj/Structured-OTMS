@@ -860,6 +860,7 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
             voy = None
 
     st.subheader("🆕 YADE Voyage Entry")
+    reset_token = st.session_state.get("yade_form_reset_token", 0)
     if voy:
         st.info(
             f"Editing voyage **#{voy.id}** — {voy.yade_name or 'N/A'} | "
@@ -884,38 +885,39 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
     c1, c2, c3 = st.columns(3)
     with c1:
         if not barge_names:
-            yade_no = st.selectbox("YADE No *", ["-- No YADE Barges (add in Assets) --"], index=0)
+            yade_no = st.selectbox("YADE No *", ["-- No YADE Barges (add in Assets) --"], index=0, key=f"yade_hdr_yade_no_{reset_token}")
             design = ""
         else:
             idx = 0
             if voy and voy.yade_name in barge_names:
                 idx = barge_names.index(voy.yade_name)
-            yade_no = st.selectbox("YADE No *", barge_names, index=idx)
+            yade_no = st.selectbox("YADE No *", barge_names, index=idx, key=f"yade_hdr_yade_no_{reset_token}")
             design = barge_design.get(yade_no, "")
 
     with c2:
-        voyage_no = st.text_input("Voyage No.", value=(voy.voyage_no or "") if voy else "")
-        convoy_no = st.text_input("Convoy No. (digits & '-' only)", value=(voy.convoy_no or "") if voy else "")
+        voyage_no = st.text_input("Voyage No.", value=(voy.voyage_no or "") if voy else "", key=f"yade_hdr_voyage_no_{reset_token}")
+        convoy_no = st.text_input("Convoy No. (digits & '-' only)", value=(voy.convoy_no or "") if voy else "", key=f"yade_hdr_convoy_no_{reset_token}")
 
     with c3:
         tx_date = st.date_input(
             "Date (DD/MM/YYYY)",
             value=voy.date if (voy and voy.date) else date.today(),
             format="DD/MM/YYYY",
+            key=f"yade_hdr_date_{reset_token}"
         )
         default_time = voy.time.strftime("%H:%M") if (voy and voy.time) else "08:00"
-        tx_time = st.text_input("Time (HH:MM)", value=default_time)
+        tx_time = st.text_input("Time (HH:MM)", value=default_time, key=f"yade_hdr_time_{reset_token}")
 
     c5, c6, c7 = st.columns(3)
     with c5:
         cargo_idx = cargo_opts.index(voy.cargo) if (voy and voy.cargo in cargo_opts) else 0
-        cargo = st.selectbox("Cargo", cargo_opts, index=cargo_idx)
+        cargo = st.selectbox("Cargo", cargo_opts, index=cargo_idx, key=f"yade_hdr_cargo_{reset_token}")
     with c6:
         dest_idx = dest_opts.index(voy.destination) if (voy and voy.destination in dest_opts) else 0
-        destination = st.selectbox("Destination", dest_opts, index=dest_idx)
+        destination = st.selectbox("Destination", dest_opts, index=dest_idx, key=f"yade_hdr_destination_{reset_token}")
     with c7:
         berth_idx = berth_opts.index(voy.loading_berth) if (voy and voy.loading_berth in berth_opts) else 0
-        loading_berth = st.selectbox("Loading Berth", berth_opts, index=berth_idx)
+        loading_berth = st.selectbox("Loading Berth", berth_opts, index=berth_idx, key=f"yade_hdr_loading_berth_{reset_token}")
 
     st.caption(f"📍 Location: **{loc_label}**")
     st.markdown("---")
@@ -1148,6 +1150,7 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
         # Small delay to show success message before rerun
         import time
         time.sleep(1.5)
+        st.session_state["yade_form_reset_token"] = reset_token + 1
         _st_safe_rerun()
 
     except Exception as ex:

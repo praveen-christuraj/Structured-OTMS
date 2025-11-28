@@ -24,9 +24,9 @@ def render_login_page():
     st.markdown("""
     <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                 padding: 2.5rem; border-radius: 12px; margin-bottom: 2rem; text-align: center;'>
-        <h1 style='color: white; margin: 0; font-size: 2.5rem;'>🔐 OTMS Login</h1>
+        <h1 style='color: white; margin: 0; font-size: 2.5rem;'>Oil Terminal Management System</h1>
         <p style='color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 1.1rem;'>
-            Oil Tanker Management System
+            A Hydrocarbon Accounting Solution
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -34,7 +34,7 @@ def render_login_page():
     st.markdown("<p style='text-align: center; color: #666; margin-bottom: 2rem;'>Enter your credentials to continue</p>", unsafe_allow_html=True)
 
     with st.form("login_form"):
-        FormBuilder.section_header("Login","Enter you OTMS Credentials")
+        FormBuilder.section_header("Login")
         username = FormBuilder.input_field("Username", "login_username", "Enter your username", required=True)
         password = FormBuilder.input_field("Password", "login_password", "Enter your password", "password", required=True)
         

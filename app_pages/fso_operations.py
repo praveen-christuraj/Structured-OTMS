@@ -870,7 +870,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
         # ========== ADD NEW ENTRY ==========
         if can_make_entries and not no_fso_assigned:
             with st.expander("➕ Add New Entry", expanded=False):
-                with st.form("add_fso_entry_form"):
+                with st.form("add_fso_entry_form", clear_on_submit=True):
                     st.markdown(f"##### New FSO Entry - {st.session_state.selected_fso_vessel}")
                     
                     form_col1, form_col2, form_col3, form_col4 = st.columns(4)

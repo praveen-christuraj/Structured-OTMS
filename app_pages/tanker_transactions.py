@@ -913,7 +913,7 @@ def _render_entry_form_legacy(location: Location, can_submit: bool, tankers: Lis
     if not loading_options_cfg:
         loading_options_cfg = ["N/A (configure in Location Settings)"]
 
-    with st.form("tanker_transaction_form", clear_on_submit=False):
+    with st.form("tanker_transaction_form", clear_on_submit=True):
         try:
             # ---------------- TANKER DETAILS ----------------
             st.markdown("#### Tanker Details")

@@ -373,7 +373,9 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
 
     try:
         earliest_allowed = earliest_first
-        calc_from = mb_from if (mb_from and mb_from >= earliest_allowed) else earliest_allowed
+        # Always calculate from earliest date to maintain continuity of opening/closing stocks
+        # The date filter will be applied to the display only
+        calc_from = earliest_allowed
         # Ensure end date is not in the future
         calc_to = mb_to if (mb_to and mb_to <= today) else today
 
@@ -411,7 +413,6 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
             return
 
         df_full = df.copy()
-        prev_rows = df_full[df_full["Date"].dt.date < mb_from]
 
         def _anchor_value(series, default=0.0) -> float:
             try:
@@ -425,23 +426,25 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
                 except Exception:
                     return float(default)
 
-        if not prev_rows.empty and "Closing Stock" in prev_rows.columns:
-            opening_anchor = _anchor_value(prev_rows["Closing Stock"].iloc[-1])
-        elif "Opening Stock" in df_full.columns:
-            opening_anchor = _anchor_value(df_full["Opening Stock"].iloc[0])
-        else:
-            opening_anchor = 0.0
-
-        if "Closing Stock" in df_full.columns:
-            closing_anchor = _anchor_value(df_full["Closing Stock"].iloc[-1])
-        else:
-            closing_anchor = 0.0
-
+        # Apply date filter
         mask = (df_full["Date"].dt.date >= mb_from) & (df_full["Date"].dt.date <= mb_to)
         df = df_full.loc[mask].copy()
         if df.empty:
             st.info("No material balance rows within the selected filter range.")
             return
+
+        # Opening stock: use the opening stock from the first filtered date
+        # This is already calculated correctly in the material balance (previous day's closing)
+        if "Opening Stock" in df.columns:
+            opening_anchor = _anchor_value(df["Opening Stock"].iloc[0])
+        else:
+            opening_anchor = 0.0
+
+        # Closing stock: use the closing stock from the last filtered date
+        if "Closing Stock" in df.columns:
+            closing_anchor = _anchor_value(df["Closing Stock"].iloc[-1])
+        else:
+            closing_anchor = 0.0
 
         df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
         total_days = len(df)

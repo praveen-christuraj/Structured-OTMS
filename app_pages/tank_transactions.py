@@ -1042,7 +1042,7 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
     manual_columns = [c for c in columns if not c.get("formula")]
     calculated_columns = [c for c in columns if c.get("formula")]
 
-    with st.form(key=f"dyn_form_{page_key}_{section_key}_{loc.id}"):
+    with st.form(key=f"dyn_form_{page_key}_{section_key}_{loc.id}", clear_on_submit=True):
         row = {}
         
         # Render manual input columns
@@ -1181,6 +1181,9 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
                 log_warning(f"Failed to log audit trail for {table_name}: {str(audit_ex)}")
                 
         st.success("✅ Row saved successfully!")
+        import time
+        time.sleep(1)
+        st.rerun()
         log_info(f"User notified of successful save to '{table_name}'")
         
     except Exception as ex:
@@ -1227,7 +1230,7 @@ def _render_custom_tab(loc, user, tab_def: dict):
     manual_columns = [c for c in columns if not c.get("formula")]
     calculated_columns = [c for c in columns if c.get("formula")]
     
-    with st.form(key=f"custom_tab_form_{table_name}_{loc.id}"):
+    with st.form(key=f"custom_tab_form_{table_name}_{loc.id}", clear_on_submit=True):
         row = {}
         
         # Render manual input columns
@@ -1337,6 +1340,9 @@ def _render_custom_tab(loc, user, tab_def: dict):
                     pass
                 
                 st.success(f"Row saved to {tab_name}.")
+                import time
+                time.sleep(1)
+                st.rerun()
         else:
             st.error(f"Database table `{table_name}` not found. Please contact administrator.")
     except Exception as ex:

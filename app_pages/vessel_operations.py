@@ -281,7 +281,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
     # ---------- add entry ----------
     if can_make_entries and VesselOpsEntry:
         with st.expander("➕ Add New Entry", expanded=False):
-            with st.form("vop_add_form"):
+            with st.form("vop_add_form", clear_on_submit=True):
                 c1, c2, c3, c4 = st.columns(4)
                 with c1:
                     e_date = st.date_input("Date *", value=date.today())
