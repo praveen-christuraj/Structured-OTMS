@@ -1,55 +1,59 @@
 import streamlit as st
 
 class DashboardCard:
-    """Reusable card component for displaying metrics"""
     
     @staticmethod
     def metric_card(title, value, subtitle="", icon="📊", color="blue"):
-        """Display a professional metric card"""
         color_map = {
-            "blue": "#667eea",
-            "green": "#28a745",
-            "red": "#dc3545",
-            "orange": "#ff9800",
-            "purple": "#764ba2",
-            "teal": "#17a2b8"
+            "blue": "#2563eb",
+            "green": "#22c55e",
+            "red": "#ef4444",
+            "orange": "#f59e0b",
+            "purple": "#7c3aed",
+            "teal": "#14b8a6"
         }
-        border_color = color_map.get(color, "#667eea")
-        
+        accent = color_map.get(color, "#2563eb")
         st.markdown(f"""
-        <div style="background: white; border-radius: 12px; padding: 1.5rem; 
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-left: 5px solid {border_color};">
-            <p style="color: #999; font-size: 0.9rem; margin: 0; text-transform: uppercase;">{title}</p>
-            <h2 style="color: {border_color}; font-size: 2rem; margin: 0. 5rem 0; font-weight: 700;">{value}</h2>
-            {f"<p style='color: #666; font-size: 0.85rem; margin: 0;'>{subtitle}</p>" if subtitle else ""}
+        <div style="background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+                    border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 1.25rem; 
+                    box-shadow: 0 6px 18px rgba(0,0,0,0.06);">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <p style="margin:0; color:#6b7280; font-size:.9rem; text-transform:uppercase; letter-spacing:.02em;">
+                    {title}
+                </p>
+                <span style="font-size:1.2rem;">{icon}</span>
+            </div>
+            <h2 style="margin:.35rem 0 .25rem 0; color:{accent}; font-size:2rem; font-weight:800;">{value}</h2>
+            {f"<p style='margin:0; color:#4b5563; font-size:.95rem;'>{subtitle}</p>" if subtitle else ""}
         </div>
         """, unsafe_allow_html=True)
-    
+
     @staticmethod
     def info_card(title, content, icon="ℹ️"):
-        """Display an information card"""
         st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%); 
-                    border-radius: 12px; padding: 1.5rem; border-left: 5px solid #17a2b8;">
-            <h3 style="color: #117a8b; margin: 0 0 0. 5rem 0;">{title}</h3>
-            <p style="color: #004085; margin: 0; line-height: 1.6;">{content}</p>
+        <div style="background: rgba(23,162,184,0.12); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                    border: 1px solid rgba(23,162,184,0.35); border-radius: 14px; padding: 1.25rem;">
+            <div style="display:flex; align-items:center; gap:.5rem;">
+                <span>{icon}</span>
+                <h3 style="margin:0; color:#117a8b; font-size:1.1rem;">{title}</h3>
+            </div>
+            <p style="margin:.45rem 0 0 0; color:#0c5460; line-height:1.6;">{content}</p>
         </div>
         """, unsafe_allow_html=True)
-    
+
     @staticmethod
     def status_badge(status, label):
-        """Display status badge"""
         status_colors = {
-            "active": "#28a745",
-            "inactive": "#6c757d",
-            "pending": "#ffc107",
-            "failed": "#dc3545",
-            "completed": "#17a2b8"
+            "active": "#22c55e",
+            "inactive": "#6b7280",
+            "pending": "#f59e0b",
+            "failed": "#ef4444",
+            "completed": "#14b8a6"
         }
-        bg_color = status_colors.get(status, "#667eea")
+        bg = status_colors.get(status, "#2563eb")
         st.markdown(f"""
-        <span style="display: inline-block; background: {bg_color}; color: white; 
-                     padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+        <span style="display:inline-block; background:{bg}; color:white; padding:.35rem .75rem; 
+                     border-radius:20px; font-size:.85rem; font-weight:600;">
             {label}
         </span>
         """, unsafe_allow_html=True)

@@ -1,16 +1,17 @@
 import streamlit as st
 
 class FormBuilder:
-    """Reusable form component builder"""
     
     @staticmethod
     def section_header(title, description=""):
-        """Create a section header"""
-        st. markdown(f"""
-        <div style="margin-top: 2rem; margin-bottom: 1. 5rem;">
-            <h3 style="color: #1e3c72; font-size: 1. 3rem; margin-bottom: 0.5rem; 
-                      border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">{title}</h3>
-            {f"<p style='color: #666; font-size: 0.9rem;'>{description}</p>" if description else ""}
+        st.markdown(f"""
+        <div style="margin: 2rem 0 1.25rem 0;">
+            <div style="display:flex; align-items:center; gap:.6rem;">
+                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; 
+                              background: linear-gradient(135deg, #667eea, #764ba2);"></span>
+                <h3 style="margin:0; color:#1e3c72; font-size:1.25rem; font-weight:700;">{title}</h3>
+            </div>
+            {f"<p style='margin:.4rem 0 0 1.2rem; color:#4b5563; font-size:.95rem;'>{description}</p>" if description else ""}
         </div>
         """, unsafe_allow_html=True)
     

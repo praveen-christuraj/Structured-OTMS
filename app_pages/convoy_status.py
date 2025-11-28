@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import base64
 import pandas as pd
 import streamlit as st
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 from db import get_session
 from ui import header
@@ -133,14 +133,20 @@ def render_convoy_status_page(active_location_id: Optional[int], user: Optional[
                     YadeVoyage.voyage_no,
                     YadeVoyage.location_id,
                     YadeVoyage.date.label("voyage_date"),
-                    TOAYadeSummary.date,
-                    TOAYadeSummary.time,
+                    YadeVoyage.after_gauge_date,
+                    YadeVoyage.after_gauge_time,
                     TOAYadeStage.nsv_bbl,
                 )
-                .outerjoin(TOAYadeSummary, TOAYadeSummary.voyage_id == YadeVoyage.id)
-                .outerjoin(TOAYadeStage, and_(TOAYadeStage.voyage_id == YadeVoyage.id, TOAYadeStage.stage == "after"))
+                .outerjoin(
+                    TOAYadeStage,
+                    and_(TOAYadeStage.voyage_id == YadeVoyage.id, func.upper(TOAYadeStage.stage) == "AFTER"),
+                )
                 .filter(YadeVoyage.location_id.in_(loc_ids))
-                .order_by(TOAYadeSummary.date.desc().nullslast(), TOAYadeSummary.time.desc().nullslast(), YadeVoyage.date.desc())
+                .order_by(
+                    YadeVoyage.after_gauge_date.desc(),
+                    YadeVoyage.after_gauge_time.desc().nullslast(),
+                    YadeVoyage.date.desc(),
+                )
                 .limit(1000)
             )
             rows = q.all()

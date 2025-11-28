@@ -681,7 +681,7 @@ def _render_yade_seal_details_section(
 
     store = st.session_state.setdefault("yade_seals", {})
     st.subheader("🔒 Seal Details — After")
-    st.caption("Enter seal numbers for Manifold Hatch 1 & 2, Lock, and Dip Hatch for each tank.")
+    st.caption("Enter seal numbers for Manhole 1 & 2, Lock, and Dip Hatch for each tank.")
 
     # Render each tank as a row with 5 columns (Tank label + 4 input fields)
     for idx, tid in enumerate(tank_ids):

@@ -34,7 +34,7 @@ def render_login_page():
     st.markdown("<p style='text-align: center; color: #666; margin-bottom: 2rem;'>Enter your credentials to continue</p>", unsafe_allow_html=True)
 
     with st.form("login_form"):
-        FormBuilder.section_header("", "")
+        FormBuilder.section_header("Login","Enter you OTMS Credentials")
         username = FormBuilder.input_field("Username", "login_username", "Enter your username", required=True)
         password = FormBuilder.input_field("Password", "login_password", "Enter your password", "password", required=True)
         

@@ -100,10 +100,6 @@ def render_filter_inputs(filter_configs: list, location_id: int) -> dict:
         end_date = FormBuilder.date_field("End Date", "filter_end_date", required=True)
         if end_date is None:
             end_date = date.today()
-            "End Date",
-            value=date.today(),
-            key="filter_end_date"
-        )
     
     filters['date_range'] = [start_date, end_date]
     filters['location_id'] = location_id
@@ -255,7 +251,6 @@ def render_reporting_page(active_location_id: int, user: dict):
         st.session_state.report_name = None
     
     # Generate report
-        # Generate report
     if generate_btn:
         with st.spinner("Generating report..."):
             try:
