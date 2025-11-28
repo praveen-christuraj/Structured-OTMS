@@ -64,11 +64,13 @@ def render_services_page(active_location_id, user):
             with get_session() as s:
                 types = []
                 try:
-                    types = get_service_types(s, loc_map.get(loc_label))
+                    types = get_service_types(s, 0)
                 except Exception:
                     types = []
             service_type_options = types if types else ["N/A"]
             service_type = st.selectbox("Service Type", service_type_options)
+            request_for_other = st.checkbox("Requesting for someone else", key="srv_req_other")
+            other_username = st.text_input("Username", key="srv_req_other_username") if request_for_other else ""
             assign_to = st.selectbox("Assign To", ASSIGNEES, index=0)
             description = st.text_area("Description")
             contact_number = st.text_input("Contact Number")
@@ -78,6 +80,8 @@ def render_services_page(active_location_id, user):
         if submitted:
             if not description.strip() or not contact_number.strip():
                 st.error("Description and Contact Number are required.")
+            elif request_for_other and not (other_username or "").strip():
+                st.error("Enter the username you are requesting for.")
             else:
                 try:
                     with get_session() as s:
@@ -87,6 +91,8 @@ def render_services_page(active_location_id, user):
                             "contact_number": contact_number.strip(),
                             "ip_number": ip_number.strip(),
                             "assigned_to": assign_to,
+                            "requesting_for_self": not request_for_other,
+                            "for_username": (other_username or "").strip() if request_for_other else None,
                         }
                         task = Task(
                             title=f"Service Request • {service_type}",

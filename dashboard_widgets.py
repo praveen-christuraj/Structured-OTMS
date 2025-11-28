@@ -452,6 +452,8 @@ class DashboardRenderer:
                     DashboardRenderer._render_monthly_data_section(config, location_id, section_date_value)
                 elif section_type == "trend_chart":
                     DashboardRenderer._render_trend_chart_section(config, location_id, section_date_value)
+                elif section_type == "convoy_status":
+                    DashboardRenderer._render_convoy_status_section(config, location_id, section_date_value)
                 else:
                     st.info(f"Custom section '{section_name}' - implementation pending")
             except Exception as e:
@@ -618,6 +620,81 @@ class DashboardRenderer:
     def _render_trend_chart_section(config: Dict, location_id: int, section_date):
         """Render trend chart section"""
         st.info("Trend chart section - implementation pending")
+
+    @staticmethod
+    def _render_convoy_status_section(config: Dict, location_id: int, section_date):
+        """Render convoy status section from saved snapshots"""
+        from db import get_session
+        from models import ConvoyStatusYade, ConvoyStatusVessel
+        if isinstance(section_date, tuple):
+            selected_date = section_date[0]
+        else:
+            selected_date = section_date if isinstance(section_date, date) else date.today()
+
+        layout_cfg = config.get("layout", {}).get("convoy_status", {})
+        if not layout_cfg.get("enabled", True):
+            st.info("Convoy Status section disabled in customization.")
+            return
+
+        show_yade = layout_cfg.get("show_yade", True)
+        show_vessel = layout_cfg.get("show_vessel", True)
+        display_mode = layout_cfg.get("display_mode", "table")
+        status_filters = [s.lower() for s in (layout_cfg.get("status_filters") or [])]
+
+        rows = []
+        with get_session() as s:
+            if show_yade:
+                y_rows = s.query(ConvoyStatusYade).filter(
+                    ConvoyStatusYade.location_id == location_id,
+                    ConvoyStatusYade.date == selected_date
+                ).all()
+                for r in y_rows:
+                    if status_filters and str(r.status).lower() not in status_filters:
+                        continue
+                    rows.append({
+                        "Type": "YADE",
+                        "Name": getattr(r.yade, "name", r.yade_barge_id),
+                        "Convoy": r.convoy_no or "",
+                        "Stock": r.stock_display or (f"{r.stock_value_bbl:.0f} bbl" if r.stock_value_bbl else ""),
+                        "Status": r.status,
+                        "Notes": r.notes or ""
+                    })
+            if show_vessel:
+                v_rows = s.query(ConvoyStatusVessel).filter(
+                    ConvoyStatusVessel.location_id == location_id,
+                    ConvoyStatusVessel.date == selected_date
+                ).all()
+                for r in v_rows:
+                    if status_filters and str(r.status).lower() not in status_filters:
+                        continue
+                    rows.append({
+                        "Type": "Vessel",
+                        "Name": r.vessel_name,
+                        "Convoy": r.shuttle_no or "",
+                        "Stock": r.stock_display or (f"{r.stock_value_bbl:.0f} bbl" if r.stock_value_bbl else ""),
+                        "Status": r.status,
+                        "Notes": r.notes or ""
+                    })
+
+        if not rows:
+            st.info("No Convoy Status entries for the selected date.")
+            return
+
+        if display_mode == "table":
+            st.dataframe(rows, use_container_width=True)
+        else:
+            cols = st.columns(3)
+            for i, row in enumerate(rows):
+                with cols[i % 3]:
+                    WidgetRenderer.render_stat_card(
+                        label=f"{row['Type']}: {row['Name']}",
+                        value=row.get("Stock") or row.get("Status"),
+                        unit="",
+                        prev_value=None,
+                        style=config.get("styles", {}).get("card"),
+                        show_delta=False,
+                        display_date=selected_date
+                    )
     
     @staticmethod
     def render_dashboard(config: Dict, location_id: int, selected_date: date):

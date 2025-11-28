@@ -58,6 +58,7 @@ def render_dashboard_customization():
         "📊 Summary Cards",
         "🛢️ Tank Visuals",
         "📈 Charts & Trends",
+        "🚢 Convoy Status",
         "🗂️ Sections Manager",
         "🎨 Styles",
         "💾 Save & Load"
@@ -106,8 +107,19 @@ def render_dashboard_customization():
             else:
                 st.error("❌ Failed to save configuration")
     
-    # Tab 4: Sections Manager
+    # Tab 4: Convoy Status
     with tabs[4]:
+        render_convoy_status_tab(config, location_id)
+        st.markdown("---")
+        if st.button("💾 Save Configuration", key="save_convoy", type="primary"):
+            if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
+                st.success("✅ Configuration saved successfully!")
+                st.session_state.dashboard_config = config
+            else:
+                st.error("❌ Failed to save configuration")
+
+    # Tab 5: Sections Manager
+    with tabs[5]:
         render_sections_manager_tab(config)
         st.markdown("---")
         if st.button("💾 Save Configuration", key="save_sections", type="primary"):
@@ -117,8 +129,8 @@ def render_dashboard_customization():
             else:
                 st.error("❌ Failed to save configuration")
     
-    # Tab 5: Styles
-    with tabs[5]:
+    # Tab 6: Styles
+    with tabs[6]:
         render_styles_tab(config)
         st.markdown("---")
         if st.button("💾 Save Configuration", key="save_styles", type="primary"):
@@ -128,9 +140,53 @@ def render_dashboard_customization():
             else:
                 st.error("❌ Failed to save configuration")
     
-    # Tab 6: Save & Load
-    with tabs[6]:
+    # Tab 7: Save & Load
+    with tabs[7]:
         render_save_load_tab(config, location_id, user)
+
+def render_convoy_status_tab(config: dict, location_id: int):
+    st.markdown("### Convoy Status Display Settings")
+    st.caption("Configure how saved Convoy Status entries appear on the dashboard for this location.")
+
+    layout_cfg = config.setdefault("layout", {}).setdefault("convoy_status", {})
+    section_list = config.setdefault("sections", [])
+    # ensure section exists
+    found = False
+    for s in section_list:
+        if s.get("id") == "convoy_status":
+            found = True
+            section = s
+            break
+    if not found:
+        section = {
+            "id": "convoy_status",
+            "name": "Convoy Status",
+            "type": "convoy_status",
+            "enabled": True,
+            "order": 5,
+            "date_filter": {"enabled": True, "type": "single", "label": "Convoy Date"}
+        }
+        section_list.append(section)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        section["enabled"] = st.toggle("Enable Convoy Status Section", value=bool(section.get("enabled", True)))
+        layout_cfg["enabled"] = section["enabled"]
+        layout_cfg["show_yade"] = st.checkbox("Show YADE convoys", value=bool(layout_cfg.get("show_yade", True)))
+        layout_cfg["show_vessel"] = st.checkbox("Show Vessel convoys", value=bool(layout_cfg.get("show_vessel", True)))
+    with col2:
+        layout_cfg["display_mode"] = st.selectbox("Display Mode", ["table", "cards"], index=(0 if layout_cfg.get("display_mode") != "cards" else 1))
+
+    st.markdown("#### Status Filters")
+    from db import get_session
+    from models import ConvoyStatusYade, ConvoyStatusVessel
+    with get_session() as s:
+        y_statuses = [r[0] for r in s.query(ConvoyStatusYade.status).filter(ConvoyStatusYade.location_id == location_id).distinct().all()]
+        v_statuses = [r[0] for r in s.query(ConvoyStatusVessel.status).filter(ConvoyStatusVessel.location_id == location_id).distinct().all()]
+    options = sorted(set((y_statuses or []) + (v_statuses or [])))
+    layout_cfg["status_filters"] = st.multiselect("Statuses to include", options=options, default=layout_cfg.get("status_filters", []))
+
+    st.info("Saved Convoy Status entries (from Convoy Status page) will be displayed on the dashboard according to these settings.")
 
 
 def render_overview_tab(config: dict, location_id: int):

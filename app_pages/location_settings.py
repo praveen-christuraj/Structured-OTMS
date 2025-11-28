@@ -381,8 +381,14 @@ def _render_convoy_status_settings(sel_location_id: int, user):
     with get_session() as s:
         cfg = LocationConfig.get_config(s, sel_location_id)
     cs = cfg.setdefault("convoy_status", {})
-    yade_statuses = list(cs.get("yade_statuses", []))
-    vessel_statuses = list(cs.get("vessel_statuses", []))
+    state_yade_key = f"ls_convoy_yade_statuses_{sel_location_id}"
+    state_vessel_key = f"ls_convoy_vessel_statuses_{sel_location_id}"
+    if state_yade_key not in st.session_state or st.session_state.get(state_yade_key) is None:
+        st.session_state[state_yade_key] = list(cs.get("yade_statuses", []))
+    if state_vessel_key not in st.session_state or st.session_state.get(state_vessel_key) is None:
+        st.session_state[state_vessel_key] = list(cs.get("vessel_statuses", []))
+    yade_statuses = list(st.session_state[state_yade_key])
+    vessel_statuses = list(st.session_state[state_vessel_key])
 
     if not yade_statuses and not vessel_statuses:
         st.info("No status options configured. If none are added, the page will show 'N/A'.")
@@ -394,7 +400,8 @@ def _render_convoy_status_settings(sel_location_id: int, user):
         if st.button("➕ Add YADE Status", key="ls_convoy_yade_add"):
             val = (new_yade or "").strip()
             if val:
-                yade_statuses = yade_statuses + [val]
+                st.session_state[state_yade_key] = yade_statuses + [val]
+                yade_statuses = list(st.session_state[state_yade_key])
                 st.success(f"Added '{val}'")
             else:
                 st.error("Enter a valid status name.")
@@ -402,7 +409,8 @@ def _render_convoy_status_settings(sel_location_id: int, user):
             c = st.columns([0.8, 0.2])
             c[0].write(name)
             if c[1].button("🗑️", key=f"ls_convoy_yade_del_{i}"):
-                yade_statuses = [n for n in yade_statuses if n != name]
+                st.session_state[state_yade_key] = [n for n in yade_statuses if n != name]
+                yade_statuses = list(st.session_state[state_yade_key])
                 st.success(f"Removed '{name}'")
     with col2:
         st.markdown("**Vessel Status Options**")
@@ -410,7 +418,8 @@ def _render_convoy_status_settings(sel_location_id: int, user):
         if st.button("➕ Add Vessel Status", key="ls_convoy_vessel_add"):
             val = (new_vessel or "").strip()
             if val:
-                vessel_statuses = vessel_statuses + [val]
+                st.session_state[state_vessel_key] = vessel_statuses + [val]
+                vessel_statuses = list(st.session_state[state_vessel_key])
                 st.success(f"Added '{val}'")
             else:
                 st.error("Enter a valid status name.")
@@ -418,7 +427,8 @@ def _render_convoy_status_settings(sel_location_id: int, user):
             c = st.columns([0.8, 0.2])
             c[0].write(name)
             if c[1].button("🗑️", key=f"ls_convoy_vessel_del_{i}"):
-                vessel_statuses = [n for n in vessel_statuses if n != name]
+                st.session_state[state_vessel_key] = [n for n in vessel_statuses if n != name]
+                vessel_statuses = list(st.session_state[state_vessel_key])
                 st.success(f"Removed '{name}'")
 
     if st.button("💾 Save Convoy Status", type="primary", key="ls_convoy_save"):
@@ -426,8 +436,8 @@ def _render_convoy_status_settings(sel_location_id: int, user):
             with get_session() as s:
                 cfg = LocationConfig.get_config(s, sel_location_id)
                 cs = cfg.setdefault("convoy_status", {})
-                cs["yade_statuses"] = yade_statuses
-                cs["vessel_statuses"] = vessel_statuses
+                cs["yade_statuses"] = list(st.session_state.get(state_yade_key, []))
+                cs["vessel_statuses"] = list(st.session_state.get(state_vessel_key, []))
                 cfg["convoy_status"] = cs
                 LocationConfig.save_config(s, sel_location_id, cfg)
             SecurityManager.log_audit(
@@ -447,12 +457,12 @@ def _render_convoy_status_settings(sel_location_id: int, user):
 
 def _render_service_types(sel_location_id: int, user):
     st.markdown("### 🛠️ Service Types")
-    st.caption("Manage service types used in the Services page for this location.")
+    st.caption("Manage global service types shown to all users at all locations.")
 
     from location_config import get_service_types, add_service_type, delete_service_type
 
     with get_session() as s:
-        types = get_service_types(s, sel_location_id)
+        types = get_service_types(s, 0)
 
     if not types:
         st.info("No service types configured. If none are added, dropdown will show 'N/A'.")
@@ -467,7 +477,7 @@ def _render_service_types(sel_location_id: int, user):
             else:
                 try:
                     with get_session() as s:
-                        add_service_type(s, sel_location_id, val)
+                        add_service_type(s, 0, val)
                         SecurityManager.log_audit(
                             s,
                             (user or {}).get("username", "system"),
@@ -476,10 +486,10 @@ def _render_service_types(sel_location_id: int, user):
                             resource_id=val,
                             details="Added service type",
                             user_id=(user or {}).get("id"),
-                            location_id=sel_location_id,
-                            ip_address=st.session_state.get("client_ip"),
-                            success=True,
-                        )
+                                    location_id=None,
+                                    ip_address=st.session_state.get("client_ip"),
+                                    success=True,
+                                )
                         s.commit()
                     st.success(f"Added '{val}'")
                     st.rerun()
@@ -493,7 +503,7 @@ def _render_service_types(sel_location_id: int, user):
         if c[1].button("🗑️ Delete", key=f"ls_service_type_del_{i}"):
             try:
                 with get_session() as s:
-                    delete_service_type(s, sel_location_id, name)
+                    delete_service_type(s, 0, name)
                     SecurityManager.log_audit(
                         s,
                         (user or {}).get("username", "system"),
@@ -502,7 +512,7 @@ def _render_service_types(sel_location_id: int, user):
                         resource_id=name,
                         details="Deleted service type",
                         user_id=(user or {}).get("id"),
-                        location_id=sel_location_id,
+                        location_id=None,
                         ip_address=st.session_state.get("client_ip"),
                         success=True,
                     )

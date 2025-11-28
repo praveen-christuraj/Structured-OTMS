@@ -112,6 +112,19 @@ class DashboardConfigManager:
                         "default_days": 30
                     }
                 }
+                ,
+                {
+                    "id": "convoy_status",
+                    "name": "Convoy Status",
+                    "type": "convoy_status",
+                    "enabled": False,
+                    "order": 5,
+                    "date_filter": {
+                        "enabled": True,
+                        "type": "single",
+                        "label": "Convoy Date"
+                    }
+                }
             ],
             "layout": {
                 "summary_cards": {
@@ -240,6 +253,16 @@ class DashboardConfigManager:
                     "show_markers": True,
                     "show_labels": True,
                     "show_totals_card": True
+                }
+                ,
+                "convoy_status": {
+                    "enabled": False,
+                    "show_yade": True,
+                    "show_vessel": True,
+                    "display_mode": "table",  # table or cards
+                    "status_filters": [],
+                    "fields": ["status", "convoy_no", "shuttle_no", "stock_display", "stock_value_bbl"],
+                    "style": {"compact": True}
                 }
             },
             "styles": {

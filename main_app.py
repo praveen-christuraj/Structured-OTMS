@@ -464,9 +464,6 @@ def main():
     active_location_id = st.session_state.get("active_location_id")
     current_page = st.session_state.get("current_page", "Home")
 
-    # Top header for the main app
-    header("OTMS Dashboard")
-
     # Sidebar navigation (role-based pages)
     pages = get_pages(user, active_location_id)
     if current_page not in pages:

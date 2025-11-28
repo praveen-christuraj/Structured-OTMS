@@ -310,28 +310,42 @@ def get_location_page_visibility(session: Session, location_id: int) -> Dict[str
 
 
 def get_service_types(session: Session, location_id: int) -> List[str]:
-    cfg = LocationConfig.get_config(session, location_id)
-    types = cfg.get("service_types", []) or []
-    return [str(t) for t in types]
+    # Global list shared across all locations, stored under LocationPageConfig with location_id=0
+    data = get_page_section_config(session, 0, "Services", "Service Types")
+    if isinstance(data, dict):
+        items = data.get("items", []) or []
+    elif isinstance(data, list):
+        items = data
+    else:
+        items = []
+    if not items:
+        items = DEFAULT_CONFIG.get("service_types", []) or []
+    return [str(t) for t in items]
 
 def add_service_type(session: Session, location_id: int, name: str) -> None:
     name = (name or "").strip()
     if not name:
         raise ValueError("Service type name required")
-    cfg = LocationConfig.get_config(session, location_id)
-    types = list(cfg.get("service_types", []) or [])
-    if any(str(t).strip().lower() == name.lower() for t in types):
+    data = get_page_section_config(session, 0, "Services", "Service Types")
+    items = []
+    if isinstance(data, dict):
+        items = list(data.get("items", []) or [])
+    elif isinstance(data, list):
+        items = list(data)
+    if any(str(t).strip().lower() == name.lower() for t in items):
         raise ValueError("Service type already exists")
-    types.append(name)
-    cfg["service_types"] = types
-    LocationConfig.save_config(session, location_id, cfg)
+    items.append(name)
+    set_page_section_config(session, 0, "Services", "Service Types", {"items": items})
 
 def delete_service_type(session: Session, location_id: int, name: str) -> None:
-    cfg = LocationConfig.get_config(session, location_id)
-    types = list(cfg.get("service_types", []) or [])
-    types = [t for t in types if str(t).strip().lower() != (name or "").strip().lower()]
-    cfg["service_types"] = types
-    LocationConfig.save_config(session, location_id, cfg)
+    data = get_page_section_config(session, 0, "Services", "Service Types")
+    items = []
+    if isinstance(data, dict):
+        items = list(data.get("items", []) or [])
+    elif isinstance(data, list):
+        items = list(data)
+    items = [t for t in items if str(t).strip().lower() != (name or "").strip().lower()]
+    set_page_section_config(session, 0, "Services", "Service Types", {"items": items})
 
 
 # ==================== TANK TRANSACTIONS TAB VISIBILITY ====================

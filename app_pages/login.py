@@ -6,6 +6,10 @@ import platform
 from db import get_session
 from auth import AuthManager
 from ip_service import IPService
+from task_manager import TaskManager
+from security import SecurityManager
+from models import User
+from logger import ActionLogger
 
 
 def render_login_page():
@@ -90,3 +94,50 @@ def render_login_page():
 
         st.success(f"Welcome, {user_dict.get('full_name') or user_dict['username']}!")
         st.rerun()
+
+    st.markdown("---")
+    st.markdown("#### Forgot Password")
+    if not st.session_state.get("fp_open"):
+        if st.button("Forgot Password", key="fp_open_btn", type="primary"):
+            st.session_state["fp_open"] = True
+            st.rerun()
+    else:
+        with st.form("forgot_password_form"):
+            fp_username = st.text_input("Username", key="fp_username")
+            fp_submit = st.form_submit_button("📩 Request Password Reset", type="primary")
+
+        if fp_submit:
+            uname = (fp_username or "").strip()
+            if not uname:
+                st.error("Enter your username to request a reset.")
+            else:
+                try:
+                    with get_session() as s:
+                        target = s.query(User).filter(User.username == uname).one_or_none()
+                        if not target or not target.is_active:
+                            st.error("Username not found or inactive.")
+                        else:
+                            user_stub = {"id": target.id, "username": target.username, "role": target.role}
+                            TaskManager.create_password_reset_request(user=user_stub, reason=None)
+                            try:
+                                SecurityManager.log_audit(
+                                    s,
+                                    target.username,
+                                    "TASK_CREATE",
+                                    resource_type="Task:PasswordReset",
+                                    resource_id=str(target.id),
+                                    details=f"Password reset requested via Login page",
+                                    user_id=target.id,
+                                    location_id=target.location_id,
+                                )
+                            except Exception:
+                                pass
+                            st.success("Password reset request submitted to Admin.")
+                            st.session_state["fp_open"] = False
+                            st.rerun()
+                except Exception as ex:
+                    st.error(f"Failed to submit request: {ex}")
+                    try:
+                        ActionLogger.log_error_with_task(ex, context="Login Forgot Password", user=None, location_id=None, severity="HIGH", additional_info=f"username={uname}")
+                    except Exception:
+                        pass
