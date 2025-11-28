@@ -15,6 +15,7 @@ from report_engine import ReportEngine
 from permission_manager import PermissionManager
 from security import SecurityManager
 from location_config import LocationConfig
+from ui_components import FormBuilder, Notifications, DashboardCard, TableDisplay, apply_custom_css
 
 def get_user_reports(user: dict, location_id: int = None):
     """
@@ -87,18 +88,18 @@ def render_filter_inputs(filter_configs: list, location_id: int) -> dict:
     """
     filters = {}
     
-    st.markdown("### 🔍 Filters")
+    FormBuilder.section_header("🔍 Report Filters", "Customize your report parameters")
     
     # Always include date range filter
     col1, col2 = st.columns(2)
     with col1:
-        start_date = st.date_input(
-            "Start Date",
-            value=date.today() - timedelta(days=30),
-            key="filter_start_date"
-        )
+        start_date = FormBuilder.date_field("Start Date", "filter_start_date", required=True)
+        if start_date is None:
+            start_date = date.today() - timedelta(days=30)
     with col2:
-        end_date = st.date_input(
+        end_date = FormBuilder.date_field("End Date", "filter_end_date", required=True)
+        if end_date is None:
+            end_date = date.today()
             "End Date",
             value=date.today(),
             key="filter_end_date"

@@ -10,6 +10,7 @@ from task_manager import TaskManager
 from security import SecurityManager
 from models import User
 from logger import ActionLogger
+from ui_components import FormBuilder, Notifications, apply_custom_css
 
 
 def render_login_page():
@@ -17,17 +18,33 @@ def render_login_page():
     Simple login form using AuthManager.authenticate.
     AuthManager already logs login attempts + audit entries.
     """
-    st.markdown("### 🔐 Login")
-    st.write("Enter your OTMS credentials to continue.")
+    apply_custom_css()
+    
+    # Modern header with gradient background
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 2.5rem; border-radius: 12px; margin-bottom: 2rem; text-align: center;'>
+        <h1 style='color: white; margin: 0; font-size: 2.5rem;'>🔐 OTMS Login</h1>
+        <p style='color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 1.1rem;'>
+            Oil Tanker Management System
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<p style='text-align: center; color: #666; margin-bottom: 2rem;'>Enter your credentials to continue</p>", unsafe_allow_html=True)
 
     with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        submitted = st.form_submit_button("🔐 Login")
+        FormBuilder.section_header("", "")
+        username = FormBuilder.input_field("Username", "login_username", "Enter your username", required=True)
+        password = FormBuilder.input_field("Password", "login_password", "Enter your password", "password", required=True)
+        
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            submitted = st.form_submit_button("🔐 Login", use_container_width=True, type="primary")
 
     if submitted:
         if not username or not password:
-            st.error("Please enter both username and password.")
+            Notifications.error_alert("Please enter both username and password.", "Login Failed")
             return
 
         # Build a Streamlit-flavoured user agent similar to legacy app
@@ -49,7 +66,7 @@ def render_login_page():
             )
 
         if not user_dict:
-            st.error("Invalid username or password.")
+            Notifications.error_alert("Invalid username or password. Please try again.", "Authentication Failed")
             return
 
         # Check for forced password change or 2FA setup
@@ -92,30 +109,37 @@ def render_login_page():
         st.session_state["last_login_ip"] = client_ip
         st.session_state["last_login_useragent"] = user_agent
 
-        st.success(f"Welcome, {user_dict.get('full_name') or user_dict['username']}!")
+        Notifications.success_alert(f"Welcome, {user_dict.get('full_name') or user_dict['username']}!", "Login Successful")
         st.rerun()
 
     st.markdown("---")
-    st.markdown("#### Forgot Password")
+    
+    # Forgot Password Section
+    FormBuilder.section_header("Forgot Password?", "Request a password reset from your administrator")
     if not st.session_state.get("fp_open"):
-        if st.button("Forgot Password", key="fp_open_btn", type="primary"):
-            st.session_state["fp_open"] = True
-            st.rerun()
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            if st.button("🔑 Request Password Reset", key="fp_open_btn", use_container_width=True, type="secondary"):
+                st.session_state["fp_open"] = True
+                st.rerun()
     else:
         with st.form("forgot_password_form"):
-            fp_username = st.text_input("Username", key="fp_username")
-            fp_submit = st.form_submit_button("📩 Request Password Reset", type="primary")
+            fp_username = FormBuilder.input_field("Username", "fp_username", "Enter your username", required=True)
+            
+            col1, col2, col3 = st.columns([1, 1, 1])
+            with col2:
+                fp_submit = st.form_submit_button("📩 Submit Request", use_container_width=True, type="primary")
 
         if fp_submit:
             uname = (fp_username or "").strip()
             if not uname:
-                st.error("Enter your username to request a reset.")
+                Notifications.error_alert("Please enter your username to request a password reset.", "Missing Information")
             else:
                 try:
                     with get_session() as s:
                         target = s.query(User).filter(User.username == uname).one_or_none()
                         if not target or not target.is_active:
-                            st.error("Username not found or inactive.")
+                            Notifications.error_alert("Username not found or account is inactive. Please contact your administrator.", "User Not Found")
                         else:
                             user_stub = {"id": target.id, "username": target.username, "role": target.role}
                             TaskManager.create_password_reset_request(user=user_stub, reason=None)
@@ -132,11 +156,11 @@ def render_login_page():
                                 )
                             except Exception:
                                 pass
-                            st.success("Password reset request submitted to Admin.")
+                            Notifications.success_alert("Your password reset request has been submitted to the administrator. You will be notified once approved.", "Request Submitted")
                             st.session_state["fp_open"] = False
                             st.rerun()
                 except Exception as ex:
-                    st.error(f"Failed to submit request: {ex}")
+                    Notifications.error_alert(f"Failed to submit request: {str(ex)}", "System Error")
                     try:
                         ActionLogger.log_error_with_task(ex, context="Login Forgot Password", user=None, location_id=None, severity="HIGH", additional_info=f"username={uname}")
                     except Exception:

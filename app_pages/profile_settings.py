@@ -16,6 +16,7 @@ from auth import AuthManager
 from twofa import TwoFactorAuth
 from security import SecurityManager
 from task_manager import TaskManager
+from ui_components import FormBuilder, Notifications, DashboardCard, apply_custom_css
 
 
 def check_password_expiry(user: User) -> dict:
@@ -72,47 +73,46 @@ def check_password_expiry(user: User) -> dict:
 
 def render_password_change_section(user_dict: dict):
     """Render password change form"""
-    st.markdown("### 🔐 Change Password")
+    FormBuilder.section_header("🔐 Change Password", "Update your account password")
     
     with get_session() as session:
         user = session.query(User).filter(User.id == user_dict["id"]).first()
         if not user:
-            st.error("User not found")
+            Notifications.error_alert("User not found", "Error")
             return
         
         # Check password expiry status
         expiry_status = check_password_expiry(user)
         
         if expiry_status["severity"] == "error":
-            st.error(expiry_status["message"])
+            Notifications.error_alert(expiry_status["message"], "Password Expired")
         elif expiry_status["severity"] == "warning":
-            st.warning(expiry_status["message"])
+            Notifications.warning_alert(expiry_status["message"], "Password Expiring Soon")
         else:
-            st.info(expiry_status["message"])
+            Notifications.info_alert(expiry_status["message"], "Password Status")
     
     with st.form("change_password_form"):
-        current_password = st.text_input("Current Password", type="password")
-        new_password = st.text_input("New Password", type="password", 
-                                     help="Must be at least 8 characters")
-        confirm_password = st.text_input("Confirm New Password", type="password")
+        current_password = FormBuilder.input_field("Current Password", "current_pwd", "Enter current password", "password", required=True)
+        new_password = FormBuilder.input_field("New Password", "new_pwd", "Must be at least 8 characters", "password", required=True)
+        confirm_password = FormBuilder.input_field("Confirm New Password", "confirm_pwd", "Re-enter new password", "password", required=True)
         
-        submitted = st.form_submit_button("Change Password", type="primary")
+        submitted = FormBuilder.form_submit_button("Change Password", "🔒")
         
         if submitted:
             if not current_password or not new_password or not confirm_password:
-                st.error("All fields are required")
+                Notifications.error_alert("All fields are required", "Validation Error")
                 return
             
             if new_password != confirm_password:
-                st.error("New passwords do not match")
+                Notifications.error_alert("New passwords do not match", "Validation Error")
                 return
             
             if len(new_password) < 8:
-                st.error("Password must be at least 8 characters long")
+                Notifications.error_alert("Password must be at least 8 characters long", "Validation Error")
                 return
             
             if new_password == current_password:
-                st.error("New password must be different from current password")
+                Notifications.error_alert("New password must be different from current password", "Validation Error")
                 return
             
             try:
@@ -121,7 +121,7 @@ def render_password_change_section(user_dict: dict):
                     
                     # Verify current password
                     if not AuthManager.verify_password(current_password, user.password_hash):
-                        st.error("Current password is incorrect")
+                        Notifications.error_alert("Current password is incorrect", "Authentication Failed")
                         return
                     
                     # Update password
@@ -144,7 +144,7 @@ def render_password_change_section(user_dict: dict):
                     )
                     
                     session.commit()
-                    st.success("✅ Password changed successfully!")
+                    Notifications.success_alert("Password changed successfully! Your new password is now active.", "Password Updated")
                     
                     # Clear enforcement flags
                     if "must_change_password" in st.session_state:

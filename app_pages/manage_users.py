@@ -5,6 +5,7 @@ from models import User, Location
 from auth import AuthManager
 from location_manager import LocationManager
 from twofa import TwoFactorAuth
+from ui_components import FormBuilder, Notifications, TableDisplay, DashboardCard, apply_custom_css
 
 # Fixed role list
 ROLES = [
@@ -38,38 +39,47 @@ def _load_locations():
 # CREATE USER
 # -------------------------------------------------------------------------
 def _create_user_form():
-    st.markdown("#### ➕ Create New User")
+    FormBuilder.section_header("➕ Create New User", "Add a new user to the system")
 
     locations = _load_locations()
 
     with st.form("create_user_form"):
-        username = st.text_input("Username *")
-        full_name = st.text_input("Full Name *")
-        password = st.text_input("Password *", type="password")
-        confirm_password = st.text_input("Confirm Password *", type="password")
+        col1, col2 = FormBuilder.form_row(2)
+        with col1:
+            username = FormBuilder.input_field("Username", "create_username", "Enter username", required=True)
+            password = FormBuilder.input_field("Password", "create_password", "Enter password", "password", required=True)
+        with col2:
+            full_name = FormBuilder.input_field("Full Name", "create_fullname", "Enter full name", required=True)
+            confirm_password = FormBuilder.input_field("Confirm Password", "create_confirm_password", "Re-enter password", "password", required=True)
 
-        role = st.selectbox(
-            "Role *",
-            [role_with_icon(r) for r in ROLES],
-        )
-        # Extract raw role from label
-        raw_role = role.split(" ", 1)[1] if " " in role else role
+        col1, col2 = FormBuilder.form_row(2)
+        with col1:
+            role = FormBuilder.select_field(
+                "Role",
+                [role_with_icon(r) for r in ROLES],
+                "create_role",
+                required=True
+            )
+            # Extract raw role from label
+            raw_role = role.split(" ", 1)[1] if " " in role else role
+        
+        with col2:
+            # Location selection (optional in UI, backend rules will enforce)
+            location_options = ["— No specific location —"]
+            loc_id_by_label = {}
+            for loc in locations:
+                label = f"{loc.name} ({loc.code})"
+                location_options.append(label)
+                loc_id_by_label[label] = loc.id
 
-        # Location selection (optional in UI, backend rules will enforce)
-        location_options = ["— No specific location —"]
-        loc_id_by_label = {}
-        for loc in locations:
-            label = f"{loc.name} ({loc.code})"
-            location_options.append(label)
-            loc_id_by_label[label] = loc.id
+            selected_loc_label = FormBuilder.select_field("Assigned Location", location_options, "create_location")
+            location_id = loc_id_by_label.get(selected_loc_label)
 
-        selected_loc_label = st.selectbox("Assigned Location", location_options)
-        location_id = loc_id_by_label.get(selected_loc_label)
-
-        supervisor_code = st.text_input(
+        supervisor_code = FormBuilder.input_field(
             "Supervisor Code (only if role = supervisor)",
-            type="password",
-            help="Supervisor code is required for supervisor accounts.",
+            "create_supervisor_code",
+            "Enter supervisor code if applicable",
+            "password"
         )
         
         st.markdown("---")
@@ -102,19 +112,19 @@ def _create_user_form():
             password_never_expires = False
             st.info("ℹ️ Non-admin users must change password every 30 days")
 
-        submitted = st.form_submit_button("Create User")
+        submitted = FormBuilder.form_submit_button("Create User", "✓")
 
     if submitted:
         if not username.strip() or not full_name.strip():
-            st.error("Username and Full Name are required.")
+            Notifications.error_alert("Username and Full Name are required fields.", "Validation Error")
             return
 
         if not password:
-            st.error("Password is required.")
+            Notifications.error_alert("Password is required.", "Validation Error")
             return
 
         if password != confirm_password:
-            st.error("Passwords do not match.")
+            Notifications.error_alert("Passwords do not match. Please try again.", "Validation Error")
             return
 
         try:
@@ -132,9 +142,9 @@ def _create_user_form():
                     password_never_expires=password_never_expires,
                 )
 
-            st.success(
-                f"User '{user_dict['username']}' created successfully "
-                f"with role '{role_with_icon(user_dict['role'])}'."
+            Notifications.success_alert(
+                f"User '{user_dict['username']}' created successfully with role '{role_with_icon(user_dict['role'])}'.",
+                "User Created"
             )
             # Audit log – user created
             current_username = (st.session_state.get("auth_user") or {}).get("username", "system")

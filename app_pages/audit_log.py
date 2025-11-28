@@ -5,27 +5,39 @@ from datetime import datetime, timedelta
 from db import get_session
 from security import SecurityManager
 from models import Location, AuditLog
+from ui_components import FormBuilder, TableDisplay, DashboardCard, apply_custom_css
 
 
 def render_audit_log_page(active_location_id, user):
     """Audit trail viewer."""
-    st.markdown("### 🧾 Audit Log")
+    apply_custom_css()
+    
+    # Modern header
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem;'>
+        <h1 style='color: white; margin: 0; font-size: 2rem;'>🧾 Audit Log</h1>
+        <p style='color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0;'>System Activity Trail</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     if not user or user["role"] not in ["admin-operations", "admin-it", "manager"]:
         st.warning("You do not have permission to view the audit log.")
         return
 
+    FormBuilder.section_header("Filter Options", "Customize your audit log view")
+    
     col1, col2, col3 = st.columns(3)
     with col1:
         range_label = st.selectbox(
-            "Date range",
+            "📅 Date Range",
             ["Last 24 hours", "Last 7 days", "Last 30 days", "All"],
         )
     with col2:
-        only_me = st.checkbox("Show only my actions", value=False)
+        only_me = st.checkbox("👤 Show only my actions", value=False)
     with col3:
         limit = st.number_input(
-            "Max rows",
+            "📊 Max Rows",
             min_value=50,
             max_value=500,
             value=200,
@@ -86,4 +98,32 @@ def render_audit_log_page(active_location_id, user):
                 }
             )
 
-    st.dataframe(rows, use_container_width=True)
+    st.markdown("---")
+    
+    # Display summary statistics
+    if rows:
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            DashboardCard.metric_card("Total Records", str(len(rows)), f"Last {range_label.lower()}", "📊", "blue")
+        with col2:
+            success_count = sum(1 for r in rows if r["Success"] == "✅")
+            DashboardCard.metric_card("Successful", str(success_count), f"{success_count/len(rows)*100:.1f}% success rate", "✅", "green")
+        with col3:
+            failed_count = sum(1 for r in rows if r["Success"] == "⛔")
+            DashboardCard.metric_card("Failed", str(failed_count), f"{failed_count/len(rows)*100:.1f}% failure rate", "⛔", "red")
+        with col4:
+            unique_users = len(set(r["User"] for r in rows))
+            DashboardCard.metric_card("Unique Users", str(unique_users), "Active users", "👥", "purple")
+    
+    st.markdown("---")
+    
+    # Display the audit log table with search
+    TableDisplay.display_data_table(
+        st.session_state.get("audit_df") if "audit_df" not in locals() else __import__('pandas').DataFrame(rows),
+        title="Audit Trail Records",
+        searchable=True
+    )
+    
+    # Store dataframe in session state for search functionality
+    import pandas as pd
+    st.session_state["audit_df"] = pd.DataFrame(rows)

@@ -9,7 +9,7 @@ from db import get_session
 from models import Location
 from dashboard_utils import DashboardMetrics
 from location_manager import LocationManager
-
+from ui_components import DashboardCard, Notifications, TableDisplay, FormBuilder
 # Dashboard imports
 try:
     from dashboard_config import DashboardConfigManager
@@ -94,6 +94,10 @@ def _render_location_access_overview(selected_location_id: int, user: dict):
 
 def render_admin_it_home(user: dict):
     """Render Admin-IT special home page"""
+    Notifications.success_alert(
+        f"Welcome back, {user. get('full_name') or user.get('username')}!",
+        "Login Successful"
+    )
     st.markdown("""
     <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                 padding: 2rem; border-radius: 10px; margin-bottom: 2rem;'>
@@ -227,7 +231,7 @@ def render_location_dashboard(selected_location_id: int, user: dict):
     
     # Quick Actions
     st.markdown("### ⚡ Quick Actions")
-    
+    FormBuilder.section_header("Common Operations", "Quick access to frequently used features")
     action_cols = st.columns(4)
     
     with action_cols[0]:
@@ -258,23 +262,82 @@ def render_basic_summary(selected_location_id: int):
     
     st.markdown("### 📊 Location Summary (last 7 days)")
     
-    # Row 1 – tank counts
+    # Row 1 – tank counts using DashboardCard
     c1, c2, c3 = st.columns(3)
-    c1.metric("Total Tanks", summary.get("total_tanks", 0))
-    c2.metric("Active Tanks", summary.get("active_tanks", 0))
-    c3.metric("Inactive Tanks", summary.get("inactive_tanks", 0))
+    with c1:
+        DashboardCard. metric_card(
+            "Total Tanks", 
+            str(summary.get("total_tanks", 0)), 
+            "All tanks", 
+            "🛢️", 
+            "blue"
+        )
+    with c2:
+        DashboardCard.metric_card(
+            "Active Tanks", 
+            str(summary.get("active_tanks", 0)), 
+            "Operating", 
+            "✅", 
+            "green"
+        )
+    with c3:
+        DashboardCard. metric_card(
+            "Inactive Tanks", 
+            str(summary.get("inactive_tanks", 0)), 
+            "Standby", 
+            "⏸️", 
+            "orange"
+        )
     
-    # Row 2 – activity
+    st.markdown("---")
+    
+    # Row 2 – activity using DashboardCard
     c4, c5, c6 = st.columns(3)
-    c4.metric("Tank Transactions", summary.get("recent_transactions", 0))
-    c5.metric("YADE Voyages", summary.get("recent_voyages", 0))
-    c6.metric("Tanker Dispatches", summary.get("recent_tanker_dispatches", 0))
+    with c4:
+        DashboardCard.metric_card(
+            "Tank Transactions", 
+            str(summary.get("recent_transactions", 0)), 
+            "This week", 
+            "📝", 
+            "purple"
+        )
+    with c5:
+        DashboardCard.metric_card(
+            "YADE Voyages", 
+            str(summary.get("recent_voyages", 0)), 
+            "In progress", 
+            "⛴️", 
+            "teal"
+        )
+    with c6:
+        DashboardCard.metric_card(
+            "Tanker Dispatches", 
+            str(summary.get("recent_tanker_dispatches", 0)), 
+            "Scheduled", 
+            "🚚", 
+            "blue"
+        )
+    
+    st.markdown("---")
     
     # Row 3 – stock
     c7, c8 = st.columns(2)
-    c7.metric("Current Stock (bbl)", f"{summary.get('current_stock_bbl', 0):,}")
-    c8.metric("Tanks with Stock", summary.get("tanks_with_stock", 0))
-
+    with c7:
+        DashboardCard.metric_card(
+            "Current Stock", 
+            f"{summary.get('current_stock_bbl', 0):,} bbl", 
+            "Available inventory", 
+            "📦", 
+            "green"
+        )
+    with c8:
+        DashboardCard.metric_card(
+            "Tanks with Stock", 
+            str(summary.get("tanks_with_stock", 0)), 
+            "Active storage", 
+            "🗂️", 
+            "blue"
+        )
 
 def render_home_page(active_location_id, user):
     """

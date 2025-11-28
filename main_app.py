@@ -1,7 +1,11 @@
 import streamlit as st
 from datetime import datetime, timedelta
 import importlib.util
-
+try:
+    from ui_components import apply_custom_css
+except Exception as e:
+    print(f"UI Components error: {e}")
+    apply_custom_css = lambda: None
 from db import init_db, get_session
 from ui import header
 from security import SecurityManager
@@ -140,28 +144,47 @@ def _inject_sidebar_css():
         .stButton > button[kind="primary"]:hover {
             box-shadow: 0 10px 26px rgba(37,99,235,.35) !important;
         }
-        /* -------- Sidebar (light glass style) -------- */
+        /* --------  (complete glass style) -------- */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #f9fafb 0%, #e5e7eb 100%) !important;
-            border-right: 1px solid #e5e7eb !important;
+            background: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
+            padding-top: 0.4rem !important;
+            padding-bottom: 0.4rem !important;
         }
-        /* Sidebar nav buttons (glass cards) */
+        /* Sidebar nav buttons (minimal glass effect) */
         section[data-testid="stSidebar"] .stButton > button {
-            width: 100%; text-align: left; border-radius: 18px; padding: 0.45rem 0.8rem; margin-bottom: 0.3rem;
-            background: rgba(255,255,255,0.85); backdrop-filter: blur(14px);
-            border: 1px solid rgba(148,163,184,0.55);
-            box-shadow: 0 8px 20px rgba(15,23,42,0.06);
-            color: #111827; font-weight: 600; font-size: 0.9rem;
+            width: 100%; text-align: left; border-radius: 10px; 
+            padding: 0.45rem 0.8rem; margin-bottom: 0.25rem;
+            background: transparent !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid transparent !important;
+            color: #374151 !important; 
+            font-weight: 500 !important; 
+            font-size: 0.90rem !important;
+            transition: all 0.2s ease !important;
+            box-shadow: none !important;
         }
         section[data-testid="stSidebar"] .stButton > button:hover {
-            background: rgba(255,255,255,1.0); box-shadow: 0 12px 30px rgba(15,23,42,0.12);
+            background: rgba(255, 255, 255, 0.5) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+            transform: translateX(2px);
         }
-        /* Sidebar active button (disabled used as active) */
+        /* Sidebar active/selected button */
         section[data-testid="stSidebar"] .stButton > button:disabled {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-            border-color: rgba(191,219,254,0.95) !important; color: #ffffff !important;
-            box-shadow: 0 18px 40px rgba(37,99,235,0.45);
+            background: rgba(37, 99, 235, 0.1) !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(37, 99, 235, 0.3) !important;
+            color: #2563eb !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15) !important;
         }
+        /* Compact markdown spacing in sidebar */
+        section[data-testid="stSidebar"] div[data-testid="stMarkdown"] { margin: 0.2rem 0 !important; }
+        section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3 { margin: 0.2rem 0 !important; }
         /* Inputs */
         input, textarea, select, .stNumberInput input, .stTextInput input { border-radius: 12px !important; }
         /* Alerts */
@@ -261,15 +284,13 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
             "assets/logos/otms_logo.png",
         ):
             try:
-                st.image(logo_path, width=150)
+                st.image(logo_path, width=120)
                 logo_loaded = True
                 break
             except Exception:
                 continue
         if not logo_loaded:
             st.markdown("### 🛢️ OTMS")
-
-        st.markdown("---")
 
         # User info below the logo
         if user:
@@ -335,18 +356,89 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 📋 Navigation")
 
-    # ---------- Navigation buttons (single click) ----------
-    for p in pages:
-        label = f"{ICONS.get(p, '📄')}  {p}"
-        is_active = (p == current_page)
-        btn_label = f"{'• ' if is_active else ''}{label}"
+    admin_pages = [
+        "Asset Management",
+        "Audit Log",
+        "Dashboard Customization",
+        "Location Settings",
+        "Manage Locations",
+        "Manage Users",
+        "MB Customization",
+        "Page Customization",
+        "Deleted Records",
+        "Report Customization",
+        "2FA Settings",
+        "Error Monitoring",
+    ]
+    ops_pages = [
+        "Tank Transactions",
+        "Yade Transactions",
+        "Tanker Transactions",
+        "View Transactions",
+        "Vessel Operations",
+        "FSO-Operations",
+        "OTR",
+        "Material Balance",
+        "Yade Tracking",
+        "Yade-Vessel Mapping",
+        "Convoy Status",
+        "BCCR",
+        "Reporting",
+    ]
+    general_pages = [
+        "Login History",
+        "My Tasks",
+        "Home",
+        "Profile Settings",
+        "Sharing",
+        "Services",
+    ]
 
-        if st.sidebar.button(btn_label, key=f"nav_{p}"):
-            st.session_state["current_page"] = p
+    admin_list = [p for p in admin_pages if p in pages]
+    ops_list = [p for p in ops_pages if p in pages]
+    gen_list = [p for p in general_pages if p in pages]
+
+    # Home separate at top
+    if "Home" in pages:
+        label = f"{ICONS.get('Home', '📄')}  Home"
+        is_active = (current_page == "Home")
+        btn_label = f"{'• ' if is_active else ''}{label}"
+        if st.sidebar.button(btn_label, key="nav_Home"):
+            st.session_state["current_page"] = "Home"
             st.rerun()
+
+    with st.sidebar.expander("OPERATIONS", expanded=(current_page in ops_list)):
+        for p in ops_list:
+            label = f"{ICONS.get(p, '📄')}  {p}"
+            is_active = (p == current_page)
+            btn_label = f"{'• ' if is_active else ''}{label}"
+            if st.button(btn_label, key=f"nav_{p}"):
+                st.session_state["current_page"] = p
+                st.rerun()
+
+    with st.sidebar.expander("GENERAL", expanded=(current_page in gen_list)):
+        for p in gen_list:
+            if p == "Home":
+                continue
+            label = f"{ICONS.get(p, '📄')}  {p}"
+            is_active = (p == current_page)
+            btn_label = f"{'• ' if is_active else ''}{label}"
+            if st.button(btn_label, key=f"nav_{p}"):
+                st.session_state["current_page"] = p
+                st.rerun()
+
+    with st.sidebar.expander("ADMIN", expanded=(current_page in admin_list)):
+        for p in admin_list:
+            label = f"{ICONS.get(p, '📄')}  {p}"
+            is_active = (p == current_page)
+            btn_label = f"{'• ' if is_active else ''}{label}"
+            if st.button(btn_label, key=f"nav_{p}"):
+                st.session_state["current_page"] = p
+                st.rerun()
 
 
 def main():
+    apply_custom_css()
     st.set_page_config(
         page_title="OTMS",
         layout="wide",

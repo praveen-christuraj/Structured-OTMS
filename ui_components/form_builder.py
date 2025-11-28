@@ -1,0 +1,73 @@
+import streamlit as st
+
+class FormBuilder:
+    """Reusable form component builder"""
+    
+    @staticmethod
+    def section_header(title, description=""):
+        """Create a section header"""
+        st. markdown(f"""
+        <div style="margin-top: 2rem; margin-bottom: 1. 5rem;">
+            <h3 style="color: #1e3c72; font-size: 1. 3rem; margin-bottom: 0.5rem; 
+                      border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">{title}</h3>
+            {f"<p style='color: #666; font-size: 0.9rem;'>{description}</p>" if description else ""}
+        </div>
+        """, unsafe_allow_html=True)
+    
+    @staticmethod
+    def input_field(label, key, placeholder="", input_type="text", required=False):
+        """Create a styled input field"""
+        st.markdown(f"""
+        <label style="font-weight: 600; color: #333; display: block; margin-bottom: 0.5rem;">
+            {label} {" <span style='color: red;'>*</span>" if required else ""}
+        </label>
+        """, unsafe_allow_html=True)
+        
+        if input_type == "text":
+            return st.text_input("", key=key, placeholder=placeholder, label_visibility="collapsed")
+        elif input_type == "number":
+            return st.number_input("", key=key, label_visibility="collapsed")
+        elif input_type == "password":
+            return st.text_input("", key=key, type="password", placeholder=placeholder, label_visibility="collapsed")
+    
+    @staticmethod
+    def select_field(label, options, key, required=False):
+        """Create a styled select field"""
+        st.markdown(f"""
+        <label style="font-weight: 600; color: #333; display: block; margin-bottom: 0.5rem;">
+            {label} {" <span style='color: red;'>*</span>" if required else ""}
+        </label>
+        """, unsafe_allow_html=True)
+        return st.selectbox("", options, key=key, label_visibility="collapsed")
+    
+    @staticmethod
+    def date_field(label, key, required=False):
+        """Create a styled date field"""
+        st. markdown(f"""
+        <label style="font-weight: 600; color: #333; display: block; margin-bottom: 0.5rem;">
+            {label} {" <span style='color: red;'>*</span>" if required else ""}
+        </label>
+        """, unsafe_allow_html=True)
+        return st.date_input("", key=key, label_visibility="collapsed")
+    
+    @staticmethod
+    def textarea_field(label, key, placeholder="", rows=4, required=False):
+        """Create a styled textarea field"""
+        st.markdown(f"""
+        <label style="font-weight: 600; color: #333; display: block; margin-bottom: 0.5rem;">
+            {label} {" <span style='color: red;'>*</span>" if required else ""}
+        </label>
+        """, unsafe_allow_html=True)
+        return st.text_area("", key=key, placeholder=placeholder, height=rows*30, label_visibility="collapsed")
+    
+    @staticmethod
+    def form_row(num_columns=2):
+        """Create columns for form layout"""
+        return st.columns(num_columns)
+    
+    @staticmethod
+    def form_submit_button(label="Submit", icon="✓"):
+        """Create a styled submit button"""
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            return st.form_submit_button(f"{icon} {label}", use_container_width=True)
