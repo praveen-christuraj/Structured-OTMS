@@ -503,7 +503,8 @@ def _render_flexible_tab(location_id: int, section: str, title: str, date_from, 
         CustomModel = None
     
     if CustomModel:
-        with get_session() as s:
+        from db import get_flex_session
+        with get_flex_session() as s:
             from sqlalchemy import or_
             query = s.query(CustomModel).filter(CustomModel.location_id == location_id)
             if date_from and hasattr(CustomModel, "tx_date"):
@@ -634,7 +635,8 @@ def _render_custom_tab_data(location_id: int, tab_def: dict, date_from, date_to,
         return
     
     # Load data
-    with get_session() as s:
+    from db import get_flex_session
+    with get_flex_session() as s:
         query = s.query(CustomModel).filter(CustomModel.location_id == location_id)
         
         if date_from and hasattr(CustomModel, 'tx_date'):
@@ -936,7 +938,8 @@ def _render_custom_edit_modal(record, tab_def: dict, user):
             if st.form_submit_button("💾 Save Changes", type="primary"):
                 try:
                     CustomModel = get_custom_table_model(table_name)
-                    with get_session() as s:
+                    from db import get_flex_session
+                    with get_flex_session() as s:
                         rec = s.query(CustomModel).get(rec_id)
                         if rec:
                             # Update fields
@@ -993,7 +996,8 @@ def _render_custom_delete_confirmation(record, tab_def: dict, user):
         if st.button("🗑️ Confirm Delete", key=f"confirm_delete_custom_{table_name}_{rec_id}", type="primary"):
             try:
                 CustomModel = get_custom_table_model(table_name)
-                with get_session() as s:
+                from db import get_flex_session
+                with get_flex_session() as s:
                     rec = s.query(CustomModel).get(rec_id)
                     if rec:
                         location_id = getattr(rec, "location_id")

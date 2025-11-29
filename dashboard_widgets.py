@@ -283,6 +283,10 @@ class WidgetRenderer:
         
         # Build long-form dataframe for altair
         frames = []
+        # Build color scale domain/range from series config
+        series_names = [s.get("name") for s in series_config]
+        series_colors = [s.get("color", "#667eea") for s in series_config]
+        color_scale = alt.Scale(domain=series_names, range=series_colors)
         for series in series_config:
             if series["field"] in df.columns:
                 sub = df[["DateTS", series["field"]]].copy()
@@ -301,37 +305,53 @@ class WidgetRenderer:
         max_val = plot_df["Value"].max()
         y_max = float(max_val if pd.notna(max_val) else 1.0) * 1.25
         
-        base = alt.Chart(plot_df). properties(height=style.get("height", 360))
-        
-        # Lines
-        lines = base.mark_line(strokeWidth=2).encode(
-            x=alt.X("DateTS:T", axis=alt.Axis(title="Date", format="%d-%b", labelAngle=0)),
-            y=alt.Y("Value:Q", axis=alt.Axis(title="Quantity in bbls"), scale=alt.Scale(domain=[0, y_max])),
-            color=alt.Color("Series:N", legend=alt.Legend(title=None, orient="top"))
-        )
-        
-        # Points
-        if style.get("show_markers", True):
-            points = base.mark_point(shape="triangle-up", filled=False, size=60).encode(
-                x="DateTS:T",
-                y="Value:Q",
-                color=alt.Color("Series:N", legend=None)
+        base = alt.Chart(plot_df).properties(height=style.get("height", 360))
+
+        chart_type = str(style.get("chart_type", "line")).lower()
+
+        points = None
+        labels = None
+        if chart_type == "area":
+            lines = base.mark_area(opacity=0.35).encode(
+                x=alt.X("DateTS:T", axis=alt.Axis(title="Date", format="%d-%b", labelAngle=0)),
+                y=alt.Y("Value:Q", axis=alt.Axis(title="Quantity in bbls"), scale=alt.Scale(domain=[0, y_max])),
+                color=alt.Color("Series:N", scale=color_scale, legend=alt.Legend(title=None, orient="top"))
+            )
+        elif chart_type == "bar":
+            lines = base.mark_bar().encode(
+                x=alt.X("DateTS:T", axis=alt.Axis(title="Date", format="%d-%b", labelAngle=0)),
+                y=alt.Y("Value:Q", axis=alt.Axis(title="Quantity in bbls"), scale=alt.Scale(domain=[0, y_max])),
+                color=alt.Color("Series:N", scale=color_scale, legend=alt.Legend(title=None, orient="top"))
             )
         else:
-            points = alt.Chart(pd.DataFrame())
+            lines = base.mark_line(strokeWidth=2).encode(
+                x=alt.X("DateTS:T", axis=alt.Axis(title="Date", format="%d-%b", labelAngle=0)),
+                y=alt.Y("Value:Q", axis=alt.Axis(title="Quantity in bbls"), scale=alt.Scale(domain=[0, y_max])),
+                color=alt.Color("Series:N", scale=color_scale, legend=alt.Legend(title=None, orient="top"))
+            )
+            # Points only for line chart
+            if style.get("show_markers", True):
+                points = base.mark_point(shape="triangle-up", filled=False, size=60).encode(
+                    x="DateTS:T",
+                    y="Value:Q",
+                    color=alt.Color("Series:N", scale=color_scale, legend=None)
+                )
         
         # Labels
         if style.get("show_labels", True):
-            labels = base. mark_text(dy=-12, color="black", fontSize=11).encode(
+            labels = base.mark_text(dy=-12, color="black", fontSize=11).encode(
                 x="DateTS:T",
                 y="Value:Q",
                 text=alt.Text("Value:Q", format=",.0f"),
-                color=alt.Color("Series:N", legend=None)
+                color=alt.Color("Series:N", scale=color_scale, legend=None)
             )
-        else:
-            labels = alt.Chart(pd.DataFrame())
         
-        chart = (lines + points + labels).configure_view(strokeOpacity=0)
+        layers = [lines]
+        if points is not None:
+            layers.append(points)
+        if labels is not None:
+            layers.append(labels)
+        chart = alt.layer(*layers).configure_view(strokeOpacity=0)
         
         st.altair_chart(chart, use_container_width=True)
 
@@ -630,7 +650,144 @@ class DashboardRenderer:
     @staticmethod
     def _render_trend_chart_section(config: Dict, location_id: int, section_date):
         """Render trend chart section"""
-        st.info("Trend chart section - implementation pending")
+        from db import get_session, engine
+        from sqlalchemy import inspect, text
+        try:
+            import pandas as pd
+        except Exception:
+            st.info("Pandas not available for trend chart rendering")
+            return
+        layout_cfg = config.get("layout", {}).get("trend_chart", {})
+        if not layout_cfg.get("enabled", True):
+            st.info("Trend chart section disabled in customization.")
+            return
+
+        series_cfg = layout_cfg.get("series") or []
+        chart_type = layout_cfg.get("chart_type", "line")
+        style = {
+            "height": 360,
+            "show_markers": bool(layout_cfg.get("show_markers", True)),
+            "show_labels": bool(layout_cfg.get("show_labels", True)),
+            "show_totals_card": bool(layout_cfg.get("show_totals_card", True)),
+            "chart_type": chart_type,
+        }
+
+        if isinstance(section_date, tuple):
+            d_start, d_end = section_date
+        else:
+            d_start = section_date
+            d_end = section_date
+
+        days = []
+        cur = d_start
+        from datetime import timedelta
+        while cur <= d_end:
+            days.append(cur)
+            cur = cur + timedelta(days=1)
+
+        rows = []
+        # Helper for table source per-day sum
+        def _table_value(table: str, field: str, dt, loc_id: int):
+            insp = inspect(engine)
+            cols = [c.get("name") for c in insp.get_columns(table)]
+            date_col = None
+            for cand in ["date", "Date", "transaction_date", "created_at", "timestamp"]:
+                if cand in cols:
+                    date_col = cand
+                    break
+            has_loc = "location_id" in cols
+            try:
+                backend = engine.url.get_backend_name()
+            except Exception:
+                backend = "sqlite"
+            def q(identifier: str) -> str:
+                if backend == "mysql":
+                    return f"`{identifier}`"
+                else:
+                    return f'"{identifier}"'
+            where = []
+            params = {}
+            if date_col:
+                where.append(f"{q(date_col)} = :d")
+                params["d"] = (str(dt) if date_col == "Date" else dt)
+            if has_loc:
+                where.append(f"{q('location_id')} = :loc")
+                params["loc"] = loc_id
+            sql = f"SELECT SUM({q(field)}) AS v FROM {q(table)}" + (" WHERE " + " AND ".join(where) if where else "")
+            with get_session() as s:
+                try:
+                    val = s.execute(text(sql), params).scalar()
+                except Exception:
+                    val = None
+            try:
+                return float(val or 0.0)
+            except Exception:
+                return 0.0
+
+        # Build per-day rows
+        for d in days:
+            rec = {"Date": str(d)}
+            for sconf in series_cfg:
+                ds = sconf.get("data_source")
+                field = sconf.get("field")
+                val = 0.0
+                try:
+                    if ds == "material_balance":
+                        val = DashboardRenderer._fetch_mb_data(location_id, d, field) or 0.0
+                    elif ds == "table":
+                        table = sconf.get("table_name")
+                        if table and field:
+                            val = _table_value(table, field, d, location_id)
+                        else:
+                            val = 0.0
+                    elif ds == "fso_operations":
+                        val = DashboardRenderer._fetch_fso_data(location_id, d, field) or 0.0
+                    else:
+                        val = 0.0
+                except Exception:
+                    val = 0.0
+                rec[field] = val
+            rows.append(rec)
+
+        df = pd.DataFrame(rows)
+        if df.empty:
+            st.info("No data available for trend chart in the selected range")
+            return
+        WidgetRenderer.render_trend_chart(df, series_cfg, style)
+
+        # Totals card rendering
+        if style.get("show_totals_card", True):
+            totals = []
+            try:
+                import pandas as pd
+                for sconf in series_cfg:
+                    field = sconf.get("field")
+                    name = sconf.get("name")
+                    if field in df.columns:
+                        total_val = float(pd.to_numeric(df[field], errors="coerce").fillna(0).sum())
+                        totals.append({"name": name, "value": total_val, "color": sconf.get("color")})
+            except Exception:
+                totals = []
+            if totals:
+                st.markdown("---")
+                st.markdown("#### Totals")
+                cols = st.columns(len(totals))
+                card_style = config.get("styles", {}).get("card", {})
+                for i, t in enumerate(totals):
+                    with cols[i]:
+                        style_override = dict(card_style)
+                        if t.get("color"):
+                            style_override["border_color"] = t["color"]
+                            style_override["value_color"] = t["color"]
+                        WidgetRenderer.render_stat_card(
+                            label=t["name"],
+                            value=t["value"],
+                            unit="",
+                            prev_value=None,
+                            style=style_override,
+                            show_delta=False,
+                            display_date=d_end
+                        )
 
     @staticmethod
     def _render_convoy_status_section(config: Dict, location_id: int, section_date):

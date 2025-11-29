@@ -116,6 +116,15 @@ class ReportEngine:
         
         # Start with base query
         query = session.query(primary_model)
+
+        # Apply base location scoping if applicable
+        base_loc_mode = self.data_source.get('base_location_mode')
+        base_loc_id = self.data_source.get('base_location_id')
+        if hasattr(primary_model, 'location_id'):
+            if base_loc_mode == 'current' and isinstance(user_filters, dict) and user_filters.get('location_id') is not None:
+                query = query.filter(primary_model.location_id == user_filters.get('location_id'))
+            elif base_loc_mode == 'specific' and base_loc_id:
+                query = query.filter(primary_model.location_id == base_loc_id)
         
         # Apply joins if specified (only for standard tables)
         if table_name in self.DATA_SOURCES:
@@ -209,47 +218,81 @@ class ReportEngine:
             pandas DataFrame with report results
         """
         try:
-            with get_session() as session:
+            table_name = self.data_source.get('table')
+            use_flex = bool(table_name and table_name not in self.DATA_SOURCES)
+            if use_flex:
+                from db import get_flex_session
+                sess_ctx = get_flex_session()
+            else:
+                sess_ctx = get_session()
+            with sess_ctx as session:
                 query = self.build_query(session, user_filters)
-                
-                # Execute query and convert to list of dicts
+                rows = query.all()
+
+                # Collect primary and extra key fields required for merges
+                primary_table = self.data_source.get('table')
+                required_primary_fields = set()
+                for col_config in self.columns:
+                    for jk in col_config.get('join_keys', []) or []:
+                        pf = jk.get('primary')
+                        if pf:
+                            required_primary_fields.add(pf)
+                for rel in self.data_source.get('joins', []) or []:
+                    for jk in rel.get('join_keys', []) or []:
+                        pf = jk.get('primary')
+                        if pf:
+                            required_primary_fields.add(pf)
+
+                # Build primary results
                 results = []
-                for row in query.all():
+                for row in rows:
                     row_dict = {}
+                    # Extract fields from primary table columns
                     for col_config in self.columns:
-                        field = col_config.get('field')
-                        if not field:
-                            continue  # Skip columns without field definition
-                        
-                        label = col_config.get('label', field if isinstance(field, str) else 'Unknown')
-                        
-                        # Get value from row
-                        if hasattr(row, field):
-                            value = getattr(row, field)
-                            
-                            # Format based on type
-                            col_type = col_config.get('type', 'string')
+                        # Only primary-source fields here; externals will be merged later
+                        src_tbl = col_config.get('source_table', primary_table)
+                        src_field = col_config.get('source_field') or col_config.get('field')
+                        label_field = col_config.get('field')
+                        label = col_config.get('label') or (label_field if isinstance(label_field, str) else (src_field or 'Unknown'))
+                        col_type = col_config.get('type', 'string')
+                        if src_tbl == primary_table and src_field and hasattr(row, src_field):
+                            value = getattr(row, src_field)
                             if col_type == 'date' and isinstance(value, (date, datetime)):
                                 value = value.strftime('%Y-%m-%d')
                             elif col_type == 'datetime' and isinstance(value, datetime):
                                 value = value.strftime('%Y-%m-%d %H:%M:%S')
                             elif col_type == 'numeric' and value is not None:
-                                value = float(value)
-                            
+                                try:
+                                    value = float(value)
+                                except Exception:
+                                    pass
                             row_dict[label] = value
-                        else:
-                            row_dict[label] = None
-                    
+                    # Ensure required primary key fields present for merges
+                    for pf in required_primary_fields:
+                        if hasattr(row, pf):
+                            row_dict[pf] = getattr(row, pf)
+                    # Auto-include common join keys even if not selected
+                    for pf in ['date', 'tx_date', 'record_date', 'location_id', 'tank_id', 'vessel_id']:
+                        if hasattr(row, pf) and pf not in row_dict:
+                            row_dict[pf] = getattr(row, pf)
                     results.append(row_dict)
-                
-                # Convert to DataFrame
+
                 df = pd.DataFrame(results)
-                
+
                 # Apply grouping and aggregations if specified
                 if self.grouping and self.aggregations:
                     df = self._apply_aggregations(df)
                 
-                # Apply sorting
+                # Merge external source columns
+                df = self._merge_external_columns(df, user_filters)
+
+                # Apply formula columns
+                df = self._apply_formula_columns(df)
+
+                # Apply runtime filters at DataFrame level (supports label-based fields)
+                df = self._apply_runtime_filters_df(df, user_filters)
+
+                # Apply sorting after filtering
                 if self.sorting and not df.empty:
                     for sort_config in self.sorting:
                         field = sort_config.get('field')
@@ -257,7 +300,21 @@ class ReportEngine:
                         ascending = (order == 'asc')
                         if field in df.columns:
                             df = df.sort_values(by=field, ascending=ascending)
-                
+
+                # Keep only requested columns (plus any filter fields present)
+                requested_labels = []
+                for c in self.columns:
+                    lbl = c.get('label') or c.get('field') or c.get('source_field')
+                    if lbl and lbl not in requested_labels:
+                        requested_labels.append(lbl)
+                filter_fields = [f.get('field') for f in (self.filters or []) if f.get('field')]
+                ordered_keep = []
+                for col in requested_labels + filter_fields:
+                    if col in df.columns and col not in ordered_keep:
+                        ordered_keep.append(col)
+                if ordered_keep:
+                    df = df[ordered_keep]
+
                 return df
         except IndexError as e:
             raise ValueError(f"String index error in report execution. Check report configuration. Details: {str(e)}")
@@ -284,6 +341,300 @@ class ReportEngine:
             if valid_groups:
                 df = df.groupby(valid_groups).agg(agg_dict).reset_index()
         
+        return df
+
+    def _merge_external_columns(self, df_primary: pd.DataFrame, user_filters: Dict[str, Any]) -> pd.DataFrame:
+        primary_table = self.data_source.get('table')
+        if df_primary is None or df_primary.empty:
+            return df_primary
+        external_cols = [c for c in self.columns if c.get('source_table') and c.get('source_table') != primary_table]
+        if not external_cols:
+            return df_primary
+
+        relationship_map = {}
+        for rel in self.data_source.get('joins', []) or []:
+            tbl = rel.get('table')
+            jks = rel.get('join_keys') or []
+            if tbl and jks:
+                relationship_map[tbl] = jks
+
+        # Group external columns by source table to minimize queries
+        from collections import defaultdict
+        table_cols = defaultdict(list)
+        for c in external_cols:
+            table_cols[c['source_table']].append(c)
+
+        from sqlalchemy import inspect
+        from db import engine, flex_engine, get_flex_session
+
+        def _pick_session(table_name: str):
+            # Decide which engine has the table; default to primary
+            if flex_engine:
+                try:
+                    if table_name in inspect(flex_engine).get_table_names():
+                        return get_flex_session
+                except Exception:
+                    pass
+            if engine:
+                try:
+                    if table_name in inspect(engine).get_table_names():
+                        return get_session
+                except Exception:
+                    pass
+            return get_session
+
+        for src_table, cols in table_cols.items():
+            sess_ctx = _pick_session(src_table)
+            with sess_ctx() as session:
+                # Build base query for source table
+                src_model = None
+                if src_table in self.DATA_SOURCES:
+                    src_model = self.DATA_SOURCES[src_table]
+                else:
+                    from models import get_custom_table_model
+                    src_model = get_custom_table_model(src_table)
+                if not src_model:
+                    continue
+                q = session.query(src_model)
+                # Reuse global filters when possible
+                q = self._apply_filters(q, src_model, self.filters, user_filters)
+                rows = q.all()
+                # Build df for source with join keys and selected fields
+                records = []
+                # Aggregate map per field
+                for r in rows:
+                    rec = {}
+                    # include join keys used by any col in this src_table
+                    needed_jk = set()
+                    for c in cols:
+                        for jk in c.get('join_keys', []) or []:
+                            if jk.get('source'):
+                                needed_jk.add(jk['source'])
+                    for jkf in needed_jk:
+                        if hasattr(r, jkf):
+                            rec[jkf] = getattr(r, jkf)
+                    for c in cols:
+                        sf = c.get('source_field')
+                        label = c.get('label') or sf
+                        val = getattr(r, sf) if (sf and hasattr(r, sf)) else None
+                        # Store raw; aggregation applied later via groupby after merge if needed, or pre-aggregate
+                        rec[label] = val
+                    records.append(rec)
+                df_src = pd.DataFrame(records)
+                # If any aggregations specified, apply grouping by join keys and aggregate label columns
+                agg_map = {}
+                for c in cols:
+                    label = c.get('label') or c.get('source_field')
+                    agg = c.get('aggregation')
+                    if agg:
+                        # map textual agg to pandas function
+                        func_map = {'sum': 'sum', 'avg': 'mean', 'max': 'max', 'min': 'min'}
+                        agg_map[label] = func_map.get(agg, 'sum')
+                join_src_fields = []
+                for c in cols:
+                    for jk in c.get('join_keys', []) or []:
+                        if jk.get('source') and jk['source'] not in join_src_fields:
+                            join_src_fields.append(jk['source'])
+                if agg_map and df_src is not None and not df_src.empty and join_src_fields:
+                    df_src = df_src.groupby(join_src_fields).agg(agg_map).reset_index()
+
+                # Perform left merge; auto-detect join keys when not provided
+                src_col_names = [c.name for c in src_model.__table__.columns]
+                auto_pairs_catalog = [
+                    ('tx_date', 'tx_date'), ('date', 'date'), ('record_date', 'record_date'),
+                    ('date', 'tx_date'), ('tx_date', 'date'), ('date', 'record_date'), ('record_date', 'date'),
+                    ('location_id', 'location_id'), ('tank_id', 'tank_id'), ('vessel_id', 'vessel_id')
+                ]
+                for c in cols:
+                    label = c.get('label') or c.get('source_field')
+                    join_pairs = c.get('join_keys') or relationship_map.get(src_table) or []
+                    # Keep only pairs that exist on both sides
+                    join_pairs = [
+                        jk for jk in (join_pairs or [])
+                        if jk.get('primary') in df_primary.columns and jk.get('source') in df_src.columns
+                    ]
+                    left_on = [jk['primary'] for jk in join_pairs]
+                    right_on = [jk['source'] for jk in join_pairs]
+                    if not left_on or not right_on:
+                        link_by = (c.get('link_by') or 'auto').lower().replace(' ', '')
+                        def _pick(colnames, candidates):
+                            for k in candidates:
+                                if k in colnames:
+                                    return k
+                            return None
+                        if link_by != 'auto':
+                            l_date = _pick(list(df_primary.columns), ['tx_date','date','record_date'])
+                            r_date = _pick(src_col_names, ['tx_date','date','record_date'])
+                            l_loc = _pick(list(df_primary.columns), ['location_id'])
+                            r_loc = _pick(src_col_names, ['location_id'])
+                            l_tank = _pick(list(df_primary.columns), ['tank_id'])
+                            r_tank = _pick(src_col_names, ['tank_id'])
+                            if link_by == 'date' and l_date and r_date:
+                                left_on, right_on = [l_date], [r_date]
+                            elif link_by == 'date+location' and l_date and r_date and l_loc and r_loc:
+                                left_on, right_on = [l_date, l_loc], [r_date, r_loc]
+                            elif link_by == 'tank+date' and l_tank and r_tank and l_date and r_date:
+                                left_on, right_on = [l_tank, l_date], [r_tank, r_date]
+                        # Auto-detect pairs based on common keys/synonyms
+                        auto_left_on, auto_right_on = [], []
+                        left_cols = list(df_primary.columns)
+                        for lo, ro in auto_pairs_catalog:
+                            if lo in left_cols and ro in src_col_names:
+                                auto_left_on.append(lo)
+                                auto_right_on.append(ro)
+                        left_on, right_on = auto_left_on, auto_right_on
+                    # If still no join keys, fallback to broadcasting aggregated value for the column
+                    if not left_on or not right_on or not all([lo in df_primary.columns for lo in left_on]):
+                        agg = c.get('aggregation')
+                        series = df_src[label] if label in df_src.columns else pd.Series([pd.NA])
+                        if agg and not series.empty:
+                            func_map = {'sum': 'sum', 'avg': 'mean', 'max': 'max', 'min': 'min'}
+                            fn = func_map.get(agg, 'sum')
+                            try:
+                                val = getattr(series, fn)()
+                            except Exception:
+                                val = pd.NA
+                        else:
+                            val = series.iloc[0] if len(series) > 0 else pd.NA
+                        df_primary[label] = val
+                        continue
+                    # Merge only the required label column plus join_src_fields to avoid duplication
+                    keep_cols = list(set(right_on + [label]))
+                    df_merge_src = df_src[keep_cols] if set(keep_cols).issubset(set(df_src.columns)) else df_src
+                    mode = c.get('source_location_mode')
+                    loc_id = c.get('source_location_id')
+                    if mode == 'current' and isinstance(user_filters, dict):
+                        cur_loc = user_filters.get('location_id')
+                        if cur_loc is not None and 'location_id' in df_merge_src.columns:
+                            df_merge_src = df_merge_src[df_merge_src['location_id'] == cur_loc]
+                    elif mode == 'specific' and loc_id is not None:
+                        if 'location_id' in df_merge_src.columns:
+                            df_merge_src = df_merge_src[df_merge_src['location_id'] == loc_id]
+
+                    # Normalize join column types for better matching (e.g., date strings vs datetime objects)
+                    for lo in left_on:
+                        if lo in df_primary.columns and pd.api.types.is_datetime64_any_dtype(df_primary[lo]):
+                            df_primary[lo] = pd.to_datetime(df_primary[lo], errors='coerce').dt.strftime('%Y-%m-%d')
+                        elif lo in df_primary.columns:
+                            df_primary[lo] = df_primary[lo].astype(str)
+                    for ro in right_on:
+                        if ro in df_merge_src.columns and pd.api.types.is_datetime64_any_dtype(df_merge_src[ro]):
+                            df_merge_src[ro] = pd.to_datetime(df_merge_src[ro], errors='coerce').dt.strftime('%Y-%m-%d')
+                        elif ro in df_merge_src.columns:
+                            df_merge_src[ro] = df_merge_src[ro].astype(str)
+
+                    df_primary = df_primary.merge(
+                        df_merge_src,
+                        left_on=left_on,
+                        right_on=right_on,
+                        how='left',
+                        suffixes=('', f'_{src_table}')
+                    )
+                    # Drop duplicate join columns brought from source to keep table tidy
+                    for ro in right_on:
+                        dup_col = f"{ro}_{src_table}"
+                        if dup_col in df_primary.columns:
+                            df_primary = df_primary.drop(columns=[dup_col])
+
+        return df_primary
+
+    def _apply_formula_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        if df is None or df.empty:
+            return df
+        for col_config in self.columns:
+            formula = col_config.get('formula')
+            label = col_config.get('label') or col_config.get('field')
+            if not formula or not label:
+                continue
+            op = formula.get('operation')
+            cols = formula.get('columns') or []
+            if not cols:
+                continue
+            # Ensure columns exist
+            if not all([c in df.columns for c in cols]):
+                continue
+            try:
+                if op == 'sum':
+                    df[label] = df[cols].sum(axis=1)
+                elif op == 'subtract':
+                    base = df[cols[0]]
+                    for c in cols[1:]:
+                        base = base - df[c]
+                    df[label] = base
+                elif op == 'multiply':
+                    prod = df[cols[0]]
+                    for c in cols[1:]:
+                        prod = prod * df[c]
+                    df[label] = prod
+                elif op == 'divide':
+                    denom = df[cols[1]] if len(cols) > 1 else 1
+                    df[label] = df[cols[0]] / denom.replace(0, pd.NA)
+                elif op == 'percentage':
+                    denom = df[cols[1]] if len(cols) > 1 else 1
+                    df[label] = (df[cols[0]] / denom.replace(0, pd.NA)) * 100
+                elif op == 'maximum':
+                    df[label] = df[cols].max(axis=1)
+                elif op == 'minimum':
+                    df[label] = df[cols].min(axis=1)
+                elif op == 'average':
+                    df[label] = df[cols].mean(axis=1)
+            except Exception:
+                # If formula fails, keep column as NA
+                df[label] = pd.NA
+        return df
+
+    def _apply_runtime_filters_df(self, df: pd.DataFrame, user_filters: Dict[str, Any]) -> pd.DataFrame:
+        if df is None or df.empty:
+            return df
+        user_filters = user_filters or {}
+        # Date range filter applied to common date-like columns
+        if 'date_range' in user_filters and isinstance(user_filters['date_range'], (list, tuple)) and len(user_filters['date_range']) >= 2:
+            start, end = user_filters['date_range'][0], user_filters['date_range'][1]
+            date_cols = [c for c in ['date', 'tx_date', 'record_date'] if c in df.columns]
+            for dc in date_cols:
+                try:
+                    series = pd.to_datetime(df[dc], errors='coerce')
+                    mask = (series >= pd.to_datetime(start)) & (series <= pd.to_datetime(end))
+                    df = df[mask]
+                    break
+                except Exception:
+                    continue
+        # Apply configured filters using label-based field names
+        for fc in (self.filters or []):
+            field = fc.get('field')
+            operator = fc.get('operator', 'equals')
+            if not isinstance(field, str) or field not in df.columns:
+                continue
+            value = user_filters.get(field)
+            if value is None:
+                continue
+            try:
+                if operator == 'equals':
+                    df = df[df[field] == value]
+                elif operator == 'not_equals':
+                    df = df[df[field] != value]
+                elif operator == 'greater_than':
+                    df = df[pd.to_numeric(df[field], errors='coerce') > float(value)]
+                elif operator == 'less_than':
+                    df = df[pd.to_numeric(df[field], errors='coerce') < float(value)]
+                elif operator == 'greater_equal':
+                    df = df[pd.to_numeric(df[field], errors='coerce') >= float(value)]
+                elif operator == 'less_equal':
+                    df = df[pd.to_numeric(df[field], errors='coerce') <= float(value)]
+                elif operator == 'contains' and isinstance(value, str):
+                    df = df[df[field].astype(str).str.contains(value, na=False)]
+                elif operator == 'starts_with' and isinstance(value, str):
+                    df = df[df[field].astype(str).str.startswith(value)]
+                elif operator == 'ends_with' and isinstance(value, str):
+                    df = df[df[field].astype(str).str.endswith(value)]
+                elif operator == 'in' and isinstance(value, (list, tuple)):
+                    df = df[df[field].isin(value)]
+                elif operator == 'between' and isinstance(value, (list, tuple)) and len(value) >= 2:
+                    low, high = value[0], value[1]
+                    series = pd.to_numeric(df[field], errors='coerce')
+                    df = df[(series >= float(low)) & (series <= float(high))]
+            except Exception:
+                continue
         return df
     
     def export_csv(self, df: pd.DataFrame, filename: str = None) -> bytes:
@@ -342,17 +693,17 @@ class ReportEngine:
         doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(A4))
         elements = []
         
-        # Add title
+        # Standardized header
         styles = getSampleStyleSheet()
-        title = Paragraph(f"<b>{report_name}</b>", styles['Heading1'])
-        elements.append(title)
-        elements.append(Spacer(1, 0.2 * inch))
-        
-        # Add generation date
-        gen_date = Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 
-                            styles['Normal'])
-        elements.append(gen_date)
-        elements.append(Spacer(1, 0.3 * inch))
+        header_title = Paragraph(f"<b>{report_name}</b>", styles['Heading1'])
+        header_date = Paragraph(
+            f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            styles['Normal']
+        )
+        elements.append(header_title)
+        elements.append(Spacer(1, 0.15 * inch))
+        elements.append(header_date)
+        elements.append(Spacer(1, 0.25 * inch))
         
         # Prepare table data
         if df.empty:
@@ -372,21 +723,29 @@ class ReportEngine:
             
             # Style the table
             table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#374151')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('FONTSIZE', (0, 0), (-1, 0), 11),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f5f5f5')),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#d1d5db')),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
             ]))
             
             elements.append(table)
         
         # Build PDF
-        doc.build(elements)
+        # Footer with page numbers and report name
+        def _footer(canvas, doc):
+            canvas.saveState()
+            canvas.setFont('Helvetica', 8)
+            footer_text = f"{report_name} • Page {canvas.getPageNumber()}"
+            canvas.drawString(40, 20, footer_text)
+            canvas.restoreState()
+
+        doc.build(elements, onFirstPage=_footer, onLaterPages=_footer)
         pdf_buffer.seek(0)
         return pdf_buffer.getvalue()
     
@@ -410,26 +769,28 @@ def get_available_data_sources() -> List[str]:
     from logger import log_info, log_error
     
     sources = []
-    
-    # Get ALL tables from database
+    all_tables = []
     try:
         from sqlalchemy import inspect
-        from db import engine
-        
+        from db import engine, flex_engine
         if engine:
             inspector = inspect(engine)
-            all_tables = inspector.get_table_names()
-            
-            # Add ALL tables from the database
-            sources.extend(all_tables)
-            log_info(f"Loaded {len(all_tables)} tables from database")
-        else:
-            log_error("Database engine not available")
-            # Fallback to standard sources if engine not available
+            base_tables = inspector.get_table_names()
+            sources.extend(base_tables)
+            all_tables.extend(base_tables)
+            log_info(f"Loaded {len(base_tables)} tables from primary database")
+        if flex_engine:
+            finsp = inspect(flex_engine)
+            flex_tables = finsp.get_table_names()
+            for t in flex_tables:
+                if t not in sources:
+                    sources.append(t)
+            all_tables.extend([t for t in flex_tables if t not in all_tables])
+            log_info(f"Loaded {len(flex_tables)} tables from flexible database")
+        if not engine and not flex_engine:
             sources = list(ReportEngine.DATA_SOURCES.keys())
     except Exception as e:
-        log_error(f"Could not load tables from database: {str(e)}", exc_info=True)
-        # Fallback to standard sources
+        log_error(f"Could not load tables from databases: {str(e)}", exc_info=True)
         sources = list(ReportEngine.DATA_SOURCES.keys())
     
     # Add custom tab tables from location_config (in case they're not in DB yet)
@@ -481,16 +842,50 @@ def get_columns_for_source(source_name: str) -> List[Dict[str, str]]:
             log_error(f"Error loading custom table '{source_name}': {str(e)}", exc_info=True)
     
     if not model:
-        log_warning(f"No model found for data source '{source_name}'")
-        return []
+        try:
+            from sqlalchemy import inspect
+            from db import engine, flex_engine
+            columns = []
+            for eng in [engine, flex_engine]:
+                if not eng:
+                    continue
+                insp = inspect(eng)
+                try:
+                    cols = insp.get_columns(source_name)
+                except Exception:
+                    cols = []
+                if cols:
+                    for c in cols:
+                        t = str(c.get('type'))
+                        if 'INT' in t:
+                            field_type = 'numeric'
+                        elif 'FLOAT' in t or 'DECIMAL' in t or 'NUMERIC' in t:
+                            field_type = 'numeric'
+                        elif 'DATE' in t and 'TIME' not in t:
+                            field_type = 'date'
+                        elif 'DATETIME' in t or 'TIMESTAMP' in t or 'TIME' in t:
+                            field_type = 'datetime'
+                        elif 'BOOL' in t:
+                            field_type = 'boolean'
+                        else:
+                            field_type = 'string'
+                        columns.append({
+                            'field': c['name'],
+                            'label': c['name'].replace('_', ' ').title(),
+                            'type': field_type
+                        })
+                    return columns
+            log_warning(f"No model found and inspector could not load columns for '{source_name}'")
+            return []
+        except Exception as e:
+            log_error(f"Inspector fallback failed for '{source_name}': {str(e)}")
+            return []
     
     columns = []
     
     try:
         for column in model.__table__.columns:
             col_type = str(column.type)
-            
-            # Map SQL types to our types
             if 'INT' in col_type:
                 field_type = 'numeric'
             elif 'FLOAT' in col_type or 'DECIMAL' in col_type:
@@ -503,13 +898,11 @@ def get_columns_for_source(source_name: str) -> List[Dict[str, str]]:
                 field_type = 'boolean'
             else:
                 field_type = 'string'
-            
             columns.append({
                 'field': column.name,
                 'label': column.name.replace('_', ' ').title(),
                 'type': field_type
             })
-        
         log_info(f"Retrieved {len(columns)} columns for data source '{source_name}'")
     except Exception as e:
         log_error(f"Error extracting columns from model for '{source_name}': {str(e)}", exc_info=True)

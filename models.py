@@ -1480,18 +1480,18 @@ def create_custom_tab_table(table_name: str, columns: list, location_id: int) ->
     """
     from sqlalchemy import Table, MetaData, inspect
     from sqlalchemy.exc import OperationalError, ProgrammingError, DatabaseError
-    from db import engine
+    from db import flex_engine
     from logger import log_info, log_error, log_warning
     
     log_info(f"Attempting to create custom table '{table_name}' for location_id={location_id}")
     
-    if not engine:
+    if not flex_engine:
         log_error("Database engine not available. Check db.py configuration.")
         raise RuntimeError("Database engine not available. Check db.py configuration.")
     
     # Test database connection
     try:
-        with engine.connect() as conn:
+        with flex_engine.connect() as conn:
             log_info(f"Database connection verified for table '{table_name}' creation")
     except Exception as conn_err:
         log_error(f"Failed to connect to database: {str(conn_err)}", exc_info=True)
@@ -1499,7 +1499,7 @@ def create_custom_tab_table(table_name: str, columns: list, location_id: int) ->
     
     try:
         # Check if table already exists
-        inspector = inspect(engine)
+        inspector = inspect(flex_engine)
         existing_tables = inspector.get_table_names()
         
         if table_name in existing_tables:
@@ -1514,7 +1514,7 @@ def create_custom_tab_table(table_name: str, columns: list, location_id: int) ->
         # Define standard columns
         table_columns = [
             Column('id', Integer, primary_key=True, autoincrement=True),
-            Column('location_id', Integer, ForeignKey('locations.id'), nullable=False),
+            Column('location_id', Integer, nullable=False),
             Column('tx_date', Date, nullable=True),
             Column('created_by', String(64), nullable=True),
             Column('created_at', DateTime, server_default=func.now()),
@@ -1551,7 +1551,7 @@ def create_custom_tab_table(table_name: str, columns: list, location_id: int) ->
         # Create the table
         log_info(f"Creating table '{table_name}' with {len(table_columns)} columns in database...")
         custom_table = Table(table_name, metadata, *table_columns)
-        metadata.create_all(engine)
+        metadata.create_all(flex_engine)
         log_info(f"✅ Successfully created table '{table_name}'")
         return True
         
@@ -1585,38 +1585,54 @@ def get_custom_table_model(table_name: str):
     """
     from sqlalchemy import Table, MetaData, inspect
     from sqlalchemy.exc import NoSuchTableError, DatabaseError
-    from db import engine
+    from db import flex_engine, engine
     from logger import log_info, log_error, log_warning
-    
-    if not engine:
-        log_error(f"Database engine not available when trying to get model for table '{table_name}'")
-        return None
-    
-    try:
-        inspector = inspect(engine)
-        existing_tables = inspector.get_table_names()
-        
-        if table_name not in existing_tables:
-            log_warning(f"Table '{table_name}' does not exist in database. Available tables: {len(existing_tables)}")
-            return None
-            
-        log_info(f"Reflecting table '{table_name}' from database...")
-        metadata = MetaData()
-        table = Table(table_name, metadata, autoload_with=engine)
-        Model = type(f"Custom_{table_name}", (Base,), {"__table__": table})
-        log_info(f"✅ Successfully created model for table '{table_name}'")
-        return Model
-        
-    except NoSuchTableError as e:
-        log_error(f"❌ Table '{table_name}' not found in database: {str(e)}")
-        return None
-    except DatabaseError as e:
-        log_error(f"❌ Database error reflecting table '{table_name}': {str(e)}", exc_info=True)
-        return None
-    except Exception as e:
-        log_error(f"❌ Unexpected error reflecting custom table '{table_name}': {str(e)}", exc_info=True)
+
+    engines_to_try = []
+    if flex_engine:
+        engines_to_try.append(("flex", flex_engine))
+    if engine:
+        engines_to_try.append(("primary", engine))
+
+    if not engines_to_try:
+        log_error(f"Database engines not available when trying to get model for table '{table_name}'")
         return None
 
+    for eng_name, eng in engines_to_try:
+        try:
+            inspector = inspect(eng)
+            existing_tables = inspector.get_table_names()
+
+            if table_name not in existing_tables:
+                continue
+
+            log_info(f"Reflecting table '{table_name}' from {eng_name} database...")
+            metadata = MetaData()
+            table = Table(table_name, metadata, autoload_with=eng)
+
+            mapper_args = {}
+            if not table.primary_key or len(table.primary_key.columns) == 0:
+                # Fallback: use first column as a synthetic primary key to allow ORM mapping
+                first_col = list(table.columns)[0]
+                mapper_args['primary_key'] = [first_col]
+                log_warning(f"Table '{table_name}' has no primary key; using '{first_col.name}' as surrogate PK for mapping")
+
+            Model = type(f"Custom_{table_name}", (Base,), {"__table__": table, "__mapper_args__": mapper_args})
+            log_info(f"Successfully created model for table '{table_name}' from {eng_name} database")
+            return Model
+
+        except NoSuchTableError as e:
+            log_warning(f"Table '{table_name}' not found in {eng_name} database: {str(e)}")
+            continue
+        except DatabaseError as e:
+            log_error(f"Database error reflecting table '{table_name}' from {eng_name}: {str(e)}", exc_info=True)
+            continue
+        except Exception as e:
+            log_error(f"Unexpected error reflecting custom table '{table_name}' from {eng_name}: {str(e)}", exc_info=True)
+            continue
+
+    log_warning(f"Table '{table_name}' does not exist in primary or flex databases.")
+    return None
 
 def drop_custom_tab_table(table_name: str) -> bool:
     """
@@ -1629,19 +1645,19 @@ def drop_custom_tab_table(table_name: str) -> bool:
         True if successful, False otherwise
     """
     from sqlalchemy import Table, MetaData, inspect
-    from db import engine
+    from db import flex_engine
     
-    if not engine:
+    if not flex_engine:
         return False
     
-    inspector = inspect(engine)
+    inspector = inspect(flex_engine)
     if table_name not in inspector.get_table_names():
         return True  # Already doesn't exist
     
     try:
         metadata = MetaData()
-        table = Table(table_name, metadata, autoload_with=engine)
-        table.drop(engine)
+        table = Table(table_name, metadata, autoload_with=flex_engine)
+        table.drop(flex_engine)
         return True
     except Exception as e:
         print(f"Error dropping custom table {table_name}: {e}")

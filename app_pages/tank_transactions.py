@@ -710,19 +710,40 @@ def _render_tab_meter_records(loc, user):
         }
 
         try:
-            from models import FlexibleRecord
-            with get_session() as s:
-                rec = FlexibleRecord(
-                    location_id=loc.id,
-                    page="tank_transactions",
-                    section="meters",
-                    tx_date=tx_date,
-                    data_json=json.dumps(payload),
-                    created_by=(user or {}).get("username", "system"),
-                )
+            from models import create_custom_tab_table, get_custom_table_model, FlexibleRecord
+            from db import get_flex_session
+            table_name = f"flex_meters_{loc.id}"
+            columns = []
+            def norm(n: str) -> str:
+                return "_".join([c for c in re.sub(r"[^A-Za-z0-9]+"," ", str(n)).strip().lower().split()])
+            for i, m in enumerate(meters):
+                base = norm(m.get("label") or f"meter_{i+1}")
+                columns.append({"name": f"{base}_opening", "type": "number"})
+                columns.append({"name": f"{base}_closing", "type": "number"})
+                columns.append({"name": f"{base}_factor", "type": "number"})
+                columns.append({"name": f"{base}_net_bbl", "type": "number"})
+            columns.append({"name": "net_total_bbl", "type": "number"})
+            columns.append({"name": "remarks", "type": "text"})
+            create_custom_tab_table(table_name, columns, loc.id)
+            CustomModel = get_custom_table_model(table_name)
+            with get_flex_session() as s:
+                record_data = {
+                    "location_id": loc.id,
+                    "tx_date": tx_date,
+                    "created_by": (user or {}).get("username", "system"),
+                    "net_total_bbl": float(net_total_bbl),
+                    "remarks": (remarks.strip() or None),
+                }
+                for i, m in enumerate(meters):
+                    base = norm(m.get("label") or f"meter_{i+1}")
+                    rp = rows_payload[i]
+                    record_data[f"{base}_opening"] = rp.get("opening")
+                    record_data[f"{base}_closing"] = rp.get("closing")
+                    record_data[f"{base}_factor"] = rp.get("factor")
+                    record_data[f"{base}_net_bbl"] = rp.get("net_bbl")
+                rec = CustomModel(**record_data)
                 s.add(rec)
                 s.commit()
-
                 try:
                     SecurityManager.log_audit(
                         s,
@@ -738,12 +759,25 @@ def _render_tab_meter_records(loc, user):
                     )
                 except Exception:
                     pass
-
-            st.success("Meter record saved.")
-            st.rerun()
+            try:
+                with get_session() as s2:
+                    fr = FlexibleRecord(
+                        location_id=loc.id,
+                        page="tank_transactions",
+                        section="meters",
+                        tx_date=tx_date,
+                        data_json=json.dumps(payload),
+                        created_by=(user or {}).get("username", "system"),
+                    )
+                    s2.add(fr)
+                    s2.commit()
+                st.success(f"Meter record saved in table '{table_name}'.")
+                st.rerun()
+            except Exception:
+                st.success(f"Meter record saved in table '{table_name}'.")
+                st.rerun()
         except Exception as ex:
-            st.info("Generic model `FlexibleRecord` not found. Add it to models.py to persist this row.")
-            st.error(f"(Developer hint) Save failed: {ex}")
+            st.error(f"Save failed: {ex}")
 
 
 # ======================= TAB: Condensate Records =======================
@@ -1145,7 +1179,8 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
 
         log_info(f"Successfully loaded model for table '{table_name}'. Proceeding to save data...")
         
-        with get_session() as s:
+        from db import get_flex_session
+        with get_flex_session() as s:
             record_data = {
                 "location_id": loc.id,
                 "tx_date": tx_date,
