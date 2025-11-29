@@ -1111,7 +1111,7 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
         tx_date = row[date_name]
 
     try:
-        from models import create_custom_tab_table, get_custom_table_model
+        from models import create_custom_tab_table, get_custom_table_model, FlexibleRecord
         from logger import log_info, log_error, log_warning
         
         # Derive a deterministic table name per location and section
@@ -1160,6 +1160,23 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
             rec = CustomModel(**record_data)
             s.add(rec)
             s.commit()
+
+            try:
+                flex_payload = {}
+                flex_payload.update({k: v for k, v in row.items()})
+                flex_row = FlexibleRecord(
+                    location_id=loc.id,
+                    page="tank_transactions",
+                    section=section_key,
+                    tx_date=tx_date,
+                    data_json=json.dumps(flex_payload),
+                    created_by=(user or {}).get("username", "system"),
+                )
+                s.add(flex_row)
+                s.commit()
+                log_info(f"Also persisted FlexibleRecord for section '{section_key}' (id={getattr(flex_row,'id',None)})")
+            except Exception as flex_ex:
+                log_warning(f"Failed to persist FlexibleRecord mirror for '{section_key}': {str(flex_ex)}")
             
             record_id = getattr(rec, "id", "unknown")
             log_info(f"✅ Successfully saved record {record_id} to table '{table_name}'")

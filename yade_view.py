@@ -650,8 +650,8 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
 
     # Header
     _two_col_header(
-        ["Date", "Voyage No", "Convoy No", "Before NSV (bbls)", "After NSV (bbls)", "Net (bbls)", "Created by", "Action"],
-        [0.13,   0.16,        0.16,        0.12,                 0.12,               0.12,        0.11,         0.08],
+        ["Date", "Yade No", "Convoy No", "Before NSV (bbls)", "After NSV (bbls)", "Net (bbls)", "Created by", "Action"],
+        [0.13,   0.16,      0.16,        0.12,                 0.12,               0.12,        0.11,         0.08],
     )
 
     # Per-row edit state
@@ -679,7 +679,7 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
         # Row
         cols = st.columns([0.13, 0.16, 0.16, 0.12, 0.12, 0.12, 0.11, 0.08])
         cols[0].write(str(v.date or ""))
-        cols[1].write(v.voyage_no or "")
+        cols[1].write(v.yade_name or "")
         cols[2].write(v.convoy_no or "")
         cols[3].write(f"{before_nsv:,.2f}")
         cols[4].write(f"{after_nsv:,.2f}")

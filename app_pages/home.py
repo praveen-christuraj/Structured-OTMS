@@ -393,7 +393,10 @@ def render_home_page(active_location_id, user):
     else:
         default_label = labels[0]
         st.session_state["active_location_id"] = locations[0].id
-        active_location_id = locations[0]. id
+        active_location_id = locations[0].id
+
+    if "__prev_active_location_id" not in st.session_state:
+        st.session_state["__prev_active_location_id"] = active_location_id
     
     # 3) Render location selector (locked for non-admins with assignment)
     st.markdown("#### Select Active Location")
@@ -419,17 +422,25 @@ def render_home_page(active_location_id, user):
                 help="This active location will be used across all other pages.",
             )
             selected_location_id = id_by_label[selected_label]
+            prev_id = st.session_state.get("__prev_active_location_id")
             st.session_state["active_location_id"] = selected_location_id
+            if prev_id != selected_location_id:
+                st.session_state["__prev_active_location_id"] = selected_location_id
+                st.rerun()
     else:
         # Admins (or users without an assigned location): free selection
-        selected_label = st. selectbox(
+        selected_label = st.selectbox(
             "Location",
             labels,
             index=labels.index(default_label),
             help="This active location will be used across all other pages.",
         )
         selected_location_id = id_by_label[selected_label]
-        st. session_state["active_location_id"] = selected_location_id
+        prev_id = st.session_state.get("__prev_active_location_id")
+        st.session_state["active_location_id"] = selected_location_id
+        if prev_id != selected_location_id:
+            st.session_state["__prev_active_location_id"] = selected_location_id
+            st.rerun()
     
     st.markdown("---")
     

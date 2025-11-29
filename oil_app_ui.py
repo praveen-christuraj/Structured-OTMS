@@ -5791,7 +5791,7 @@ def _load_yade_tracking_rows(session, location_ids: List[int]) -> List[Dict[str,
 
 
 # -------- App setup --------
-st.set_page_config(page_title="OTMS", page_icon="🛢️", layout="wide")
+st.set_page_config(page_title="OTMS", page_icon="assets/logo.png", layout="wide")
 
 # ==== Brand UI (visual-only) ====
 BRAND_CSS = """

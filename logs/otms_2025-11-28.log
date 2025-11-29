@@ -1,2 +1,9 @@
 2025-11-28 17:39:05 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 49
 2025-11-28 17:39:05 - OTMS - WARNING - Table 'flex_produced_water_2' does not exist in database. Available tables: 49
+2025-11-28 20:33:02 - OTMS - INFO - Loaded 49 tables from database
+2025-11-28 20:33:02 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-28 20:33:02 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-28 20:33:02 - OTMS - INFO - Reflecting table 'audit_log' from database...
+2025-11-28 20:33:02 - OTMS - INFO - ✅ Successfully created model for table 'audit_log'
+2025-11-28 20:33:02 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-28 20:33:02 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'

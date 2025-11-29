@@ -1,4 +1,5 @@
 import re
+import json
 from datetime import date, datetime
 from uuid import uuid4
 
@@ -124,6 +125,35 @@ def render_bccr_page(active_location_id, user):
     def _set_records(records):
         st.session_state["bccr_records"][target_location_id] = records
 
+    def _load_bccr_records(location_id, date_from=None, date_to=None, convoy=None):
+        rows = []
+        try:
+            with get_session() as s:
+                from models import FlexibleRecord
+                q = s.query(FlexibleRecord).filter(
+                    FlexibleRecord.location_id == location_id,
+                    FlexibleRecord.page == "bccr",
+                    FlexibleRecord.section == "report",
+                )
+                if date_from:
+                    q = q.filter(FlexibleRecord.tx_date >= date_from)
+                if date_to:
+                    q = q.filter(FlexibleRecord.tx_date <= date_to)
+                q = q.order_by(FlexibleRecord.tx_date.desc(), FlexibleRecord.id.desc()).limit(500)
+                recs = q.all()
+                for r in recs:
+                    try:
+                        payload = json.loads(getattr(r, "data_json", "") or "{}")
+                    except Exception:
+                        payload = {}
+                    if convoy and convoy.strip():
+                        if convoy.strip().lower() not in (payload.get("convoy") or "").lower():
+                            continue
+                    rows.append({"_id": getattr(r, "id", None), **payload})
+        except Exception:
+            rows = []
+        return rows
+
     def _generate_bccr_pdf(df, location_name, location_code, filters_text):
         from io import BytesIO
         from reportlab.lib import colors
@@ -131,44 +161,79 @@ def render_bccr_page(active_location_id, user):
         from reportlab.lib.pagesizes import landscape, A4
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+        from reportlab.lib.units import cm
         import numbers
 
         buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), leftMargin=25, rightMargin=25, topMargin=35, bottomMargin=25)
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), leftMargin=0.5*cm, rightMargin=0.5*cm, topMargin=0.5*cm, bottomMargin=0.5*cm)
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle("BCCRTitle", parent=styles["Title"], alignment=TA_CENTER, fontSize=18)
         subtitle_style = ParagraphStyle("BCCRSubtitle", parent=styles["Heading3"], alignment=TA_CENTER, fontSize=12)
         filter_style = ParagraphStyle("BCCRFilters", parent=styles["BodyText"], alignment=TA_CENTER, fontSize=10)
         table_text_style = ParagraphStyle("BCCRTable", parent=styles["BodyText"], alignment=TA_LEFT, fontSize=9)
-        elements = [Paragraph("BCCR Report", title_style), Paragraph(f"{location_name} ({location_code})", subtitle_style), Paragraph(filters_text, filter_style), Spacer(1, 12)]
+        elements = [Paragraph("BCCR Report", title_style), Paragraph(f"{location_name} ({location_code})", subtitle_style), Paragraph(filters_text, filter_style), Spacer(1, 8)]
         if df.empty:
             elements.append(Paragraph("No records available for the selected filters.", table_text_style))
         else:
-            table_data = [list(df.columns)]
+            # Build header and rows using Paragraph for wrapping
+            header_style = ParagraphStyle("BCCRHeader", parent=styles["BodyText"], alignment=TA_CENTER, fontSize=10)
+            header_style.textColor = colors.white
+            header_style.fontName = "Helvetica-Bold"
+            body_style = ParagraphStyle("BCCRBody", parent=styles["BodyText"], alignment=TA_LEFT, fontSize=9)
+
+            columns = list(df.columns)
+            header_row = [Paragraph(str(c), header_style) for c in columns]
+            table_data = [header_row]
+
             for _, row in df.iterrows():
                 row_values = []
-                for col in df.columns:
+                for col in columns:
                     value = row[col]
                     if value is None:
-                        row_values.append("")
+                        txt = ""
                     elif isinstance(value, numbers.Integral):
-                        row_values.append(str(int(value)))
+                        txt = str(int(value))
                     elif isinstance(value, numbers.Number):
-                        row_values.append(f"{float(value):,.2f}")
+                        txt = f"{float(value):,.2f}"
                     else:
-                        row_values.append(str(value))
+                        txt = str(value)
+                    row_values.append(Paragraph(txt, body_style))
                 table_data.append(row_values)
-            table = Table(table_data, repeatRows=1)
+
+            # Compute column widths to fit exactly within the page content width
+            available_width = doc.width
+            numeric_cols = {
+                "ROB Qty", "ROB Water", "TOB Qty", "TOB Water",
+                "Net YADE Receipt", "Net Water", "BCCR Quantity",
+                "BCCR Water", "S.No", "Date", "Difference Yade vs BCCR"
+            }
+            def _weight(col_name: str) -> float:
+                if col_name == "Remarks":
+                    return 3.0
+                if col_name in {"Convoy No"}:
+                    return 1.5
+                if col_name in numeric_cols:
+                    return 1.0
+                return 1.2
+            weights = [_weight(c) for c in columns]
+            total_w = sum(weights) if sum(weights) > 0 else 1.0
+            col_widths = [available_width * (w / total_w) for w in weights]
+
+            table = Table(table_data, repeatRows=1, colWidths=col_widths, hAlign="LEFT")
             table.setStyle(TableStyle([
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#003366")),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
                 ("FONTSIZE", (0, 0), (-1, 0), 10),
                 ("FONTSIZE", (0, 1), (-1, -1), 9),
                 ("GRID", (0, 0), (-1, -1), 0.3, colors.grey),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("ALIGN", (0, 1), (-1, -1), "LEFT"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 3),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+                ("TOPPADDING", (0, 0), (-1, -1), 2),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
             ]))
             elements.append(table)
         doc.build(elements)
@@ -184,18 +249,30 @@ def render_bccr_page(active_location_id, user):
             stages = s.query(TOAYadeStage).filter(TOAYadeStage.voyage_id.in_(voyage_ids)).all()
             stage_map = {}
             for stage in stages:
-                stage_map.setdefault(stage.voyage_id, {})[(stage.stage or "").strip().lower()] = stage
+                key_raw = (getattr(stage, "stage", "") or "").strip().lower()
+                key = (
+                    "before" if ("before" in key_raw) else (
+                        "after" if ("after" in key_raw) else key_raw
+                    )
+                )
+                stage_map.setdefault(stage.voyage_id, {})[key] = stage
             rows = []
             for summary, voyage in summaries:
                 per_stage = stage_map.get(summary.voyage_id, {})
                 before = per_stage.get("before")
                 after = per_stage.get("after")
-                rob_qty = float(getattr(before, "nsv_bbl", 0.0) or 0.0)
-                rob_water = float(getattr(before, "fw_bbl", 0.0) or 0.0)
-                tob_qty = float(getattr(after, "nsv_bbl", 0.0) or 0.0)
-                tob_water = float(getattr(after, "fw_bbl", 0.0) or 0.0)
-                net_loaded = float(getattr(summary, "net_nsv_bbl", None) or (tob_qty - rob_qty))
-                net_water = float(getattr(summary, "net_bsw_bbl", None) or (tob_water - rob_water))
+                rob_qty = float((getattr(summary, "before_nsv_bbl", None) if hasattr(summary, "before_nsv_bbl") else None) or getattr(before, "nsv_bbl", 0.0) or 0.0)
+                rob_bsw = float((getattr(summary, "before_bsw_bbl", None) if hasattr(summary, "before_bsw_bbl") else None) or getattr(before, "bsw_bbl", 0.0) or 0.0)
+                rob_fw = float(getattr(before, "fw_bbl", 0.0) or 0.0)
+                rob_water = rob_bsw if rob_bsw else rob_fw
+                tob_qty = float((getattr(summary, "after_nsv_bbl", None) if hasattr(summary, "after_nsv_bbl") else None) or getattr(after, "nsv_bbl", 0.0) or 0.0)
+                tob_bsw = float((getattr(summary, "after_bsw_bbl", None) if hasattr(summary, "after_bsw_bbl") else None) or getattr(after, "bsw_bbl", 0.0) or 0.0)
+                tob_fw = float(getattr(after, "fw_bbl", 0.0) or 0.0)
+                tob_water = tob_bsw if tob_bsw else tob_fw
+                net_loaded = float((getattr(summary, "net_nsv_bbl", None) if hasattr(summary, "net_nsv_bbl") else None) or (tob_qty - rob_qty))
+                net_bsw = float((getattr(summary, "net_bsw_bbl", None) if hasattr(summary, "net_bsw_bbl") else None) or (tob_bsw - rob_bsw))
+                net_fw = float(tob_fw - rob_fw)
+                net_water = net_bsw if net_bsw else net_fw
                 rows.append({
                     "id": summary.voyage_id,
                     "Date": voyage.date,
@@ -212,13 +289,36 @@ def render_bccr_page(active_location_id, user):
 
     def _load_dispatch_rows(location_id):
         with get_session() as s:
-            from models import OTRRecord
+            from models import OTRRecord, Tank
             records = s.query(OTRRecord).filter(OTRRecord.location_id == location_id).order_by(OTRRecord.date.asc(), OTRRecord.time.asc()).all()
             if not records:
                 return []
+            tank_ids = []
+            for rec in records:
+                try:
+                    if rec.tank_id is not None:
+                        tid = int(str(rec.tank_id))
+                        tank_ids.append(tid)
+                except Exception:
+                    pass
+            name_by_id = {}
+            if tank_ids:
+                try:
+                    tanks = s.query(Tank).filter(Tank.location_id == location_id, Tank.id.in_(sorted(set(tank_ids)))).all()
+                    name_by_id = {int(t.id): (t.name or "") for t in tanks}
+                except Exception:
+                    name_by_id = {}
             data = []
             for rec in records:
-                tank_label = getattr(rec, "tank_name", None) or (rec.tank_id or "")
+                tank_label = None
+                try:
+                    tid = int(str(rec.tank_id)) if rec.tank_id is not None else None
+                    if tid is not None:
+                        tank_label = name_by_id.get(tid)
+                except Exception:
+                    tank_label = None
+                if not tank_label:
+                    tank_label = rec.tank_id or ""
                 data.append({
                     "id": rec.id,
                     "Ticket ID": rec.ticket_id,
@@ -237,7 +337,7 @@ def render_bccr_page(active_location_id, user):
             df.sort_values(["Tank", "DT"], inplace=True)
             df["Prev NSV"] = df.groupby("Tank")["NSV (bbl)"].shift(1)
             df["Prev FW"] = df.groupby("Tank")["Free Water (bbl)"].shift(1)
-            df["Net Rece/Disp (bbls)"] = df["NSV (bbl)"] - df["Prev NSV"]
+            df["Net Rece/Disp (bbls)"] = (df["NSV (bbl)"] - df["Prev NSV"]).abs()
             df["Net Water Rece/Disp (bbls)"] = df["Free Water (bbl)"] - df["Prev FW"]
             df = df[df["Operation"].str.strip().str.lower() == "dispatch to barge"]
             df = df.sort_values("Date", ascending=False).head(200)
@@ -292,11 +392,12 @@ def render_bccr_page(active_location_id, user):
         map_col1, map_col2 = st.columns(2)
         with map_col1:
             st.subheader("YADE Transactions (TOA)")
-            yc1, yc2 = st.columns(2)
+            yc1, yc2, yc3 = st.columns(3)
             with yc1:
                 yade_convoy_filter = st.text_input("Convoy No", key=f"bccr_yade_convoy_{target_location_id}")
-                yade_no_filter = st.text_input("Yade No", key=f"bccr_yade_yade_{target_location_id}")
             with yc2:
+                yade_no_filter = st.text_input("Yade No", key=f"bccr_yade_yade_{target_location_id}")
+            with yc3:
                 yade_date_filter = st.date_input("Date", value=None, key=f"bccr_yade_date_{target_location_id}")
             def _matches_yade(row):
                 if yade_convoy_filter and yade_convoy_filter.strip():
@@ -361,7 +462,7 @@ def render_bccr_page(active_location_id, user):
                 st.warning("Please select at least one YADE record and one Dispatch record.")
             else:
                 selected_yade_rows = [yade_lookup[row_id] for row_id in yade_selected if row_id in yade_lookup]
-                selected_otr_rows = [otr_lookup[row_id] for row_id in otr_selected if row_id in otr_lookup]
+                selected_otr_rows = [otr_lookup[row_id] for row_id in otr_lookup]
                 if not selected_yade_rows or not selected_otr_rows:
                     st.warning("Unable to locate selected rows. Please try again.")
                 else:
@@ -375,6 +476,7 @@ def render_bccr_page(active_location_id, user):
                         "net_yade": round(sum(r["Net Loaded"] for r in selected_yade_rows), 2),
                         "net_water": round(sum(r["Net Water"] for r in selected_yade_rows), 2),
                         "bccr_qty": round(sum(r.get("Net Rece/Disp (bbls)", 0.0) for r in selected_otr_rows if isinstance(r.get("Net Rece/Disp (bbls)"), (int, float))), 2),
+                        "bccr_water": round(sum(r.get("Net Water Rece/Disp (bbls)", 0.0) for r in selected_otr_rows if isinstance(r.get("Net Water Rece/Disp (bbls)"), (int, float))), 2),
                     }
                     _set_pending(pending_payload)
                     _set_selection("bccr_yade_selected", set())
@@ -386,16 +488,18 @@ def render_bccr_page(active_location_id, user):
     with tab_report:
         st.markdown("### BCCR Report")
         pending_data = _get_pending()
-        records = _get_records()
-        rep_col1, rep_col2 = st.columns(2)
+        records_all = _load_bccr_records(target_location_id)
+        rep_col1, rep_col2, rep_col3 = st.columns(3)
         with rep_col1:
-            report_date_filter = st.date_input("Filter by Date", value=None, key=f"bccr_report_date_{target_location_id}")
+            report_date_from = st.date_input("From", value=None, key=f"bccr_report_from_{target_location_id}")
         with rep_col2:
-            report_convoy_filter = st.text_input("Filter by Convoy No", key=f"bccr_report_convoy_{target_location_id}")
+            report_date_to = st.date_input("To", value=None, key=f"bccr_report_to_{target_location_id}")
+        with rep_col3:
+            report_convoy_filter = st.text_input("Convoy No", key=f"bccr_report_convoy_{target_location_id}")
         export_container = st.container()
         if pending_data:
             st.info("Pending mapping detected. Review the values below and save to BCCR report.")
-            default_sno = max([rec["sno"] for rec in records], default=0) + 1
+            default_sno = max([rec.get("sno", 0) for rec in records_all], default=0) + 1
             with st.form(f"bccr_add_form_{target_location_id}"):
                 col1, col2 = st.columns(2)
                 with col1:
@@ -410,12 +514,12 @@ def render_bccr_page(active_location_id, user):
                     new_net_yade = st.number_input("Net YADE Receipt (bbls)", value=float(pending_data["net_yade"]), format="%.2f")
                     new_net_water = st.number_input("Net Water (bbls)", value=float(pending_data["net_water"]), format="%.2f")
                     new_bccr_qty = st.number_input("BCCR Quantity (bbls)", value=float(pending_data["bccr_qty"]), format="%.2f")
+                    new_bccr_water = st.number_input("BCCR Water (bbls)", value=float(pending_data.get("bccr_water", 0.0)), format="%.2f")
                     difference_value = new_bccr_qty - new_net_yade
                     st.metric("Difference (BCCR - YADE)", f"{difference_value:,.2f} bbls")
                 new_remarks = st.text_area("Remarks", value="")
                 if st.form_submit_button("Save BCCR Mapping", type="primary"):
                     record = {
-                        "id": str(uuid4()),
                         "sno": int(new_sno),
                         "date": new_date.strftime("%Y-%m-%d"),
                         "convoy": new_convoy,
@@ -426,13 +530,42 @@ def render_bccr_page(active_location_id, user):
                         "net_yade": round(new_net_yade, 2),
                         "net_water": round(new_net_water, 2),
                         "bccr_qty": round(new_bccr_qty, 2),
+                        "bccr_water": round(new_bccr_water, 2),
                         "difference": round(difference_value, 2),
                         "remarks": new_remarks.strip(),
                     }
-                    records.append(record)
-                    _set_records(records)
-                    _set_pending(None)
-                    st.success("Mapping saved.")
+                    try:
+                        with get_session() as s:
+                            from models import FlexibleRecord
+                            txd = new_date
+                            fr = FlexibleRecord(
+                                location_id=target_location_id,
+                                page="bccr",
+                                section="report",
+                                tx_date=txd,
+                                data_json=json.dumps(record),
+                                created_by=(user or {}).get("username", "system"),
+                            )
+                            s.add(fr)
+                            s.commit()
+                            try:
+                                from security import SecurityManager
+                                SecurityManager.log_audit(
+                                    s,
+                                    (user or {}).get("username", "system"),
+                                    "CREATE",
+                                    resource_type="BCCRRecord",
+                                    resource_id=str(getattr(fr, "id", "")),
+                                    details=f"Saved BCCR mapping for convoy {new_convoy}",
+                                    user_id=(user or {}).get("id"),
+                                    location_id=target_location_id,
+                                )
+                            except Exception:
+                                pass
+                        _set_pending(None)
+                        st.success("Mapping saved.")
+                    except Exception as ex:
+                        st.error(f"Failed to save mapping: {ex}")
         else:
             st.caption("Select records in the Mapping tab and click MAP to create a pending entry.")
 
@@ -449,7 +582,7 @@ def render_bccr_page(active_location_id, user):
                     return False
             return True
 
-        filtered_records = [rec for rec in records if _record_matches(rec)]
+        filtered_records = _load_bccr_records(target_location_id, report_date_from, report_date_to, report_convoy_filter)
         column_map = {
             "sno": "S.No",
             "date": "Date",
@@ -461,6 +594,7 @@ def render_bccr_page(active_location_id, user):
             "net_yade": "Net YADE Receipt",
             "net_water": "Net Water",
             "bccr_qty": "BCCR Quantity",
+            "bccr_water": "BCCR Water",
             "difference": "Difference Yade vs BCCR",
             "remarks": "Remarks",
         }
@@ -471,12 +605,21 @@ def render_bccr_page(active_location_id, user):
             download_df = renamed_df.drop(columns=["id"], errors="ignore")
         export_disabled = download_df.empty
         filter_parts = []
-        if report_date_filter:
-            filter_parts.append(f"Date: {report_date_filter.strftime('%d %b %Y')}")
+        if report_date_from:
+            filter_parts.append(f"From: {report_date_from.strftime('%d %b %Y')}")
+        if report_date_to:
+            filter_parts.append(f"To: {report_date_to.strftime('%d %b %Y')}")
         if report_convoy_filter and report_convoy_filter.strip():
             filter_parts.append(f"Convoy: {report_convoy_filter.strip()}")
         filter_description = " | ".join(filter_parts) if filter_parts else "No filters applied"
-        date_token = report_date_filter.strftime("%Y%m%d") if report_date_filter else "ALL"
+        if report_date_from and report_date_to:
+            date_token = f"{report_date_from.strftime('%Y%m%d')}-{report_date_to.strftime('%Y%m%d')}"
+        elif report_date_from:
+            date_token = f"{report_date_from.strftime('%Y%m%d')}-ALL"
+        elif report_date_to:
+            date_token = f"ALL-{report_date_to.strftime('%Y%m%d')}"
+        else:
+            date_token = "ALL"
         convoy_raw = (report_convoy_filter or "").strip()
         convoy_token = re.sub(r"[^A-Za-z0-9]+", "_", convoy_raw).strip("_") or "ALL"
         location_token = _canon(target_location_code) or _canon(target_location_name) or "LOCATION"
@@ -535,11 +678,32 @@ def render_bccr_page(active_location_id, user):
             st.subheader("Mapped Records")
             st.dataframe(download_df, use_container_width=True, hide_index=True)
             for rec in filtered_records:
-                if st.button(f"Delete S.No {rec['sno']}", key=f"bccr_delete_{rec['id']}"):
-                    records = [r for r in records if r["id"] != rec["id"]]
-                    _set_records(records)
-                    st.success(f"Deleted mapping S.No {rec['sno']}")
-                    break
+                rid = rec.get("_id")
+                if st.button(f"Delete S.No {rec['sno']}", key=f"bccr_delete_{rid}"):
+                    try:
+                        with get_session() as s:
+                            from models import FlexibleRecord
+                            obj = s.query(FlexibleRecord).get(rid)
+                            if obj:
+                                try:
+                                    from recycle_bin import RecycleBinManager
+                                    RecycleBinManager.archive_record(
+                                        s,
+                                        obj,
+                                        "FlexibleRecord:BCCR",
+                                        username=(user or {}).get("username", "system"),
+                                        user_id=(user or {}).get("id"),
+                                        location_id=target_location_id,
+                                        reason=f"Deleted BCCR mapping S.No {rec['sno']}",
+                                        label=str(rid),
+                                    )
+                                    s.commit()
+                                except Exception:
+                                    s.delete(obj)
+                                    s.commit()
+                        st.success(f"Deleted mapping S.No {rec['sno']}")
+                        st.rerun()
+                    except Exception as ex:
+                        st.error(f"Failed to delete mapping: {ex}")
         else:
             st.info("No BCCR mappings found for the current filters.")
-

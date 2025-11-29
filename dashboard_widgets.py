@@ -465,9 +465,11 @@ class DashboardRenderer:
     def _render_summary_cards_section(config: Dict, location_id: int, section_date):
         """Render summary cards section"""
         if isinstance(section_date, tuple):
-            selected_date = section_date[0]  # Use start date for cards
+            selected_date_start = section_date[0]
+            selected_date_end = section_date[1]
         else:
-            selected_date = section_date if isinstance(section_date, date) else date.today()
+            selected_date_start = section_date if isinstance(section_date, date) else date.today()
+            selected_date_end = selected_date_start
         
         cards = config["layout"]["summary_cards"]["cards"]
         num_cols = config["layout"]["summary_cards"]["columns"]
@@ -475,11 +477,20 @@ class DashboardRenderer:
         cols = st.columns(num_cols)
         for idx, card in enumerate(cards[:num_cols]):
             with cols[idx]:
-                value = DashboardRenderer._fetch_card_data(card, location_id, selected_date, config)
+                value = DashboardRenderer._fetch_card_data(
+                    card,
+                    location_id,
+                    (selected_date_start, selected_date_end),
+                    config,
+                )
                 prev_value = None
                 if card.get("show_delta", False):
+                    prev_base = (selected_date_end - timedelta(days=1)) if isinstance(selected_date_end, date) else selected_date_start
                     prev_value = DashboardRenderer._fetch_card_data(
-                        card, location_id, selected_date - timedelta(days=1), config
+                        card,
+                        location_id,
+                        prev_base,
+                        config,
                     )
                 
                 WidgetRenderer.render_stat_card(
@@ -489,7 +500,7 @@ class DashboardRenderer:
                     prev_value=prev_value,
                     style=config.get("styles", {}).get("card"),
                     show_delta=card.get("show_delta", False),
-                    display_date=selected_date
+                    display_date=selected_date_end
                 )
     
     @staticmethod
@@ -818,18 +829,106 @@ class DashboardRenderer:
         
         if data_source == "calculated":
             calculation = card_config.get("calculation")
+            # For range filters, use end date for status-like calculations
+            if isinstance(target_date, tuple):
+                date_end = target_date[1] or target_date[0]
+            else:
+                date_end = target_date
             if calculation == "ullage":
-                return DashboardRenderer._calculate_ullage(location_id, target_date)
+                return DashboardRenderer._calculate_ullage(location_id, date_end)
             elif calculation == "pumpable":
-                return DashboardRenderer._calculate_pumpable(location_id, target_date, config)
+                return DashboardRenderer._calculate_pumpable(location_id, date_end, config)
         
         elif data_source == "material_balance":
             field = card_config.get("field")
-            return DashboardRenderer._fetch_mb_data(location_id, target_date, field)
+            # Support single-day and range aggregation
+            try:
+                if isinstance(target_date, tuple):
+                    from material_balance_calculator import MaterialBalanceCalculator
+                    from location_manager import LocationManager
+                    from db import get_session
+                    d_start, d_end = target_date
+                    with get_session() as s:
+                        loc = LocationManager.get_location_by_id(s, location_id)
+                        if not loc:
+                            return None
+                        rows = MaterialBalanceCalculator.calculate_material_balance(
+                            entries=None,
+                            location_code=loc.code.upper(),
+                            date_from=d_start,
+                            date_to=d_end,
+                            location_id=location_id,
+                            debug=False,
+                        )
+                        if rows:
+                            df = pd.DataFrame(rows)
+                            if field in df.columns:
+                                return float(pd.to_numeric(df[field], errors="coerce").fillna(0).sum())
+                        return None
+                else:
+                    return DashboardRenderer._fetch_mb_data(location_id, target_date, field)
+            except Exception:
+                return None
         
         elif data_source == "fso_operations":
             field = card_config.get("field")
             return DashboardRenderer._fetch_fso_data(location_id, target_date, field)
+        elif data_source == "table":
+            table = card_config.get("table_name")
+            field = card_config.get("field")
+            if not table or not field:
+                return None
+            from sqlalchemy import inspect, text
+            from db import engine, get_session
+            insp = inspect(engine)
+            cols = [c.get("name") for c in insp.get_columns(table)]
+            date_col = None
+            for cand in ["date", "Date", "transaction_date", "created_at", "timestamp"]:
+                if cand in cols:
+                    date_col = cand
+                    break
+            has_loc = "location_id" in cols
+            where = []
+            params = {}
+            try:
+                backend = engine.url.get_backend_name()
+            except Exception:
+                backend = "sqlite"
+
+            def q(identifier: str) -> str:
+                if backend == "mysql":
+                    return f"`{identifier}`"
+                else:
+                    return f'"{identifier}"'
+
+            q_table = q(table)
+            q_field = q(field)
+            q_date = q(date_col) if date_col else None
+            q_loc = q("location_id") if has_loc else None
+
+            # Apply date filter as equality or range
+            if date_col:
+                if isinstance(target_date, tuple):
+                    d_start, d_end = target_date
+                    where.append(f"{q_date} BETWEEN :d1 AND :d2")
+                    params["d1"] = (str(d_start) if date_col == "Date" else d_start)
+                    params["d2"] = (str(d_end) if date_col == "Date" else d_end)
+                else:
+                    where.append(f"{q_date} = :d")
+                    params["d"] = (str(target_date) if date_col == "Date" else target_date)
+            if has_loc:
+                where.append(f"{q_loc} = :loc")
+                params["loc"] = location_id
+            sql = f"SELECT SUM({q_field}) AS v FROM {q_table}" + (" WHERE " + " AND ".join(where) if where else "")
+            with get_session() as s:
+                try:
+                    val = s.execute(text(sql), params).scalar()
+                except Exception:
+                    val = None
+            try:
+                return float(val or 0.0)
+            except Exception:
+                return None
         
         return None
     

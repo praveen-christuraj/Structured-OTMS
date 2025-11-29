@@ -1,0 +1,1096 @@
+2025-11-29 08:10:37 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:10:37 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:10:37 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:10:37 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:27:20 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 49
+2025-11-29 08:27:20 - OTMS - WARNING - Table 'flex_produced_water_2' does not exist in database. Available tables: 49
+2025-11-29 08:27:40 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:27:40 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:27:40 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:27:40 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:27:49 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:27:49 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:27:49 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:27:49 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:27:51 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:27:51 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:27:51 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:27:51 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:27:57 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:27:57 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:27:57 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:27:57 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:27:59 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:27:59 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:27:59 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:27:59 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:03 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:03 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:03 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:03 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:05 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:05 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:07 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:07 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:07 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:07 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:11 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:11 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:11 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:11 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:12 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:13 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:13 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:13 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:15 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:15 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:15 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:15 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:16 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:16 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:16 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:16 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:18 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:18 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:18 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:18 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:19 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:19 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:19 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:19 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:48 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:48 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:48 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:48 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:49 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:49 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:49 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:49 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:52 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:52 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:52 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:52 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:55 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:55 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:55 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:55 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:56 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:56 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:56 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:56 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:28:58 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:28:58 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:28:58 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:28:58 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:29:14 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:29:14 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:29:14 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:29:14 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:31:30 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:31:30 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:31:30 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:31:30 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:31:31 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:31:31 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:31:31 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:31:31 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:31:32 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:31:32 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:31:32 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:31:32 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:31:33 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:31:33 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:31:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:31:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:31:38 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:31:38 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:31:38 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:31:38 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:31:41 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:31:41 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:31:41 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:31:41 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:31:49 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:31:49 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:31:49 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:31:49 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:31:51 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:31:51 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:31:51 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:31:51 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:32:04 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:32:04 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:32:04 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:32:04 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:32:07 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:32:07 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:32:07 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:32:07 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:32:10 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:32:10 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:32:10 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:32:10 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:32:11 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:32:11 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:32:11 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:32:11 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:32:12 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:32:12 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:32:12 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:32:12 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:32:19 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:32:19 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:32:19 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:32:19 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:32:21 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:32:21 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:32:21 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:32:21 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:48:41 - OTMS - INFO - Loaded 49 tables from database
+2025-11-29 08:48:41 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:48:41 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:48:41 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:49:34 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:49:34 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:49:34 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:49:34 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:49:34 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:49:34 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:49:34 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:50:16 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:16 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:16 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:16 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:28 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:28 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:28 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:28 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:30 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:30 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:30 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:30 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:30 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:30 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:30 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:30 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:32 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:32 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:32 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:32 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:35 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:35 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:35 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:35 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:37 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:37 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:37 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:37 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:45 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:45 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:45 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:45 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:47 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:47 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:47 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:47 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:48 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:48 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:48 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:48 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:52 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:52 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:52 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:52 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:53 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:53 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:50:59 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:50:59 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:50:59 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:50:59 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:02 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:02 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:02 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:02 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:02 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:02 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:02 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:02 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:04 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:04 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:04 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:04 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:05 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:05 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:06 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:06 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:06 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:06 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:08 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:08 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:08 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:08 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:16 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:16 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:16 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:16 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:18 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:18 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:18 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:18 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:19 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:19 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:19 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:19 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:21 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:51:21 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:51:21 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:21 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:29 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:29 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:38 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:38 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:47 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:47 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:51:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:51:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:05 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:05 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:05 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:05 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:05 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:05 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:06 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 08:53:06 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 08:53:12 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:53:12 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:53:12 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:12 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:53:16 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:53:16 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:53:16 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:16 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:53:22 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:53:22 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:53:22 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:22 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 08:53:23 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 08:53:23 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 08:53:23 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 08:53:23 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:27:40 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 09:27:40 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 09:27:40 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:27:40 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:27:55 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 09:27:56 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 09:27:56 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:27:56 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:29:33 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 50
+2025-11-29 09:29:33 - OTMS - WARNING - Table 'flex_produced_water_2' does not exist in database. Available tables: 50
+2025-11-29 09:29:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:36 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:36 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:29:37 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:29:37 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:38:50 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:38:50 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:04 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 09:40:04 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 09:40:57 - OTMS - INFO - Loaded 50 tables from database
+2025-11-29 09:40:57 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 09:40:57 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 09:40:57 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 10:09:03 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 50
+2025-11-29 10:09:03 - OTMS - WARNING - Table 'flex_produced_water_2' does not exist in database. Available tables: 50
+2025-11-29 10:09:07 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 50
+2025-11-29 10:09:07 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 50
+2025-11-29 10:09:07 - OTMS - WARNING - Table 'flex_produced_water_2' does not exist in database. Available tables: 50
+2025-11-29 10:09:10 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 50
+2025-11-29 10:09:10 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 50
+2025-11-29 10:09:10 - OTMS - WARNING - Table 'flex_produced_water_2' does not exist in database. Available tables: 50
+2025-11-29 10:09:30 - OTMS - INFO - Saving produced_water data to table 'flex_produced_water_2' for location_id=2, username=admin
+2025-11-29 10:09:30 - OTMS - INFO - Attempting to create/verify table 'flex_produced_water_2' with 2 columns
+2025-11-29 10:09:30 - OTMS - INFO - Attempting to create custom table 'flex_produced_water_2' for location_id=2
+2025-11-29 10:09:30 - OTMS - INFO - Database connection verified for table 'flex_produced_water_2' creation
+2025-11-29 10:09:30 - OTMS - INFO - Table 'flex_produced_water_2' does not exist. Creating new table...
+2025-11-29 10:09:30 - OTMS - INFO - Processing 2 custom column definitions for table 'flex_produced_water_2'
+2025-11-29 10:09:30 - OTMS - INFO - Added column 'date' (date) to table 'flex_produced_water_2'
+2025-11-29 10:09:30 - OTMS - INFO - Added column 'produced_water' (number) to table 'flex_produced_water_2'
+2025-11-29 10:09:30 - OTMS - INFO - Creating table 'flex_produced_water_2' with 9 columns in database...
+2025-11-29 10:09:30 - OTMS - INFO - ✅ Successfully created table 'flex_produced_water_2'
+2025-11-29 10:09:30 - OTMS - INFO - Table 'flex_produced_water_2' is ready for use
+2025-11-29 10:09:30 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:09:30 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:09:30 - OTMS - INFO - Successfully loaded model for table 'flex_produced_water_2'. Proceeding to save data...
+2025-11-29 10:09:30 - OTMS - INFO - Inserting record into 'flex_produced_water_2' with data: {'location_id': 2, 'tx_date': datetime.date(2025, 11, 28), 'created_by': 'admin', 'date': datetime.date(2025, 11, 28), 'produced_water': 24500.0}
+2025-11-29 10:09:30 - OTMS - INFO - ✅ Successfully saved record 1 to table 'flex_produced_water_2'
+2025-11-29 10:09:34 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:09:34 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:09:34 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:09:50 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:09:50 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:09:50 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:10:03 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:10:03 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:10:03 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:12:16 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:12:16 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:12:16 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:12:37 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:12:37 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:12:37 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:12:47 - OTMS - INFO - Saving produced_water data to table 'flex_produced_water_2' for location_id=2, username=admin
+2025-11-29 10:12:47 - OTMS - INFO - Attempting to create/verify table 'flex_produced_water_2' with 2 columns
+2025-11-29 10:12:47 - OTMS - INFO - Attempting to create custom table 'flex_produced_water_2' for location_id=2
+2025-11-29 10:12:47 - OTMS - INFO - Database connection verified for table 'flex_produced_water_2' creation
+2025-11-29 10:12:47 - OTMS - INFO - Table 'flex_produced_water_2' already exists. Skipping creation.
+2025-11-29 10:12:47 - OTMS - INFO - Table 'flex_produced_water_2' is ready for use
+2025-11-29 10:12:47 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:12:47 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:12:47 - OTMS - INFO - Successfully loaded model for table 'flex_produced_water_2'. Proceeding to save data...
+2025-11-29 10:12:47 - OTMS - INFO - Inserting record into 'flex_produced_water_2' with data: {'location_id': 2, 'tx_date': datetime.date(2025, 11, 28), 'created_by': 'admin', 'date': datetime.date(2025, 11, 28), 'produced_water': 14000.0}
+2025-11-29 10:12:47 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'produced_water': Object of type date is not JSON serializable
+2025-11-29 10:12:47 - OTMS - INFO - ✅ Successfully saved record 2 to table 'flex_produced_water_2'
+2025-11-29 10:12:51 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:12:51 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:12:51 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:12:58 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:12:58 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:12:58 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:22:03 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:22:03 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:22:03 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:22:28 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:22:28 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:22:28 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:24:01 - OTMS - INFO - Saving produced_water data to table 'flex_produced_water_2' for location_id=2, username=admin
+2025-11-29 10:24:01 - OTMS - INFO - Attempting to create/verify table 'flex_produced_water_2' with 2 columns
+2025-11-29 10:24:01 - OTMS - INFO - Attempting to create custom table 'flex_produced_water_2' for location_id=2
+2025-11-29 10:24:01 - OTMS - INFO - Database connection verified for table 'flex_produced_water_2' creation
+2025-11-29 10:24:01 - OTMS - INFO - Table 'flex_produced_water_2' already exists. Skipping creation.
+2025-11-29 10:24:01 - OTMS - INFO - Table 'flex_produced_water_2' is ready for use
+2025-11-29 10:24:01 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:24:01 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:24:01 - OTMS - INFO - Successfully loaded model for table 'flex_produced_water_2'. Proceeding to save data...
+2025-11-29 10:24:01 - OTMS - INFO - Inserting record into 'flex_produced_water_2' with data: {'location_id': 2, 'tx_date': datetime.date(2025, 11, 29), 'created_by': 'admin', 'date': datetime.date(2025, 11, 29), 'produced_water': 15000.0}
+2025-11-29 10:24:01 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'produced_water': Object of type date is not JSON serializable
+2025-11-29 10:24:01 - OTMS - INFO - ✅ Successfully saved record 3 to table 'flex_produced_water_2'
+2025-11-29 10:24:05 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:24:05 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:24:05 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:25:24 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:25:24 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:25:24 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:26:25 - OTMS - INFO - Saving produced_water data to table 'flex_produced_water_2' for location_id=2, username=admin
+2025-11-29 10:26:25 - OTMS - INFO - Attempting to create/verify table 'flex_produced_water_2' with 2 columns
+2025-11-29 10:26:25 - OTMS - INFO - Attempting to create custom table 'flex_produced_water_2' for location_id=2
+2025-11-29 10:26:25 - OTMS - INFO - Database connection verified for table 'flex_produced_water_2' creation
+2025-11-29 10:26:25 - OTMS - INFO - Table 'flex_produced_water_2' already exists. Skipping creation.
+2025-11-29 10:26:25 - OTMS - INFO - Table 'flex_produced_water_2' is ready for use
+2025-11-29 10:26:25 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:26:25 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:26:25 - OTMS - INFO - Successfully loaded model for table 'flex_produced_water_2'. Proceeding to save data...
+2025-11-29 10:26:25 - OTMS - INFO - Inserting record into 'flex_produced_water_2' with data: {'location_id': 2, 'tx_date': datetime.date(2025, 11, 28), 'created_by': 'admin', 'date': datetime.date(2025, 11, 28), 'produced_water': 15000.0}
+2025-11-29 10:26:25 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'produced_water': Object of type date is not JSON serializable
+2025-11-29 10:26:25 - OTMS - INFO - ✅ Successfully saved record 1 to table 'flex_produced_water_2'
+2025-11-29 10:33:49 - OTMS - ERROR - [ERROR] Sharing delete
+Error: module 'streamlit' has no attribute 'experimental_rerun'
+User: admin
+Location: 2
+Stack trace:
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\sharing.py", line 160, in render_sharing_page
+    st.experimental_rerun()
+    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'streamlit' has no attribute 'experimental_rerun'. Did you mean: 'experimental_user'?
+
+2025-11-29 10:40:12 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:12 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:12 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:12 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:12 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:12 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:12 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:12 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:12 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:12 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:12 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:13 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 10:40:13 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 10:40:26 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:40:26 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:40:26 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:40:53 - OTMS - INFO - Saving produced_water data to table 'flex_produced_water_2' for location_id=2, username=Jetty
+2025-11-29 10:40:53 - OTMS - INFO - Attempting to create/verify table 'flex_produced_water_2' with 2 columns
+2025-11-29 10:40:53 - OTMS - INFO - Attempting to create custom table 'flex_produced_water_2' for location_id=2
+2025-11-29 10:40:53 - OTMS - INFO - Database connection verified for table 'flex_produced_water_2' creation
+2025-11-29 10:40:53 - OTMS - INFO - Table 'flex_produced_water_2' already exists. Skipping creation.
+2025-11-29 10:40:53 - OTMS - INFO - Table 'flex_produced_water_2' is ready for use
+2025-11-29 10:40:53 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:40:53 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:40:53 - OTMS - INFO - Successfully loaded model for table 'flex_produced_water_2'. Proceeding to save data...
+2025-11-29 10:40:53 - OTMS - INFO - Inserting record into 'flex_produced_water_2' with data: {'location_id': 2, 'tx_date': datetime.date(2025, 11, 28), 'created_by': 'Jetty', 'date': datetime.date(2025, 11, 28), 'produced_water': 15000.0}
+2025-11-29 10:40:53 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'produced_water': Object of type date is not JSON serializable
+2025-11-29 10:40:53 - OTMS - INFO - ✅ Successfully saved record 2 to table 'flex_produced_water_2'
+2025-11-29 10:41:00 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:41:00 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:41:00 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:41:11 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:41:11 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:41:11 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:41:48 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:41:48 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:41:48 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:42:13 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:42:13 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:42:13 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:44:31 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:44:31 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:44:31 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:45:37 - OTMS - INFO - Saving produced_water data to table 'flex_produced_water_2' for location_id=2, username=Jetty
+2025-11-29 10:45:37 - OTMS - INFO - Attempting to create/verify table 'flex_produced_water_2' with 2 columns
+2025-11-29 10:45:37 - OTMS - INFO - Attempting to create custom table 'flex_produced_water_2' for location_id=2
+2025-11-29 10:45:37 - OTMS - INFO - Database connection verified for table 'flex_produced_water_2' creation
+2025-11-29 10:45:37 - OTMS - INFO - Table 'flex_produced_water_2' already exists. Skipping creation.
+2025-11-29 10:45:37 - OTMS - INFO - Table 'flex_produced_water_2' is ready for use
+2025-11-29 10:45:37 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:45:37 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:45:37 - OTMS - INFO - Successfully loaded model for table 'flex_produced_water_2'. Proceeding to save data...
+2025-11-29 10:45:37 - OTMS - INFO - Inserting record into 'flex_produced_water_2' with data: {'location_id': 2, 'tx_date': datetime.date(2025, 11, 29), 'created_by': 'Jetty', 'date': datetime.date(2025, 11, 29), 'produced_water': 24000.0}
+2025-11-29 10:45:37 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'produced_water': Object of type date is not JSON serializable
+2025-11-29 10:45:37 - OTMS - INFO - ✅ Successfully saved record 3 to table 'flex_produced_water_2'
+2025-11-29 10:45:41 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:45:41 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:45:41 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 10:46:21 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 10:46:21 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 10:46:21 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 11:13:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:13:53 - OTMS - INFO - Reflecting table 'otr_records' from database...
+2025-11-29 11:13:53 - OTMS - INFO - ✅ Successfully created model for table 'otr_records'
+2025-11-29 11:18:25 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 11:18:25 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 11:18:25 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 11:20:59 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 11:20:59 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 11:20:59 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 11:24:54 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 11:24:54 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 11:24:54 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'
+2025-11-29 11:28:11 - OTMS - WARNING - Table 'flex_meters_2' does not exist in database. Available tables: 51
+2025-11-29 11:28:11 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from database...
+2025-11-29 11:28:11 - OTMS - INFO - ✅ Successfully created model for table 'flex_produced_water_2'

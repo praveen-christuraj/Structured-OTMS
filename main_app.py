@@ -441,6 +441,7 @@ def main():
     apply_custom_css()
     st.set_page_config(
         page_title="OTMS",
+        page_icon="assets/logo.png",
         layout="wide",
         initial_sidebar_state="expanded",
     )

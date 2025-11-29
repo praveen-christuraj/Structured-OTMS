@@ -157,7 +157,13 @@ def render_sharing_page(active_location_id: Optional[int], user: Dict[str, Any])
                                             success=True,
                                         )
                                 st.success("File deleted.")
-                                st.experimental_rerun()
+                                try:
+                                    st.rerun()
+                                except Exception:
+                                    try:
+                                        st.experimental_rerun()
+                                    except Exception:
+                                        pass
                             except Exception as ex:
                                 st.error(f"Delete failed: {ex}")
                                 try:

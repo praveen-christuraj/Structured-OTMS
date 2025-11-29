@@ -5,6 +5,8 @@ Allows admins to configure dashboard layout and widgets
 """
 
 import streamlit as st
+from sqlalchemy import inspect
+from db import engine
 import json
 from datetime import date, datetime
 from dashboard_config import DashboardConfigManager, DashboardConfig
@@ -352,22 +354,28 @@ def render_summary_cards_tab(config: dict):
                     key=f"card_name_{idx}"
                 )
                 
-                card["data_source"] = st. selectbox(
+                ds_opts = ["material_balance", "fso_operations", "calculated", "manual", "table"]
+                try:
+                    ds_idx = ds_opts.index(card.get("data_source", "material_balance"))
+                except Exception:
+                    ds_idx = 0
+                card["data_source"] = st.selectbox(
                     "Data Source",
-                    options=["material_balance", "fso_operations", "calculated", "manual"],
-                    index=["material_balance", "fso_operations", "calculated", "manual"]. index(
-                        card. get("data_source", "material_balance")
-                    ),
+                    options=ds_opts,
+                    index=ds_idx,
                     key=f"card_source_{idx}"
                 )
                 
                 if card["data_source"] == "material_balance":
+                    opts = ["Receipt", "Dispatch", "Closing Stock", "Opening Stock"]
+                    try:
+                        cur_idx = opts.index(card.get("field", "Receipt"))
+                    except Exception:
+                        cur_idx = 0
                     card["field"] = st.selectbox(
                         "Field",
-                        options=["Receipt", "Dispatch", "Closing Stock", "Opening Stock"],
-                        index=["Receipt", "Dispatch", "Closing Stock", "Opening Stock"].index(
-                            card.get("field", "Receipt")
-                        ),
+                        options=opts,
+                        index=cur_idx,
                         key=f"card_field_{idx}"
                     )
                 elif card["data_source"] == "calculated":
@@ -379,6 +387,23 @@ def render_summary_cards_tab(config: dict):
                         ),
                         key=f"card_calc_{idx}"
                     )
+                elif card["data_source"] == "table":
+                    insp = inspect(engine)
+                    tables = sorted(insp.get_table_names())
+                    if tables:
+                        card["table_name"] = st.selectbox(
+                            "Table",
+                            options=tables,
+                            index=max(0, tables.index(card.get("table_name")) if card.get("table_name") in tables else 0),
+                            key=f"card_table_{idx}"
+                        )
+                        cols = [c.get("name") for c in insp.get_columns(card["table_name"])]
+                        card["field"] = st.selectbox(
+                            "Field",
+                            options=cols or [""],
+                            index=max(0, (cols or [""]).index(card.get("field")) if card.get("field") in (cols or []) else 0),
+                            key=f"card_field_{idx}"
+                        )
             
             with col2:
                 card["unit"] = st.text_input(
@@ -886,21 +911,41 @@ def render_charts_tab(config: dict):
                     key=f"series_name_{idx}"
                 )
                 
+                ds_opts = ["material_balance", "fso_operations", "table"]
+                try:
+                    ds_idx = ds_opts.index(series.get("data_source", "material_balance"))
+                except Exception:
+                    ds_idx = 0
                 series["data_source"] = st.selectbox(
                     "Data Source",
-                    options=["material_balance", "fso_operations"],
-                    index=["material_balance", "fso_operations"]. index(
-                        series.get("data_source", "material_balance")
-                    ),
+                    options=ds_opts,
+                    index=ds_idx,
                     key=f"series_source_{idx}"
                 )
             
             with col2:
-                series["field"] = st.text_input(
-                    "Field Name",
-                    value=series. get("field", "Receipt"),
-                    key=f"series_field_{idx}"
-                )
+                if series.get("data_source") == "table":
+                    insp = inspect(engine)
+                    tables = sorted(insp.get_table_names())
+                    series["table_name"] = st.selectbox(
+                        "Table",
+                        options=tables,
+                        index=max(0, tables.index(series.get("table_name")) if series.get("table_name") in tables else 0),
+                        key=f"series_table_{idx}"
+                    )
+                    cols = [c.get("name") for c in insp.get_columns(series["table_name"])]
+                    series["field"] = st.selectbox(
+                        "Field",
+                        options=cols or [""],
+                        index=max(0, (cols or [""]).index(series.get("field")) if series.get("field") in (cols or []) else 0),
+                        key=f"series_field_{idx}"
+                    )
+                else:
+                    series["field"] = st.text_input(
+                        "Field Name",
+                        value=series.get("field", "Receipt"),
+                        key=f"series_field_{idx}"
+                    )
                 
                 series["color"] = st.color_picker(
                     "Line Color",

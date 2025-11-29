@@ -25,6 +25,11 @@ def render_audit_log_page(active_location_id, user):
         st.warning("You do not have permission to view the audit log.")
         return
 
+    c1, c2 = st.columns([0.2, 0.8])
+    with c1:
+        if st.button("🔄 Refresh Now", use_container_width=True):
+            st.rerun()
+
     FormBuilder.section_header("Filter Options", "Customize your audit log view")
     
     col1, col2, col3 = st.columns(3)

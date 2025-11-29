@@ -553,6 +553,57 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
 
         st.markdown(_render_table_html(df_with_totals), unsafe_allow_html=True)
 
+        try:
+            from sqlalchemy import inspect, text
+            from db import engine
+            from sqlalchemy.types import Float, Text
+            insp = inspect(engine)
+            table_name = f"material_balance_{loc.id}"
+            df_save = df.copy()
+            df_save = df_save[df_save["Date"] != "TOTAL"]
+            if table_name in insp.get_table_names():
+                existing_cols = {c.get("name") for c in insp.get_columns(table_name)}
+                desired_cols = list(df_save.columns)
+                backend = "sqlite"
+                try:
+                    backend = engine.url.get_backend_name()
+                except Exception:
+                    backend = "sqlite"
+                add_stmts = []
+                for col in desired_cols:
+                    if col not in existing_cols:
+                        if col == "Date":
+                            col_type = "TEXT" if backend == "sqlite" else ("DATE" if backend in ["postgresql", "mysql"] else "TEXT")
+                        else:
+                            col_type = "REAL" if backend == "sqlite" else ("DOUBLE PRECISION" if backend == "postgresql" else "DOUBLE")
+                        add_stmts.append(f"ALTER TABLE {table_name} ADD COLUMN \"{col}\" {col_type}")
+                if add_stmts:
+                    with engine.begin() as conn:
+                        for stmt in add_stmts:
+                            try:
+                                conn.execute(text(stmt))
+                            except Exception:
+                                pass
+                with get_session() as s:
+                    try:
+                        s.execute(
+                            text(f"DELETE FROM {table_name} WHERE Date BETWEEN :d1 AND :d2"),
+                            {"d1": df_save["Date"].iloc[0], "d2": df_save["Date"].iloc[-1]},
+                        )
+                        s.commit()
+                    except Exception:
+                        pass
+            # Persist material balance per location table (creates if missing)
+            dtype_map = {}
+            for c in df_save.columns:
+                if c == "Date":
+                    dtype_map[c] = Text()
+                else:
+                    dtype_map[c] = Float()
+            df_save.to_sql(table_name, con=engine, if_exists="append", index=False, dtype=dtype_map)
+        except Exception:
+            pass
+
         # Export options
         st.markdown("---")
         st.markdown("#### 📤 Export Options")

@@ -493,8 +493,63 @@ def _render_tank_tx_tab(location_id: int, date_from, date_to, created_by_filter,
 
 
 def _render_flexible_tab(location_id: int, section: str, title: str, date_from, date_to, created_by_filter, search_text, user):
-    """Render FlexibleRecord data (Meters, Condensate, Produced Water, Production)"""
     st.markdown(f"#### {title}")
+    
+    table_name = f"flex_{section}_{location_id}"
+    try:
+        from models import get_custom_table_model
+        CustomModel = get_custom_table_model(table_name)
+    except Exception:
+        CustomModel = None
+    
+    if CustomModel:
+        with get_session() as s:
+            from sqlalchemy import or_
+            query = s.query(CustomModel).filter(CustomModel.location_id == location_id)
+            if date_from and hasattr(CustomModel, "tx_date"):
+                query = query.filter(or_(CustomModel.tx_date >= date_from, CustomModel.tx_date == None))
+            if date_to and hasattr(CustomModel, "tx_date"):
+                query = query.filter(or_(CustomModel.tx_date <= date_to, CustomModel.tx_date == None))
+            if created_by_filter and hasattr(CustomModel, "created_by"):
+                query = query.filter(CustomModel.created_by.contains(created_by_filter))
+            records = query.order_by(getattr(CustomModel, "id").desc()).all()
+        if not records:
+            st.info(f"No {title.lower()} found for the selected filters.")
+            return
+        st.metric("Total Records", len(records))
+        st.markdown("---")
+        cols = [c.name for c in CustomModel.__table__.columns]
+        reserved = {"id","location_id","tx_date","created_by","created_at","updated_by","updated_at"}
+        data_cols = [c for c in cols if c not in reserved]
+        table_data = []
+        for rec in records:
+            row = {
+                "ID": getattr(rec, "id", ""),
+                "Date": str(getattr(rec, "tx_date", "")) if hasattr(rec, "tx_date") else "",
+                "Created By": getattr(rec, "created_by", "") or "",
+                "Created At": getattr(rec, "created_at").strftime("%Y-%m-%d %H:%M") if hasattr(rec, "created_at") and getattr(rec, "created_at") else "",
+            }
+            for c in data_cols:
+                v = getattr(rec, c, None)
+                if v is None:
+                    row[c] = ""
+                else:
+                    try:
+                        row[c] = f"{float(v):.2f}"
+                    except Exception:
+                        row[c] = str(v)
+            table_data.append(row)
+        df = pd.DataFrame(table_data)
+        st.dataframe(df, use_container_width=True)
+        st.markdown("---")
+        st.markdown("##### Actions")
+        for rec in records:
+            col1, col2 = st.columns([0.7, 0.3])
+            with col1:
+                st.text(f"ID {getattr(rec,'id','')} • {getattr(rec,'tx_date', '') or 'No date'}")
+            with col2:
+                st.caption(f"By: {getattr(rec,'created_by','') or 'Unknown'}")
+        return
     
     FlexModel = _get_flexible_model()
     if not FlexModel:
@@ -507,24 +562,18 @@ def _render_flexible_tab(location_id: int, section: str, title: str, date_from, 
             FlexModel.page == "tank_transactions",
             FlexModel.section == section
         )
-        
         if date_from:
             query = query.filter(FlexModel.tx_date >= date_from)
         if date_to:
             query = query.filter(FlexModel.tx_date <= date_to)
         if created_by_filter:
             query = query.filter(FlexModel.created_by.contains(created_by_filter))
-        
         records = query.order_by(FlexModel.created_at.desc()).all()
-    
     if not records:
         st.info(f"No {title.lower()} found for the selected filters.")
         return
-    
     st.metric("Total Records", len(records))
     st.markdown("---")
-    
-    # Parse data_json and create table
     table_data = []
     for rec in records:
         try:
@@ -539,42 +588,28 @@ def _render_flexible_tab(location_id: int, section: str, title: str, date_from, 
             table_data.append(row_dict)
         except Exception:
             continue
-    
     if table_data:
         df = pd.DataFrame(table_data)
-        
-        # Add action buttons column
         st.dataframe(df, use_container_width=True)
-        
         st.markdown("---")
         st.markdown("##### Actions")
-        
-        # Edit/Delete for each record
         for i, rec in enumerate(records):
             col1, col2, col3, col4 = st.columns([0.5, 0.2, 0.15, 0.15])
-            
             with col1:
                 data = json.loads(rec.data_json) if rec.data_json else {}
                 st.text(f"ID {rec.id} • {rec.tx_date or 'No date'}")
-            
             with col2:
                 st.caption(f"By: {rec.created_by or 'Unknown'}")
-            
             with col3:
                 if st.button("✏️ Edit", key=f"edit_flex_{section}_{rec.id}"):
                     st.session_state[f"editing_flex_{section}_{rec.id}"] = True
                     st.rerun()
-            
             with col4:
                 if st.button("🗑️", key=f"delete_flex_{section}_{rec.id}"):
                     st.session_state[f"deleting_flex_{section}_{rec.id}"] = True
                     st.rerun()
-            
-            # Edit modal
             if st.session_state.get(f"editing_flex_{section}_{rec.id}"):
                 _render_flex_edit_modal(rec, section, title, user)
-            
-            # Delete confirmation
             if st.session_state.get(f"deleting_flex_{section}_{rec.id}"):
                 _render_flex_delete_confirmation(rec, section, title, user)
 
