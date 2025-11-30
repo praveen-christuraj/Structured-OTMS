@@ -1461,6 +1461,128 @@ class ReportAccess(Base):
 # Index for faster access control queries
 Index('idx_report_access_lookup', ReportAccess.report_id, ReportAccess.role, ReportAccess.user_id)
 
+# =============================================================================
+# REPORT ENHANCEMENT MODELS - Add at the end of models.py
+# =============================================================================
+
+class ReportTemplate(Base):
+    """Reusable report templates that can be cloned across locations."""
+    __tablename__ = "report_templates"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    slug = Column(String(255), unique=True, nullable=False)
+    description = Column(Text, nullable=True)
+    config_json = Column(Text, nullable=False)  # Full report configuration
+    category = Column(String(100), nullable=True)  # e.g., "Operations", "Finance", "Production"
+    is_global = Column(Boolean, default=True)  # Available to all locations
+    created_by = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime. utcnow)
+    version = Column(Integer, default=1)
+    
+    def __repr__(self):
+        return f"<ReportTemplate(id={self.id}, name='{self. name}')>"
+
+
+class ReportSchedule(Base):
+    """Scheduled report execution configuration."""
+    __tablename__ = "report_schedules"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    report_id = Column(Integer, ForeignKey("report_definitions.id"), nullable=False)
+    name = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    
+    # Schedule configuration
+    frequency = Column(String(50), nullable=False)  # daily, weekly, monthly, custom
+    cron_expression = Column(String(100), nullable=True)  # For custom schedules
+    run_time = Column(String(10), nullable=True)  # HH:MM format
+    run_day = Column(Integer, nullable=True)  # Day of week (0-6) or day of month (1-31)
+    timezone = Column(String(50), default="UTC")
+    
+    # Filter overrides for scheduled runs
+    filter_overrides_json = Column(Text, nullable=True)
+    
+    # Export configuration
+    export_formats = Column(String(255), default="xlsx,pdf")  # Comma-separated
+    
+    # Destination configuration (JSON array)
+    destinations_json = Column(Text, nullable=True)
+    
+    # Notification settings
+    notify_on_success = Column(Boolean, default=False)
+    notify_on_failure = Column(Boolean, default=True)
+    notification_emails = Column(Text, nullable=True)  # Comma-separated emails
+    
+    # Execution tracking
+    last_run_at = Column(DateTime, nullable=True)
+    last_run_status = Column(String(50), nullable=True)  # success, failed, running
+    last_run_message = Column(Text, nullable=True)
+    next_run_at = Column(DateTime, nullable=True)
+    
+    created_by = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship
+    report = relationship("ReportDefinition", backref="schedules")
+    
+    def __repr__(self):
+        return f"<ReportSchedule(id={self. id}, report_id={self. report_id}, frequency='{self.frequency}')>"
+
+
+class ReportDestination(Base):
+    """Configured export destinations for reports."""
+    __tablename__ = "report_destinations"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    destination_type = Column(String(50), nullable=False)  # network, email, sftp, s3, azure, sharepoint
+    is_active = Column(Boolean, default=True)
+    
+    # Connection configuration (encrypted JSON)
+    config_json = Column(Text, nullable=False)
+    
+    # Validation
+    last_test_at = Column(DateTime, nullable=True)
+    last_test_status = Column(String(50), nullable=True)
+    
+    created_by = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<ReportDestination(id={self. id}, name='{self.name}', type='{self. destination_type}')>"
+
+
+class ReportExecutionLog(Base):
+    """Log of all report executions (manual and scheduled)."""
+    __tablename__ = "report_execution_logs"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    report_id = Column(Integer, ForeignKey("report_definitions.id"), nullable=False)
+    schedule_id = Column(Integer, ForeignKey("report_schedules.id"), nullable=True)
+    
+    execution_type = Column(String(50), nullable=False)  # manual, scheduled
+    status = Column(String(50), nullable=False)  # started, success, failed
+    
+    started_at = Column(DateTime, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
+    duration_seconds = Column(Float, nullable=True)
+    
+    row_count = Column(Integer, nullable=True)
+    export_format = Column(String(20), nullable=True)
+    destination_type = Column(String(50), nullable=True)
+    destination_path = Column(Text, nullable=True)
+    
+    error_message = Column(Text, nullable=True)
+    executed_by = Column(String(255), nullable=True)
+    
+    # Filters used
+    filters_json = Column(Text, nullable=True)
+    
+    def __repr__(self):
+        return f"<ReportExecutionLog(id={self.id}, report_id={self.report_id}, status='{self.status}')>"
 
 # ============================================================================
 # DYNAMIC TABLE CREATION FOR CUSTOM TABS

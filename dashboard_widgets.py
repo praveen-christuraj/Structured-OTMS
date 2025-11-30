@@ -408,16 +408,31 @@ class DashboardRenderer:
                     elif filter_type == "range":
                         default_days = date_filter_cfg.get("default_days", 30)
                         default_start = date.today() - timedelta(days=default_days)
-                        start_date = st.date_input(
-                            f"{filter_label} - Start",
-                            value=st.session_state.get(f"section_start_{section_id}", default_start),
-                            key=f"section_start_{section_id}"
-                        )
-                        end_date = st.date_input(
-                            f"{filter_label} - End",
-                            value=st.session_state.get(f"section_end_{section_id}", date.today()),
-                            key=f"section_end_{section_id}"
-                        )
+                        if section_type == "trend_chart":
+                            dc1, dc2 = st.columns([0.5, 0.5])
+                            with dc1:
+                                start_date = st.date_input(
+                                    "From",
+                                    value=st.session_state.get(f"section_start_{section_id}", default_start),
+                                    key=f"section_start_{section_id}"
+                                )
+                            with dc2:
+                                end_date = st.date_input(
+                                    "To",
+                                    value=st.session_state.get(f"section_end_{section_id}", date.today()),
+                                    key=f"section_end_{section_id}"
+                                )
+                        else:
+                            start_date = st.date_input(
+                                f"{filter_label} - Start",
+                                value=st.session_state.get(f"section_start_{section_id}", default_start),
+                                key=f"section_start_{section_id}"
+                            )
+                            end_date = st.date_input(
+                                f"{filter_label} - End",
+                                value=st.session_state.get(f"section_end_{section_id}", date.today()),
+                                key=f"section_end_{section_id}"
+                            )
                         section_date_value = (start_date, end_date)
                     elif filter_type == "month":
                         month_col, year_col = st.columns(2)

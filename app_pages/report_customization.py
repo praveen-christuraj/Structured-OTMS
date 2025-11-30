@@ -477,6 +477,129 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
             default=["manager", "supervisor"],
         )
 
+    with st.expander("8) Export Formats & Delivery Options", expanded=False):
+        st.caption("Configure available export formats and delivery destinations.")
+
+        col_fmt1, col_fmt2 = st.columns(2)
+
+        with col_fmt1:
+            st.markdown("**Available Export Formats**")
+            export_csv = st.checkbox("CSV (Comma-Separated Values)", value=True, key="exp_csv")
+            export_xlsx = st.checkbox("Excel (XLSX)", value=True, key="exp_xlsx")
+            export_pdf = st.checkbox("PDF Document", value=True, key="exp_pdf")
+            export_json = st.checkbox("JSON (For APIs)", value=False, key="exp_json")
+            export_xml = st.checkbox("XML (For Integration)", value=False, key="exp_xml")
+            export_html = st.checkbox("HTML (For Email/Web)", value=False, key="exp_html")
+
+        selected_formats: List[str] = []
+        if export_csv:
+            selected_formats.append("csv")
+        if export_xlsx:
+            selected_formats.append("xlsx")
+        if export_pdf:
+            selected_formats.append("pdf")
+        if export_json:
+            selected_formats.append("json")
+        if export_xml:
+            selected_formats.append("xml")
+        if export_html:
+            selected_formats.append("html")
+
+        with col_fmt2:
+            st.markdown("**PDF Options**")
+            pdf_orientation = st.selectbox(
+                "PDF Orientation",
+                ["Landscape", "Portrait"],
+                key="pdf_orientation",
+            )
+            pdf_page_size = st.selectbox(
+                "PDF Page Size",
+                ["A4", "Letter", "Legal", "A3"],
+                key="pdf_page_size",
+            )
+            include_logo = st.checkbox("Include company logo", value=True, key="pdf_logo")
+
+        st.markdown("---")
+        st.markdown("**Output Destinations**")
+        st.caption("Configure where reports can be automatically delivered.")
+
+        enable_destinations = st.checkbox(
+            "Enable automatic delivery to destinations",
+            value=False,
+            key="enable_dest",
+        )
+
+        destination_configs: List[Dict[str, Any]] = []
+
+        if enable_destinations:
+            dest_count = st.number_input(
+                "Number of destinations",
+                min_value=1,
+                max_value=5,
+                value=1,
+                step=1,
+                key="dest_count",
+            )
+
+            for idx in range(int(dest_count)):
+                st.markdown(f"**Destination {idx + 1}**")
+                dest_cols = st.columns([0.3, 0.7])
+
+                with dest_cols[0]:
+                    dest_type = st.selectbox(
+                        "Type",
+                        ["Network Path", "Email", "SFTP", "AWS S3", "Azure Blob"],
+                        key=f"dest_type_{idx}",
+                    )
+
+                with dest_cols[1]:
+                    dest_config: Dict[str, Any] = {"type": dest_type.lower().replace(" ", "_")}
+
+                    if dest_type == "Network Path":
+                        dest_config["path"] = st.text_input(
+                            "UNC Path or Directory",
+                            placeholder="//server/share/reports/ or /mnt/reports/",
+                            key=f"dest_path_{idx}",
+                        )
+                        dest_config["subfolder_pattern"] = st.text_input(
+                            "Subfolder Pattern (optional)",
+                            placeholder="{year}/{month}/ or {date}/",
+                            key=f"dest_subfolder_{idx}",
+                            help="Use {year}, {month}, {day}, {date}, {datetime}",
+                        )
+
+                    elif dest_type == "Email":
+                        dest_config["recipients"] = st.text_input(
+                            "Recipients (comma-separated)",
+                            placeholder="user1@company.com, user2@company.com",
+                            key=f"dest_email_{idx}",
+                        )
+                        dest_config["subject"] = st.text_input(
+                            "Email Subject",
+                            value=f"Report: {report_name or 'Report'} - {{date}}",
+                            key=f"dest_subject_{idx}",
+                        )
+
+                    elif dest_type == "SFTP":
+                        dest_config["host"] = st.text_input("Host", key=f"dest_sftp_host_{idx}")
+                        dest_config["port"] = st.number_input("Port", min_value=1, max_value=65535, value=22, step=1, key=f"dest_sftp_port_{idx}")
+                        dest_config["username"] = st.text_input("Username", key=f"dest_sftp_user_{idx}")
+                        dest_config["password"] = st.text_input("Password", type="password", key=f"dest_sftp_pass_{idx}")
+                        dest_config["remote_path"] = st.text_input("Remote Path", placeholder="/reports/", key=f"dest_sftp_path_{idx}")
+
+                    elif dest_type == "AWS S3":
+                        dest_config["bucket"] = st.text_input("Bucket Name", key=f"dest_s3_bucket_{idx}")
+                        dest_config["folder"] = st.text_input("Folder (optional)", placeholder="reports/{year}/{month}", key=f"dest_s3_folder_{idx}")
+                        dest_config["access_key_id"] = st.text_input("Access Key ID", key=f"dest_s3_key_{idx}")
+                        dest_config["secret_access_key"] = st.text_input("Secret Access Key", type="password", key=f"dest_s3_secret_{idx}")
+
+                    elif dest_type == "Azure Blob":
+                        dest_config["connection_string"] = st.text_input("Connection String", key=f"dest_az_conn_{idx}")
+                        dest_config["container"] = st.text_input("Container", key=f"dest_az_container_{idx}")
+                        dest_config["folder"] = st.text_input("Folder (optional)", placeholder="reports/{year}/{month}", key=f"dest_az_folder_{idx}")
+
+                    destination_configs.append(dest_config)
+
     # Optional table creation
     with st.expander("Optional: Persist as database table", expanded=False):
         create_db_table = st.checkbox(
@@ -534,6 +657,14 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
             "grouping": [],
             "aggregations": {},
             "show_totals": bool(show_totals),
+            "export_formats": selected_formats,
+            "pdf_options": {
+                "orientation": pdf_orientation.lower() if "pdf_orientation" in st.session_state else "landscape",
+                "page_size": pdf_page_size if "pdf_page_size" in st.session_state else "A4",
+                "include_logo": bool(include_logo) if "pdf_logo" in st.session_state else True,
+            },
+            "enable_destinations": bool(enable_destinations),
+            "destinations": destination_configs,
             "create_table": bool(create_db_table),
             "custom_table_name": custom_table_name if create_db_table else None,
         }

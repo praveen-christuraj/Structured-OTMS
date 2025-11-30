@@ -636,6 +636,56 @@ class ReportEngine:
             except Exception:
                 continue
         return df
+
+    def _apply_column_formatting(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Apply formatting rules to columns based on configuration.
+
+        This method processes formatting configurations for:
+        - Number formatting (decimals, thousands separator)
+        - Prefix/suffix
+        - Conditional formatting (returns formatted strings)
+        """
+        if df is None or df.empty:
+            return df
+
+        for col_config in self.columns:
+            formatting = col_config.get('formatting')
+            if not formatting:
+                continue
+
+            label = col_config.get('label') or col_config.get('field')
+            if label not in df.columns:
+                continue
+
+            try:
+                col_type = col_config.get('type', 'string')
+
+                if col_type == 'numeric':
+                    decimal_places = formatting.get('decimal_places', 2)
+                    thousands_sep = formatting.get('thousands_separator', False)
+                    prefix = formatting.get('prefix', '')
+                    suffix = formatting.get('suffix', '')
+
+                    def format_number(val):
+                        if pd.isna(val):
+                            return ''
+                        try:
+                            num = float(val)
+                            if thousands_sep:
+                                formatted = f"{num:,.{decimal_places}f}"
+                            else:
+                                formatted = f"{num:.{decimal_places}f}"
+                            return f"{prefix}{formatted}{suffix}"
+                        except Exception:
+                            return str(val)
+
+                    df[f'{label}_formatted'] = df[label].apply(format_number)
+
+            except Exception:
+                continue
+
+        return df
     
     def export_csv(self, df: pd.DataFrame, filename: str = None) -> bytes:
         """

@@ -9317,3 +9317,102 @@ sqlalchemy.exc.ArgumentError: Mapper Mapper[Custom_material_balance_2(material_b
 2025-11-29 19:40:05 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
 2025-11-29 19:40:05 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
 2025-11-29 19:40:05 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Loaded 56 tables from primary database
+2025-11-29 19:55:59 - OTMS - INFO - Loaded 47 tables from flexible database
+2025-11-29 19:55:59 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 19:55:59 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:55:59 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:55:59 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:55:59 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:55:59 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:55:59 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:55:59 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:55:59 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:55:59 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:55:59 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:55:59 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:55:59 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:55:59 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:55:59 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Loaded 56 tables from primary database
+2025-11-29 19:58:58 - OTMS - INFO - Loaded 47 tables from flexible database
+2025-11-29 19:58:58 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 19:58:58 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:58:58 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:58:58 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:58:58 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:58:58 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:58:58 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:58:58 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:58:58 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:58:58 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:58:58 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:58:58 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 19:58:58 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 19:58:58 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 19:58:58 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Loaded 56 tables from primary database
+2025-11-29 20:00:37 - OTMS - INFO - Loaded 47 tables from flexible database
+2025-11-29 20:00:37 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-29 20:00:37 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 20:00:37 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 20:00:37 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 20:00:37 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 20:00:37 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 20:00:37 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 20:00:37 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 20:00:37 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 20:00:37 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 20:00:37 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 20:00:37 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 20:00:37 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-29 20:00:38 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-29 20:00:38 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-29 20:00:38 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-29 20:00:38 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-29 20:00:38 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
