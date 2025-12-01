@@ -410,45 +410,34 @@ class DashboardRenderer:
                     elif filter_type == "range":
                         default_days = date_filter_cfg.get("default_days", 30)
                         default_start = date.today() - timedelta(days=default_days)
-                        if section_type == "trend_chart":
-                            dc1, dc2 = st.columns([0.5, 0.5])
-                            with dc1:
-                                start_date = st.date_input(
-                                    "From",
-                                    value=st.session_state.get(f"section_start_{section_id}", default_start),
-                                    max_value=date.today(),
-                                    key=f"section_start_{section_id}"
-                                )
-                            with dc2:
-                                end_date = st.date_input(
-                                    "To",
-                                    value=st.session_state.get(f"section_end_{section_id}", date.today()),
-                                    max_value=date.today(),
-                                    key=f"section_end_{section_id}"
-                                )
-                        else:
+                        dc1, dc2 = st.columns([0.5, 0.5])
+                        with dc1:
                             start_date = st.date_input(
-                                f"{filter_label} - Start",
+                                "From",
                                 value=st.session_state.get(f"section_start_{section_id}", default_start),
                                 max_value=date.today(),
-                                key=f"section_start_{section_id}"
+                                key=f"section_start_{section_id}",
+                                label_visibility="collapsed"
                             )
+                        with dc2:
                             end_date = st.date_input(
-                                f"{filter_label} - End",
+                                "To",
                                 value=st.session_state.get(f"section_end_{section_id}", date.today()),
                                 max_value=date.today(),
-                                key=f"section_end_{section_id}"
+                                key=f"section_end_{section_id}",
+                                label_visibility="collapsed"
                             )
                         section_date_value = (start_date, end_date)
                     elif filter_type == "month":
-                        month_col, year_col = st.columns(2)
+                        month_col, year_col = st.columns([0.7, 0.3])
                         with month_col:
                             month = st.selectbox(
                                 "Month",
                                 options=list(range(1, 13)),
                                 format_func=lambda x: datetime(2000, x, 1).strftime("%B"),
                                 index=date.today().month - 1,
-                                key=f"section_month_{section_id}"
+                                key=f"section_month_{section_id}",
+                                label_visibility="collapsed"
                             )
                         with year_col:
                             year = st.number_input(
@@ -456,7 +445,8 @@ class DashboardRenderer:
                                 min_value=2020,
                                 max_value=2050,
                                 value=date.today().year,
-                                key=f"section_year_{section_id}"
+                                key=f"section_year_{section_id}",
+                                label_visibility="collapsed"
                             )
                         section_date_value = (month, year)
                     elif filter_type == "year":
@@ -678,23 +668,25 @@ class DashboardRenderer:
             st.info("Monthly data section disabled in customization.")
             return
 
-        # Resolve month start/end
-        if isinstance(section_date, tuple) and len(section_date) == 2 and isinstance(section_date[0], int):
+        if isinstance(section_date, tuple) and len(section_date) == 2 and isinstance(section_date[0], date):
+            range_start = section_date[0]
+            range_end = section_date[1]
+        elif isinstance(section_date, tuple) and len(section_date) == 2 and isinstance(section_date[0], int):
             m = int(section_date[0])
             y = int(section_date[1])
             from datetime import date as _d, timedelta
-            month_start = _d(y, m, 1)
+            range_start = _d(y, m, 1)
             next_month = _d(y + (1 if m == 12 else 0), (1 if m == 12 else m + 1), 1)
-            month_end = next_month - timedelta(days=1)
+            range_end = next_month - timedelta(days=1)
         else:
             d0 = section_date if isinstance(section_date, date) else date.today()
             from datetime import timedelta
-            month_start = d0.replace(day=1)
-            if month_start.month == 12:
-                next_month = month_start.replace(year=month_start.year + 1, month=1)
+            range_start = d0.replace(day=1)
+            if range_start.month == 12:
+                next_month = range_start.replace(year=range_start.year + 1, month=1)
             else:
-                next_month = month_start.replace(month=month_start.month + 1)
-            month_end = next_month - timedelta(days=1)
+                next_month = range_start.replace(month=range_start.month + 1)
+            range_end = next_month - timedelta(days=1)
 
         visuals = layout_cfg.get("cards") or []
         num_cols = int(layout_cfg.get("columns", 4) or 4)
@@ -706,8 +698,8 @@ class DashboardRenderer:
         def _agg_vals_per_day(ds: str, field: str) -> List[Dict[str, Any]]:
             from datetime import timedelta
             rows = []
-            cur = month_start
-            while cur <= month_end:
+            cur = range_start
+            while cur <= range_end:
                 v = 0.0
                 try:
                     if ds == "material_balance":
@@ -741,8 +733,8 @@ class DashboardRenderer:
             params = {}
             if date_col:
                 where.append(f"{q(date_col)} >= :d1 AND {q(date_col)} <= :d2")
-                params["d1"] = (str(month_start) if date_col == "Date" else month_start)
-                params["d2"] = (str(month_end) if date_col == "Date" else month_end)
+                params["d1"] = (str(range_start) if date_col == "Date" else range_start)
+                params["d2"] = (str(range_end) if date_col == "Date" else range_end)
             if has_loc:
                 where.append(f"{q('location_id')} = :loc")
                 params["loc"] = location_id
@@ -776,8 +768,8 @@ class DashboardRenderer:
             params = {}
             if date_col:
                 where.append(f"{q(date_col)} >= :d1 AND {q(date_col)} <= :d2")
-                params["d1"] = (str(month_start) if date_col == "Date" else month_start)
-                params["d2"] = (str(month_end) if date_col == "Date" else month_end)
+                params["d1"] = (str(range_start) if date_col == "Date" else range_start)
+                params["d2"] = (str(range_end) if date_col == "Date" else range_end)
             if has_loc:
                 where.append(f"{q('location_id')} = :loc")
                 params["loc"] = location_id
@@ -831,7 +823,7 @@ class DashboardRenderer:
                             prev_value=None,
                             style=style,
                             show_delta=False,
-                            display_date=month_end
+                            display_date=range_end
                         )
 
                     elif vtype in ("line", "area", "bar"):
@@ -842,7 +834,7 @@ class DashboardRenderer:
                         rows = _agg_vals_per_day(ds, field)
                         df = pd.DataFrame(rows)
                         if df.empty:
-                            st.info("No data for selected month")
+                            st.info("No data for selected range")
                             continue
                         series_cfg = [{"name": title, "field": "Value", "color": color}]
                         style = {
@@ -864,7 +856,7 @@ class DashboardRenderer:
                             continue
                         df = _table_group_sum(table, value_field, group_field)
                         if df.empty:
-                            st.info("No data for selected month")
+                            st.info("No data for selected range")
                             continue
                         palette = card.get("palette") or ["#667eea", "#06b6d4", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"]
                         base = alt.Chart(df).encode(

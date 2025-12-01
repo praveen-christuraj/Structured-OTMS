@@ -62,6 +62,7 @@ ICONS = {
     "Sharing": "🔗",
     "Services": "🛠️",
     "Backup & Recovery": "💾",
+    "Back Data": "📥",
     }
 
 ROLE_ICONS = USER_ROLE_ICONS
@@ -227,6 +228,7 @@ def get_pages(user, active_location_id):
             "Report Customization",
             "Deleted Records",
             "Backup & Recovery",
+            "Back Data",
         ]
 
     # ---- Operational pages (role + location flags + module present) ----
@@ -369,6 +371,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         "Report Customization",
         "2FA Settings",
         "Error Monitoring",
+        "Back Data",
     ]
     ops_pages = [
         "Tank Transactions",
@@ -683,6 +686,9 @@ def main():
     elif current_page == "Backup & Recovery":
         from app_pages.backup_recovery import render_backup_recovery_page
         render_backup_recovery_page(active_location_id, user)
+    elif current_page == "Back Data":
+        from app_pages.back_data import render_back_data_page
+        render_back_data_page(active_location_id, user)
     # elif current_page == "FSO-Operations":
     #     from app_pages.fso_operations import render_fso_operations_page
     #     render_fso_operations_page(active_location_id, user)
