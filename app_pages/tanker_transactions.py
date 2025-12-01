@@ -634,7 +634,7 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
             chassis_no = st.text_input("Chassis No", key="tanker_tx_chassis_no")
         with meta_c2:
             convoy_no = st.text_input("Convoy No *", key="tanker_tx_convoy_no")
-            tx_date = st.date_input("Date *", key="tanker_tx_date")
+            tx_date = st.date_input("Date *", max_value=date.today(), key="tanker_tx_date")
         with meta_c3:
             cargo = st.selectbox(
                 "Cargo *",
@@ -938,7 +938,7 @@ def _render_entry_form_legacy(location: Location, can_submit: bool, tankers: Lis
                 chassis_no = st.text_input("Chassis No", key="tanker_tx_chassis_no")
             with meta_c2:
                 convoy_no = st.text_input("Convoy No *", key="tanker_tx_convoy_no")
-                tx_date = st.date_input("Date *", key="tanker_tx_date")
+                tx_date = st.date_input("Date *", max_value=date.today(), key="tanker_tx_date")
             with meta_c3:
                 cargo = st.selectbox(
                     "Cargo *",
@@ -1521,7 +1521,7 @@ def _render_custom_tanker_tab(loc, user, tab_def: dict):
             name = col.get("name")
             
             if ctype == "date":
-                row[name] = st.date_input(label, key=f"custom_tanker_{table_name}_{loc.id}_date_{i}")
+                row[name] = st.date_input(label, max_value=date.today(), key=f"custom_tanker_{table_name}_{loc.id}_date_{i}")
             elif ctype == "number":
                 row[name] = st.number_input(label, step=0.01, format="%.2f", key=f"custom_tanker_{table_name}_{loc.id}_num_{i}")
             else:

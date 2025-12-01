@@ -59,6 +59,7 @@ def render_dashboard_customization():
         "📋 Overview",
         "📊 Summary Cards",
         "🛢️ Tank Visuals",
+        "📅 Monthly Data",
         "📈 Charts & Trends",
         "🚢 Convoy Status",
         "🗂️ Sections Manager",
@@ -98,8 +99,19 @@ def render_dashboard_customization():
             else:
                 st.error("❌ Failed to save configuration")
     
-    # Tab 3: Charts & Trends
+    # Tab 3: Monthly Data
     with tabs[3]:
+        render_monthly_data_tab(config)
+        st.markdown("---")
+        if st.button("💾 Save Configuration", key="save_monthly", type="primary"):
+            if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
+                st.success("✅ Configuration saved successfully!")
+                st.session_state.dashboard_config = config
+            else:
+                st.error("❌ Failed to save configuration")
+
+    # Tab 4: Charts & Trends
+    with tabs[4]:
         render_charts_tab(config)
         st.markdown("---")
         if st.button("💾 Save Configuration", key="save_charts", type="primary"):
@@ -109,8 +121,8 @@ def render_dashboard_customization():
             else:
                 st.error("❌ Failed to save configuration")
     
-    # Tab 4: Convoy Status
-    with tabs[4]:
+    # Tab 5: Convoy Status
+    with tabs[5]:
         render_convoy_status_tab(config, location_id)
         st.markdown("---")
         if st.button("💾 Save Configuration", key="save_convoy", type="primary"):
@@ -120,8 +132,8 @@ def render_dashboard_customization():
             else:
                 st.error("❌ Failed to save configuration")
 
-    # Tab 5: Sections Manager
-    with tabs[5]:
+    # Tab 6: Sections Manager
+    with tabs[6]:
         render_sections_manager_tab(config)
         st.markdown("---")
         if st.button("💾 Save Configuration", key="save_sections", type="primary"):
@@ -131,8 +143,8 @@ def render_dashboard_customization():
             else:
                 st.error("❌ Failed to save configuration")
     
-    # Tab 6: Styles
-    with tabs[6]:
+    # Tab 7: Styles
+    with tabs[7]:
         render_styles_tab(config)
         st.markdown("---")
         if st.button("💾 Save Configuration", key="save_styles", type="primary"):
@@ -142,9 +154,99 @@ def render_dashboard_customization():
             else:
                 st.error("❌ Failed to save configuration")
     
-    # Tab 7: Save & Load
-    with tabs[7]:
+    # Tab 8: Save & Load
+    with tabs[8]:
         render_save_load_tab(config, location_id, user)
+
+def render_monthly_data_tab(config: dict):
+    """Render monthly data configuration tab"""
+    st.markdown("### Monthly Data Configuration")
+    layout = config.setdefault("layout", {}).setdefault("monthly_data", {})
+    section_list = config.setdefault("sections", [])
+    # ensure section exists
+    found = False
+    for s in section_list:
+        if s.get("id") == "monthly_data":
+            found = True
+            section = s
+            break
+    if not found:
+        section = {
+            "id": "monthly_data",
+            "name": "Monthly Data",
+            "type": "monthly_data",
+            "enabled": True,
+            "order": 3,
+            "date_filter": {"enabled": True, "type": "month", "label": "Month"}
+        }
+        section_list.append(section)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        section["enabled"] = st.toggle("Enable Monthly Data Section", value=bool(section.get("enabled", True)))
+        layout["enabled"] = section["enabled"]
+        layout["columns"] = st.number_input("Number of Columns", min_value=1, max_value=6, value=int(layout.get("columns", 4) or 4))
+    with col2:
+        st.caption("Configure visuals like cards, line/area/bar charts, pie/doughnut charts")
+
+    st.markdown("---")
+    st.markdown("### Monthly Visuals")
+    visuals = layout.setdefault("cards", [])
+
+    if st.button("➕ Add Visual"):
+        visuals.append({
+            "name": "New Visual",
+            "type": "card",
+            "data_source": "material_balance",
+            "field": "Receipt",
+            "aggregation": "sum",
+            "unit": "bbls",
+            "color": "#667eea",
+            "show_labels": True,
+            "show_markers": True
+        })
+
+    for idx, v in enumerate(visuals):
+        with st.expander(f"Visual {idx + 1}: {v.get('name','Visual')}", expanded=False):
+            col1, col2 = st.columns(2)
+            with col1:
+                v["name"] = st.text_input("Title", value=v.get("name", "Visual"), key=f"md_name_{idx}")
+                vtype_options = ["card", "line", "area", "bar", "pie", "doughnut"]
+                if v.get("type") not in vtype_options:
+                    v["type"] = "card"
+                v["type"] = st.selectbox("Visual Type", options=vtype_options, index=vtype_options.index(v.get("type", "card")), key=f"md_type_{idx}")
+                ds_opts = ["material_balance", "fso_operations", "table", "manual"]
+                try:
+                    ds_idx = ds_opts.index(v.get("data_source", "material_balance"))
+                except Exception:
+                    ds_idx = 0
+                v["data_source"] = st.selectbox("Data Source", options=ds_opts, index=ds_idx, key=f"md_ds_{idx}")
+                v["aggregation"] = st.selectbox("Aggregation", options=["sum", "avg", "min", "max"], index=["sum", "avg", "min", "max"].index(v.get("aggregation", "sum")), key=f"md_agg_{idx}")
+                v["unit"] = st.text_input("Unit", value=v.get("unit", ""), key=f"md_unit_{idx}")
+                v["color"] = st.color_picker("Color", value=_ensure_hex_color(v.get("color", "#667eea"), "#667eea"), key=f"md_color_{idx}")
+            with col2:
+                if v.get("data_source") == "table":
+                    insp = inspect(engine)
+                    tables = sorted(insp.get_table_names())
+                    v["table_name"] = st.selectbox("Table", options=tables or [""], index=max(0, (tables or [""]).index(v.get("table_name")) if v.get("table_name") in (tables or []) else 0), key=f"md_tbl_{idx}")
+                    cols = [c.get("name") for c in insp.get_columns(v.get("table_name"))] if v.get("table_name") else []
+                    v["field"] = st.selectbox("Value Field", options=cols or [""], index=max(0, (cols or [""]).index(v.get("field")) if v.get("field") in (cols or []) else 0), key=f"md_val_{idx}")
+                    if v.get("type") in ("pie", "doughnut"):
+                        v["group_field"] = st.selectbox("Group Field", options=cols or [""], index=max(0, (cols or [""]).index(v.get("group_field")) if v.get("group_field") in (cols or []) else 0), key=f"md_grp_{idx}")
+                        default_palette = v.get("palette", ["#667eea","#06b6d4","#22c55e","#f59e0b","#ef4444","#8b5cf6"])
+                        default_palette_str = ",".join(default_palette if isinstance(default_palette, list) else [str(default_palette)])
+                        pal_str = st.text_input("Palette (comma colors)", value=default_palette_str, key=f"md_pal_{idx}")
+                        v["palette"] = [c.strip() for c in pal_str.split(",") if c.strip()]
+                else:
+                    v["field"] = st.text_input("Field Name", value=v.get("field", "Receipt"), key=f"md_field_{idx}")
+                v["show_labels"] = st.checkbox("Show Labels", value=bool(v.get("show_labels", True)), key=f"md_labels_{idx}")
+                v["show_markers"] = st.checkbox("Show Markers (for line)", value=bool(v.get("show_markers", True)), key=f"md_markers_{idx}")
+                if v.get("type") in ("doughnut", "pie"):
+                    v["inner_radius"] = st.number_input("Inner Radius (donut)", min_value=0, max_value=120, value=int(v.get("inner_radius", 60)), key=f"md_inner_{idx}")
+                v["height"] = st.number_input("Chart/Card Height", min_value=180, max_value=600, value=int(v.get("height", 280)), key=f"md_h_{idx}")
+            if st.button(f"🗑️ Delete Visual {idx + 1}", key=f"md_del_{idx}"):
+                visuals.pop(idx)
+                st.rerun()
 
 def render_convoy_status_tab(config: dict, location_id: int):
     st.markdown("### Convoy Status Display Settings")
@@ -702,7 +804,7 @@ def render_sections_manager_tab(config: dict):
                 "order": 3,
                 "date_filter": {
                     "enabled": True,
-                    "type": "single",
+                    "type": "month",
                     "label": "Month"
                 }
             },

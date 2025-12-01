@@ -278,7 +278,7 @@ def _render_tab_tank_entry(loc, loc_label, user):
     # --- Inputs (live) ---
     c1, c2, c3 = st.columns(3)
     with c1:
-        tx_date = st.date_input("📅 Date", value=date.today(), key="tx_date")
+        tx_date = st.date_input("📅 Date", value=date.today(), max_value=date.today(), key="tx_date")
     with c2:
         # Manual HH:MM (no dropdown) — strict validation
         now_txt = datetime.now().strftime("%H:%M")
@@ -659,7 +659,7 @@ def _render_tab_meter_records(loc, user):
         "If a meter’s unit is m³, its net is converted to bbls using 6.289811."
     )
 
-    tx_date = st.date_input("📅 Date", value=date.today(), key=f"meter_txdate_{loc.id}")
+    tx_date = st.date_input("📅 Date", value=date.today(), max_value=date.today(), key=f"meter_txdate_{loc.id}")
 
     net_total_bbl = 0.0
     rows_payload = []
@@ -821,7 +821,7 @@ def _render_tab_condensate(loc, user):
         "If a meter’s unit is m³, net converts to bbls using 6.289811."
     )
 
-    tx_date = st.date_input("📅 Date", value=date.today(), key=f"cond_txdate_{loc.id}")
+    tx_date = st.date_input("📅 Date", value=date.today(), max_value=date.today(), key=f"cond_txdate_{loc.id}")
 
     st.markdown("##### Meter Readings")
     GOV_total_bbl = 0.0
@@ -1085,7 +1085,7 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
             label = col.get("label") or col.get("name")
             name = col.get("name")
             if ctype == "date":
-                row[name] = st.date_input(label, key=f"{page_key}_{section_key}_{loc.id}_date_{i}")
+                row[name] = st.date_input(label, max_value=date.today(), key=f"{page_key}_{section_key}_{loc.id}_date_{i}")
             elif ctype == "number":
                 row[name] = st.number_input(label, step=0.01, format="%.2f", key=f"{page_key}_{section_key}_{loc.id}_num_{i}")
             else:
@@ -1292,7 +1292,7 @@ def _render_custom_tab(loc, user, tab_def: dict):
             name = col.get("name")
             
             if ctype == "date":
-                row[name] = st.date_input(label, key=f"custom_{table_name}_{loc.id}_date_{i}")
+                row[name] = st.date_input(label, max_value=date.today(), key=f"custom_{table_name}_{loc.id}_date_{i}")
             elif ctype == "number":
                 row[name] = st.number_input(label, step=0.01, format="%.2f", key=f"custom_{table_name}_{loc.id}_num_{i}")
             else:

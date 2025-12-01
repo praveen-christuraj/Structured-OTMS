@@ -126,7 +126,7 @@ def render_filter_inputs(filter_configs: list, location_id: int) -> dict:
         
         # Render appropriate input widget
         if filter_type == 'date':
-            filters[field] = st.date_input(label, key=f"filter_{field}")
+            filters[field] = st.date_input(label, key=f"filter_{field}", max_value=date.today())
         
         elif filter_type == 'numeric':
             if operator == 'between':

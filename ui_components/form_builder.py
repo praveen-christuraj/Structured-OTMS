@@ -49,7 +49,8 @@ class FormBuilder:
             {label} {" <span style='color: red;'>*</span>" if required else ""}
         </label>
         """, unsafe_allow_html=True)
-        return st.date_input("", key=key, label_visibility="collapsed")
+        from datetime import date
+        return st.date_input("", key=key, label_visibility="collapsed", max_value=date.today())
     
     @staticmethod
     def textarea_field(label, key, placeholder="", rows=4, required=False):

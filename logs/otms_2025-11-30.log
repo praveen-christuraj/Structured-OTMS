@@ -31,3 +31,354 @@
 2025-11-30 08:19:40 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
 2025-11-30 08:19:40 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
 2025-11-30 08:19:40 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Loaded 56 tables from primary database
+2025-11-30 09:32:34 - OTMS - INFO - Loaded 47 tables from flexible database
+2025-11-30 09:32:34 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:32:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:32:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:32:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:32:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:32:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:32:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:32:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:32:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:32:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:32:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:32:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:32:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:32:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:32:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Loaded 56 tables from primary database
+2025-11-30 09:47:34 - OTMS - INFO - Loaded 47 tables from flexible database
+2025-11-30 09:47:34 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:47:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:47:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:47:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:47:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:47:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:47:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:47:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:47:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:47:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:47:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:47:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-11-30 09:47:34 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-11-30 09:47:34 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-11-30 09:47:34 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-11-30 09:50:49 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:50:49 - OTMS - INFO - Reflecting table 'flex_production_5' from primary database...
+2025-11-30 09:50:49 - OTMS - INFO - Successfully created model for table 'flex_production_5' from primary database
+2025-11-30 09:52:48 - OTMS - INFO - Saving production data to table 'flex_production_5' for location_id=5, username=admin
+2025-11-30 09:52:48 - OTMS - INFO - Attempting to create/verify table 'flex_production_5' with 6 columns
+2025-11-30 09:52:48 - OTMS - INFO - Attempting to create custom table 'flex_production_5' for location_id=5
+2025-11-30 09:52:48 - OTMS - INFO - Database connection verified for table 'flex_production_5' creation
+2025-11-30 09:52:48 - OTMS - INFO - Table 'flex_production_5' does not exist. Creating new table...
+2025-11-30 09:52:48 - OTMS - INFO - Processing 6 custom column definitions for table 'flex_production_5'
+2025-11-30 09:52:48 - OTMS - INFO - Added column 'date' (date) to table 'flex_production_5'
+2025-11-30 09:52:48 - OTMS - INFO - Added column 'okw_production' (number) to table 'flex_production_5'
+2025-11-30 09:52:48 - OTMS - INFO - Added column 'gpp1_production' (number) to table 'flex_production_5'
+2025-11-30 09:52:48 - OTMS - INFO - Added column 'gpp2_production' (number) to table 'flex_production_5'
+2025-11-30 09:52:48 - OTMS - INFO - Added column 'gpp_closing_stock' (number) to table 'flex_production_5'
+2025-11-30 09:52:48 - OTMS - INFO - Added column 'gpp_total_production' (number) to table 'flex_production_5'
+2025-11-30 09:52:48 - OTMS - INFO - Creating table 'flex_production_5' with 13 columns in database...
+2025-11-30 09:52:48 - OTMS - INFO - ✅ Successfully created table 'flex_production_5'
+2025-11-30 09:52:48 - OTMS - INFO - Table 'flex_production_5' is ready for use
+2025-11-30 09:52:48 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 09:52:48 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 09:52:48 - OTMS - INFO - Successfully loaded model for table 'flex_production_5'. Proceeding to save data...
+2025-11-30 09:52:48 - OTMS - INFO - Inserting record into 'flex_production_5' with data: {'location_id': 5, 'tx_date': datetime.date(2025, 11, 30), 'created_by': 'admin', 'date': datetime.date(2025, 11, 30), 'okw_production': 12000.0, 'gpp1_production': 1240.0, 'gpp2_production': 6000.0, 'gpp_closing_stock': 8599.0, 'gpp_total_production': 7240.0}
+2025-11-30 09:52:48 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'production': Object of type date is not JSON serializable
+2025-11-30 09:52:48 - OTMS - INFO - ✅ Successfully saved record 1 to table 'flex_production_5'
+2025-11-30 09:52:53 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:52:53 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 09:52:53 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 09:53:18 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:53:18 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:53:18 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 09:53:18 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 09:53:21 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:53:21 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:53:21 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 09:53:21 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 09:53:24 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:53:24 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:53:24 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 09:53:24 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 09:53:30 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:53:30 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:53:30 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 09:53:30 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 09:54:24 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:54:24 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:54:24 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:54:24 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:54:24 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:54:45 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:54:45 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:54:45 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:54:45 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:54:45 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:54:49 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:54:49 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:54:49 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:54:49 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:54:49 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:54:50 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:54:50 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:54:50 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:54:50 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:54:50 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:54:51 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:54:51 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:54:51 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:54:51 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:54:51 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:54:53 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:54:53 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:54:53 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:54:53 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:54:53 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:54:56 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:54:56 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:54:56 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:54:56 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:54:56 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:54:57 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:54:57 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:54:57 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:54:57 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:54:57 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:04 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:04 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:04 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:04 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:04 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:06 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:06 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:06 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:06 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:06 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:09 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:09 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:09 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:09 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:09 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:14 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:14 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:14 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:14 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:14 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:17 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:17 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:17 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:17 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:17 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:19 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:19 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:19 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:19 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:19 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:25 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:25 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:25 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:25 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:25 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:27 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:27 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:27 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:27 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:27 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:31 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:31 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:31 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:31 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:31 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:32 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:32 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:32 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:32 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:32 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:33 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:33 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:33 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:41 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:41 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:41 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:41 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:41 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:43 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:43 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:43 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:43 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:43 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:45 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:45 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:45 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:45 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:45 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:47 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:47 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:47 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:47 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:47 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:52 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:52 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:52 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:52 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:52 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:54 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:54 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:54 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:54 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:54 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:55:59 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:55:59 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:55:59 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:55:59 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:55:59 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:00 - OTMS - INFO - Loaded 57 tables from primary database
+2025-11-30 09:56:00 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-11-30 09:56:00 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-11-30 09:56:00 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:00 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:10 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:10 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:10 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:10 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:10 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:10 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:10 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:10 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:10 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:10 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:30 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:30 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:30 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:30 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:30 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:30 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:30 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:30 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:30 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:30 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:30 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-11-30 09:56:36 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:36 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:36 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:36 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:36 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:36 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:36 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:36 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:36 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-11-30 09:56:36 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-11-30 09:56:56 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 09:56:56 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 09:56:56 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 10:00:20 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 10:00:20 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 10:00:20 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 10:00:44 - OTMS - INFO - Saving production data to table 'flex_production_5' for location_id=5, username=admin
+2025-11-30 10:00:44 - OTMS - INFO - Attempting to create/verify table 'flex_production_5' with 6 columns
+2025-11-30 10:00:44 - OTMS - INFO - Attempting to create custom table 'flex_production_5' for location_id=5
+2025-11-30 10:00:44 - OTMS - INFO - Database connection verified for table 'flex_production_5' creation
+2025-11-30 10:00:44 - OTMS - INFO - Table 'flex_production_5' already exists. Skipping creation.
+2025-11-30 10:00:44 - OTMS - INFO - Table 'flex_production_5' is ready for use
+2025-11-30 10:00:44 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 10:00:44 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 10:00:44 - OTMS - INFO - Successfully loaded model for table 'flex_production_5'. Proceeding to save data...
+2025-11-30 10:00:44 - OTMS - INFO - Inserting record into 'flex_production_5' with data: {'location_id': 5, 'tx_date': datetime.date(2025, 11, 29), 'created_by': 'admin', 'date': datetime.date(2025, 11, 29), 'okw_production': 12000.0, 'gpp1_production': 2000.0, 'gpp2_production': 4500.0, 'gpp_closing_stock': 9000.0, 'gpp_total_production': 6500.0}
+2025-11-30 10:00:44 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'production': Object of type date is not JSON serializable
+2025-11-30 10:00:44 - OTMS - INFO - ✅ Successfully saved record 2 to table 'flex_production_5'
+2025-11-30 10:00:46 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 10:00:46 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 10:00:46 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 10:02:07 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 10:02:07 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 10:02:07 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-11-30 10:02:15 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-11-30 10:02:15 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-11-30 10:02:15 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database

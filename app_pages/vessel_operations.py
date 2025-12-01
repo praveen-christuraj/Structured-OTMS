@@ -284,7 +284,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
             with st.form("vop_add_form", clear_on_submit=True):
                 c1, c2, c3, c4 = st.columns(4)
                 with c1:
-                    e_date = st.date_input("Date *", value=date.today())
+                    e_date = st.date_input("Date *", value=date.today(), max_value=date.today())
                     e_time = st.text_input("Time (HH:MM) *", value=datetime.now().strftime("%H:%M"), max_chars=5)
                     e_shuttle = st.text_input("Shuttle No *", placeholder="SH-001")
                 with c2:
@@ -466,7 +466,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                 with st.form(f"vop_edit_form_{entry.id}"):
                     ec1, ec2, ec3, ec4 = st.columns(4)
                     with ec1:
-                        ed_date = st.date_input("Date", value=entry.date, key=f"vop_ed_date_{entry.id}")
+                        ed_date = st.date_input("Date", value=entry.date, max_value=date.today(), key=f"vop_ed_date_{entry.id}")
                         ed_time = st.text_input("Time (HH:MM)", value=str(entry.time), max_chars=5,
                                                 key=f"vop_ed_time_{entry.id}")
                         ed_shuttle = st.text_input("Shuttle No", value=entry.shuttle_no, key=f"vop_ed_sh_{entry.id}")

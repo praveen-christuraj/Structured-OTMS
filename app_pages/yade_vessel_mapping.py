@@ -496,6 +496,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                         yade_from = st.date_input(
                             "From",
                             value=default_from,
+                            max_value=date.today(),
                             key="yvm_yade_from",
                             label_visibility="collapsed",
                         )
@@ -504,6 +505,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                         yade_to = st.date_input(
                             "To",
                             value=default_to,
+                            max_value=date.today(),
                             key="yvm_yade_to",
                             label_visibility="collapsed",
                         )
@@ -535,6 +537,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                         vessel_from = st.date_input(
                             "From ",
                             value=default_from,
+                            max_value=date.today(),
                             key="yvm_vessel_from",
                             label_visibility="collapsed",
                         )
@@ -543,6 +546,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                         vessel_to = st.date_input(
                             "To ",
                             value=default_to,
+                            max_value=date.today(),
                             key="yvm_vessel_to",
                             label_visibility="collapsed",
                         )
@@ -580,6 +584,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                         fso_from = st.date_input(
                             "From  ",
                             value=default_from,
+                            max_value=date.today(),
                             key="yvm_fso_from",
                             label_visibility="collapsed",
                         )
@@ -588,6 +593,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                         fso_to = st.date_input(
                             "To  ",
                             value=default_to,
+                            max_value=date.today(),
                             key="yvm_fso_to",
                             label_visibility="collapsed",
                         )

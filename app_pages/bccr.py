@@ -398,7 +398,7 @@ def render_bccr_page(active_location_id, user):
             with yc2:
                 yade_no_filter = st.text_input("Yade No", key=f"bccr_yade_yade_{target_location_id}")
             with yc3:
-                yade_date_filter = st.date_input("Date", value=None, key=f"bccr_yade_date_{target_location_id}")
+                yade_date_filter = st.date_input("Date", value=None, max_value=date.today(), key=f"bccr_yade_date_{target_location_id}")
             def _matches_yade(row):
                 if yade_convoy_filter and yade_convoy_filter.strip():
                     if yade_convoy_filter.strip().lower() not in (row.get("Convoy No") or "").lower():
@@ -431,7 +431,7 @@ def render_bccr_page(active_location_id, user):
             st.subheader("Dispatch to Barge (OTR)")
             oc1, oc2 = st.columns(2)
             with oc1:
-                otr_date_filter = st.date_input("Date", value=None, key=f"bccr_otr_date_{target_location_id}")
+                otr_date_filter = st.date_input("Date", value=None, max_value=date.today(), key=f"bccr_otr_date_{target_location_id}")
             with oc2:
                 otr_tank_filter = st.text_input("Tank", key=f"bccr_otr_tank_{target_location_id}")
             def _matches_otr(row):
@@ -491,9 +491,9 @@ def render_bccr_page(active_location_id, user):
         records_all = _load_bccr_records(target_location_id)
         rep_col1, rep_col2, rep_col3 = st.columns(3)
         with rep_col1:
-            report_date_from = st.date_input("From", value=None, key=f"bccr_report_from_{target_location_id}")
+            report_date_from = st.date_input("From", value=None, max_value=date.today(), key=f"bccr_report_from_{target_location_id}")
         with rep_col2:
-            report_date_to = st.date_input("To", value=None, key=f"bccr_report_to_{target_location_id}")
+            report_date_to = st.date_input("To", value=None, max_value=date.today(), key=f"bccr_report_to_{target_location_id}")
         with rep_col3:
             report_convoy_filter = st.text_input("Convoy No", key=f"bccr_report_convoy_{target_location_id}")
         export_container = st.container()
@@ -504,7 +504,7 @@ def render_bccr_page(active_location_id, user):
                 col1, col2 = st.columns(2)
                 with col1:
                     new_sno = st.number_input("S.No", min_value=1, value=default_sno, step=1)
-                    new_date = st.date_input("Date", value=date.today())
+                    new_date = st.date_input("Date", value=date.today(), max_value=date.today())
                     new_convoy = st.text_input("Convoy No", value="")
                     new_rob_qty = st.number_input("ROB Qty (bbls)", value=float(pending_data["rob_qty"]), format="%.2f")
                     new_rob_water = st.number_input("ROB Water (bbls)", value=float(pending_data["rob_water"]), format="%.2f")

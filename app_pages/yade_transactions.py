@@ -404,6 +404,7 @@ def _render_yade_dip_section(
                 "Gauging Date (Before)",
                 value=st.session_state[ns].get("before", {}).get("date") or default_date,
                 format="DD/MM/YYYY",
+                max_value=date.today(),
                 key=f"{ns}_before_date",
             )
         with bc2:
@@ -465,6 +466,7 @@ def _render_yade_dip_section(
                 "Gauging Date (After)",
                 value=st.session_state[ns].get("after", {}).get("date") or default_date,
                 format="DD/MM/YYYY",
+                max_value=date.today(),
                 key=f"{ns}_after_date",
             )
         with ac2:
@@ -903,6 +905,7 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
             "Date (DD/MM/YYYY)",
             value=voy.date if (voy and voy.date) else date.today(),
             format="DD/MM/YYYY",
+            max_value=date.today(),
             key=f"yade_hdr_date_{reset_token}"
         )
         default_time = voy.time.strftime("%H:%M") if (voy and voy.time) else "08:00"

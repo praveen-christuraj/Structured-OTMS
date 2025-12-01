@@ -1686,7 +1686,7 @@ def render_ofs_reports_tab(active_location_id: int, loc: Any, user: Optional[Dic
                 "From",
                 value=rpt_from_default,
                 min_value=rpt_min,
-                max_value=rpt_max,
+                max_value=min(rpt_max, _date.today()),
                 key="ofs_rpt_from",
             )
         with c2:
@@ -1694,7 +1694,7 @@ def render_ofs_reports_tab(active_location_id: int, loc: Any, user: Optional[Dic
                 "To",
                 value=rpt_to_default,
                 min_value=rpt_min,
-                max_value=rpt_max,
+                max_value=min(rpt_max, _date.today()),
                 key="ofs_rpt_to",
             )
 
@@ -11577,12 +11577,14 @@ if page == "Home":
             trend_from = st.date_input(
                 "From (Trend)",
                 value=st.session_state.get("dash_date_all_sites", _date.today()).replace(day=1),
+                max_value=_date.today(),
                 key="trend_from",
             )
         with tcol2:
             trend_to = st.date_input(
                 "To (Trend)",
                 value=st.session_state.get("dash_date_all_sites", _date.today()),
+                max_value=_date.today(),
                 key="trend_to",
             )
     

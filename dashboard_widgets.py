@@ -373,6 +373,7 @@ class DashboardRenderer:
             selected_date = st.date_input(
                 "Dashboard Date",
                 value=st.session_state.get("dash_date", date.today()),
+                max_value=date.today(),
                 key="dash_date"
             )
             return DashboardRenderer.render_dashboard(config, location_id, selected_date)
@@ -403,6 +404,7 @@ class DashboardRenderer:
                         section_date_value = st.date_input(
                             filter_label,
                             value=st.session_state.get(f"section_date_{section_id}", date.today()),
+                            max_value=date.today(),
                             key=f"section_date_{section_id}"
                         )
                     elif filter_type == "range":
@@ -414,23 +416,27 @@ class DashboardRenderer:
                                 start_date = st.date_input(
                                     "From",
                                     value=st.session_state.get(f"section_start_{section_id}", default_start),
+                                    max_value=date.today(),
                                     key=f"section_start_{section_id}"
                                 )
                             with dc2:
                                 end_date = st.date_input(
                                     "To",
                                     value=st.session_state.get(f"section_end_{section_id}", date.today()),
+                                    max_value=date.today(),
                                     key=f"section_end_{section_id}"
                                 )
                         else:
                             start_date = st.date_input(
                                 f"{filter_label} - Start",
                                 value=st.session_state.get(f"section_start_{section_id}", default_start),
+                                max_value=date.today(),
                                 key=f"section_start_{section_id}"
                             )
                             end_date = st.date_input(
                                 f"{filter_label} - End",
                                 value=st.session_state.get(f"section_end_{section_id}", date.today()),
+                                max_value=date.today(),
                                 key=f"section_end_{section_id}"
                             )
                         section_date_value = (start_date, end_date)
@@ -660,7 +666,219 @@ class DashboardRenderer:
     @staticmethod
     def _render_monthly_data_section(config: Dict, location_id: int, section_date):
         """Render monthly data section"""
-        st.info("Monthly data section - implementation pending")
+        from db import get_session, engine
+        from sqlalchemy import inspect, text
+        try:
+            import pandas as pd
+        except Exception:
+            st.info("Pandas not available for monthly data rendering")
+            return
+        layout_cfg = config.get("layout", {}).get("monthly_data", {})
+        if not layout_cfg.get("enabled", True):
+            st.info("Monthly data section disabled in customization.")
+            return
+
+        # Resolve month start/end
+        if isinstance(section_date, tuple) and len(section_date) == 2 and isinstance(section_date[0], int):
+            m = int(section_date[0])
+            y = int(section_date[1])
+            from datetime import date as _d, timedelta
+            month_start = _d(y, m, 1)
+            next_month = _d(y + (1 if m == 12 else 0), (1 if m == 12 else m + 1), 1)
+            month_end = next_month - timedelta(days=1)
+        else:
+            d0 = section_date if isinstance(section_date, date) else date.today()
+            from datetime import timedelta
+            month_start = d0.replace(day=1)
+            if month_start.month == 12:
+                next_month = month_start.replace(year=month_start.year + 1, month=1)
+            else:
+                next_month = month_start.replace(month=month_start.month + 1)
+            month_end = next_month - timedelta(days=1)
+
+        visuals = layout_cfg.get("cards") or []
+        num_cols = int(layout_cfg.get("columns", 4) or 4)
+        if not visuals:
+            st.info("No Monthly Data visuals configured.")
+            return
+
+        # Helpers
+        def _agg_vals_per_day(ds: str, field: str) -> List[Dict[str, Any]]:
+            from datetime import timedelta
+            rows = []
+            cur = month_start
+            while cur <= month_end:
+                v = 0.0
+                try:
+                    if ds == "material_balance":
+                        v = DashboardRenderer._fetch_mb_data(location_id, cur, field) or 0.0
+                    elif ds == "fso_operations":
+                        v = DashboardRenderer._fetch_fso_data(location_id, cur, field) or 0.0
+                    else:
+                        v = 0.0
+                except Exception:
+                    v = 0.0
+                rows.append({"Date": str(cur), "Value": float(v)})
+                cur = cur + timedelta(days=1)
+            return rows
+
+        def _table_sum_range(table: str, value_field: str) -> float:
+            insp = inspect(engine)
+            cols = [c.get("name") for c in insp.get_columns(table)]
+            date_col = None
+            for cand in ["date", "Date", "tx_date", "transaction_date", "created_at", "timestamp"]:
+                if cand in cols:
+                    date_col = cand
+                    break
+            has_loc = "location_id" in cols
+            try:
+                backend = engine.url.get_backend_name()
+            except Exception:
+                backend = "sqlite"
+            def q(identifier: str) -> str:
+                return f"`{identifier}`" if backend == "mysql" else f'"{identifier}"'
+            where = []
+            params = {}
+            if date_col:
+                where.append(f"{q(date_col)} >= :d1 AND {q(date_col)} <= :d2")
+                params["d1"] = (str(month_start) if date_col == "Date" else month_start)
+                params["d2"] = (str(month_end) if date_col == "Date" else month_end)
+            if has_loc:
+                where.append(f"{q('location_id')} = :loc")
+                params["loc"] = location_id
+            sql = f"SELECT SUM({q(value_field)}) AS v FROM {q(table)}" + (" WHERE " + " AND ".join(where) if where else "")
+            with get_session() as s:
+                try:
+                    val = s.execute(text(sql), params).scalar()
+                except Exception:
+                    val = None
+            try:
+                return float(val or 0.0)
+            except Exception:
+                return 0.0
+
+        def _table_group_sum(table: str, value_field: str, group_field: str) -> pd.DataFrame:
+            insp = inspect(engine)
+            cols = [c.get("name") for c in insp.get_columns(table)]
+            date_col = None
+            for cand in ["date", "Date", "tx_date", "transaction_date", "created_at", "timestamp"]:
+                if cand in cols:
+                    date_col = cand
+                    break
+            has_loc = "location_id" in cols
+            try:
+                backend = engine.url.get_backend_name()
+            except Exception:
+                backend = "sqlite"
+            def q(identifier: str) -> str:
+                return f"`{identifier}`" if backend == "mysql" else f'"{identifier}"'
+            where = []
+            params = {}
+            if date_col:
+                where.append(f"{q(date_col)} >= :d1 AND {q(date_col)} <= :d2")
+                params["d1"] = (str(month_start) if date_col == "Date" else month_start)
+                params["d2"] = (str(month_end) if date_col == "Date" else month_end)
+            if has_loc:
+                where.append(f"{q('location_id')} = :loc")
+                params["loc"] = location_id
+            sql = f"SELECT {q(group_field)} AS g, SUM({q(value_field)}) AS v FROM {q(table)}" + (" WHERE " + " AND ".join(where) if where else "") + f" GROUP BY {q(group_field)}"
+            with get_session() as s:
+                try:
+                    rows = s.execute(text(sql), params).fetchall()
+                except Exception:
+                    rows = []
+            return pd.DataFrame([{"Group": r[0], "Value": float(r[1] or 0.0)} for r in rows])
+
+        # Render visuals grid
+        grids = [visuals[i:i+num_cols] for i in range(0, len(visuals), num_cols)]
+        for row in grids:
+            cols = st.columns(len(row))
+            for idx, card in enumerate(row):
+                with cols[idx]:
+                    vtype = str(card.get("type", "card")).lower()
+                    ds = str(card.get("data_source", "material_balance")).lower()
+                    title = card.get("name") or card.get("title") or "Monthly Metric"
+                    unit = card.get("unit", "")
+                    color = card.get("color") or config.get("styles", {}).get("value", {}).get("color", "#667eea")
+
+                    if vtype == "card":
+                        # Aggregate across the month
+                        agg = str(card.get("aggregation", "sum")).lower()
+                        field = card.get("field")
+                        total = 0.0
+                        if ds in ("material_balance", "fso_operations") and field:
+                            rows = _agg_vals_per_day(ds, field)
+                            series = [r["Value"] for r in rows]
+                            if agg == "avg":
+                                total = float(pd.Series(series).mean()) if series else 0.0
+                            elif agg == "min":
+                                total = float(pd.Series(series).min()) if series else 0.0
+                            elif agg == "max":
+                                total = float(pd.Series(series).max()) if series else 0.0
+                            else:
+                                total = float(pd.Series(series).sum()) if series else 0.0
+                        elif ds == "table":
+                            table = card.get("table_name")
+                            value_field = card.get("field")
+                            if table and value_field:
+                                total = _table_sum_range(table, value_field)
+                        style = dict(config.get("styles", {}).get("card", {}))
+                        style["value_color"] = color
+                        WidgetRenderer.render_stat_card(
+                            label=title,
+                            value=total,
+                            unit=unit,
+                            prev_value=None,
+                            style=style,
+                            show_delta=False,
+                            display_date=month_end
+                        )
+
+                    elif vtype in ("line", "area", "bar"):
+                        field = card.get("field")
+                        if not field:
+                            st.info("Missing field for chart")
+                            continue
+                        rows = _agg_vals_per_day(ds, field)
+                        df = pd.DataFrame(rows)
+                        if df.empty:
+                            st.info("No data for selected month")
+                            continue
+                        series_cfg = [{"name": title, "field": "Value", "color": color}]
+                        style = {
+                            "height": int(card.get("height", 280)),
+                            "show_markers": bool(card.get("show_markers", True)),
+                            "show_labels": bool(card.get("show_labels", True)),
+                            "chart_type": vtype,
+                        }
+                        # Adapt df to expected format
+                        df = df.rename(columns={"Date": "Date"})
+                        WidgetRenderer.render_trend_chart(df.rename(columns={"Value": field}).assign(**{}), [{"name": title, "field": field, "color": color}], style)
+
+                    elif vtype in ("pie", "donut", "doughnut"):
+                        table = card.get("table_name")
+                        value_field = card.get("field")
+                        group_field = card.get("group_field")
+                        if not (table and value_field and group_field):
+                            st.info("Missing table/group/field for pie/doughnut chart")
+                            continue
+                        df = _table_group_sum(table, value_field, group_field)
+                        if df.empty:
+                            st.info("No data for selected month")
+                            continue
+                        palette = card.get("palette") or ["#667eea", "#06b6d4", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"]
+                        base = alt.Chart(df).encode(
+                            theta=alt.Theta("Value:Q"),
+                            color=alt.Color("Group:N", scale=alt.Scale(range=palette), legend=alt.Legend(title=None)),
+                            tooltip=["Group:N", alt.Tooltip("Value:Q", format=",.0f")]
+                        )
+                        if vtype in ("donut", "doughnut"):
+                            chart = base.mark_arc(innerRadius=int(card.get("inner_radius", 60)))
+                        else:
+                            chart = base.mark_arc()
+                        st.altair_chart(chart.properties(height=int(card.get("height", 280))), use_container_width=True)
+                    else:
+                        st.info(f"Unsupported visual type: {vtype}")
     
     @staticmethod
     def _render_trend_chart_section(config: Dict, location_id: int, section_date):

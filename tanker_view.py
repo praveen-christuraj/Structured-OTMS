@@ -1149,9 +1149,9 @@ def _render_custom_tanker_tab_view(location_id: Optional[int], tab_def: dict, us
     
     f1, f2, f3 = st.columns(3)
     with f1:
-        date_from = st.date_input("From Date", value=default_from, key=f"ctv_{table_name}_from")
+        date_from = st.date_input("From Date", value=default_from, max_value=today, key=f"ctv_{table_name}_from")
     with f2:
-        date_to = st.date_input("To Date", value=today, key=f"ctv_{table_name}_to")
+        date_to = st.date_input("To Date", value=today, max_value=today, key=f"ctv_{table_name}_to")
     with f3:
         created_by_filter = st.text_input("Created By (contains)", key=f"ctv_{table_name}_creator")
     

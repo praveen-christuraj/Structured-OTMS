@@ -834,6 +834,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
             filter_date_from = st.date_input(
                 "From Date",
                 value=date.today() - timedelta(days=30),
+                max_value=date.today(),
                 key="fso_otr_date_from"
             )
         
@@ -841,6 +842,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
             filter_date_to = st.date_input(
                 "To Date",
                 value=date.today(),
+                max_value=date.today(),
                 key="fso_otr_date_to"
             )
         
@@ -876,7 +878,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                     form_col1, form_col2, form_col3, form_col4 = st.columns(4)
                     
                     with form_col1:
-                        entry_date = st.date_input("Date *", value=date.today(), key="fso_new_date")
+                        entry_date = st.date_input("Date *", value=date.today(), max_value=date.today(), key="fso_new_date")
                         entry_time_input = st.text_input(
                             "Time * (HH:MM)",
                             value=datetime.now().strftime("%H:%M"),
@@ -1280,7 +1282,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                 ecol1, ecol2, ecol3, ecol4 = st.columns(4)
                                 
                                 with ecol1:
-                                    edit_date = st.date_input("Date", value=original_entry.date)
+                                    edit_date = st.date_input("Date", value=original_entry.date, max_value=date.today())
                                     try:
                                         if isinstance(original_entry.time, dt_time):
                                             time_val = original_entry.time

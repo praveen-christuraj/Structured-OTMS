@@ -236,7 +236,7 @@ def render_convoy_status_page(active_location_id: Optional[int], user: Optional[
         with tabs[tab_idx["yade"]]:
             if "convoy_status_yade_date" not in st.session_state:
                 st.session_state["convoy_status_yade_date"] = date.today()
-            yade_date = st.date_input("Select Date", key="convoy_status_yade_date")
+            yade_date = st.date_input("Select Date", max_value=date.today(), key="convoy_status_yade_date")
             convoy_map, yade_stock_map = _load_yade_dropdown_data(yade_date, source_location_ids)
             saved_yade = {}
             with get_session() as s:
@@ -330,7 +330,7 @@ def render_convoy_status_page(active_location_id: Optional[int], user: Optional[
     with tabs[tab_idx["vessel"]]:
         if "convoy_status_vessel_date" not in st.session_state:
             st.session_state["convoy_status_vessel_date"] = date.today()
-        vessel_date = st.date_input("Select Date", key="convoy_status_vessel_date")
+        vessel_date = st.date_input("Select Date", max_value=date.today(), key="convoy_status_vessel_date")
         shuttle_map, vessel_stock_map = _load_vessel_dropdown_data(vessel_date, target_location_id, assigned_vessel_ids)
         saved_vessel = {}
         with get_session() as s:

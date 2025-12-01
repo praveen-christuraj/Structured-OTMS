@@ -286,9 +286,9 @@ def render_tank_transactions_view_page(active_location_id: Optional[int], user: 
     today = date.today()
     default_from = today - timedelta(days=30)
     with col1:
-        d1 = st.date_input("From", value=default_from, key="vtv_from")
+        d1 = st.date_input("From", value=default_from, max_value=today, key="vtv_from")
     with col2:
-        d2 = st.date_input("To", value=today, key="vtv_to")
+        d2 = st.date_input("To", value=today, max_value=today, key="vtv_to")
     with col3:
         created_by = st.text_input("Created By (contains)", value="", key="vtv_created_by")
 
@@ -910,7 +910,7 @@ def _render_custom_edit_modal(record, tab_def: dict, user):
             current_value = getattr(record, col_name, None) if hasattr(record, col_name) else None
             
             if col_type == "date":
-                edited_values[col_name] = st.date_input(col_label, value=current_value, key=f"edit_{table_name}_{rec_id}_{col_name}")
+                edited_values[col_name] = st.date_input(col_label, value=current_value, max_value=date.today(), key=f"edit_{table_name}_{rec_id}_{col_name}")
             elif col_type == "number":
                 edited_values[col_name] = st.number_input(col_label, value=float(current_value) if current_value is not None else 0.0, step=0.01, format="%.2f", key=f"edit_{table_name}_{rec_id}_{col_name}")
             else:

@@ -343,7 +343,7 @@ def _tank_filters_ui(location_id: int) -> dict:
             "Date",
             value=default_date,
             min_value=d_min,
-            max_value=d_max,
+            max_value=min(d_max, date.today()),
             key="vt_tank_date",
         )
         d1, d2 = d, d
@@ -1375,7 +1375,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
             "Date",
             value=default_date,
             min_value=d_min,
-            max_value=d_max,
+            max_value=min(d_max, date.today()),
             key=f"vt_{section}_d",
         )
     with c2:
@@ -1389,40 +1389,39 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
     rows = []
     try:
         from models import get_custom_table_model
+        from db import get_flex_session
         table_name = f"flex_{section}_{location_id}"
         Model = get_custom_table_model(table_name)
-        with get_session() as s:
-            if Model:
-                is_custom = True
+        if Model:
+            is_custom = True
+            with get_flex_session() as s:
                 q = s.query(Model).filter(getattr(Model, "location_id") == location_id)
                 if d and hasattr(Model, "tx_date"):
                     q = q.filter(getattr(Model, "tx_date") == d)
                 if created_by and hasattr(Model, "created_by"):
                     q = q.filter(getattr(Model, "created_by").ilike(f"%{created_by}%"))
-                # best-effort search on 'remarks' column if present
                 if search and hasattr(Model, "remarks"):
                     q = q.filter(getattr(Model, "remarks").ilike(f"%{search}%"))
-                # order by date then id
                 if hasattr(Model, "tx_date"):
                     q = q.order_by(getattr(Model, "tx_date").desc())
                 if hasattr(Model, "id"):
                     q = q.order_by(getattr(Model, "id").desc())
                 rows = q.limit(500).all()
-            else:
-                with get_session() as s2:
-                    q = s2.query(FlexibleRecord).filter(
-                        FlexibleRecord.location_id == location_id,
-                        FlexibleRecord.page == "tank_transactions",
-                        FlexibleRecord.section == section,
-                    )
-                    if d:
-                        q = q.filter(FlexibleRecord.tx_date == d)
-                    if created_by:
-                        q = q.filter(getattr(FlexibleRecord, "created_by").ilike(f"%{created_by}%"))
-                    if search:
-                        q = q.filter(getattr(FlexibleRecord, "data_json").ilike(f"%{search}%"))
-                    q = q.order_by(FlexibleRecord.tx_date.desc(), FlexibleRecord.id.desc()).limit(500)
-                    rows = q.all()
+        else:
+            with get_session() as s2:
+                q = s2.query(FlexibleRecord).filter(
+                    FlexibleRecord.location_id == location_id,
+                    FlexibleRecord.page == "tank_transactions",
+                    FlexibleRecord.section == section,
+                )
+                if d:
+                    q = q.filter(FlexibleRecord.tx_date == d)
+                if created_by:
+                    q = q.filter(getattr(FlexibleRecord, "created_by").ilike(f"%{created_by}%"))
+                if search:
+                    q = q.filter(getattr(FlexibleRecord, "data_json").ilike(f"%{search}%"))
+                q = q.order_by(FlexibleRecord.tx_date.desc(), FlexibleRecord.id.desc()).limit(500)
+                rows = q.all()
     except Exception as ex:
         _audit_error(f"Load {section} failed: {ex}", user, location_id)
         st.error(f"Failed to load {title}. (Logged)")
@@ -1663,14 +1662,16 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
             # Deletion approval UI for flexible records
             if st.session_state.get(f"vt_{section}_show_delete_ui_{i}"):
                 def delete_flex_record():
-                    with get_session() as s:
-                        if is_custom:
+                    if is_custom:
+                        from db import get_flex_session
+                        with get_flex_session() as s:
                             M = get_custom_table_model(f"flex_{section}_{location_id}")
                             rec = s.query(M).get(getattr(r, "id")) if M else None
                             if rec:
                                 s.delete(rec)
                                 s.commit()
-                        else:
+                    else:
+                        with get_session() as s:
                             if RecycleBinManager:
                                 try:
                                     RecycleBinManager.archive_record(
@@ -1745,15 +1746,15 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                                     if col_name in ('tx_date', 'date', 'transaction_date', 'start_date', 'end_date'):
                                         # Date fields
                                         if isinstance(current_value, date):
-                                            edited_values[col_name] = st.date_input(label, value=current_value, key=f"edit_{section}_{i}_{col_name}")
+                                            edited_values[col_name] = st.date_input(label, value=current_value, max_value=date.today(), key=f"edit_{section}_{i}_{col_name}")
                                         elif isinstance(current_value, str):
                                             try:
                                                 parsed_date = datetime.strptime(current_value, "%Y-%m-%d").date()
-                                                edited_values[col_name] = st.date_input(label, value=parsed_date, key=f"edit_{section}_{i}_{col_name}")
+                                                edited_values[col_name] = st.date_input(label, value=parsed_date, max_value=date.today(), key=f"edit_{section}_{i}_{col_name}")
                                             except:
-                                                edited_values[col_name] = st.date_input(label, value=date.today(), key=f"edit_{section}_{i}_{col_name}")
+                                                edited_values[col_name] = st.date_input(label, value=date.today(), max_value=date.today(), key=f"edit_{section}_{i}_{col_name}")
                                         else:
-                                            edited_values[col_name] = st.date_input(label, value=date.today(), key=f"edit_{section}_{i}_{col_name}")
+                                            edited_values[col_name] = st.date_input(label, value=date.today(), max_value=date.today(), key=f"edit_{section}_{i}_{col_name}")
                                     elif current_value is None:
                                         edited_values[col_name] = st.text_input(label, value="", key=f"edit_{section}_{i}_{col_name}")
                                     elif isinstance(current_value, (int, float)):
@@ -1962,6 +1963,23 @@ def _render_tank_view_tabs(location_id: int, location_label: str, user: dict | N
         ("Produced Water Records", _render_pw_tab),
         ("Production", _render_production_tab),
     ]
+    try:
+        from location_config import get_custom_tabs
+        with get_session() as s:
+            custom_tabs = get_custom_tabs(s, location_id, "tank_transactions") or []
+        for ctab in custom_tabs:
+            if not ctab.get("active", True):
+                continue
+            tab_label = ctab.get("name", "Custom")
+            table_name = ctab.get("table_name")
+            if not table_name:
+                continue
+            def make_renderer(lbl: str, tbl: str):
+                return lambda loc_id, usr: _custom_flex_list(loc_id, tbl, usr, lbl)
+            tab_defs.append((tab_label, make_renderer(tab_label, table_name)))
+            flags[tab_label] = True
+    except Exception:
+        pass
     enabled = [(label, fn) for (label, fn) in tab_defs if flags.get(label, False)]
     if not enabled:
         st.info("No tabs are enabled for this location.")
@@ -1974,6 +1992,241 @@ def _render_tank_view_tabs(location_id: int, location_label: str, user: dict | N
         with t:
             fn(location_id, user)
 
+
+def _custom_flex_list(location_id: int, table_name: str, user: dict | None, title: str):
+    _inject_css_once()
+    from models import get_custom_table_model
+    Model = get_custom_table_model(table_name)
+    if not Model:
+        st.info(f"Table '{table_name}' not found for {title}.")
+        return
+    # Filters
+    d_min, d_max = _get_flex_date_bounds(location_id, section=table_name.replace(f"flex_", ""))
+    default_date = d_max
+    c1, c2, c3 = st.columns([0.25, 0.35, 0.40], gap="small")
+    with c1:
+        d = st.date_input(
+            "Date",
+            value=default_date,
+            min_value=d_min,
+            max_value=min(d_max, date.today()),
+            key=f"vt_custom_{table_name}_d",
+        )
+    with c2:
+        created_by = (st.text_input("Created by", key=f"vt_custom_{table_name}_by") or "").strip()
+    with c3:
+        search = (st.text_input("Search text", key=f"vt_custom_{table_name}_q") or "").strip()
+
+    rows = []
+    try:
+        from db import get_flex_session
+        with get_flex_session() as s:
+            q = s.query(Model).filter(getattr(Model, "location_id") == location_id)
+            if d and hasattr(Model, "tx_date"):
+                q = q.filter(getattr(Model, "tx_date") == d)
+            if created_by and hasattr(Model, "created_by"):
+                q = q.filter(getattr(Model, "created_by").ilike(f"%{created_by}%"))
+            if search and hasattr(Model, "remarks"):
+                q = q.filter(getattr(Model, "remarks").ilike(f"%{search}%"))
+            if hasattr(Model, "tx_date"):
+                q = q.order_by(getattr(Model, "tx_date").desc())
+            if hasattr(Model, "id"):
+                q = q.order_by(getattr(Model, "id").desc())
+            rows = q.limit(500).all()
+    except Exception as ex:
+        _audit_error(f"Load custom {title} failed: {ex}", user, location_id)
+        st.error(f"Failed to load {title}. (Logged)")
+        return
+
+    if not rows:
+        st.info("No records found.")
+        return
+
+    # Detect columns
+    try:
+        cols = [c.name for c in rows[0].__table__.columns] if rows else []
+    except Exception:
+        cols = []
+    system_cols = {"id", "location_id", "tx_date", "created_by", "created_at", "updated_by", "updated_at"}
+    display_keys = [k for k in cols if k not in system_cols and k not in ("tx_date", "date", "transaction_date")]
+    all_keys = [k for k in cols if k not in {"id", "location_id", "created_at", "updated_at"}]
+
+    widths = [0.16] + ([0.12] * len(display_keys)) + [0.20, 0.20, 0.10]
+    hdr = st.columns(widths if display_keys else [0.18, 0.42, 0.20, 0.20, 0.10], gap="small")
+    if display_keys:
+        hdr[0].markdown("**Date**")
+        for i, k in enumerate(display_keys, start=1):
+            hdr[i].markdown(f"**{k.replace('_',' ').title()}**")
+        hdr[-3].markdown("**Remarks**")
+        hdr[-2].markdown("**Created By / At**")
+        hdr[-1].markdown("**Actions**")
+    else:
+        hdr[0].markdown("**Date**")
+        hdr[1].markdown("**Summary**")
+        hdr[2].markdown("**Remarks**")
+        hdr[3].markdown("**Created By / At**")
+        hdr[4].markdown("**Actions**")
+
+    def _fmt_val(v):
+        try:
+            if v is None:
+                return ""
+            if isinstance(v, (int, float)):
+                return f"{float(v):,.2f}"
+            s = str(v)
+            return s if len(s) <= 140 else (s[:137] + "…")
+        except Exception:
+            return ""
+
+    for i, r in enumerate(rows):
+        created = _nice_dt(getattr(r, "created_at", None))
+        created_by = getattr(r, "created_by", "")
+        edited_by = getattr(r, "updated_by", None)
+        edited_at = getattr(r, "updated_at", None)
+        edited_badge = ""
+        if edited_by or edited_at:
+            wh = str(edited_by or "unknown")
+            wn = _nice_dt(edited_at) if edited_at else "unknown time"
+            edited_badge = f" <span title='Edited by {wh} on {wn}'>⚠️</span>"
+
+        is_editable = True
+        rec_created_at = getattr(r, "created_at", None)
+        if rec_created_at:
+            try:
+                if isinstance(rec_created_at, str):
+                    rec_created_at = datetime.fromisoformat(rec_created_at)
+                is_editable = (datetime.utcnow() - rec_created_at).total_seconds() < (24 * 3600)
+            except Exception:
+                is_editable = True
+
+        if display_keys:
+            row_cols = st.columns(widths, gap="small")
+            tx_date_str = str(getattr(r, "tx_date", "") or "")
+            row_cols[0].markdown(f"<div class='ellip'>{tx_date_str}{edited_badge}</div>", unsafe_allow_html=True)
+            for j, k in enumerate(display_keys, start=1):
+                v = getattr(r, k, None)
+                row_cols[j].markdown(f"<div class='ellip'>{_fmt_val(v)}</div>", unsafe_allow_html=True)
+            remarks = getattr(r, "remarks", "")
+            row_cols[-3].markdown(f"<div class='ellip'>{remarks}</div>", unsafe_allow_html=True)
+            row_cols[-2].markdown(f"<div class='ellip'>{created_by} | {created}</div>", unsafe_allow_html=True)
+
+            act1, act2 = row_cols[-1].columns([0.50, 0.50], gap="small")
+            with act1:
+                if is_editable:
+                    edit_state_key = f"vt_custom_edit_{table_name}_{i}"
+                    is_editing = st.session_state.get(edit_state_key, False)
+                    if st.button("✏️" if not is_editing else "✖️", key=f"vt_custom_edit_btn_{table_name}_{i}", help="Edit" if not is_editing else "Close"):
+                        st.session_state[edit_state_key] = not is_editing
+                        st.rerun()
+                else:
+                    st.button("🔒", key=f"vt_custom_edit_locked_{table_name}_{i}", help="Edit locked (>24hrs)", disabled=True)
+            with act2:
+                if st.button("🗑️", key=f"vt_custom_del_btn_{table_name}_{i}", help="Delete"):
+                    st.session_state[f"vt_custom_show_delete_{table_name}_{i}"] = True
+
+        # Delete UI
+        if st.session_state.get(f"vt_custom_show_delete_{table_name}_{i}"):
+            def delete_record():
+                from db import get_flex_session
+                with get_flex_session() as s:
+                    rec = s.query(Model).get(getattr(r, "id"))
+                    if rec:
+                        s.delete(rec)
+                        s.commit()
+            if render_deletion_ui(
+                resource_type=f"Custom:{title}",
+                resource_id=getattr(r, "id"),
+                resource_label=f"{title} Record #{getattr(r, 'id')}",
+                delete_func=delete_record,
+                user=user,
+                location_id=location_id,
+                on_success_message=f"{title} record deleted successfully",
+                metadata={"table": table_name, "tx_date": str(getattr(r, 'tx_date', ''))},
+                button_key_prefix=f"vt_custom_{table_name}_{i}"
+            ):
+                st.session_state[f"vt_custom_show_delete_{table_name}_{i}"] = False
+                st.rerun()
+
+        # Edit form
+        edit_state_key = f"vt_custom_edit_{table_name}_{i}"
+        if st.session_state.get(edit_state_key, False):
+            with st.form(key=f"vt_custom_edit_form_{table_name}_{i}"):
+                st.info("🔒 System columns (id, location_id, created_by, etc.) are protected and cannot be edited.")
+                editable_cols = [k for k in all_keys if k not in {'id', 'location_id', 'created_by', 'created_at', 'updated_by', 'updated_at'}]
+                edited_values = {}
+                for col_name in editable_cols:
+                    current_value = getattr(r, col_name, None)
+                    label = col_name.replace('_', ' ').title()
+                    if col_name in ('tx_date', 'date', 'transaction_date', 'start_date', 'end_date'):
+                        if isinstance(current_value, date):
+                            edited_values[col_name] = st.date_input(label, value=current_value, max_value=date.today(), key=f"edit_custom_{table_name}_{i}_{col_name}")
+                        elif isinstance(current_value, str):
+                            try:
+                                parsed_date = datetime.strptime(current_value, "%Y-%m-%d").date()
+                                edited_values[col_name] = st.date_input(label, value=parsed_date, max_value=date.today(), key=f"edit_custom_{table_name}_{i}_{col_name}")
+                            except:
+                                edited_values[col_name] = st.date_input(label, value=date.today(), max_value=date.today(), key=f"edit_custom_{table_name}_{i}_{col_name}")
+                        else:
+                            edited_values[col_name] = st.date_input(label, value=date.today(), max_value=date.today(), key=f"edit_custom_{table_name}_{i}_{col_name}")
+                    elif current_value is None:
+                        edited_values[col_name] = st.text_input(label, value="", key=f"edit_custom_{table_name}_{i}_{col_name}")
+                    elif isinstance(current_value, (int, float)):
+                        edited_values[col_name] = st.number_input(label, value=float(current_value), key=f"edit_custom_{table_name}_{i}_{col_name}")
+                    elif isinstance(current_value, bool):
+                        edited_values[col_name] = st.checkbox(label, value=current_value, key=f"edit_custom_{table_name}_{i}_{col_name}")
+                    elif isinstance(current_value, str) and len(str(current_value)) > 100:
+                        edited_values[col_name] = st.text_area(label, value=str(current_value), height=100, key=f"edit_custom_{table_name}_{i}_{col_name}")
+                    else:
+                        edited_values[col_name] = st.text_input(label, value=str(current_value) if current_value else "", key=f"edit_custom_{table_name}_{i}_{col_name}")
+
+                save = st.form_submit_button("💾 Save", type="primary")
+                cancel = st.form_submit_button("↩️ Cancel")
+            if save:
+                try:
+                    with get_session() as s:
+                        rec = s.query(Model).get(getattr(r, "id"))
+                        if not rec:
+                            st.error("Record not found in database")
+                        else:
+                            for k, v in edited_values.items():
+                                if k in ('tx_date', 'date', 'transaction_date', 'start_date', 'end_date'):
+                                    if isinstance(v, str):
+                                        try:
+                                            v = datetime.strptime(v, "%Y-%m-%d").date()
+                                        except:
+                                            continue
+                                    elif isinstance(v, datetime):
+                                        v = v.date()
+                                elif isinstance(v, str) and v == "":
+                                    v = None
+                                setattr(rec, k, v)
+                            if hasattr(rec, "updated_by"):
+                                setattr(rec, "updated_by", (user or {}).get("username", "system"))
+                            s.commit()
+                            try:
+                                SecurityManager.log_audit(
+                                    s,
+                                    (user or {}).get("username", "system"),
+                                    "UPDATE",
+                                    resource_type=f"Custom:{title}",
+                                    resource_id=str(getattr(r, "id")),
+                                    details=f"Inline edit via View Transactions - Updated fields",
+                                    user_id=(user or {}).get("id"),
+                                    location_id=location_id,
+                                    ip_address=_get_client_ip(),
+                                    success=True,
+                                )
+                            except Exception:
+                                pass
+                    st.success("✅ Saved successfully!")
+                    st.session_state[edit_state_key] = False
+                    st.rerun()
+                except Exception as ex:
+                    _audit_error(f"Edit custom {title} failed: {ex}", user, location_id)
+                    st.error(f"❌ Save failed: {str(ex)} (Logged)")
+            if cancel:
+                st.session_state[edit_state_key] = False
+                st.rerun()
 
 # ========================= main page =========================
 def render_view_transactions_page(active_location_id, user):

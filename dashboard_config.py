@@ -95,7 +95,7 @@ class DashboardConfigManager:
                     "order": 3,
                     "date_filter": {
                         "enabled": True,
-                        "type": "single",
+                        "type": "month",
                         "label": "Month"
                     }
                 },

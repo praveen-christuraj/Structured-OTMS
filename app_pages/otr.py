@@ -265,17 +265,17 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
         with c3:
             f_from = st.date_input(
                 "From date",
-                value=dmin,
+                value=min(dmin, date.today()),
                 min_value=dmin,
-                max_value=dmax,
+                max_value=min(dmax, date.today()),
                 key="otr_f_from",
             )
         with c4:
             f_to = st.date_input(
                 "To date",
-                value=dmax,
+                value=min(dmax, date.today()),
                 min_value=dmin,
-                max_value=dmax,
+                max_value=min(dmax, date.today()),
                 key="otr_f_to",
             )
 
