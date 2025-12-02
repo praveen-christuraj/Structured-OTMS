@@ -12,6 +12,7 @@ from datetime import date, datetime
 from dashboard_config import DashboardConfigManager, DashboardConfig
 from dashboard_widgets import WidgetRenderer
 from db import get_session
+from location_manager import LocationManager
 
 
 def _ensure_hex_color(color: str, default: str = "#000000") -> str:
@@ -49,10 +50,36 @@ def render_dashboard_customization():
         st.error("🚫 Access Denied.  Only administrators can customize dashboards.")
         return
     
-    location_id = st.session_state.get("active_location_id")
-    if not location_id:
-        st.warning("⚠️ Please select a location first")
+    with get_session() as session:
+        locations = LocationManager.get_all_locations(session, active_only=True)
+    if not locations:
+        st.warning("⚠️ No active locations available")
         return
+
+    labels = [f"{getattr(l, 'name', 'Location')} ({getattr(l, 'code', '')})" for l in locations]
+    id_by_label = {labels[i]: locations[i].id for i in range(len(locations))}
+    default_label = labels[0]
+
+    current_location_id = st.session_state.get("active_location_id") or locations[0].id
+    current_label = next((lbl for lbl, lid in id_by_label.items() if lid == current_location_id), default_label)
+
+    st.markdown("#### Select Location for Customization")
+    selected_label = st.selectbox(
+        "Location",
+        labels,
+        index=labels.index(current_label) if current_label in labels else labels.index(default_label),
+        help="Changes are saved per location and do not affect others.",
+        key="dc_location_selector"
+    )
+    location_id = id_by_label[selected_label]
+
+    prev_key = "__prev_active_location_id_dc"
+    prev_id = st.session_state.get(prev_key)
+    st.session_state["active_location_id"] = location_id
+    if prev_id != location_id:
+        st.session_state[prev_key] = location_id
+        st.session_state.dashboard_config = DashboardConfigManager.load_config(location_id)
+        st.rerun()
     
     # Tabs for different customization sections
     tabs = st.tabs([
@@ -237,6 +264,22 @@ def render_monthly_data_tab(config: dict):
                         default_palette_str = ",".join(default_palette if isinstance(default_palette, list) else [str(default_palette)])
                         pal_str = st.text_input("Palette (comma colors)", value=default_palette_str, key=f"md_pal_{idx}")
                         v["palette"] = [c.strip() for c in pal_str.split(",") if c.strip()]
+                    st.markdown("**Filters**")
+                    criteria = v.setdefault("criteria", [])
+                    if st.button("➕ Add Filter", key=f"md_add_filter_{idx}"):
+                        criteria.append({"column": (cols or [""])[0] if cols else "", "operator": "equals", "value": ""})
+                    for c_i, crit in enumerate(list(criteria)):
+                        fc1, fc2, fc3, fc4 = st.columns([1.6, 1.2, 1.6, 0.6])
+                        with fc1:
+                            crit["column"] = st.selectbox("Column", options=cols or [""], index=max(0, (cols or [""]).index(crit.get("column")) if crit.get("column") in (cols or []) else 0), key=f"md_crit_col_{idx}_{c_i}")
+                        with fc2:
+                            crit["operator"] = st.selectbox("Operator", options=["equals", "not_equals", "contains", "starts_with", "ends_with", "greater_than", "less_than", "greater_equal", "less_equal"], index=["equals", "not_equals", "contains", "starts_with", "ends_with", "greater_than", "less_than", "greater_equal", "less_equal"].index(crit.get("operator", "equals")), key=f"md_crit_op_{idx}_{c_i}")
+                        with fc3:
+                            crit["value"] = st.text_input("Value", value=str(crit.get("value", "")), key=f"md_crit_val_{idx}_{c_i}")
+                        with fc4:
+                            if st.button("🗑️", key=f"md_crit_del_{idx}_{c_i}"):
+                                criteria.pop(c_i)
+                                st.rerun()
                 else:
                     v["field"] = st.text_input("Field Name", value=v.get("field", "Receipt"), key=f"md_field_{idx}")
                 v["show_labels"] = st.checkbox("Show Labels", value=bool(v.get("show_labels", True)), key=f"md_labels_{idx}")
@@ -506,6 +549,22 @@ def render_summary_cards_tab(config: dict):
                             index=max(0, (cols or [""]).index(card.get("field")) if card.get("field") in (cols or []) else 0),
                             key=f"card_field_{idx}"
                         )
+                        st.markdown("**Filters**")
+                        criteria = card.setdefault("criteria", [])
+                        if st.button("➕ Add Filter", key=f"card_add_filter_{idx}"):
+                            criteria.append({"column": (cols or [""])[0] if cols else "", "operator": "equals", "value": ""})
+                        for c_i, crit in enumerate(list(criteria)):
+                            fc1, fc2, fc3, fc4 = st.columns([1.6, 1.2, 1.6, 0.6])
+                            with fc1:
+                                crit["column"] = st.selectbox("Column", options=cols or [""], index=max(0, (cols or [""]).index(crit.get("column")) if crit.get("column") in (cols or []) else 0), key=f"card_crit_col_{idx}_{c_i}")
+                            with fc2:
+                                crit["operator"] = st.selectbox("Operator", options=["equals", "not_equals", "contains", "starts_with", "ends_with", "greater_than", "less_than", "greater_equal", "less_equal"], index=["equals", "not_equals", "contains", "starts_with", "ends_with", "greater_than", "less_than", "greater_equal", "less_equal"].index(crit.get("operator", "equals")), key=f"card_crit_op_{idx}_{c_i}")
+                            with fc3:
+                                crit["value"] = st.text_input("Value", value=str(crit.get("value", "")), key=f"card_crit_val_{idx}_{c_i}")
+                            with fc4:
+                                if st.button("🗑️", key=f"card_crit_del_{idx}_{c_i}"):
+                                    criteria.pop(c_i)
+                                    st.rerun()
             
             with col2:
                 card["unit"] = st.text_input(
@@ -1042,6 +1101,22 @@ def render_charts_tab(config: dict):
                         index=max(0, (cols or [""]).index(series.get("field")) if series.get("field") in (cols or []) else 0),
                         key=f"series_field_{idx}"
                     )
+                    st.markdown("**Filters**")
+                    criteria = series.setdefault("criteria", [])
+                    if st.button("➕ Add Filter", key=f"series_add_filter_{idx}"):
+                        criteria.append({"column": (cols or [""])[0] if cols else "", "operator": "equals", "value": ""})
+                    for c_i, crit in enumerate(list(criteria)):
+                        fc1, fc2, fc3, fc4 = st.columns([1.6, 1.2, 1.6, 0.6])
+                        with fc1:
+                            crit["column"] = st.selectbox("Column", options=cols or [""], index=max(0, (cols or [""]).index(crit.get("column")) if crit.get("column") in (cols or []) else 0), key=f"series_crit_col_{idx}_{c_i}")
+                        with fc2:
+                            crit["operator"] = st.selectbox("Operator", options=["equals", "not_equals", "contains", "starts_with", "ends_with", "greater_than", "less_than", "greater_equal", "less_equal"], index=["equals", "not_equals", "contains", "starts_with", "ends_with", "greater_than", "less_than", "greater_equal", "less_equal"].index(crit.get("operator", "equals")), key=f"series_crit_op_{idx}_{c_i}")
+                        with fc3:
+                            crit["value"] = st.text_input("Value", value=str(crit.get("value", "")), key=f"series_crit_val_{idx}_{c_i}")
+                        with fc4:
+                            if st.button("🗑️", key=f"series_crit_del_{idx}_{c_i}"):
+                                criteria.pop(c_i)
+                                st.rerun()
                 else:
                     series["field"] = st.text_input(
                         "Field Name",

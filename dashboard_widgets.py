@@ -719,7 +719,7 @@ class DashboardRenderer:
                 cur = cur + timedelta(days=1)
             return rows
 
-        def _table_sum_range(table: str, value_field: str) -> float:
+        def _table_sum_range(table: str, value_field: str, criteria: List[Dict[str, Any]] = None) -> float:
             insp = inspect(engine)
             cols = [c.get("name") for c in insp.get_columns(table)]
             date_col = None
@@ -743,6 +743,41 @@ class DashboardRenderer:
             if has_loc:
                 where.append(f"{q('location_id')} = :loc")
                 params["loc"] = location_id
+            for i, crit in enumerate(list(criteria or [])):
+                col = str(crit.get("column") or "")
+                op = str(crit.get("operator") or "equals")
+                val = crit.get("value")
+                if not col or col not in cols:
+                    continue
+                q_col = q(col)
+                p = f"c{i}"
+                if op == "equals":
+                    where.append(f"{q_col} = :{p}")
+                    params[p] = val
+                elif op == "not_equals":
+                    where.append(f"{q_col} != :{p}")
+                    params[p] = val
+                elif op == "contains":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"%{val}%"
+                elif op == "starts_with":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"{val}%"
+                elif op == "ends_with":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"%{val}"
+                elif op == "greater_than":
+                    where.append(f"{q_col} > :{p}")
+                    params[p] = val
+                elif op == "less_than":
+                    where.append(f"{q_col} < :{p}")
+                    params[p] = val
+                elif op == "greater_equal":
+                    where.append(f"{q_col} >= :{p}")
+                    params[p] = val
+                elif op == "less_equal":
+                    where.append(f"{q_col} <= :{p}")
+                    params[p] = val
             sql = f"SELECT SUM({q(value_field)}) AS v FROM {q(table)}" + (" WHERE " + " AND ".join(where) if where else "")
             with get_session() as s:
                 try:
@@ -754,7 +789,7 @@ class DashboardRenderer:
             except Exception:
                 return 0.0
 
-        def _table_group_sum(table: str, value_field: str, group_field: str) -> pd.DataFrame:
+        def _table_group_sum(table: str, value_field: str, group_field: str, criteria: List[Dict[str, Any]] = None) -> pd.DataFrame:
             insp = inspect(engine)
             cols = [c.get("name") for c in insp.get_columns(table)]
             date_col = None
@@ -778,6 +813,41 @@ class DashboardRenderer:
             if has_loc:
                 where.append(f"{q('location_id')} = :loc")
                 params["loc"] = location_id
+            for i, crit in enumerate(list(criteria or [])):
+                col = str(crit.get("column") or "")
+                op = str(crit.get("operator") or "equals")
+                val = crit.get("value")
+                if not col or col not in cols:
+                    continue
+                q_col = q(col)
+                p = f"c{i}"
+                if op == "equals":
+                    where.append(f"{q_col} = :{p}")
+                    params[p] = val
+                elif op == "not_equals":
+                    where.append(f"{q_col} != :{p}")
+                    params[p] = val
+                elif op == "contains":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"%{val}%"
+                elif op == "starts_with":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"{val}%"
+                elif op == "ends_with":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"%{val}"
+                elif op == "greater_than":
+                    where.append(f"{q_col} > :{p}")
+                    params[p] = val
+                elif op == "less_than":
+                    where.append(f"{q_col} < :{p}")
+                    params[p] = val
+                elif op == "greater_equal":
+                    where.append(f"{q_col} >= :{p}")
+                    params[p] = val
+                elif op == "less_equal":
+                    where.append(f"{q_col} <= :{p}")
+                    params[p] = val
             sql = f"SELECT {q(group_field)} AS g, SUM({q(value_field)}) AS v FROM {q(table)}" + (" WHERE " + " AND ".join(where) if where else "") + f" GROUP BY {q(group_field)}"
             with get_session() as s:
                 try:
@@ -817,8 +887,9 @@ class DashboardRenderer:
                         elif ds == "table":
                             table = card.get("table_name")
                             value_field = card.get("field")
+                            crit = card.get("criteria") or []
                             if table and value_field:
-                                total = _table_sum_range(table, value_field)
+                                total = _table_sum_range(table, value_field, crit)
                         style = dict(config.get("styles", {}).get("card", {}))
                         style["value_color"] = color
                         WidgetRenderer.render_stat_card(
@@ -859,7 +930,7 @@ class DashboardRenderer:
                         if not (table and value_field and group_field):
                             st.info("Missing table/group/field for pie/doughnut chart")
                             continue
-                        df = _table_group_sum(table, value_field, group_field)
+                        df = _table_group_sum(table, value_field, group_field, card.get("criteria") or [])
                         if df.empty:
                             st.info("No data for selected range")
                             continue
@@ -917,7 +988,7 @@ class DashboardRenderer:
 
         rows = []
         # Helper for table source per-day sum
-        def _table_value(table: str, field: str, dt, loc_id: int):
+        def _table_value(table: str, field: str, dt, loc_id: int, criteria: List[Dict[str, Any]] = None):
             insp = inspect(engine)
             cols = [c.get("name") for c in insp.get_columns(table)]
             date_col = None
@@ -943,6 +1014,41 @@ class DashboardRenderer:
             if has_loc:
                 where.append(f"{q('location_id')} = :loc")
                 params["loc"] = loc_id
+            for i, crit in enumerate(list(criteria or [])):
+                col = str(crit.get("column") or "")
+                op = str(crit.get("operator") or "equals")
+                val = crit.get("value")
+                if not col or col not in cols:
+                    continue
+                q_col = q(col)
+                p = f"c{i}"
+                if op == "equals":
+                    where.append(f"{q_col} = :{p}")
+                    params[p] = val
+                elif op == "not_equals":
+                    where.append(f"{q_col} != :{p}")
+                    params[p] = val
+                elif op == "contains":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"%{val}%"
+                elif op == "starts_with":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"{val}%"
+                elif op == "ends_with":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"%{val}"
+                elif op == "greater_than":
+                    where.append(f"{q_col} > :{p}")
+                    params[p] = val
+                elif op == "less_than":
+                    where.append(f"{q_col} < :{p}")
+                    params[p] = val
+                elif op == "greater_equal":
+                    where.append(f"{q_col} >= :{p}")
+                    params[p] = val
+                elif op == "less_equal":
+                    where.append(f"{q_col} <= :{p}")
+                    params[p] = val
             sql = f"SELECT SUM({q(field)}) AS v FROM {q(table)}" + (" WHERE " + " AND ".join(where) if where else "")
             with get_session() as s:
                 try:
@@ -967,7 +1073,7 @@ class DashboardRenderer:
                     elif ds == "table":
                         table = sconf.get("table_name")
                         if table and field:
-                            val = _table_value(table, field, d, location_id)
+                            val = _table_value(table, field, d, location_id, sconf.get("criteria") or [])
                         else:
                             val = 0.0
                     elif ds == "fso_operations":
@@ -1295,6 +1401,8 @@ class DashboardRenderer:
             q_date = q(date_col) if date_col else None
             q_loc = q("location_id") if has_loc else None
 
+            criteria = card_config.get("criteria") or []
+
             # Apply date filter as equality or range
             if date_col:
                 if isinstance(target_date, tuple):
@@ -1308,6 +1416,41 @@ class DashboardRenderer:
             if has_loc:
                 where.append(f"{q_loc} = :loc")
                 params["loc"] = location_id
+            for i, crit in enumerate(criteria):
+                col = str(crit.get("column") or "")
+                op = str(crit.get("operator") or "equals")
+                val = crit.get("value")
+                if not col or col not in cols:
+                    continue
+                q_col = q(col)
+                p = f"c{i}"
+                if op == "equals":
+                    where.append(f"{q_col} = :{p}")
+                    params[p] = val
+                elif op == "not_equals":
+                    where.append(f"{q_col} != :{p}")
+                    params[p] = val
+                elif op == "contains":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"%{val}%"
+                elif op == "starts_with":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"{val}%"
+                elif op == "ends_with":
+                    where.append(f"{q_col} LIKE :{p}")
+                    params[p] = f"%{val}"
+                elif op == "greater_than":
+                    where.append(f"{q_col} > :{p}")
+                    params[p] = val
+                elif op == "less_than":
+                    where.append(f"{q_col} < :{p}")
+                    params[p] = val
+                elif op == "greater_equal":
+                    where.append(f"{q_col} >= :{p}")
+                    params[p] = val
+                elif op == "less_equal":
+                    where.append(f"{q_col} <= :{p}")
+                    params[p] = val
             sql = f"SELECT SUM({q_field}) AS v FROM {q_table}" + (" WHERE " + " AND ".join(where) if where else "")
             with get_session() as s:
                 try:

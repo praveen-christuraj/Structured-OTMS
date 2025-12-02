@@ -1211,8 +1211,8 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
                     "ROB Water": round(rob_w, 2),
                     "TOB Qty": round(tob_q, 2),
                     "TOB Water": round(tob_w, 2),
-                    "Net Loaded/Unloaded (bbls)": round(float(tob_q - rob_q), 2),
-                    "Net Water Loaded/Unloaded (bbls)": round(float(tob_w - rob_w), 2),
+                    "Net Loaded/Unloaded (bbls)": round(abs(float(tob_q - rob_q)), 2),
+                    "Net Water Loaded/Unloaded (bbls)": round(abs(float(tob_w - rob_w)), 2),
                     "_voyage_id": v.id,
                     "_location_id": int(getattr(v, "location_id", 0) or 0),
                 })
@@ -1245,8 +1245,8 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
                         obj.rob_fw_bbl = float(r["ROB Water"]) 
                         obj.tob_qty_bbl = float(r["TOB Qty"]) 
                         obj.tob_fw_bbl = float(r["TOB Water"]) 
-                        obj.net_qty_bbl = float(r["Net Loaded/Unloaded (bbls)"]) 
-                        obj.net_fw_bbl = float(r["Net Water Loaded/Unloaded (bbls)"]) 
+                        obj.net_qty_bbl = abs(float(r["Net Loaded/Unloaded (bbls)"])) 
+                        obj.net_fw_bbl = abs(float(r["Net Water Loaded/Unloaded (bbls)"])) 
                         obj.updated_by = (user or {}).get("username", "system")
                     s.flush()
                 except Exception:
