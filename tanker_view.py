@@ -422,26 +422,47 @@ def _render_main_tanker_view(user: Dict[str, Any] | None, location_id: Optional[
     if "tanker_view_edit" not in st.session_state:
         st.session_state["tanker_view_edit"] = False
 
-    # header row
-    st.caption("Date • Time • Tanker • Convoy • Destination • GOV • NSV • Created • Actions")
+    # header row + widths reused for alignment
+    col_widths = [0.10, 0.08, 0.16, 0.10, 0.16, 0.08, 0.08, 0.12, 0.12]
+    headers = ["Date", "Time", "Tanker", "Convoy", "Destination", "GOV", "NSV", "Created", "Actions"]
+    header_align = ["left", "left", "left", "left", "left", "right", "right", "left", "center"]
+    hcols = st.columns(col_widths)
+    for col, label, align in zip(hcols, headers, header_align):
+        col.markdown(
+            f"<div style='font-weight:600;font-size:12px;padding:4px 0;text-align:{align};'>{label}</div>",
+            unsafe_allow_html=True,
+        )
+
     for r in rows:
-        cols = st.columns([0.10, 0.08, 0.16, 0.10, 0.16, 0.08, 0.08, 0.12, 0.12])
+        cols = st.columns(col_widths)
         with cols[0]:
-            st.write(f"**{_fmt_date(r.transaction_date)}**")
+            st.markdown(
+                f"<div style='padding:4px 0;font-weight:600;'>{_fmt_date(r.transaction_date)}</div>",
+                unsafe_allow_html=True,
+            )
         with cols[1]:
-            st.write(_fmt_time(r.transaction_time))
+            st.markdown(f"<div style='padding:4px 0;'>{_fmt_time(r.transaction_time)}</div>", unsafe_allow_html=True)
         with cols[2]:
-            st.write(r.tanker_name or "—")
+            st.markdown(f"<div style='padding:4px 0;'>{escape(str(r.tanker_name or '—'))}</div>", unsafe_allow_html=True)
         with cols[3]:
-            st.write(r.convoy_no or "—")
+            st.markdown(f"<div style='padding:4px 0;'>{escape(str(r.convoy_no or '—'))}</div>", unsafe_allow_html=True)
         with cols[4]:
-            st.write(getattr(r, "destination", "") or "—")
+            st.markdown(
+                f"<div style='padding:4px 0;'>{escape(str(getattr(r, 'destination', '') or '—'))}</div>",
+                unsafe_allow_html=True,
+            )
         with cols[5]:
-            st.write(f"{_fmt_num(getattr(r, 'gov_bbl', 0), 0)}")
+            st.markdown(
+                f"<div style='padding:4px 0;text-align:right;'>{_fmt_num(getattr(r, 'gov_bbl', 0), 0)}</div>",
+                unsafe_allow_html=True,
+            )
         with cols[6]:
-            st.write(f"{_fmt_num(getattr(r, 'nsv_bbl', 0), 0)}")
+            st.markdown(
+                f"<div style='padding:4px 0;text-align:right;'>{_fmt_num(getattr(r, 'nsv_bbl', 0), 0)}</div>",
+                unsafe_allow_html=True,
+            )
         with cols[7]:
-            st.write(r.created_by or "system")
+            st.markdown(f"<div style='padding:4px 0;'>{escape(str(r.created_by or 'system'))}</div>", unsafe_allow_html=True)
         with cols[8]:
             a1, a2, a3 = st.columns([1,1,1])
             with a1:
@@ -898,13 +919,15 @@ def _build_tanker_pdf_bytes_conventional(row: TankerTransaction) -> bytes:
         for i in range(cols):
             c.line(x + i*cw, y, x + i*cw, y - h)
         # draw text
-        tx = x + 2*mm
         ty = y - 6*mm
         for i, (lab, val) in enumerate(items[:cols]):
+            cell_x = x + i * cw
+            label_txt = f"{lab} :"
             c.setFont("Helvetica-Bold", 9)
-            c.drawString(x + i*cw + 2*mm, ty, str(lab))
+            c.drawString(cell_x + 2*mm, ty, label_txt)
+            label_w = c.stringWidth(label_txt, "Helvetica-Bold", 9)
             c.setFont("Helvetica", 9)
-            c.drawString(x + i*cw + 2*mm + 28*mm, ty, str(val))
+            c.drawString(cell_x + 2*mm + label_w + 2*mm, ty, str(val))
 
     # two rows of info (3 cells per row)
     row_h = 10*mm
@@ -1025,6 +1048,18 @@ def _build_tanker_pdf_bytes_conventional(row: TankerTransaction) -> bytes:
     for ln in lines[:4]:
         c.drawString(LM + 3*mm, ty, ln)
         ty -= 5*mm
+
+    # ===== Authorized signatory =====
+    bottom_of_remarks = y - rem_h
+    sig_h = 22*mm
+    gap = 6*mm
+    sig_y = max(BM, bottom_of_remarks - gap - sig_h)
+    c.rect(LM, sig_y, W - LM - RM, sig_h, stroke=1, fill=0)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(LM + 3*mm, sig_y + sig_h - 6*mm, "Authorized Signatory")
+    c.setFont("Helvetica", 9)
+    c.drawString(LM + 3*mm, sig_y + 6*mm, "For SEEPCO")
+    c.drawRightString(W - RM - 3*mm, sig_y + 6*mm, "For Tanker Representative")
 
     c.showPage()
     c.save()

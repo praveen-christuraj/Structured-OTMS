@@ -91,7 +91,8 @@ def render_dashboard_customization():
         "🚢 Convoy Status",
         "🗂️ Sections Manager",
         "🎨 Styles",
-        "💾 Save & Load"
+        "💾 Save & Load",
+        "🖨️ PDF Export"
     ])
     
     # Load current configuration
@@ -184,6 +185,25 @@ def render_dashboard_customization():
     # Tab 8: Save & Load
     with tabs[8]:
         render_save_load_tab(config, location_id, user)
+
+    # Tab 9: PDF Export
+    with tabs[9]:
+        st.markdown("### PDF Export Configuration")
+        pdf_cfg = config.setdefault("pdf_export", {})
+        enabled = pdf_cfg.setdefault("enabled_sections", {})
+        sections = config.get("sections", [])
+        for sec in sections:
+            sid = sec.get("id")
+            sname = sec.get("name") or sid
+            cur = bool(enabled.get(sid, sec.get("enabled", True)))
+            enabled[sid] = st.toggle(f"Include: {sname}", value=cur, key=f"pdf_inc_{sid}")
+        st.markdown("---")
+        if st.button("💾 Save Configuration", key="save_pdf", type="primary"):
+            if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
+                st.success("✅ Configuration saved successfully!")
+                st.session_state.dashboard_config = config
+            else:
+                st.error("❌ Failed to save configuration")
 
 def render_monthly_data_tab(config: dict):
     """Render monthly data configuration tab"""

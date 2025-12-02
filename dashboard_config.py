@@ -285,6 +285,17 @@ class DashboardConfigManager:
                     "color": "#666666",
                     "text_transform": "uppercase"
                 }
+            },
+            "pdf_export": {
+                "enabled_sections": {
+                    "summary_cards": True,
+                    "tank_visuals": True,
+                    "monthly_data": True,
+                    "trend_chart": True,
+                    "convoy_status": False
+                },
+                "include_header": True,
+                "title": "Dashboard Export"
             }
         }
     

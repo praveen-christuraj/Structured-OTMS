@@ -270,6 +270,19 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
                     ["string", "numeric", "date", "datetime", "boolean"],
                     key=f"col_type_{idx}",
                 )
+                decimal_places = None
+                if dtype == "numeric":
+                    decimal_places = int(
+                        st.number_input(
+                            "Decimal places",
+                            min_value=0,
+                            max_value=6,
+                            value=2,
+                            step=1,
+                            key=f"col_decimals_{idx}",
+                            help="Number of decimal places to show for this numeric column in PDFs.",
+                        )
+                    )
             with c2:
                 src_opt = st.selectbox(
                     "Data source (table) *",
@@ -410,6 +423,7 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
                     "source_location_id": source_location_id,
                     "link_by": link_by,
                     "formula": formula_cfg,
+                    "decimal_places": decimal_places,
                 }
             )
 

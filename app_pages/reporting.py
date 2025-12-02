@@ -398,9 +398,27 @@ def render_reporting_page(active_location_id: int, user: dict):
             try:
                 engine = ReportEngine(config)
                 pdf_base64 = engine.get_pdf_base64(df, report_name)
-                pdf_url = f"data:application/pdf;base64,{pdf_base64}"
                 components.html(
-                    f"<script>window.open('{pdf_url}', '_blank');</script>",
+                    f"""
+                    <script>
+                    (function(){{
+                        const b64 = "{pdf_base64}";
+                        const bytes = atob(b64);
+                        const len = bytes.length;
+                        const out = new Uint8Array(len);
+                        for (let i = 0; i < len; i++) {{
+                            out[i] = bytes.charCodeAt(i);
+                        }}
+                        const blob = new Blob([out], {{ type: "application/pdf" }});
+                        const url = URL.createObjectURL(blob);
+                        const w = window.open(url, "_blank");
+                        if (!w) {{
+                            alert("Please allow pop-ups to view the PDF.");
+                        }}
+                        setTimeout(() => URL.revokeObjectURL(url), 60000);
+                    }})();
+                    </script>
+                    """,
                     height=0,
                 )
                 SecurityManager.log_audit(
@@ -422,8 +440,6 @@ def render_reporting_page(active_location_id: int, user: dict):
             summary_data[col] = {
                 'Total': f"{df[col].sum():,.2f}",
                 'Average': f"{df[col].mean():,.2f}",
-                'Min': f"{df[col].min():,.2f}",
-                'Max': f"{df[col].max():,.2f}",
             }
         summary_df = pd.DataFrame(summary_data).T
         st.dataframe(summary_df, use_container_width=True)

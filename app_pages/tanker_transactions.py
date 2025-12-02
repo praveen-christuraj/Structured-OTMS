@@ -1406,8 +1406,6 @@ def render_tanker_transactions_page(active_location_id: Optional[int], user: Opt
             
             # Main tanker dispatch tab
             with tabs[0]:
-                _render_saved_transactions(loc.id, can_make_entries)
-                st.markdown("---")
                 _render_entry_form(loc, can_make_entries, tankers)
             
             # Custom tabs
@@ -1416,8 +1414,6 @@ def render_tanker_transactions_page(active_location_id: Optional[int], user: Opt
                     _render_custom_tanker_tab(loc, user, custom_tab)
         else:
             # No custom tabs, render normally
-            _render_saved_transactions(loc.id, can_make_entries)
-            st.markdown("---")
             _render_entry_form(loc, can_make_entries, tankers)
 
     except Exception as exc:  # pragma: no cover

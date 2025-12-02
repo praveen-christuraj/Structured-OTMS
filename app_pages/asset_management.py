@@ -165,9 +165,9 @@ def _tab_tanks(active_location_id, user):
                 c4.caption(f"Status: {t.status.name}")
                 with c5:
                     colA, colB = st.columns(2)
-                    if colA.button("✏️ Edit", key=f"btn_edit_tank_{t.id}", use_container_width=True):
+                    if colA.button("✏️", key=f"btn_edit_tank_{t.id}", help="Edit", use_container_width=False):
                         st.session_state[f"editing_tank_{t.id}"] = True
-                    if colB.button("🗑️ Delete", key=f"del_tank_{t.id}", use_container_width=True):
+                    if colB.button("🗑️", key=f"del_tank_{t.id}", help="Delete", use_container_width=False):
                         st.session_state[f"confirm_del_tank_{t.id}"] = True
 
                 if st.session_state.get(f"editing_tank_{t.id}"):
@@ -381,9 +381,9 @@ def _tab_vessels_assign(active_location_id, user):
                 c3.caption(f"Capacity: {int(v.capacity_bbl or 0)} bbl")
                 with c4:
                     colA, colB = st.columns(2)
-                    if colA.button("✏️ Edit", key=f"btn_edit_vessel_{v.id}", use_container_width=True):
+                    if colA.button("✏️", key=f"btn_edit_vessel_{v.id}", help="Edit", use_container_width=False):
                         st.session_state[f"editing_vessel_{v.id}"] = True
-                    if colB.button("🗑️ Delete", key=f"del_vessel_{v.id}", use_container_width=True):
+                    if colB.button("🗑️", key=f"del_vessel_{v.id}", help="Delete", use_container_width=False):
                         st.session_state[f"confirm_del_vessel_{v.id}"] = True
 
                 if st.session_state.get(f"editing_vessel_{v.id}"):
@@ -545,9 +545,9 @@ def _tab_fso_assign(active_location_id, user):
                 c2.caption(f"Capacity: {int(v.capacity_bbl or 0)} bbl")
                 with c3:
                     colA, colB = st.columns(2)
-                    if colA.button("✏️ Edit", key=f"btn_edit_fso_{v.id}", use_container_width=True):
+                    if colA.button("✏️", key=f"btn_edit_fso_{v.id}", help="Edit", use_container_width=False):
                         st.session_state[f"editing_fso_{v.id}"] = True
-                    if colB.button("🗑️ Delete", key=f"del_fso_{v.id}", use_container_width=True):
+                    if colB.button("🗑️", key=f"del_fso_{v.id}", help="Delete", use_container_width=False):
                         st.session_state[f"confirm_del_fso_{v.id}"] = True
 
                 if st.session_state.get(f"editing_fso_{v.id}"):
@@ -731,9 +731,9 @@ def _tab_tankers(user):
                 c2.caption(f"Chassis: {tk.registration_no or '-'} | Capacity: {int(tk.capacity_litres or 0)} L")  # <-- caption updated
                 with c3:
                     colA, colB = st.columns(2)
-                    if colA.button("✏️ Edit", key=f"btn_edit_tanker_{tk.id}", use_container_width=True):
+                    if colA.button("✏️", key=f"btn_edit_tanker_{tk.id}", help="Edit", use_container_width=False):
                         st.session_state[f"editing_tanker_{tk.id}"] = True
-                    if colB.button("🗑️ Delete", key=f"del_tanker_{tk.id}", use_container_width=True):
+                    if colB.button("🗑️", key=f"del_tanker_{tk.id}", help="Delete", use_container_width=False):
                         st.session_state[f"confirm_del_tanker_{tk.id}"] = True
 
                 if st.session_state.get(f"editing_tanker_{tk.id}"):
@@ -1147,6 +1147,15 @@ def _tab_astm_table11(user):
 def render_asset_management_page(active_location_id, user):
     st.markdown("### 🧰 Asset Management")
     if not _require_admin(user): return
+    st.markdown(
+        """
+        <style>
+        .stButton>button { padding: 4px 8px; height: 28px; }
+        div[data-testid=\"stHorizontalBlock\"] { gap: 0.25rem; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     tabs = st.tabs([
         "🛢️ Tanks",

@@ -213,6 +213,79 @@ def render_location_dashboard(selected_location_id: int, user: dict):
         """,
         unsafe_allow_html=True
     )
+    c1, c2 = st.columns([0.9, 0.1])
+    with c2:
+        if st.button("🖨️", help="Export Dashboard to PDF", use_container_width=True):
+            try:
+                from logger import log_info
+                log_info("Dashboard PDF export triggered")
+            except Exception:
+                pass
+            try:
+                import streamlit.components.v1 as components
+                components.html(
+                    """
+                    <script>
+                    (async function(){
+                        function loadScript(src){
+                            return new Promise(function(resolve, reject){
+                                try {
+                                    var s = document.createElement('script');
+                                    s.src = src;
+                                    s.onload = resolve;
+                                    s.onerror = function(){ reject(new Error('Failed to load '+src)); };
+                                    var doc2 = (window.parent && window.parent.document) ? window.parent.document : document;
+                                    (doc2.body || doc2.head || doc2.documentElement).appendChild(s);
+                                } catch(e){ reject(e); }
+                            });
+                        }
+                        try {
+                            var doc = (window.parent && window.parent.document) ? window.parent.document : document;
+                            if (!window.parent.__otmsPdfLibsLoaded) {
+                                await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
+                                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+                                window.parent.__otmsPdfLibsLoaded = true;
+                            }
+                            var target = doc.querySelector('[data-testid="stAppViewContainer"] .block-container')
+                                || doc.querySelector('.block-container')
+                                || doc.querySelector('main')
+                                || doc.body;
+                            var h2c = (window.parent && window.parent.html2canvas) ? window.parent.html2canvas : window.html2canvas;
+                            await new Promise(function(r){ requestAnimationFrame(r); });
+                            var canvas = await h2c(target, { scale: 1.5, useCORS: true, backgroundColor: '#ffffff' });
+                            var imgData = canvas.toDataURL('image/png');
+                            var jpdf = (window.parent && window.parent.jspdf) ? window.parent.jspdf : window.jspdf;
+                            var jsPDF = jpdf.jsPDF || jpdf;
+                            var pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+                            var pageWidth = pdf.internal.pageSize.getWidth();
+                            var pageHeight = pdf.internal.pageSize.getHeight();
+                            var imgWidth = pageWidth;
+                            var imgHeight = canvas.height * (imgWidth / canvas.width);
+                            var y = 0;
+                            pdf.addImage(imgData, 'PNG', 0, y, imgWidth, imgHeight);
+                            var heightLeft = imgHeight - pageHeight;
+                            while (heightLeft > 0) {
+                                pdf.addPage();
+                                y = heightLeft - imgHeight;
+                                pdf.addImage(imgData, 'PNG', 0, y, imgWidth, imgHeight);
+                                heightLeft -= pageHeight;
+                            }
+                            var blob = pdf.output('blob');
+                            var url = ((window.parent || window).URL || URL).createObjectURL(blob);
+                            (window.parent || window).open(url, '_blank');
+                        } catch (err) {
+                            console.error(err);
+                            try { (window.parent || window).print(); } catch(e2) {}
+                            alert('Failed to export dashboard to PDF. Print dialog opened as fallback.');
+                        }
+                    })();
+                    </script>
+                    """,
+                    height=0
+                );
+            except Exception as e:
+                st.error(f"PDF export failed: {e}")
+            
     
     # Load dashboard configuration
     try:

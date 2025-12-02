@@ -114,8 +114,8 @@ class ReportEngine:
                 log_error(f"Error loading custom table '{table_name}': {str(e)}", exc_info=True)
                 raise ValueError(f"Unknown data source: {table_name}. Error: {e}")
         
-        # Start with base query
-        query = session.query(primary_model)
+        # Start with base query anchored to primary model
+        query = session.query(primary_model).select_from(primary_model)
 
         # Apply base location scoping if applicable
         base_loc_mode = self.data_source.get('base_location_mode')
@@ -126,14 +126,39 @@ class ReportEngine:
             elif base_loc_mode == 'specific' and base_loc_id:
                 query = query.filter(primary_model.location_id == base_loc_id)
         
-        # Apply joins if specified (only for standard tables)
+        # Apply joins if specified (only for standard tables) using explicit ON clauses
         if table_name in self.DATA_SOURCES:
+            joined_tables = set()
             joins = self.data_source.get('joins', [])
             for join_config in joins:
                 join_table = join_config.get('table')
-                if join_table in self.DATA_SOURCES:
-                    join_model = self.DATA_SOURCES[join_table]
-                    query = query.join(join_model)
+                if not join_table:
+                    continue
+                # avoid self-joins and duplicate joins that cause ambiguity
+                if join_table == table_name or join_table in joined_tables:
+                    continue
+                # resolve join model (standard only for now)
+                join_model = self.DATA_SOURCES.get(join_table)
+                if not join_model:
+                    continue
+
+                # Build explicit ON clause from join_keys to avoid ambiguous joins
+                join_keys = join_config.get('join_keys') or []
+                conditions = []
+                for jk in join_keys:
+                    left_key = jk.get('primary')
+                    right_key = jk.get('source')
+                    if left_key and right_key and hasattr(primary_model, left_key) and hasattr(join_model, right_key):
+                        conditions.append(getattr(primary_model, left_key) == getattr(join_model, right_key))
+
+                if conditions:
+                    join_type = join_config.get('type', '').lower()
+                    if join_type == 'left':
+                        query = query.outerjoin(join_model, and_(*conditions))
+                    else:
+                        query = query.join(join_model, and_(*conditions))
+                    joined_tables.add(join_table)
+                # If no valid join keys, skip joining to prevent ambiguous JOIN errors
         
         # Apply predefined filters from config
         query = self._apply_filters(query, primary_model, self.filters, user_filters)
@@ -731,67 +756,211 @@ class ReportEngine:
         Returns:
             PDF data as bytes
         """
-        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.lib.pagesizes import A4, A3, landscape, portrait
         from reportlab.lib import colors
-        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
         from reportlab.lib.units import inch
-        
+
         pdf_buffer = BytesIO()
-        
-        # Use landscape for wider tables
-        doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(A4))
-        elements = []
-        
-        # Standardized header
-        styles = getSampleStyleSheet()
-        header_title = Paragraph(f"<b>{report_name}</b>", styles['Heading1'])
-        header_date = Paragraph(
-            f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-            styles['Normal']
+
+        # PDF options from config (orientation/page size/logo flag)
+        opts = {}
+        try:
+            opts = self.config.get("pdf_options", {}) if isinstance(self.config, dict) else {}
+        except Exception:
+            opts = {}
+        orientation = (opts.get("orientation") or "landscape").lower()
+        page_size_name = (opts.get("page_size") or "A4").upper()
+        include_logo = bool(opts.get("include_logo", True))
+
+        page_size_map = {"A4": A4, "A3": A3}
+        base_size = page_size_map.get(page_size_name, A4)
+        page_size = landscape(base_size) if orientation == "landscape" else portrait(base_size)
+
+        doc = SimpleDocTemplate(
+            pdf_buffer,
+            pagesize=page_size,
+            leftMargin=18,
+            rightMargin=18,
+            topMargin=24,
+            bottomMargin=24,
         )
-        elements.append(header_title)
+        elements = []
+
+        # Palette aligned with conventional reports
+        header_bg = colors.HexColor("#0B3D91")
+        header_text = colors.white
+        table_header_bg = colors.HexColor("#1E3A8A")
+        table_row_alt = colors.HexColor("#F3F4F6")
+        table_grid = colors.HexColor("#D1D5DB")
+
+        # Styles
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(name="ReportTitle", parent=styles["Heading1"], textColor=header_text))
+        styles.add(ParagraphStyle(name="Meta", parent=styles["Normal"], textColor=header_text, fontSize=9))
+        styles.add(ParagraphStyle(name="TableCell", parent=styles["Normal"], fontSize=9))
+
+        # Header bar
+        title_para = Paragraph(report_name or "Report", styles["ReportTitle"])
+        meta_para = Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles["Meta"])
+        header_cells = [[title_para, meta_para]]
+        header_table = Table(header_cells, colWidths=[doc.width * 0.6, doc.width * 0.4])
+        header_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), header_bg),
+                    ("TEXTCOLOR", (0, 0), (-1, -1), header_text),
+                    ("ALIGN", (0, 0), (0, -1), "LEFT"),
+                    ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+                    ("TOPPADDING", (0, 0), (-1, -1), 8),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                ]
+            )
+        )
+        elements.append(header_table)
+        elements.append(Spacer(1, 0.2 * inch))
+
+        # Optional logo placeholder (text badge) to keep consistent layout without needing image assets
+        if include_logo:
+            logo_para = Paragraph("<b>OTMS</b> | Operations Reporting", styles["Normal"])
+            elements.append(logo_para)
+            elements.append(Spacer(1, 0.1 * inch))
+
+        # Subtitle line
+        elements.append(Paragraph("Custom Report Output", styles["Normal"]))
         elements.append(Spacer(1, 0.15 * inch))
-        elements.append(header_date)
-        elements.append(Spacer(1, 0.25 * inch))
         
+        # Prepare decimal formatting lookup for numeric columns
+        decimals_lookup = {}
+        try:
+            for col_cfg in self.columns:
+                lbl = col_cfg.get("label") or col_cfg.get("field") or col_cfg.get("source_field")
+                if not lbl:
+                    continue
+                if str(col_cfg.get("type")).lower() == "numeric":
+                    try:
+                        decimals_lookup[lbl] = int(col_cfg.get("decimal_places")) if col_cfg.get("decimal_places") is not None else 2
+                    except Exception:
+                        decimals_lookup[lbl] = 2
+        except Exception:
+            decimals_lookup = {}
+
+        def _fmt_num(val, dp):
+            try:
+                v = float(val)
+                if pd.isna(v):
+                    return ""
+                return f"{v:,.{dp}f}"
+            except Exception:
+                return "" if pd.isna(val) else str(val)
+
+        # Make a display copy with formatted numeric columns
+        df_display = df.copy()
+        for col in list(df_display.columns):
+            if col in decimals_lookup:
+                dp = decimals_lookup[col]
+                df_display[col] = df_display[col].apply(lambda x, d=dp: _fmt_num(x, d))
+
         # Prepare table data
         if df.empty:
             no_data = Paragraph("No data available for this report.", styles['Normal'])
             elements.append(no_data)
         else:
             # Limit columns if too many (PDF width limitation)
-            max_cols = 10
-            if len(df.columns) > max_cols:
-                df = df.iloc[:, :max_cols]
-            
-            # Convert DataFrame to list of lists
-            table_data = [df.columns.tolist()] + df.values.tolist()
-            
-            # Create table
-            table = Table(table_data)
-            
-            # Style the table
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#374151')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 11),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f5f5f5')),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#d1d5db')),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
-            ]))
-            
+            max_cols = 12
+            if len(df_display.columns) > max_cols:
+                df_display = df_display.iloc[:, :max_cols]
+
+            # Convert DataFrame to list of lists (stringify values for consistency)
+            table_data = [list(map(str, df_display.columns.tolist()))]
+            for row_vals in df_display.values.tolist():
+                table_data.append([("" if v is None else str(v)) for v in row_vals])
+
+            # Derive column widths evenly across available width
+            col_count = len(df_display.columns)
+            col_width = doc.width / col_count if col_count else doc.width
+            col_widths = [col_width for _ in range(col_count)]
+
+            table = Table(table_data, colWidths=col_widths, repeatRows=1)
+
+            # Style the table using conventional palette
+            style_cmds = [
+                ("BACKGROUND", (0, 0), (-1, 0), table_header_bg),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, 0), 10),
+                ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+                ("GRID", (0, 0), (-1, -1), 0.5, table_grid),
+                ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                ("FONTSIZE", (0, 1), (-1, -1), 9),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ]
+            # Zebra striping for body rows
+            for idx in range(1, len(table_data)):
+                if idx % 2 == 0:
+                    style_cmds.append(("BACKGROUND", (0, idx), (-1, idx), table_row_alt))
+
+            table.setStyle(TableStyle(style_cmds))
             elements.append(table)
+
+            # Totals / summary section in PDF when enabled
+            show_totals = bool(self.config.get("show_totals", False)) if isinstance(self.config, dict) else False
+            if show_totals:
+                numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c]) or c in decimals_lookup]
+                numeric_cols = [c for c in numeric_cols if c in df.columns]
+                if numeric_cols:
+                    elements.append(Spacer(1, 0.2 * inch))
+                    elements.append(Paragraph("Summary (Totals)", styles["Normal"]))
+                    summary_headers = ["Metric"] + numeric_cols
+                    summary_rows = []
+                    metrics = ["Total", "Average"]
+                    for metric in metrics:
+                        row_vals = [metric]
+                        for col in numeric_cols:
+                            series = pd.to_numeric(df[col], errors="coerce")
+                            val = ""
+                            if metric == "Total":
+                                val = series.sum(skipna=True)
+                            elif metric == "Average":
+                                val = series.mean(skipna=True)
+                            dp = decimals_lookup.get(col, 2)
+                            row_vals.append(_fmt_num(val, dp))
+                        summary_rows.append(row_vals)
+
+                    summary_table = Table([summary_headers] + summary_rows, repeatRows=1)
+                    summary_style = [
+                        ("BACKGROUND", (0, 0), (-1, 0), table_header_bg),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("FONTSIZE", (0, 0), (-1, 0), 9),
+                        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+                        ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
+                        ("GRID", (0, 0), (-1, -1), 0.5, table_grid),
+                        ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                        ("FONTSIZE", (0, 1), (-1, -1), 9),
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                    ]
+                    for idx in range(1, len(summary_rows) + 1):
+                        if idx % 2 == 0:
+                            summary_style.append(("BACKGROUND", (0, idx), (-1, idx), table_row_alt))
+                    summary_table.setStyle(TableStyle(summary_style))
+                    elements.append(summary_table)
         
         # Build PDF
         # Footer with page numbers and report name
         def _footer(canvas, doc):
             canvas.saveState()
             canvas.setFont('Helvetica', 8)
-            footer_text = f"{report_name} • Page {canvas.getPageNumber()}"
+            footer_text = f"{report_name} - Page {canvas.getPageNumber()}"
             canvas.drawString(40, 20, footer_text)
             canvas.restoreState()
 
