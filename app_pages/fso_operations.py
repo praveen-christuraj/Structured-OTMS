@@ -1892,11 +1892,63 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                     try:
                         mb_cache_df = mb_df_full.copy()
                         mb_cache_df["Date"] = pd.to_datetime(mb_cache_df["Date"], errors="coerce").dt.date
-                        mb_cache_df["Location"] = getattr(loc, "code", "") or ""
+                        try:
+                            from models import Location
+                            with get_session() as s_loc:
+                                loc_obj = s_loc.query(Location).filter(Location.id == active_location_id).one_or_none()
+                            mb_cache_df["Location"] = getattr(loc_obj, "code", "") or ""
+                        except Exception:
+                            mb_cache_df["Location"] = ""
                         mb_cache_df["FSO Vessel"] = st.session_state.selected_fso_vessel
                         st.session_state["fso_material_balance_df"] = mb_cache_df
                         st.session_state["fso_mb_df"] = mb_cache_df
                         st.session_state["fso_mb_table"] = mb_cache_df
+
+                        with get_session() as s_persist:
+                            try:
+                                from models import FSOMaterialBalance
+                                from db import engine as _engine
+                                FSOMaterialBalance.__table__.create(bind=_engine, checkfirst=True)
+                                for _, r in mb_cache_df.iterrows():
+                                    try:
+                                        obj = s_persist.query(FSOMaterialBalance).filter(
+                                            FSOMaterialBalance.location_id == active_location_id,
+                                            FSOMaterialBalance.fso_vessel == st.session_state.selected_fso_vessel,
+                                            FSOMaterialBalance.date == r["Date"],
+                                        ).one_or_none()
+                                        if not obj:
+                                            obj = FSOMaterialBalance(
+                                                location_id=active_location_id,
+                                                fso_vessel=st.session_state.selected_fso_vessel,
+                                                date=r["Date"],
+                                                opening_stock=float(r["Opening Stock"] or 0.0),
+                                                opening_water=float(r.get("Opening Water", 0.0) or 0.0),
+                                                receipts=float(r["Receipts"] or 0.0),
+                                                exports=float(r["Exports"] or 0.0),
+                                                closing_stock=float(r["Closing Stock"] or 0.0),
+                                                closing_water=float(r.get("Closing Water", 0.0) or 0.0),
+                                                loss_gain=float(r["Loss/Gain"] or 0.0),
+                                                created_by=user["username"],
+                                            )
+                                            s_persist.add(obj)
+                                        else:
+                                            obj.opening_stock = float(r["Opening Stock"] or 0.0)
+                                            obj.opening_water = float(r.get("Opening Water", 0.0) or 0.0)
+                                            obj.receipts = float(r["Receipts"] or 0.0)
+                                            obj.exports = float(r["Exports"] or 0.0)
+                                            obj.closing_stock = float(r["Closing Stock"] or 0.0)
+                                            obj.closing_water = float(r.get("Closing Water", 0.0) or 0.0)
+                                            obj.loss_gain = float(r["Loss/Gain"] or 0.0)
+                                            obj.updated_by = user["username"]
+                                        s_persist.flush()
+                                    except Exception:
+                                        pass
+                                try:
+                                    s_persist.commit()
+                                except Exception:
+                                    pass
+                            except Exception:
+                                pass
                     except Exception:
                         st.session_state["fso_material_balance_df"] = mb_df_full.copy()
                     

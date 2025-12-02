@@ -912,6 +912,36 @@ class YadeVesselMappingRecord(Base):
         Index('idx_yvm_location_date', 'location_id', 'date'),
     )
 
+class YadeLoadOffload(Base):
+    __tablename__ = "yade_load_offload_table"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    location_id = Column(Integer, ForeignKey("locations.id"), nullable=False, index=True)
+    voyage_id = Column(Integer, ForeignKey("yade_voyage.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+
+    date = Column(Date, nullable=False, index=True)
+    convoy_no = Column(String(64), nullable=True)
+    yade_no = Column(String(64), nullable=True)
+
+    rob_qty_bbl = Column(Float, nullable=False, default=0.0)
+    rob_fw_bbl = Column(Float, nullable=False, default=0.0)
+    tob_qty_bbl = Column(Float, nullable=False, default=0.0)
+    tob_fw_bbl = Column(Float, nullable=False, default=0.0)
+    net_qty_bbl = Column(Float, nullable=False, default=0.0)
+    net_fw_bbl = Column(Float, nullable=False, default=0.0)
+
+    created_by = Column(String(64), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime, onupdate=func.now())
+
+    location = relationship("Location")
+    voyage = relationship("YadeVoyage")
+
+    __table_args__ = (
+        Index('idx_yllo_location_date', 'location_id', 'date'),
+    )
+
 # ============================================================================
 # TANKER TRANSACTIONS (LOCATION-SPECIFIC)
 # ============================================================================
@@ -1174,6 +1204,40 @@ class FSOOperation(Base):
     def __repr__(self):
         return f"<FSOOperation(id={self.id}, fso='{self.fso_vessel}', date='{self.date}')>"
 
+
+class FSOMaterialBalance(Base):
+    __tablename__ = "fso_mb_table"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    location_id = Column(Integer, ForeignKey("locations.id"), nullable=False, index=True)
+    fso_vessel = Column(String(50), nullable=False)
+    date = Column(Date, nullable=False, index=True)
+
+    opening_stock = Column(Float, nullable=False, default=0.0)
+    opening_water = Column(Float, nullable=False, default=0.0)
+    receipts = Column(Float, nullable=False, default=0.0)
+    exports = Column(Float, nullable=False, default=0.0)
+    closing_stock = Column(Float, nullable=False, default=0.0)
+    closing_water = Column(Float, nullable=False, default=0.0)
+    loss_gain = Column(Float, nullable=False, default=0.0)
+
+    created_by = Column(String(64), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime, onupdate=func.now())
+
+    location = relationship("Location")
+
+    __table_args__ = (
+        UniqueConstraint("location_id", "fso_vessel", "date", name="uq_fso_mb_loc_vessel_date"),
+        Index("idx_fso_mb_location_date", "location_id", "date"),
+        Index("idx_fso_mb_vessel", "fso_vessel"),
+    )
+
+    def __repr__(self):
+        return (
+            f"<FSOMaterialBalance(loc={self.location_id}, vessel='{self.fso_vessel}', date='{self.date}')>"
+        )
 
 # ============================================================================
 # CONVOY STATUS SNAPSHOTS (YADE / VESSEL)

@@ -70,6 +70,8 @@ class WidgetRenderer:
             border-radius: {style.get('border_radius', 10)}px;
             box-shadow: {style.get('shadow', '0 2px 8px rgba(0,0,0,0.1)')};
             border-left: {style.get('border_width', 4)}px solid {style.get('border_color', '#667eea')};
+            width: {str(int(style.get('width'))) + 'px' if style.get('width') else '100%'};
+            min-height: {str(int(style.get('height'))) + 'px' if style.get('height') else 'auto'};
         ">
             <div style="
                 color: {style.get('label_color', '#666')};
@@ -502,37 +504,40 @@ class DashboardRenderer:
             selected_date_start = section_date if isinstance(section_date, date) else date.today()
             selected_date_end = selected_date_start
         
-        cards = config["layout"]["summary_cards"]["cards"]
-        num_cols = config["layout"]["summary_cards"]["columns"]
-        
-        cols = st.columns(num_cols)
-        for idx, card in enumerate(cards[:num_cols]):
-            with cols[idx]:
-                value = DashboardRenderer._fetch_card_data(
-                    card,
-                    location_id,
-                    (selected_date_start, selected_date_end),
-                    config,
-                )
-                prev_value = None
-                if card.get("show_delta", False):
-                    prev_base = (selected_date_end - timedelta(days=1)) if isinstance(selected_date_end, date) else selected_date_start
-                    prev_value = DashboardRenderer._fetch_card_data(
+        cards = list(config["layout"]["summary_cards"]["cards"] or [])
+        num_cols = max(1, int(config["layout"]["summary_cards"].get("columns", 1)))
+
+        rows = [cards[i:i+num_cols] for i in range(0, len(cards), num_cols)] or [[]]
+        for row in rows:
+            if not row:
+                continue
+            cols = st.columns(len(row))
+            for idx, card in enumerate(row):
+                with cols[idx]:
+                    value = DashboardRenderer._fetch_card_data(
                         card,
                         location_id,
-                        prev_base,
+                        (selected_date_start, selected_date_end),
                         config,
                     )
-                
-                WidgetRenderer.render_stat_card(
-                    label=card["name"],
-                    value=value,
-                    unit=card.get("unit", ""),
-                    prev_value=prev_value,
-                    style=config.get("styles", {}).get("card"),
-                    show_delta=card.get("show_delta", False),
-                    display_date=selected_date_end
-                )
+                    prev_value = None
+                    if card.get("show_delta", False):
+                        prev_base = (selected_date_end - timedelta(days=1)) if isinstance(selected_date_end, date) else selected_date_start
+                        prev_value = DashboardRenderer._fetch_card_data(
+                            card,
+                            location_id,
+                            prev_base,
+                            config,
+                        )
+                    WidgetRenderer.render_stat_card(
+                        label=card.get("name", ""),
+                        value=value,
+                        unit=card.get("unit", ""),
+                        prev_value=prev_value,
+                        style=config.get("styles", {}).get("card"),
+                        show_delta=card.get("show_delta", False),
+                        display_date=selected_date_end
+                    )
     
     @staticmethod
     def _render_tank_visuals_section(config: Dict, location_id: int, section_date):
@@ -1098,30 +1103,32 @@ class DashboardRenderer:
         # Summary Cards
         if config["layout"]["summary_cards"]["enabled"]:
             st.markdown("### 📊 Summary Statistics")
-            cards = config["layout"]["summary_cards"]["cards"]
-            num_cols = config["layout"]["summary_cards"]["columns"]
-            
-            cols = st.columns(num_cols)
-            for idx, card in enumerate(cards[:num_cols]):
-                with cols[idx]:
-                    # Fetch data based on data_source
-                    value = DashboardRenderer._fetch_card_data(
-                        card, location_id, selected_date
-                    )
-                    prev_value = None
-                    if card. get("show_delta", False):
-                        prev_value = DashboardRenderer._fetch_card_data(
-                            card, location_id, selected_date - timedelta(days=1)
+            cards = list(config["layout"]["summary_cards"].get("cards", []))
+            num_cols = max(1, int(config["layout"]["summary_cards"].get("columns", 1)))
+
+            rows = [cards[i:i+num_cols] for i in range(0, len(cards), num_cols)] or [[]]
+            for row in rows:
+                if not row:
+                    continue
+                cols = st.columns(len(row))
+                for idx, card in enumerate(row):
+                    with cols[idx]:
+                        value = DashboardRenderer._fetch_card_data(
+                            card, location_id, selected_date
                         )
-                    
-                    WidgetRenderer.render_stat_card(
-                        label=card["name"],
-                        value=value,
-                        unit=card.get("unit", ""),
-                        prev_value=prev_value,
-                        style=config. get("styles", {}). get("card"),
-                        show_delta=card.get("show_delta", False)
-                    )
+                        prev_value = None
+                        if card.get("show_delta", False):
+                            prev_value = DashboardRenderer._fetch_card_data(
+                                card, location_id, selected_date - timedelta(days=1)
+                            )
+                        WidgetRenderer.render_stat_card(
+                            label=card.get("name", ""),
+                            value=value,
+                            unit=card.get("unit", ""),
+                            prev_value=prev_value,
+                            style=config.get("styles", {}).get("card"),
+                            show_delta=card.get("show_delta", False)
+                        )
         
         # Tank Visuals
         if config["layout"]["tank_visuals"]["enabled"]:

@@ -1096,7 +1096,7 @@ def render_styles_tab(config: dict):
     st.markdown("#### Card Styles")
     
     card_style = styles.get("card", {})
-    
+
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -1141,7 +1141,24 @@ def render_styles_tab(config: dict):
             value=card_style.get("shadow", "0 2px 8px rgba(0,0,0,0.1)"),
             key="card_shadow"
         )
-    
+    colw, colh = st.columns(2)
+    with colw:
+        card_style["width"] = st.number_input(
+            "Width (px)",
+            min_value=0,
+            max_value=1200,
+            value=card_style.get("width", 0),
+            key="card_width"
+        )
+    with colh:
+        card_style["height"] = st.number_input(
+            "Height (px)",
+            min_value=0,
+            max_value=600,
+            value=card_style.get("height", 0),
+            key="card_height"
+        )
+
     styles["card"] = card_style
     
     st.markdown("---")

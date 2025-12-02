@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from db import get_session
-from models import YadeVoyage, YadeDip, TOAYadeSummary
+from models import YadeVoyage, YadeDip, TOAYadeSummary, TOAYadeStage, YadeLoadOffload
 from security import SecurityManager
 from deletion_approval import render_deletion_ui, DeletionApprovalManager
 
@@ -648,17 +648,263 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
     with f4:
         filter_creator = st.selectbox("👤 Created By", ["All"] + all_creators, key="yade_filter_creator")
 
-    # Header
-    _two_col_header(
-        ["Date", "Yade No", "Convoy No", "Before NSV (bbls)", "After NSV (bbls)", "Net (bbls)", "Created by", "Action"],
-        [0.13,   0.16,      0.16,        0.12,                 0.12,               0.12,        0.11,         0.08],
-    )
+    tabs = st.tabs(["List", "Yade Loading/Offloading"])
+    with tabs[0]:
+        _two_col_header(
+            ["Date", "Yade No", "Convoy No", "Before NSV (bbls)", "After NSV (bbls)", "Net (bbls)", "Created by", "Action"],
+            [0.13,   0.16,      0.16,        0.12,                 0.12,               0.12,        0.11,         0.08],
+        )
+        edit_id = st.session_state.get("yade_row_open")
+        for v in voyages:
+            if filter_date and v.date != filter_date:
+                continue
+            if filter_yade != "All" and v.yade_name != filter_yade:
+                continue
+            if filter_convoy != "All" and v.convoy_no != filter_convoy:
+                continue
+            if filter_creator != "All" and getattr(v, "created_by", None) != filter_creator:
+                continue
+
+            with get_session() as s:
+                totals = preview_or_summary_totals(s, v.id)
+            before_nsv = float(totals["before"].get("NSV", 0.0) or 0.0)
+            after_nsv  = float(totals["after"].get("NSV", 0.0) or 0.0)
+            net_nsv    = float(totals["net"].get("NSV", 0.0) or 0.0)
+
+            cols = st.columns([0.13, 0.16, 0.16, 0.12, 0.12, 0.12, 0.11, 0.08])
+            cols[0].write(str(v.date or ""))
+            cols[1].write(v.yade_name or "")
+            cols[2].write(v.convoy_no or "")
+            cols[3].write(f"{before_nsv:,.2f}")
+            cols[4].write(f"{after_nsv:,.2f}")
+            cols[5].write(f"{net_nsv:,.2f}")
+
+            created_by = getattr(v, "created_by", None)
+            updated_by = getattr(v, "updated_by", None)
+            updated_at = getattr(v, "updated_at", None)
+            cols[6].markdown(_caution_badge(created_by, updated_by, updated_at), unsafe_allow_html=True)
+
+            with cols[7]:
+                c = st.columns(3)
+                view_btn = c[0].button("👁️", key=f"yade_view_{v.id}")
+                del_btn  = c[1].button("🗑️", key=f"yade_del_{v.id}")
+                pdf_btn  = c[2].button("📕", key=f"yade_pdf_{v.id}")
+
+            if pdf_btn:
+                pdf = _build_toa_pdf_bytes(v.id)
+                if pdf:
+                    _open_pdf_blob_inline(pdf)
+
+            if del_btn:
+                st.session_state[f"yade_show_delete_ui_{v.id}"] = True
+
+            if st.session_state.get(f"yade_show_delete_ui_{v.id}"):
+                def delete_yade_record():
+                    with get_session() as s:
+                        obj = s.query(YadeVoyage).filter(YadeVoyage.id == v.id).one_or_none()
+                        if obj:
+                            from recycle_bin import RecycleBinManager
+                            from models import YadeDip, YadeSampleParam, YadeSealDetail, TOAYadeSummary
+                            u = user or {}
+                            dips = s.query(YadeDip).filter(YadeDip.voyage_id == v.id).all()
+                            sample_params = s.query(YadeSampleParam).filter(YadeSampleParam.voyage_id == v.id).all()
+                            seals = s.query(YadeSealDetail).filter(YadeSealDetail.voyage_id == v.id).all()
+                            toa = s.query(TOAYadeSummary).filter(TOAYadeSummary.voyage_id == v.id).all()
+                            payload = RecycleBinManager.snapshot_record(obj)
+                            payload["_related_dips"] = [RecycleBinManager.snapshot_record(d) for d in dips]
+                            payload["_related_sample_params"] = [RecycleBinManager.snapshot_record(sp) for sp in sample_params]
+                            payload["_related_seals"] = [RecycleBinManager.snapshot_record(seal) for seal in seals]
+                            payload["_related_toa"] = [RecycleBinManager.snapshot_record(t) for t in toa]
+                            RecycleBinManager.archive_payload(
+                                session=s,
+                                resource_type="YadeVoyage",
+                                resource_id=str(v.id),
+                                payload=payload,
+                                username=u.get("username", "unknown"),
+                                user_id=u.get("id"),
+                                location_id=st.session_state.get("active_location_id"),
+                                reason="User deleted from View Transactions",
+                                label=f"Voyage {v.voyage_no or v.id}"
+                            )
+                            s.delete(obj)
+                            s.commit()
+                if render_deletion_ui(
+                    resource_type="YadeVoyage",
+                    resource_id=v.id,
+                    resource_label=f"YADE Voyage {v.voyage_no or v.id}",
+                    delete_func=delete_yade_record,
+                    user=user,
+                    location_id=st.session_state.get("active_location_id"),
+                    on_success_message="YADE voyage moved to recycle bin",
+                    metadata={"voyage_no": v.voyage_no, "convoy_no": v.convoy_no},
+                    button_key_prefix=f"yade_{v.id}"
+                ):
+                    st.session_state.pop(f"yade_show_delete_ui_{v.id}", None)
+                    st.rerun()
+
+            if view_btn or (edit_id == v.id):
+                st.session_state["yade_row_open"] = v.id
+                with st.expander(f"📝 Edit: {v.voyage_no or v.id}", expanded=True):
+                    hv1 = st.columns(3)
+                    new_date = hv1[0].date_input("Date", value=v.date or date.today(), key=f"yade_hdr_date_{v.id}", label_visibility="collapsed")
+                    new_voy  = hv1[1].text_input("Voyage", value=v.voyage_no or '', key=f"yade_hdr_voy_{v.id}", placeholder="Voyage No")
+                    new_con  = hv1[2].text_input("Convoy", value=v.convoy_no or '', key=f"yade_hdr_con_{v.id}", placeholder="Convoy No")
+
+                    with get_session() as s:
+                        df_b = _dip_df_for_stage(s, v.id, "BEFORE")
+                        df_a = _dip_df_for_stage(s, v.id, "AFTER")
+                        from models import YadeSampleParam
+                        sp_before = s.query(YadeSampleParam).filter(
+                            YadeSampleParam.voyage_id == v.id,
+                            func.upper(YadeSampleParam.stage) == "BEFORE"
+                        ).one_or_none()
+                        sp_after = s.query(YadeSampleParam).filter(
+                            YadeSampleParam.voyage_id == v.id,
+                            func.upper(YadeSampleParam.stage) == "AFTER"
+                        ).one_or_none()
+
+                    scols = st.columns(2)
+                    with scols[0]:
+                        if not df_b.empty:
+                            df_b_compact = df_b[['tank_id', 'total_cm', 'water_cm']].copy()
+                        else:
+                            df_b_compact = df_b
+                        ed_b = st.data_editor(df_b_compact, use_container_width=True, key=f"yade_ed_b_{v.id}", hide_index=True, height=150)
+                        st.caption("Sample Parameters")
+                        sp_b_obs_mode = st.selectbox("Obs Mode", ["Observed API", "Observed Density"], 
+                                                      index=0 if (sp_before and "API" in (sp_before.obs_mode or "")) else 1,
+                                                      key=f"sp_b_mode_{v.id}")
+                        sp_b_cols = st.columns(2)
+                        sp_b_obs_val = sp_b_cols[0].number_input("Obs Val", value=float(sp_before.obs_val if sp_before else 35.0), 
+                                                                   step=0.1, format="%.2f", key=f"sp_b_val_{v.id}")
+                        sp_b_ccf = sp_b_cols[1].number_input("CCF", value=float(sp_before.ccf if sp_before else 1.0), 
+                                                              step=0.001, format="%.4f", key=f"sp_b_ccf_{v.id}")
+                        sp_b_temps = st.columns(2)
+                        sp_b_sample_temp = sp_b_temps[0].number_input("Sample T", value=float(sp_before.sample_temp if sp_before else 60.0), 
+                                                                        step=0.1, format="%.1f", key=f"sp_b_stemp_{v.id}")
+                        sp_b_tank_temp = sp_b_temps[1].number_input("Tank T", value=float(sp_before.tank_temp if sp_before else 60.0), 
+                                                                      step=0.1, format="%.1f", key=f"sp_b_ttemp_{v.id}")
+                        sp_b_bsw = st.number_input("BS&W %", value=float(sp_before.bsw_pct if sp_before else 0.0), 
+                                                    step=0.01, format="%.2f", key=f"sp_b_bsw_{v.id}")
+
+                    with scols[1]:
+                        if not df_a.empty:
+                            df_a_compact = df_a[['tank_id', 'total_cm', 'water_cm']].copy()
+                        else:
+                            df_a_compact = df_a
+                        ed_a = st.data_editor(df_a_compact, use_container_width=True, key=f"yade_ed_a_{v.id}", hide_index=True, height=150)
+                        st.caption("Sample Parameters")
+                        sp_a_obs_mode = st.selectbox("Obs Mode ", ["Observed API", "Observed Density"], 
+                                                      index=0 if (sp_after and "API" in (sp_after.obs_mode or "")) else 1,
+                                                      key=f"sp_a_mode_{v.id}")
+                        sp_a_cols = st.columns(2)
+                        sp_a_obs_val = sp_a_cols[0].number_input("Obs Val ", value=float(sp_after.obs_val if sp_after else 35.0), 
+                                                                   step=0.1, format="%.2f", key=f"sp_a_val_{v.id}")
+                        sp_a_ccf = sp_a_cols[1].number_input("CCF ", value=float(sp_after.ccf if sp_after else 1.0), 
+                                                              step=0.001, format="%.4f", key=f"sp_a_ccf_{v.id}")
+                        sp_a_temps = st.columns(2)
+                        sp_a_sample_temp = sp_a_temps[0].number_input("Sample T ", value=float(sp_after.sample_temp if sp_after else 60.0), 
+                                                                        step=0.1, format="%.1f", key=f"sp_a_stemp_{v.id}")
+                        sp_a_tank_temp = sp_a_temps[1].number_input("Tank T ", value=float(sp_after.tank_temp if sp_after else 60.0), 
+                                                                      step=0.1, format="%.1f", key=f"sp_a_ttemp_{v.id}")
+                        sp_a_bsw = st.number_input("BS&W % ", value=float(sp_after.bsw_pct if sp_after else 0.0), 
+                                                    step=0.01, format="%.2f", key=f"sp_a_bsw_{v.id}")
+
+                    if not df_b.empty and 'id' in df_b.columns:
+                        for col in ['tank_id', 'total_cm', 'water_cm']:
+                            if col in ed_b.columns:
+                                df_b[col] = ed_b[col]
+                        ed_b = df_b
+                    if not df_a.empty and 'id' in df_a.columns:
+                        for col in ['tank_id', 'total_cm', 'water_cm']:
+                            if col in ed_a.columns:
+                                df_a[col] = ed_a[col]
+                        ed_a = df_a
+
+                    bc = st.columns(3)
+                    save_btn   = bc[0].button("💾 Save", key=f"yade_save_{v.id}", use_container_width=True)
+                    cancel_btn = bc[1].button("↩️ Cancel", key=f"yade_cancel_{v.id}", use_container_width=True)
+                    close_btn  = bc[2].button("✖️ Close", key=f"yade_close_{v.id}", use_container_width=True)
+
+                    if cancel_btn:
+                        st.session_state["yade_row_open"] = None
+                        st.rerun()
+
+                    if close_btn:
+                        st.session_state["yade_row_open"] = None
+                        st.rerun()
+
+                    if save_btn:
+                        try:
+                            with get_session() as s:
+                                obj = s.query(YadeVoyage).filter(YadeVoyage.id == v.id).one_or_none()
+                                if not obj:
+                                    st.error("Record no longer exists.")
+                                    return
+
+                                obj.date = new_date
+                                if hasattr(obj, "voyage_no"):
+                                    obj.voyage_no = (new_voy or "").strip()
+                                obj.convoy_no = (new_con or "").strip()
+
+                                u = user or {}
+                                if hasattr(obj, "updated_by"):
+                                    obj.updated_by = u.get("username", "unknown")
+                                if hasattr(obj, "updated_at"):
+                                    obj.updated_at = datetime.now()
+
+                                n = _apply_dip_edits(s, ed_b.copy(), ed_a.copy(), v.id, user or {})
+
+                                from models import YadeSampleParam
+                                sp_b = s.query(YadeSampleParam).filter(
+                                    YadeSampleParam.voyage_id == v.id,
+                                    func.upper(YadeSampleParam.stage) == "BEFORE"
+                                ).one_or_none()
+                                if sp_b:
+                                    sp_b.obs_mode = sp_b_obs_mode
+                                    sp_b.obs_val = float(sp_b_obs_val)
+                                    sp_b.ccf = float(sp_b_ccf)
+                                    sp_b.sample_temp = float(sp_b_sample_temp)
+                                    sp_b.tank_temp = float(sp_b_tank_temp)
+                                    sp_b.bsw_pct = float(sp_b_bsw)
+                                
+                                sp_a = s.query(YadeSampleParam).filter(
+                                    YadeSampleParam.voyage_id == v.id,
+                                    func.upper(YadeSampleParam.stage) == "AFTER"
+                                ).one_or_none()
+                                if sp_a:
+                                    sp_a.obs_mode = sp_a_obs_mode
+                                    sp_a.obs_val = float(sp_a_obs_val)
+                                    sp_a.ccf = float(sp_a_ccf)
+                                    sp_a.sample_temp = float(sp_a_sample_temp)
+                                    sp_a.tank_temp = float(sp_a_tank_temp)
+                                    sp_a.bsw_pct = float(sp_a_bsw)
+
+                                from toa_yade_calculator import compute_and_save_summary
+                                compute_and_save_summary(s, v.id, created_by=u.get("username","operator"))
+
+                                SecurityManager.log_audit(
+                                    s, u.get("username","unknown"), "UPDATE",
+                                    resource_type="YadeVoyage",
+                                    resource_id=str(obj.id),
+                                    details=f"Edited YADE voyage {obj.voyage_no or obj.id}; dips: {n}, params updated",
+                                    user_id=u.get("id"),
+                                    location_id=st.session_state.get("active_location_id"),
+                                )
+                                s.commit()
+
+                            st.success("Saved. Recomputed TOA.")
+                            st.session_state["yade_row_open"] = None
+                            st.rerun()
+
+                        except Exception as ex:
+                            st.error(f"Save failed: {ex}")
 
     # Per-row edit state
     edit_id = st.session_state.get("yade_row_open")
 
     # Rows with filters
-    for v in voyages:
+    for v in []:
         # Apply filters
         if filter_date and v.date != filter_date:
             continue
@@ -676,7 +922,6 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
         after_nsv  = float(totals["after"].get("NSV", 0.0) or 0.0)
         net_nsv    = float(totals["net"].get("NSV", 0.0) or 0.0)
 
-        # Row
         cols = st.columns([0.13, 0.16, 0.16, 0.12, 0.12, 0.12, 0.11, 0.08])
         cols[0].write(str(v.date or ""))
         cols[1].write(v.yade_name or "")
@@ -933,3 +1178,162 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
 
                     except Exception as ex:
                         st.error(f"Save failed: {ex}")
+    with tabs[1]:
+        # Compact filter row (date range + yade + convoy)
+        with get_session() as s:
+            q = s.query(YadeVoyage).order_by(YadeVoyage.date.desc(), YadeVoyage.id.desc())
+            voyages2: List[YadeVoyage] = q.all()
+            if location_id:
+                voyages2 = [v for v in voyages2 if int(getattr(v, "location_id", 0) or 0) == int(location_id)]
+
+            # Build master rows (used for DB sync and filtering)
+            ids = [v.id for v in voyages2]
+            stages = s.query(TOAYadeStage).filter(TOAYadeStage.voyage_id.in_(ids)).all()
+            smap: Dict[int, Dict[str, TOAYadeStage]] = {}
+            for stg in stages:
+                k = (stg.stage or "").strip().lower()
+                smap.setdefault(stg.voyage_id, {})[k] = stg
+
+            rows = []
+            for v in voyages2:
+                stg = smap.get(v.id, {})
+                b = stg.get("before")
+                a = stg.get("after")
+                rob_q = float(getattr(b, "nsv_bbl", 0.0) or 0.0)
+                rob_w = float(getattr(b, "fw_bbl", 0.0) or 0.0)
+                tob_q = float(getattr(a, "nsv_bbl", 0.0) or 0.0)
+                tob_w = float(getattr(a, "fw_bbl", 0.0) or 0.0)
+                rows.append({
+                    "Date": v.date,
+                    "Convoy no": v.convoy_no or "",
+                    "Yade No": v.yade_name or "",
+                    "ROB Qty": round(rob_q, 2),
+                    "ROB Water": round(rob_w, 2),
+                    "TOB Qty": round(tob_q, 2),
+                    "TOB Water": round(tob_w, 2),
+                    "Net Loaded/Unloaded (bbls)": round(float(tob_q - rob_q), 2),
+                    "Net Water Loaded/Unloaded (bbls)": round(float(tob_w - rob_w), 2),
+                    "_voyage_id": v.id,
+                    "_location_id": int(getattr(v, "location_id", 0) or 0),
+                })
+
+            # Persist to DB (upsert per voyage)
+            for r in rows:
+                try:
+                    obj = s.query(YadeLoadOffload).filter(YadeLoadOffload.voyage_id == int(r["_voyage_id"]) ).one_or_none()
+                    if not obj:
+                        obj = YadeLoadOffload(
+                            location_id=int(r["_location_id"]),
+                            voyage_id=int(r["_voyage_id"]),
+                            date=r["Date"],
+                            convoy_no=str(r["Convoy no"]),
+                            yade_no=str(r["Yade No"]),
+                            rob_qty_bbl=float(r["ROB Qty"]),
+                            rob_fw_bbl=float(r["ROB Water"]),
+                            tob_qty_bbl=float(r["TOB Qty"]),
+                            tob_fw_bbl=float(r["TOB Water"]),
+                            net_qty_bbl=float(r["Net Loaded/Unloaded (bbls)"]),
+                            net_fw_bbl=float(r["Net Water Loaded/Unloaded (bbls)"]),
+                            created_by=(user or {}).get("username", "system"),
+                        )
+                        s.add(obj)
+                    else:
+                        obj.date = r["Date"]
+                        obj.convoy_no = str(r["Convoy no"]) 
+                        obj.yade_no = str(r["Yade No"]) 
+                        obj.rob_qty_bbl = float(r["ROB Qty"]) 
+                        obj.rob_fw_bbl = float(r["ROB Water"]) 
+                        obj.tob_qty_bbl = float(r["TOB Qty"]) 
+                        obj.tob_fw_bbl = float(r["TOB Water"]) 
+                        obj.net_qty_bbl = float(r["Net Loaded/Unloaded (bbls)"]) 
+                        obj.net_fw_bbl = float(r["Net Water Loaded/Unloaded (bbls)"]) 
+                        obj.updated_by = (user or {}).get("username", "system")
+                    s.flush()
+                except Exception:
+                    pass
+            try:
+                s.commit()
+            except Exception:
+                pass
+
+        # Apply existing filters
+        frows = []
+        for r in rows:
+            if filter_date and r["Date"] != filter_date:
+                continue
+            if filter_yade != "All" and r["Yade No"] != filter_yade:
+                continue
+            if filter_convoy != "All" and r["Convoy no"] != filter_convoy:
+                continue
+            frows.append(r)
+
+        # Sort and add S.No
+        frows = sorted(frows, key=lambda x: x["Date"], reverse=True)
+        for i, r in enumerate(frows, start=1):
+            r["S.no"] = i
+
+        disp_cols = [
+            "S.no",
+            "Date",
+            "Convoy no",
+            "Yade No",
+            "ROB Qty",
+            "ROB Water",
+            "TOB Qty",
+            "TOB Water",
+            "Net Loaded/Unloaded (bbls)",
+            "Net Water Loaded/Unloaded (bbls)",
+        ]
+        df_disp = pd.DataFrame([{k: r[k] for k in disp_cols} for r in frows])
+        if df_disp.empty:
+            st.info("No records for the selected filters.")
+            return
+        st.dataframe(df_disp, use_container_width=True)
+
+        # Downloads: CSV, XLSX, PDF and View PDF
+        csv_bytes = df_disp.to_csv(index=False).encode("utf-8")
+        from io import BytesIO
+        xbuf = BytesIO()
+        with pd.ExcelWriter(xbuf, engine="xlsxwriter") as writer:
+            df_disp.to_excel(writer, index=False, sheet_name="Yade LO")
+        xbuf.seek(0)
+
+        def _generate_lo_pdf(dfpdf: pd.DataFrame) -> bytes:
+            try:
+                from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+                from reportlab.lib.pagesizes import A4, landscape
+                from reportlab.lib import colors
+                from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+                from reportlab.lib.units import cm
+                buf = BytesIO()
+                doc = SimpleDocTemplate(buf, pagesize=landscape(A4), leftMargin=0.6*cm, rightMargin=0.6*cm, topMargin=0.7*cm, bottomMargin=0.7*cm)
+                styles = getSampleStyleSheet()
+                title = Paragraph("Yade Loading/Offloading", ParagraphStyle(name="title", parent=styles["Heading2"], alignment=1))
+                elements = [title, Spacer(1, 0.3*cm)]
+                headers = dfpdf.columns.tolist()
+                data = [headers] + dfpdf.astype(str).values.tolist()
+                tbl = Table(data, repeatRows=1)
+                tbl.setStyle(TableStyle([
+                    ("GRID", (0,0), (-1,-1), 0.25, colors.grey),
+                    ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#f5f7fb")),
+                    ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+                    ("ALIGN", (0,0), (-1,-1), "CENTER"),
+                    ("FONTSIZE", (0,0), (-1,-1), 9),
+                    ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.white, colors.HexColor("#fbfcff")]),
+                ]))
+                elements.append(tbl)
+                doc.build(elements)
+                out = buf.getvalue()
+                buf.close()
+                return out
+            except Exception:
+                return b""
+
+        pdf_bytes = _generate_lo_pdf(df_disp)
+        btn_cols = st.columns(4)
+        btn_cols[0].download_button("📥 CSV", data=csv_bytes, file_name="yade_loading_offloading.csv", mime="text/csv", use_container_width=True)
+        btn_cols[1].download_button("📥 XLSX", data=xbuf.getvalue(), file_name="yade_loading_offloading.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+        btn_cols[2].download_button("📥 PDF", data=pdf_bytes or b"", file_name="yade_loading_offloading.pdf", mime="application/pdf", use_container_width=True)
+        if btn_cols[3].button("👁️ View PDF", use_container_width=True):
+            if pdf_bytes:
+                _open_pdf_blob_inline(pdf_bytes)
