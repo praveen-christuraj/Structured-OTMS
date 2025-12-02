@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 from datetime import date, datetime, time, timedelta
 from io import BytesIO
+import json
 from typing import Any, Dict, List, Optional, Set
 from uuid import uuid4
 
@@ -22,7 +23,7 @@ from db import get_session
 from location_config import LocationConfig
 from location_manager import LocationManager
 from logger import log_warning
-from models import FSOOperation, OTRVessel, TOAYadeStage, YadeVoyage
+from models import FSOOperation, OTRVessel, TOAYadeStage, YadeVoyage, YadeVesselMappingRecord
 from security import SecurityManager
 from ui import header
 
@@ -94,7 +95,7 @@ def _fetch_yade_rows(sess, location_id: int, limit: int = 500) -> List[Dict[str,
                 "Yade No": voyage.yade_name or "",
                 "TOB Qty": round(tob, 2),
                 "ROB Qty": round(rob, 2),
-                "Net Offloaded": round(tob - rob, 2),
+                "Net Loaded/Unloaded (bbls)": round(tob - rob, 2),
                 "SortKey": _combine_datetime(voyage.date, voyage.time),
             }
         )
@@ -421,7 +422,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
         "Yade No": st.column_config.TextColumn("Yade No"),
         "TOB Qty": st.column_config.NumberColumn("TOB Qty (bbls)", format="%.2f"),
         "ROB Qty": st.column_config.NumberColumn("ROB Qty (bbls)", format="%.2f"),
-        "Net Offloaded": st.column_config.NumberColumn("Net Offloaded (bbls)", format="%.2f"),
+        "Net Loaded/Unloaded (bbls)": st.column_config.NumberColumn("Net Loaded/Unloaded (bbls)", format="%.2f"),
     }
     vessel_column_config = {
         "Select": st.column_config.CheckboxColumn("Select", help="Include shuttle entry in mapping."),
@@ -635,7 +636,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                     "yade_ids": sorted(yade_selection),
                     "vessel_ids": sorted(vessel_selection),
                     "fso_ids": sorted(fso_selection),
-                    "yade_dispatch": _sum_selection(yade_selection, yade_lookup, "Net Offloaded"),
+                    "yade_dispatch": _sum_selection(yade_selection, yade_lookup, "Net Loaded/Unloaded (bbls)"),
                     "vessel_receipt": _sum_selection(vessel_selection, vessel_lookup, "Net Receipt/Dispatch"),
                     "fso_receipt": _sum_selection(fso_selection, fso_lookup, "Qty Received"),
                 }
@@ -651,6 +652,37 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
             st.markdown("#### Comparison")
             pending_payload = st.session_state.get("yvm_pending_payload")
             stored_rows: List[Dict[str, Any]] = st.session_state.get("yvm_records", [])
+            if not stored_rows:
+                try:
+                    with get_session() as load_sess:
+                        db_rows = (
+                            load_sess.query(YadeVesselMappingRecord)
+                            .filter(YadeVesselMappingRecord.location_id == active_location_id)
+                            .order_by(YadeVesselMappingRecord.s_no.asc(), YadeVesselMappingRecord.date.asc())
+                            .all()
+                        )
+                        for r in db_rows:
+                            stored_rows.append(
+                                {
+                                    "record_id": r.record_id,
+                                    "s_no": r.s_no,
+                                    "date": r.date,
+                                    "yade_dispatch": float(r.yade_dispatch or 0.0),
+                                    "vessel_receipt": float(r.vessel_receipt or 0.0),
+                                    "diff_y_vs_v": float(r.diff_y_vs_v or 0.0),
+                                    "fso_receipt": float(r.fso_receipt or 0.0),
+                                    "diff_v_vs_tt": float(r.diff_v_vs_tt or 0.0),
+                                    "remarks": r.remarks or "",
+                                    "source_ids": {
+                                        "yade_ids": json.loads(r.yade_ids_json or "[]"),
+                                        "vessel_ids": json.loads(r.vessel_ids_json or "[]"),
+                                        "fso_ids": json.loads(r.fso_ids_json or "[]"),
+                                    },
+                                }
+                            )
+                        st.session_state["yvm_records"] = stored_rows
+                except Exception:
+                    log_warning("Failed to load saved Yade-Vessel mappings from database", exc_info=True)
             comparison_df = _comparison_dataframe(stored_rows)
             next_s_no = (max((row["s_no"] for row in stored_rows), default=0) + 1) if stored_rows else 1
             delete_target = st.session_state.get("yvm_delete_target")
@@ -683,6 +715,13 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                 if removed:
                     try:
                         with get_session() as log_session:
+                            db_row = (
+                                log_session.query(YadeVesselMappingRecord)
+                                .filter(YadeVesselMappingRecord.record_id == removed.get("record_id"))
+                                .one_or_none()
+                            )
+                            if db_row:
+                                log_session.delete(db_row)
                             SecurityManager.log_audit(
                                 log_session,
                                 user.get("username", "unknown"),
@@ -694,7 +733,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                                 location_id=active_location_id,
                             )
                     except Exception:
-                        log_warning("Failed to log Yade-Vessel mapping deletion", exc_info=True)
+                        log_warning("Failed to remove Yade-Vessel mapping row", exc_info=True)
                 return removed
 
             if delete_target:
@@ -815,8 +854,9 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                     _st_safe_rerun()
 
                 if submitted:
+                    record_uuid = str(uuid4())
                     record = {
-                        "record_id": str(uuid4()),
+                        "record_id": record_uuid,
                         "s_no": int(s_no_value),
                         "date": mapping_date,
                         "yade_dispatch": pending_payload["yade_dispatch"],
@@ -831,6 +871,37 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                             "fso_ids": pending_payload["fso_ids"],
                         },
                     }
+                    try:
+                        with get_session() as persist_sess:
+                            persist_row = YadeVesselMappingRecord(
+                                record_id=record_uuid,
+                                location_id=active_location_id,
+                                s_no=record["s_no"],
+                                date=record["date"],
+                                yade_dispatch=record["yade_dispatch"],
+                                vessel_receipt=record["vessel_receipt"],
+                                diff_y_vs_v=record["diff_y_vs_v"],
+                                fso_receipt=record["fso_receipt"],
+                                diff_v_vs_tt=record["diff_v_vs_tt"],
+                                remarks=record["remarks"],
+                                yade_ids_json=json.dumps(record["source_ids"]["yade_ids"]),
+                                vessel_ids_json=json.dumps(record["source_ids"]["vessel_ids"]),
+                                fso_ids_json=json.dumps(record["source_ids"]["fso_ids"]),
+                                created_by=user.get("username", "unknown"),
+                            )
+                            persist_sess.add(persist_row)
+                            SecurityManager.log_audit(
+                                persist_sess,
+                                user.get("username", "unknown"),
+                                "CREATE",
+                                resource_type="YadeVesselMapping",
+                                resource_id=str(record_uuid),
+                                details=f"Saved Yade-Vessel mapping row S.No {record['s_no']} dated {record['date']}",
+                                user_id=user.get("id"),
+                                location_id=active_location_id,
+                            )
+                    except Exception:
+                        log_warning("Failed to persist Yade-Vessel mapping row", exc_info=True)
                     st.session_state["yvm_records"].append(record)
                     st.session_state["yvm_pending_payload"] = None
                     st.success("Comparison row saved.")

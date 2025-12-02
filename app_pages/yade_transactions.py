@@ -845,7 +845,7 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
         cargo_opts = _list_names_from_ops(s, location_id, asset="yade", category="Cargo Type") or ["N/A"]
         dest_opts  = _list_names_from_ops(s, location_id, asset="yade", category="Destination") or ["N/A"]
         berth_opts = _list_names_from_ops(s, location_id, asset="yade", category="Loading Berth") or ["N/A"]
-        op_opts    = _list_names_from_ops(s, location_id, asset="yade", category="Others") or ["N/A"]
+        op_opts    = _list_names_from_ops(s, location_id, asset="yade", category="Operation") or ["N/A"]
 
     # Prefill for edit
     voy: Optional[YadeVoyage] = None

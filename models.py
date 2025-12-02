@@ -880,6 +880,38 @@ class TOAYadeStage(Base):
     __table_args__ = (UniqueConstraint("voyage_id", "stage", name="uq_toa_stage_voyage_stage"),)
 
 
+class YadeVesselMappingRecord(Base):
+    __tablename__ = "yade_vessel_mapping"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    record_id = Column(String(64), unique=True, nullable=False, index=True)
+    location_id = Column(Integer, ForeignKey("locations.id"), nullable=False, index=True)
+
+    s_no = Column(Integer, nullable=False)
+    date = Column(Date, nullable=False, index=True)
+
+    yade_dispatch = Column(Float, nullable=False, default=0.0)
+    vessel_receipt = Column(Float, nullable=False, default=0.0)
+    diff_y_vs_v = Column(Float, nullable=False, default=0.0)
+    fso_receipt = Column(Float, nullable=False, default=0.0)
+    diff_v_vs_tt = Column(Float, nullable=False, default=0.0)
+    remarks = Column(String(500), nullable=True)
+
+    yade_ids_json = Column(Text, nullable=True)
+    vessel_ids_json = Column(Text, nullable=True)
+    fso_ids_json = Column(Text, nullable=True)
+
+    created_by = Column(String(64), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime, onupdate=func.now())
+
+    location = relationship("Location")
+
+    __table_args__ = (
+        Index('idx_yvm_location_date', 'location_id', 'date'),
+    )
+
 # ============================================================================
 # TANKER TRANSACTIONS (LOCATION-SPECIFIC)
 # ============================================================================

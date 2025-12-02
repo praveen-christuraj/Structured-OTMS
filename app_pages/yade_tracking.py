@@ -158,6 +158,7 @@ def render_yade_tracking_page(active_location_id: int | None, user: Dict[str, An
                         {"label": "Yade No", "source": "voyage.yade_name"},
                         {"label": "ROB qty", "source": "toa.before.nsv_bbl"},
                         {"label": "TOB qty", "source": "toa.after.nsv_bbl"},
+                        {"label": "Net Loaded/Unloaded (bbls)", "source": "net.nsv_bbl"},
                         {"label": "Loading berth", "source": "voyage.loading_berth"},
                     ],
                     "filters": [
@@ -176,6 +177,7 @@ def render_yade_tracking_page(active_location_id: int | None, user: Dict[str, An
                         {"label": "Yade No", "source": "voyage.yade_name"},
                         {"label": "ROB qty", "source": "toa.after.nsv_bbl"},
                         {"label": "TOB qty", "source": "toa.before.nsv_bbl"},
+                        {"label": "Net Loaded/Unloaded (bbls)", "source": "net.nsv_bbl"},
                         {"label": "Loading berth", "source": "voyage.loading_berth"},
                     ],
                     "filters": [
@@ -252,11 +254,19 @@ def render_yade_tracking_page(active_location_id: int | None, user: Dict[str, An
         for col in (columns or []):
             lab = col.get("label") or col.get("source")
             src = col.get("source")
-            display_df[lab] = df[src]
+            if src == "net.nsv_bbl":
+                a = df.get("toa.after.nsv_bbl") if "toa.after.nsv_bbl" in df.columns else None
+                b = df.get("toa.before.nsv_bbl") if "toa.before.nsv_bbl" in df.columns else None
+                if a is not None and b is not None:
+                    display_df[lab] = (a.fillna(0) - b.fillna(0)).apply(lambda v: None if pd.isna(v) else float(v))
+                else:
+                    display_df[lab] = ""
+            else:
+                display_df[lab] = df[src]
         # Format quantities nicely if present
         for lab, src in [(c.get("label"), c.get("source")) for c in (columns or [])]:
-            if src in ("toa.before.nsv_bbl", "toa.after.nsv_bbl"):
-                display_df[lab] = display_df[lab].apply(lambda v: f"{v:,.2f}" if v is not None else "")
+            if src in ("toa.before.nsv_bbl", "toa.after.nsv_bbl", "net.nsv_bbl"):
+                display_df[lab] = display_df[lab].apply(lambda v: f"{float(v):,.2f}" if v is not None and v != "" else "")
         st.dataframe(display_df, hide_index=True, use_container_width=True)
         st.caption(f"{len(display_df)} voyage(s) shown")
 

@@ -920,16 +920,25 @@ def _tab_yade_barges(user):
     if not barges:
         st.info("No YADE barges found.")
     else:
+        st.markdown(
+            """
+            <style>
+            .stButton>button { padding: 4px 8px; height: 28px; }
+            div[data-testid="stHorizontalBlock"] { gap: 0.25rem; }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
         for b in barges:
             with st.container(border=True):
-                c1, c2, c3 = st.columns([2, 2, 1])
+                c1, c2, c3 = st.columns([6, 3, 1])
                 c1.markdown(f"**{b.name}**")
                 c2.caption(f"Design: {b.design}")
                 with c3:
                     colA, colB = st.columns(2)
-                    if colA.button("✏️ Edit", key=f"btn_edit_barge_{b.id}", use_container_width=True):
+                    if colA.button("✏️", key=f"btn_edit_barge_{b.id}", help="Edit", use_container_width=False):
                         st.session_state[f"editing_barge_{b.id}"] = True
-                    if colB.button("🗑️ Delete", key=f"del_barge_{b.id}", use_container_width=True):
+                    if colB.button("🗑️", key=f"del_barge_{b.id}", help="Delete", use_container_width=False):
                         st.session_state[f"confirm_del_barge_{b.id}"] = True
 
                 if st.session_state.get(f"editing_barge_{b.id}"):

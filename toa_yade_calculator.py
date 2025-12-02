@@ -16,6 +16,7 @@ from utils_calc import (
 # DB models
 from models import (
     TOAYadeSummary,
+    TOAYadeStage,
     YadeVoyage,
     YadeCalibration,
     YadeDip,
@@ -301,6 +302,39 @@ def compute_and_save_summary(
     summary.net_nsv_bbl = round(a["NSV"] - b["NSV"], 0)
     summary.net_lt_bbl = round(a["LT"] - b["LT"], 0)
     summary.net_mt = round(a["MT"] - b["MT"], 0)
+
+    # Upsert stage rows for BEFORE and AFTER
+    before_row = (
+        session.query(TOAYadeStage)
+        .filter(TOAYadeStage.voyage_id == voyage_id, TOAYadeStage.stage == "BEFORE")
+        .one_or_none()
+    )
+    if not before_row:
+        before_row = TOAYadeStage(voyage_id=voyage_id, stage="BEFORE")
+        session.add(before_row)
+    before_row.gov_bbl = b["GOV"]
+    before_row.gsv_bbl = b["GSV"]
+    before_row.bsw_bbl = b["BSW"]
+    before_row.nsv_bbl = b["NSV"]
+    before_row.lt = b["LT"]
+    before_row.mt = b["MT"]
+    before_row.fw_bbl = b["FW"]
+
+    after_row = (
+        session.query(TOAYadeStage)
+        .filter(TOAYadeStage.voyage_id == voyage_id, TOAYadeStage.stage == "AFTER")
+        .one_or_none()
+    )
+    if not after_row:
+        after_row = TOAYadeStage(voyage_id=voyage_id, stage="AFTER")
+        session.add(after_row)
+    after_row.gov_bbl = a["GOV"]
+    after_row.gsv_bbl = a["GSV"]
+    after_row.bsw_bbl = a["BSW"]
+    after_row.nsv_bbl = a["NSV"]
+    after_row.lt = a["LT"]
+    after_row.mt = a["MT"]
+    after_row.fw_bbl = a["FW"]
     
     session.commit()
     

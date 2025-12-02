@@ -245,7 +245,7 @@ def get_pages(user, active_location_id):
     ops = [
         ("show_tank_transactions",   ("Tank Transactions",   "app_pages.tank_transactions")),
         ("show_tanker_transactions", ("Tanker Transactions", "app_pages.tanker_transactions")),
-        ("show_tank_transactions",   ("View Transactions",   "app_pages.view_transactions")),
+        ("show_view_transactions",   ("View Transactions",   "app_pages.view_transactions")),
         ("show_yade_transactions",   ("Yade Transactions",   "app_pages.yade_transactions")),
         ("show_yade_tracking",       ("Yade Tracking",       "app_pages.yade_tracking")),
         ("show_yade_vessel_mapping", ("Yade-Vessel Mapping", "app_pages.yade_vessel_mapping")),
