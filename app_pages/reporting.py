@@ -41,11 +41,21 @@ def get_user_reports(user: dict, location_id: int = None):
             # Regular users see only reports they have access to
             query = query.join(ReportAccess, ReportDefinition.id == ReportAccess.report_id)
             
-            # Filter by role, user_id, or location
+            # Filter by role, user_id, or location (scoped to current location unless global)
             query = query.filter(
-                (ReportAccess.role == user['role']) |
-                (ReportAccess.user_id == user['id']) |
-                (ReportAccess.location_id == location_id)
+                (
+                    (ReportAccess.role == user['role']) |
+                    (ReportAccess.user_id == user['id']) |
+                    (ReportAccess.location_id == location_id)
+                )
+                & (
+                    (ReportAccess.location_id == None) |  # noqa: E711
+                    (ReportAccess.location_id == location_id)
+                )
+                & (
+                    (ReportDefinition.location_id == None) |  # noqa: E711
+                    (ReportDefinition.location_id == location_id)
+                )
             )
             
             reports = query.distinct().all()
@@ -89,7 +99,7 @@ def render_filter_inputs(filter_configs: list, location_id: int) -> dict:
     """
     filters = {}
     
-    FormBuilder.section_header("🔍 Report Filters", "Customize your report parameters")
+    FormBuilder.section_header("🔍 Report Filters")
     
     # Always include date range filter
     col1, col2 = st.columns(2)
@@ -220,15 +230,6 @@ def render_reporting_page(active_location_id: int, user: dict):
         return
     
     selected_report = report_options[selected_report_name]
-    
-    st.markdown("---")
-    
-    # Display report info
-    with st.expander("ℹ️ Report Information", expanded=False):
-        st.write(f"**Report Name:** {selected_report['name']}")
-        st.write(f"**Created By:** {selected_report['created_by']}")
-        if selected_report.get('created_at') and hasattr(selected_report['created_at'], 'strftime'):
-            st.write(f"**Created On:** {selected_report['created_at'].strftime('%Y-%m-%d')}")
     
     # Get report configuration
     config = selected_report['config']

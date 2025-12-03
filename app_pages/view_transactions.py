@@ -33,8 +33,9 @@ except Exception:
 
 # Per-location tab flags (reuse entry-page toggles)
 try:
-    from location_config import get_tank_transactions_tab_visibility, get_active_operation_names
+    from location_config import LocationConfig, get_tank_transactions_tab_visibility, get_active_operation_names
 except Exception:
+    LocationConfig = None
     get_tank_transactions_tab_visibility = None
 
     def get_active_operation_names(*args, **kwargs):
@@ -2239,8 +2240,32 @@ def render_view_transactions_page(active_location_id, user):
             return
 
         st.caption(f"Active Location: **{loc_label}**")
+        cfg = {}
+        try:
+            if LocationConfig:
+                with get_session() as s:
+                    cfg = LocationConfig.get_config(s, loc.id)
+        except Exception:
+            cfg = {}
+        pv = cfg.get("page_visibility", {}) if isinstance(cfg, dict) else {}
 
-        source = st.selectbox("Source", ["Tank", "Yade", "Tanker"], index=0, key="vt_source_sel")
+        def _visible(key: str, default: bool = True) -> bool:
+            val = pv.get(key)
+            return default if val is None else bool(val)
+
+        source_options = []
+        if _visible("show_tank_transactions", True):
+            source_options.append("Tank")
+        if _visible("show_yade_transactions", True):
+            source_options.append("Yade")
+        if _visible("show_tanker_transactions", True):
+            source_options.append("Tanker")
+
+        if not source_options:
+            st.info("No transaction sources are enabled for this location.")
+            return
+
+        source = st.selectbox("Source", source_options, index=0, key="vt_source_sel")
         if source == "Tank":
             _render_tank_view_tabs(loc.id, loc_label, user)
         elif source == "Yade":

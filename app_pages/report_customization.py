@@ -164,6 +164,7 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
         return
 
     source_options = [_table_option(src) for src in available_sources]
+    loc_labels, loc_map = _load_locations()
 
     # 1) Basic info
     with st.expander("1) Basic Information", expanded=True):
@@ -483,6 +484,7 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
             sorting_configs.append({"field": sort_field, "order": sort_order})
 
     # 7) Totals & access control
+    allowed_location_ids: List[int] = []
     with st.expander("7) Totals & Access Control", expanded=False):
         show_totals = st.checkbox("Include totals for numeric columns", value=True)
         allowed_roles = st.multiselect(
@@ -490,6 +492,16 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
             options=["admin-operations", "admin-it", "manager", "supervisor", "operator"],
             default=["manager", "supervisor"],
         )
+        default_loc_labels = [lbl for lbl, lid in loc_map.items() if lid == active_location_id]
+        allowed_location_labels = st.multiselect(
+            "Enable for locations",
+            options=loc_labels,
+            default=default_loc_labels,
+            help="Reports will only appear in Reporting for these locations until you add more.",
+        )
+        allowed_location_ids = [loc_map[label] for label in allowed_location_labels if label in loc_map]
+        if not allowed_location_ids and active_location_id:
+            allowed_location_ids = [active_location_id]
 
     with st.expander("8) Export Formats & Delivery Options", expanded=False):
         st.caption("Configure available export formats and delivery destinations.")
@@ -643,6 +655,8 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
         missing_sources = [c for c in column_configs if not c.get("source_table") or not c.get("source_field")]
         if missing_sources:
             errors.append("Each column needs a source table and field.")
+        if not allowed_location_ids:
+            errors.append("Select at least one location to enable this report.")
 
         if errors:
             for err in errors:
@@ -685,8 +699,11 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
 
         try:
             with get_session() as session:
+                primary_location_id = active_location_id if base_location_mode != "all" else None
+                if base_location_mode != "all" and allowed_location_ids:
+                    primary_location_id = allowed_location_ids[0]
                 new_report = ReportDefinition(
-                    location_id=active_location_id if base_location_mode != "all" else None,
+                    location_id=primary_location_id,
                     name=report_name,
                     slug=report_slug,
                     config_json=json.dumps(report_config),
@@ -697,14 +714,16 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
                 session.add(new_report)
                 session.flush()
 
-                for role in allowed_roles:
-                    access = ReportAccess(
-                        report_id=new_report.id,
-                        role=role,
-                        granted_by=user.get("username"),
-                        granted_at=datetime.utcnow(),
-                    )
-                    session.add(access)
+                for loc_id in allowed_location_ids:
+                    for role in allowed_roles:
+                        access = ReportAccess(
+                            report_id=new_report.id,
+                            role=role,
+                            location_id=loc_id,
+                            granted_by=user.get("username"),
+                            granted_at=datetime.utcnow(),
+                        )
+                        session.add(access)
 
                 # Optional: create table schema
                 if create_db_table and custom_table_name:
@@ -745,6 +764,7 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
 
 def render_manage_reports(user: Dict[str, Any], active_location_id: int):
     st.markdown("### Manage Existing Reports")
+    loc_labels, loc_map = _load_locations()
 
     filter_option = st.radio(
         "Show Reports:",
@@ -795,6 +815,7 @@ def render_manage_reports(user: Dict[str, Any], active_location_id: int):
                 config = json.loads(report.config_json or "{}")
             except Exception:
                 config = {}
+            accesses = session.query(ReportAccess).filter(ReportAccess.report_id == report.id).all()
 
             status_badge = "Active" if report.is_active else "Inactive"
             report_type_badge = "Custom" if report.created_by != "system" else "System"
@@ -813,6 +834,57 @@ def render_manage_reports(user: Dict[str, Any], active_location_id: int):
                     st.write(f"**Status:** {status_badge}")
                     data_source = config.get("data_source", {}).get("table", "Unknown")
                     st.write(f"**Base Table:** `{data_source}`")
+
+                st.markdown("---")
+                loc_ids_current = sorted({a.location_id for a in accesses if a.location_id})
+                selected_loc_labels = [lbl for lbl, lid in loc_map.items() if lid in loc_ids_current]
+                with st.expander("Location Access", expanded=False):
+                    loc_selection = st.multiselect(
+                        "Enabled locations",
+                        options=loc_labels,
+                        default=selected_loc_labels,
+                        help="Reports stay hidden in Reporting unless the current location is enabled here.",
+                        key=f"loc_access_{report.id}",
+                    )
+                    if st.button("Save Location Access", key=f"save_loc_access_{report.id}"):
+                        try:
+                            new_loc_ids = {loc_map[lbl] for lbl in loc_selection if lbl in loc_map}
+                            if not new_loc_ids:
+                                st.warning("Select at least one location before saving.")
+                                raise ValueError("No locations selected")
+                            role_set = {a.role for a in accesses if a.role}
+                            # Remove existing non user-specific entries, then recreate with new location scope
+                            session.query(ReportAccess).filter(
+                                ReportAccess.report_id == report.id,
+                                ReportAccess.user_id == None  # noqa: E711
+                            ).delete()
+                            for loc_id in new_loc_ids:
+                                if role_set:
+                                    for role in role_set:
+                                        session.add(
+                                            ReportAccess(
+                                                report_id=report.id,
+                                                role=role,
+                                                location_id=loc_id,
+                                                granted_by=user.get("username"),
+                                                granted_at=datetime.utcnow(),
+                                            )
+                                        )
+                                else:
+                                    session.add(
+                                        ReportAccess(
+                                            report_id=report.id,
+                                            location_id=loc_id,
+                                            granted_by=user.get("username"),
+                                            granted_at=datetime.utcnow(),
+                                        )
+                                    )
+                            session.commit()
+                            st.success("Location access updated.")
+                            st.rerun()
+                        except Exception as exc:
+                            session.rollback()
+                            st.error(f"Could not update access: {exc}")
 
                 st.markdown("---")
                 with st.expander("View configuration JSON", expanded=False):

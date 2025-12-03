@@ -460,7 +460,6 @@ def main():
 
     # ================= NOT LOGGED IN ================= #
     if not user:
-        header("OTMS Login")
         render_login_page()
         return
 
@@ -488,12 +487,12 @@ def main():
         st.session_state["current_page"] = "Home"
         st.session_state["logout_confirm"] = False
 
-        header("OTMS Login")
-        st.warning(
-            f"⏰ Your session has expired due to {SecurityManager.SESSION_TIMEOUT_MINUTES} minutes of inactivity. "
-            "Please log in again."
+        render_login_page(
+            notice=(
+                f"Your session has expired after "
+                f"{SecurityManager.SESSION_TIMEOUT_MINUTES} minutes of inactivity. Please sign in again."
+            )
         )
-        render_login_page()
         return
 
     # ================= SESSION STILL VALID ================= #

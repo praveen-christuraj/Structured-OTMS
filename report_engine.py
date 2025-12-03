@@ -615,15 +615,43 @@ class ReportEngine:
         # Date range filter applied to common date-like columns
         if 'date_range' in user_filters and isinstance(user_filters['date_range'], (list, tuple)) and len(user_filters['date_range']) >= 2:
             start, end = user_filters['date_range'][0], user_filters['date_range'][1]
-            date_cols = [c for c in ['date', 'tx_date', 'record_date'] if c in df.columns]
-            for dc in date_cols:
-                try:
-                    series = pd.to_datetime(df[dc], errors='coerce')
-                    mask = (series >= pd.to_datetime(start)) & (series <= pd.to_datetime(end))
-                    df = df[mask]
-                    break
-                except Exception:
-                    continue
+            # Prefer configured date/datetime columns (labels or raw fields) before falling back
+            date_candidates = []
+            try:
+                for col_config in self.columns or []:
+                    col_type = str(col_config.get('type', '')).lower()
+                    if col_type in ('date', 'datetime'):
+                        label = col_config.get('label') or col_config.get('field') or col_config.get('source_field')
+                        for name in [label, col_config.get('field'), col_config.get('source_field')]:
+                            if isinstance(name, str) and name not in date_candidates:
+                                date_candidates.append(name)
+            except Exception:
+                pass
+            for fallback in ['date', 'tx_date', 'record_date']:
+                if fallback not in date_candidates:
+                    date_candidates.append(fallback)
+            try:
+                start_dt = pd.to_datetime(start)
+                end_dt = pd.to_datetime(end)
+                if pd.isna(start_dt) or pd.isna(end_dt):
+                    start_dt = None
+                    end_dt = None
+                elif start_dt > end_dt:
+                    start_dt, end_dt = end_dt, start_dt
+            except Exception:
+                start_dt = None
+                end_dt = None
+            if start_dt is not None and end_dt is not None:
+                for dc in date_candidates:
+                    if dc not in df.columns:
+                        continue
+                    try:
+                        series = pd.to_datetime(df[dc], errors='coerce')
+                        mask = (series >= start_dt) & (series <= end_dt)
+                        df = df[mask]
+                        break
+                    except Exception:
+                        continue
         # Apply configured filters using label-based field names
         for fc in (self.filters or []):
             field = fc.get('field')
