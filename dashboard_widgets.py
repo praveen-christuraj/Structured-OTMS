@@ -538,31 +538,51 @@ class DashboardRenderer:
             cols = st.columns(len(row))
             for idx, card in enumerate(row):
                 with cols[idx]:
-                    value = DashboardRenderer._fetch_card_data(
-                        card,
-                        location_id,
-                        (selected_date_start, selected_date_end),
-                        config,
-                    )
-                    prev_value = None
-                    if card.get("show_delta", False):
-                        prev_base = (selected_date_end - timedelta(days=1)) if isinstance(selected_date_end, date) else selected_date_start
-                        prev_value = DashboardRenderer._fetch_card_data(
+                        value = DashboardRenderer._fetch_card_data(
                             card,
                             location_id,
-                            prev_base,
+                            (selected_date_start, selected_date_end),
                             config,
                         )
-                    WidgetRenderer.render_stat_card(
-                        label=card.get("name", ""),
-                        value=value,
-                        unit=card.get("unit", ""),
-                        prev_value=prev_value,
-                        style=config.get("styles", {}).get("card"),
-                        show_delta=card.get("show_delta", False),
-                        display_date=selected_date_end,
-                        show_date=False
-                    )
+                        prev_value = None
+                        if card.get("show_delta", False):
+                            prev_base = (selected_date_end - timedelta(days=1)) if isinstance(selected_date_end, date) else selected_date_start
+                            prev_value = DashboardRenderer._fetch_card_data(
+                                card,
+                                location_id,
+                                prev_base,
+                                config,
+                            )
+                        sub_value = None
+                        sub_label = str(card.get("sub_label", ""))
+                        if bool(card.get("sub_enabled", False)):
+                            sub_cfg = {
+                                "data_source": str(card.get("sub_data_source", "table")),
+                                "table_name": card.get("sub_table_name"),
+                                "field": card.get("sub_field"),
+                                "criteria": list(card.get("sub_criteria") or []),
+                            }
+                            try:
+                                sub_value = DashboardRenderer._fetch_card_data(
+                                    sub_cfg,
+                                    location_id,
+                                    (selected_date_start, selected_date_end),
+                                    config,
+                                )
+                            except Exception:
+                                sub_value = None
+                        WidgetRenderer.render_stat_card(
+                            label=card.get("name", ""),
+                            value=value,
+                            unit=card.get("unit", ""),
+                            prev_value=prev_value,
+                            style=config.get("styles", {}).get("card"),
+                            show_delta=card.get("show_delta", False),
+                            display_date=selected_date_end,
+                            sub_value=sub_value,
+                            sub_label=sub_label,
+                            show_date=False
+                        )
     
     @staticmethod
     def _render_tank_visuals_section(config: Dict, location_id: int, section_date):
@@ -1340,13 +1360,30 @@ class DashboardRenderer:
                             prev_value = DashboardRenderer._fetch_card_data(
                                 card, location_id, selected_date - timedelta(days=1)
                             )
+                        sub_value = None
+                        sub_label = str(card.get("sub_label", ""))
+                        if bool(card.get("sub_enabled", False)):
+                            sub_cfg = {
+                                "data_source": str(card.get("sub_data_source", "table")),
+                                "table_name": card.get("sub_table_name"),
+                                "field": card.get("sub_field"),
+                                "criteria": list(card.get("sub_criteria") or []),
+                            }
+                            try:
+                                sub_value = DashboardRenderer._fetch_card_data(
+                                    sub_cfg, location_id, selected_date
+                                )
+                            except Exception:
+                                sub_value = None
                         WidgetRenderer.render_stat_card(
                             label=card.get("name", ""),
                             value=value,
                             unit=card.get("unit", ""),
                             prev_value=prev_value,
                             style=config.get("styles", {}).get("card"),
-                            show_delta=card.get("show_delta", False)
+                            show_delta=card.get("show_delta", False),
+                            sub_value=sub_value,
+                            sub_label=sub_label
                         )
         
         # Tank Visuals

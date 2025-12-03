@@ -612,6 +612,66 @@ def render_summary_cards_tab(config: dict):
                     value=card. get("show_delta", False),
                     key=f"card_delta_{idx}"
                 )
+
+            st.markdown("**Sub-Data (optional)**")
+            sub_enabled = bool(card.get("sub_enabled", False))
+            card["sub_enabled"] = st.toggle(
+                "Enable Sub-Data",
+                value=sub_enabled,
+                key=f"card_sub_enabled_{idx}"
+            )
+            if card["sub_enabled"]:
+                sub_col1, sub_col2 = st.columns(2)
+                with sub_col1:
+                    sub_ds_opts = ["table"]
+                    try:
+                        sub_ds_idx = sub_ds_opts.index(card.get("sub_data_source", "table"))
+                    except Exception:
+                        sub_ds_idx = 0
+                    card["sub_data_source"] = st.selectbox(
+                        "Sub-Data Source",
+                        options=sub_ds_opts,
+                        index=sub_ds_idx,
+                        key=f"card_sub_source_{idx}"
+                    )
+                    card["sub_label"] = st.text_input(
+                        "Sub-Data Label",
+                        value=card.get("sub_label", ""),
+                        key=f"card_sub_label_{idx}"
+                    )
+                with sub_col2:
+                    if card.get("sub_data_source") == "table":
+                        insp = inspect(engine)
+                        tables = sorted(insp.get_table_names())
+                        card["sub_table_name"] = st.selectbox(
+                            "Sub-Data Table",
+                            options=tables or [""],
+                            index=max(0, (tables or [""]).index(card.get("sub_table_name")) if card.get("sub_table_name") in (tables or []) else 0),
+                            key=f"card_sub_table_{idx}"
+                        )
+                        cols = [c.get("name") for c in insp.get_columns(card.get("sub_table_name"))] if card.get("sub_table_name") else []
+                        card["sub_field"] = st.selectbox(
+                            "Sub-Data Field",
+                            options=cols or [""],
+                            index=max(0, (cols or [""]).index(card.get("sub_field")) if card.get("sub_field") in (cols or []) else 0),
+                            key=f"card_sub_field_{idx}"
+                        )
+                        st.markdown("Sub-Data Filters")
+                        sub_criteria = card.setdefault("sub_criteria", [])
+                        if st.button("➕ Add Sub-Filter", key=f"card_add_sub_filter_{idx}"):
+                            sub_criteria.append({"column": (cols or [""])[0] if cols else "", "operator": "equals", "value": ""})
+                        for c_i, crit in enumerate(list(sub_criteria)):
+                            fc1, fc2, fc3, fc4 = st.columns([1.6, 1.2, 1.6, 0.6])
+                            with fc1:
+                                crit["column"] = st.selectbox("Column", options=cols or [""], index=max(0, (cols or [""]).index(crit.get("column")) if crit.get("column") in (cols or []) else 0), key=f"card_sub_crit_col_{idx}_{c_i}")
+                            with fc2:
+                                crit["operator"] = st.selectbox("Operator", options=["equals", "not_equals", "contains", "starts_with", "ends_with", "greater_than", "less_than", "greater_equal", "less_equal"], index=["equals", "not_equals", "contains", "starts_with", "ends_with", "greater_than", "less_than", "greater_equal", "less_equal"].index(crit.get("operator", "equals")), key=f"card_sub_crit_op_{idx}_{c_i}")
+                            with fc3:
+                                crit["value"] = st.text_input("Value", value=str(crit.get("value", "")), key=f"card_sub_crit_val_{idx}_{c_i}")
+                            with fc4:
+                                if st.button("🗑️", key=f"card_sub_crit_del_{idx}_{c_i}"):
+                                    sub_criteria.pop(c_i)
+                                    st.rerun()
             
             # Delete button
             if st.button(f"🗑️ Delete Card {idx + 1}", key=f"delete_card_{idx}"):
