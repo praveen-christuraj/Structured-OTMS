@@ -16,6 +16,7 @@ from location_config import (
 DEFAULT_FLAGS = {
     "show_tank_transactions": True,
     "show_tanker_transactions": True,
+    "show_tanker_tracking": False,
     "show_yade_transactions": True,
     "show_yade_vessel_mapping": True,
     "show_yade_tracking": True,
@@ -77,7 +78,7 @@ def render_location_settings_page(active_location_id, user):
     # -------- section switcher --------
     section = st.radio(
         "Configure Section",
-        ["Page Access", "Tank Tx Tabs", "Reporting Tabs", "Convoy Status", "Service Types", "Operations"],
+        ["Page Access", "Tank Tx Tabs", "Reporting Tabs", "Convoy Status", "Service Types", "Tanker Tracking", "Operations"],
         horizontal=True,
         key="ls_section_switch",
     )
@@ -94,6 +95,8 @@ def render_location_settings_page(active_location_id, user):
         _render_convoy_status_settings(sel_location_id, user)
     elif section == "Service Types":
         _render_service_types(sel_location_id, user)
+    elif section == "Tanker Tracking":
+        _render_tanker_tracking_settings(sel_location_id, user)
 
     else:  # "Operations" (this is where you also add Cargo Type / Destination / Loading Berth via categories)
         _render_operations_config(sel_location_id, user)
@@ -118,6 +121,11 @@ def _render_page_access(sel_location_id: int, user):
             "🚚 Tanker Transactions",
             value=cfg.get("show_tanker_transactions", True),
             key="ls_flag_tanker",
+        )
+        show_tanker_tracking = st.toggle(
+            "🚚 Tanker Tracking",
+            value=cfg.get("show_tanker_tracking", False),
+            key="ls_flag_tanker_tracking",
         )
         show_fso = st.toggle(
             "⚓ FSO Operations",
@@ -192,6 +200,7 @@ def _render_page_access(sel_location_id: int, user):
         new_flags = {
             "show_tank_transactions": bool(show_tank),
             "show_tanker_transactions": bool(show_tanker),
+            "show_tanker_tracking": bool(show_tanker_tracking),
             "show_yade_transactions": bool(show_yade),
             "show_yade_vessel_mapping": bool(show_yvm),
             "show_yade_tracking": bool(show_yade_tracking),
@@ -218,6 +227,7 @@ def _render_page_access(sel_location_id: int, user):
                 perms.update({
                     "tank_transactions": bool(show_tank),
                     "tanker_transactions": bool(show_tanker),
+                    "tanker_tracking": bool(show_tanker_tracking),
                     "yade_transactions": bool(show_yade),
                     "otr_vessel": bool(show_vessel_ops),
                     "fso_operations": bool(show_fso),
@@ -533,6 +543,105 @@ def _render_service_types(sel_location_id: int, user):
                 st.rerun()
             except Exception as ex:
                 st.error(f"Delete failed: {ex}")
+# ===================== Tanker Tracking =====================
+def _render_tanker_tracking_settings(sel_location_id: int, user):
+    st.markdown("### 🚚 Tanker Tracking")
+    st.caption("Configure sender/receiver roles and routing for tanker tracking.")
+
+    with get_session() as session:
+        cfg = LocationConfig.get_config(session, sel_location_id)
+        all_locations = session.query(Location).order_by(Location.name).all()
+
+    page_enabled = bool(cfg.get("page_visibility", {}).get("show_tanker_tracking", False))
+    tt_cfg = cfg.get("tanker_tracking", {}) or {}
+
+    loc_lookup = {loc.id: loc for loc in all_locations}
+    selected_loc = loc_lookup.get(sel_location_id)
+    options = {loc.id: f"{loc.name} ({loc.code})" for loc in all_locations if loc.id != sel_location_id}
+
+    sender_default = [lid for lid in tt_cfg.get("sender_targets", []) if lid in options]
+    receiver_default = [lid for lid in tt_cfg.get("receiver_sources", []) if lid in options]
+    aliases = tt_cfg.get("receiver_aliases", []) or []
+    alias_seed = ", ".join(aliases) if aliases else ", ".join(
+        [v for v in [getattr(selected_loc, "name", ""), getattr(selected_loc, "code", "")] if v]
+    )
+
+    if not page_enabled:
+        st.info("Enable Tanker Tracking for this location in Page Access to expose it in the sidebar.")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        is_sender = st.toggle(
+            "Allow this location to dispatch tankers (Sender)",
+            value=tt_cfg.get("is_sender", False),
+            disabled=not page_enabled,
+            key="ls_tt_sender",
+        )
+        sender_targets = st.multiselect(
+            "Receivers this sender dispatches to",
+            options=list(options.values()),
+            default=[options[lid] for lid in sender_default],
+            disabled=not (page_enabled and is_sender),
+            key="ls_tt_sender_targets",
+        )
+    with col2:
+        is_receiver = st.toggle(
+            "Allow this location to receive/close tankers (Receiver)",
+            value=tt_cfg.get("is_receiver", False),
+            disabled=not page_enabled,
+            key="ls_tt_receiver",
+        )
+        receiver_sources = st.multiselect(
+            "This receiver expects tankers from",
+            options=list(options.values()),
+            default=[options[lid] for lid in receiver_default],
+            disabled=not (page_enabled and is_receiver),
+            key="ls_tt_receiver_sources",
+        )
+
+    alias_input = st.text_input(
+        "Destination aliases that map to this receiver (comma separated)",
+        value=alias_seed,
+        disabled=not (page_enabled and is_receiver),
+        key="ls_tt_aliases",
+    )
+
+    label_to_id = {label: lid for lid, label in options.items()}
+    sender_ids = [label_to_id.get(label) for label in sender_targets if label in label_to_id]
+    receiver_ids = [label_to_id.get(label) for label in receiver_sources if label in label_to_id]
+    alias_list = [a.strip() for a in (alias_input or "").split(",") if a.strip()]
+
+    if st.button("💾 Save Tanker Tracking", type="primary", key="ls_tt_save"):
+        try:
+            with get_session() as session:
+                cfg = LocationConfig.get_config(session, sel_location_id)
+                tt = cfg.get("tanker_tracking", {}) or {}
+                tt.update(
+                    {
+                        "is_sender": bool(is_sender),
+                        "is_receiver": bool(is_receiver),
+                        "sender_targets": sender_ids,
+                        "receiver_sources": receiver_ids,
+                        "receiver_aliases": alias_list,
+                    }
+                )
+                cfg["tanker_tracking"] = tt
+                LocationConfig.save_config(session, sel_location_id, cfg)
+
+            SecurityManager.log_audit(
+                None,
+                (user or {}).get("username", "system"),
+                "UPDATE",
+                resource_type="LocationSettings.TankerTracking",
+                resource_id=str(sel_location_id),
+                details=f"Tanker Tracking updated (sender={is_sender}, receiver={is_receiver})",
+                user_id=(user or {}).get("id"),
+                location_id=sel_location_id,
+            )
+            st.success("Tanker Tracking settings saved.")
+        except Exception as ex:
+            st.error(f"Failed to save Tanker Tracking settings: {ex}")
+
 # ===================== Operations config =====================
 def _render_operations_config(selected_location_id, user):
     """

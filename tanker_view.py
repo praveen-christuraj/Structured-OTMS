@@ -505,7 +505,7 @@ def _render_main_tanker_view(user: Dict[str, Any] | None, location_id: Optional[
             def delete_tanker_record():
                 _delete_tanker_transaction(r.id, user or {})
             
-            if render_deletion_ui(
+            deletion_result = render_deletion_ui(
                 resource_type="TankerTransaction",
                 resource_id=r.id,
                 resource_label=f"Tanker Transaction {r.tanker_name or r.id}",
@@ -515,7 +515,10 @@ def _render_main_tanker_view(user: Dict[str, Any] | None, location_id: Optional[
                 on_success_message="Tanker transaction deleted successfully",
                 metadata={"tanker_name": r.tanker_name, "date": str(getattr(r, 'transaction_date', ''))},
                 button_key_prefix=f"tanker_{r.id}"
-            ):
+            )
+            
+            # Close the prompt on any button click (delete success, cancel, or error)
+            if deletion_result is not None:
                 st.session_state.pop(f"tanker_show_delete_ui_{r.id}", None)
                 st.rerun()
 

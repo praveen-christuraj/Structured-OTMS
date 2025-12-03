@@ -799,13 +799,14 @@ class ReportEngine:
         excel_buffer.seek(0)
         return excel_buffer.getvalue()
     
-    def export_pdf(self, df: pd.DataFrame, report_name: str = "Report") -> bytes:
+    def export_pdf(self, df: pd.DataFrame, report_name: str = "Report", user_filters: Dict[str, Any] = None) -> bytes:
         """
         Export DataFrame to PDF.
         
         Args:
             df: pandas DataFrame
             report_name: Name of the report for title
+            user_filters: Runtime filters (for calculating date-based averages)
         
         Returns:
             PDF data as bytes
@@ -897,7 +898,11 @@ class ReportEngine:
                     continue
                 if str(col_cfg.get("type")).lower() == "numeric":
                     try:
-                        decimals_lookup[lbl] = int(col_cfg.get("decimal_places")) if col_cfg.get("decimal_places") is not None else 2
+                        # VCF gets 5 decimal places, everything else gets 2
+                        if 'vcf' in lbl.lower():
+                            decimals_lookup[lbl] = 5
+                        else:
+                            decimals_lookup[lbl] = int(col_cfg.get("decimal_places")) if col_cfg.get("decimal_places") is not None else 2
                     except Exception:
                         decimals_lookup[lbl] = 2
         except Exception:
@@ -975,6 +980,20 @@ class ReportEngine:
                     summary_headers = ["Metric"] + numeric_cols
                     summary_rows = []
                     metrics = ["Total", "Average"]
+                    
+                    # Calculate number of days from date filter for proper daily average
+                    num_days = 1  # default to 1 day if no filter applied
+                    if user_filters and 'date_range' in user_filters and isinstance(user_filters['date_range'], (list, tuple)) and len(user_filters['date_range']) >= 2:
+                        try:
+                            start_date = user_filters['date_range'][0]
+                            end_date = user_filters['date_range'][1]
+                            if isinstance(start_date, date) and isinstance(end_date, date):
+                                num_days = (end_date - start_date).days + 1  # +1 to include both start and end dates
+                                if num_days < 1:
+                                    num_days = 1
+                        except Exception:
+                            num_days = 1
+                    
                     for metric in metrics:
                         row_vals = [metric]
                         for col in numeric_cols:
@@ -983,7 +1002,8 @@ class ReportEngine:
                             if metric == "Total":
                                 val = series.sum(skipna=True)
                             elif metric == "Average":
-                                val = series.mean(skipna=True)
+                                total = series.sum(skipna=True)
+                                val = total / num_days
                             dp = decimals_lookup.get(col, 2)
                             row_vals.append(_fmt_num(val, dp))
                         summary_rows.append(row_vals)
@@ -1022,18 +1042,19 @@ class ReportEngine:
         pdf_buffer.seek(0)
         return pdf_buffer.getvalue()
     
-    def get_pdf_base64(self, df: pd.DataFrame, report_name: str = "Report") -> str:
+    def get_pdf_base64(self, df: pd.DataFrame, report_name: str = "Report", user_filters: Dict[str, Any] = None) -> str:
         """
         Generate PDF and return as base64 string for iframe display.
         
         Args:
             df: pandas DataFrame
             report_name: Name of the report
+            user_filters: Runtime filters (for calculating date-based averages)
         
         Returns:
             Base64 encoded PDF string
         """
-        pdf_bytes = self.export_pdf(df, report_name)
+        pdf_bytes = self.export_pdf(df, report_name, user_filters)
         return base64.b64encode(pdf_bytes).decode('utf-8')
 
 

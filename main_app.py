@@ -41,6 +41,7 @@ ICONS = {
     "Dashboard Customization": "📊⚙️",
     "Tank Transactions": "🛢️",
     "Tanker Transactions": "🚚",
+    "Tanker Tracking": "🧭",
     "Yade Transactions": "⛴️",
     "Yade Tracking": "📍",
     "Yade-Vessel Mapping": "🚩",
@@ -245,6 +246,7 @@ def get_pages(user, active_location_id):
     ops = [
         ("show_tank_transactions",   ("Tank Transactions",   "app_pages.tank_transactions")),
         ("show_tanker_transactions", ("Tanker Transactions", "app_pages.tanker_transactions")),
+        ("show_tanker_tracking",     ("Tanker Tracking",     "app_pages.tanker_tracking")),
         ("show_view_transactions",   ("View Transactions",   "app_pages.view_transactions")),
         ("show_yade_transactions",   ("Yade Transactions",   "app_pages.yade_transactions")),
         ("show_yade_tracking",       ("Yade Tracking",       "app_pages.yade_tracking")),
@@ -369,7 +371,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         "Page Customization",
         "Deleted Records",
         "Report Customization",
-        "2FA Settings",
+        "Backup & Recovery",
         "Error Monitoring",
         "Back Data",
     ]
@@ -377,6 +379,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         "Tank Transactions",
         "Yade Transactions",
         "Tanker Transactions",
+        "Tanker Tracking",
         "View Transactions",
         "Vessel Operations",
         "FSO-Operations",
@@ -393,6 +396,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         "My Tasks",
         "Home",
         "Profile Settings",
+        "2FA Settings",
         "Sharing",
         "Services",
     ]
@@ -622,6 +626,10 @@ def main():
     elif current_page == "Tanker Transactions":
         # separate file: app_pages/tanker_transactions.py
         render_tanker_transactions_page(active_location_id, user)
+
+    elif current_page == "Tanker Tracking":
+        from app_pages.tanker_tracking import render_tanker_tracking_page
+        render_tanker_tracking_page(active_location_id, user)
 
     elif current_page == "Yade Transactions":
         from app_pages.yade_transactions import render_yade_transactions_page

@@ -42,6 +42,7 @@ class PermissionManager:
             "tank_transactions": False,
             "yade_transactions": False,
             "tanker_transactions": False,
+            "tanker_tracking": False,
             "otr_vessel": False,
             "fso_operations": False,
             "is_head_office": False
@@ -408,6 +409,8 @@ class PermissionManager:
             allowed.append("YADE Transactions")
         if permissions.get("tanker_transactions"):
             allowed.append("Tanker Transactions")
+        if permissions.get("tanker_tracking"):
+            allowed.append("Tanker Tracking")
         if permissions.get("otr_vessel"):
             allowed.append("OTR-Vessel")
         

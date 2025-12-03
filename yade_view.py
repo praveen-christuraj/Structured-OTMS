@@ -728,7 +728,8 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
                             )
                             s.delete(obj)
                             s.commit()
-                if render_deletion_ui(
+                
+                deletion_result = render_deletion_ui(
                     resource_type="YadeVoyage",
                     resource_id=v.id,
                     resource_label=f"YADE Voyage {v.voyage_no or v.id}",
@@ -738,7 +739,10 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
                     on_success_message="YADE voyage moved to recycle bin",
                     metadata={"voyage_no": v.voyage_no, "convoy_no": v.convoy_no},
                     button_key_prefix=f"yade_{v.id}"
-                ):
+                )
+                
+                # Close the prompt on any button click (delete success, cancel, or error)
+                if deletion_result is not None:
                     st.session_state.pop(f"yade_show_delete_ui_{v.id}", None)
                     st.rerun()
 
@@ -982,7 +986,7 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
                         s.delete(obj)
                         s.commit()
             
-            if render_deletion_ui(
+            deletion_result = render_deletion_ui(
                 resource_type="YadeVoyage",
                 resource_id=v.id,
                 resource_label=f"YADE Voyage {v.voyage_no or v.id}",
@@ -992,7 +996,10 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
                 on_success_message="YADE voyage moved to recycle bin",
                 metadata={"voyage_no": v.voyage_no, "convoy_no": v.convoy_no},
                 button_key_prefix=f"yade_{v.id}"
-            ):
+            )
+            
+            # Close the prompt on any button click (delete success, cancel, or error)
+            if deletion_result is not None:
                 st.session_state.pop(f"yade_show_delete_ui_{v.id}", None)
                 st.rerun()
 

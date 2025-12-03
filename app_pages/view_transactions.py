@@ -1316,7 +1316,7 @@ def _render_tank_list(location_id: int, user: dict | None):
                             )
                             s.commit()
                 
-                if render_deletion_ui(
+                deletion_result = render_deletion_ui(
                     resource_type="TankTransaction",
                     resource_id=rec_id,
                     resource_label=f"Tank Transaction Ticket #{r.get('Ticket ID', rec_id)}",
@@ -1326,7 +1326,10 @@ def _render_tank_list(location_id: int, user: dict | None):
                     on_success_message="Tank transaction moved to Deleted Records",
                     metadata={"ticket_id": r.get('Ticket ID'), "tank_name": r.get('Tank Name')},
                     button_key_prefix=f"vt_tank_{idx}"
-                ):
+                )
+                
+                # Close the prompt on any button click (delete success, cancel, or error)
+                if deletion_result is not None:
                     st.session_state[f"vt_tank_show_delete_ui_{idx}"] = False
                     st.rerun()        # inline viewer/editor rows
         if st.session_state.get(f"vt_tank_view_open_{idx}", False):
@@ -1396,20 +1399,29 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
 
     # Date bounds for this section
     d_min, d_max = _get_flex_date_bounds(location_id, section)
-    default_date = d_max
+    default_date_from = d_max
+    default_date_to = d_max
 
-    c1, c2, c3 = st.columns([0.25, 0.35, 0.40], gap="small")
+    c1, c2, c3, c4 = st.columns([0.20, 0.20, 0.30, 0.30], gap="small")
     with c1:
-        d = st.date_input(
-            "Date",
-            value=default_date,
+        date_from = st.date_input(
+            "From Date",
+            value=default_date_from,
             min_value=d_min,
-            max_value=min(d_max, date.today()),
-            key=f"vt_{section}_d",
+            max_value=date.today(),
+            key=f"vt_{section}_date_from",
         )
     with c2:
-        created_by = (st.text_input("Created by", key=f"vt_{section}_by") or "").strip()
+        date_to = st.date_input(
+            "To Date",
+            value=default_date_to,
+            min_value=d_min,
+            max_value=date.today(),
+            key=f"vt_{section}_date_to",
+        )
     with c3:
+        created_by = (st.text_input("Created by", key=f"vt_{section}_by") or "").strip()
+    with c4:
         search = (st.text_input("Search text", key=f"vt_{section}_q") or "").strip()
 
     # Automatically detect if this is a custom table (flex_*) or legacy FlexibleRecord
@@ -1425,8 +1437,12 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
             is_custom = True
             with get_flex_session() as s:
                 q = s.query(Model).filter(getattr(Model, "location_id") == location_id)
-                if d and hasattr(Model, "tx_date"):
-                    q = q.filter(getattr(Model, "tx_date") == d)
+                if date_from and date_to and hasattr(Model, "tx_date"):
+                    q = q.filter(getattr(Model, "tx_date") >= date_from, getattr(Model, "tx_date") <= date_to)
+                elif date_from and hasattr(Model, "tx_date"):
+                    q = q.filter(getattr(Model, "tx_date") >= date_from)
+                elif date_to and hasattr(Model, "tx_date"):
+                    q = q.filter(getattr(Model, "tx_date") <= date_to)
                 if created_by and hasattr(Model, "created_by"):
                     q = q.filter(getattr(Model, "created_by").ilike(f"%{created_by}%"))
                 if search and hasattr(Model, "remarks"):
@@ -1443,8 +1459,12 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                     FlexibleRecord.page == "tank_transactions",
                     FlexibleRecord.section == section,
                 )
-                if d:
-                    q = q.filter(FlexibleRecord.tx_date == d)
+                if date_from and date_to:
+                    q = q.filter(FlexibleRecord.tx_date >= date_from, FlexibleRecord.tx_date <= date_to)
+                elif date_from:
+                    q = q.filter(FlexibleRecord.tx_date >= date_from)
+                elif date_to:
+                    q = q.filter(FlexibleRecord.tx_date <= date_to)
                 if created_by:
                     q = q.filter(getattr(FlexibleRecord, "created_by").ilike(f"%{created_by}%"))
                 if search:
@@ -1478,18 +1498,72 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
     
     # Prepare data for export (CSV, XLSX, PDF)
     export_data = []
+    export_data_pdf = []  # Separate data for PDF with excluded columns
+    
     for r in rows:
         if is_custom:
             row_dict = {
                 "Date": str(getattr(r, 'tx_date', '')),
                 "Created By": getattr(r, "created_by", ""),
                 "Created At": str(getattr(r, "created_at", "")),
-                "Remarks": getattr(r, "remarks", "")
             }
-            # Add all custom columns
-            for col_name in all_columns_set:
-                if col_name not in {"id", "location_id", "tx_date", "created_by", "created_at", "updated_by", "updated_at", "remarks"}:
-                    row_dict[col_name.replace('_', ' ').title()] = getattr(r, col_name, "")
+            row_dict_pdf = {
+                "Date": str(getattr(r, 'tx_date', '')),
+            }
+            
+            # Define column order for meters (for both display and export)
+            if section == "meters":
+                meter_col_order = [
+                    ("meter_1_opening", "Meter 1 Opening"),
+                    ("meter_1_closing", "Meter 1 Closing"),
+                    ("meter_1_factor", "Meter 1 Factor"),
+                    ("meter_1_net_bbl", "Meter 1 Net Bbl"),
+                    ("meter_2_opening", "Meter 2 Opening"),
+                    ("meter_2_closing", "Meter 2 Closing"),
+                    ("meter_2_factor", "Meter 2 Factor"),
+                    ("meter_2_net_bbl", "Meter 2 Net Bbl"),
+                    ("net_total_bbl", "Net Total Bbl"),
+                ]
+                # PDF column order excludes factor columns
+                meter_col_order_pdf = [
+                    ("meter_1_opening", "Meter 1 Opening"),
+                    ("meter_1_closing", "Meter 1 Closing"),
+                    ("meter_1_net_bbl", "Meter 1 Net Bbl"),
+                    ("meter_2_opening", "Meter 2 Opening"),
+                    ("meter_2_closing", "Meter 2 Closing"),
+                    ("meter_2_net_bbl", "Meter 2 Net Bbl"),
+                    ("net_total_bbl", "Net Total Bbl"),
+                ]
+                for col_name, col_label in meter_col_order:
+                    val = getattr(r, col_name, "")
+                    row_dict[col_label] = val
+                for col_name, col_label in meter_col_order_pdf:
+                    val = getattr(r, col_name, "")
+                    # Format numeric values to 2 decimal places for PDF
+                    if isinstance(val, (int, float)):
+                        row_dict_pdf[col_label] = f"{float(val):,.2f}"
+                    else:
+                        row_dict_pdf[col_label] = val
+                # Add remarks at the end
+                row_dict["Remarks"] = getattr(r, "remarks", "")
+                row_dict_pdf["Remarks"] = getattr(r, "remarks", "")
+            else:
+                # Add all custom columns for other sections
+                for col_name in all_columns_set:
+                    if col_name not in {"id", "location_id", "tx_date", "created_by", "created_at", "updated_by", "updated_at", "remarks"}:
+                        col_label = col_name.replace('_', ' ').title()
+                        val = getattr(r, col_name, "")
+                        row_dict[col_label] = val
+                        # Format numeric values for PDF: VCF gets 5 decimals, others get 2
+                        if isinstance(val, (int, float)):
+                            if 'vcf' in col_name.lower():
+                                row_dict_pdf[col_label] = f"{float(val):,.5f}"
+                            else:
+                                row_dict_pdf[col_label] = f"{float(val):,.2f}"
+                        else:
+                            row_dict_pdf[col_label] = val
+                row_dict["Remarks"] = getattr(r, "remarks", "")
+                row_dict_pdf["Remarks"] = getattr(r, "remarks", "")
         else:
             try:
                 payload = json.loads(r.data_json or "{}")
@@ -1501,10 +1575,25 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                 "Created At": str(getattr(r, "created_at", "")),
                 "Remarks": payload.get("remarks", "")
             }
+            row_dict_pdf = {
+                "Date": str(getattr(r, 'tx_date', '')),
+            }
             for k, v in payload.items():
                 if k not in ("remarks", "__edited_by__", "__edited_at__") and not isinstance(v, (dict, list, tuple)):
-                    row_dict[k.replace('_', ' ').title()] = v
+                    col_label = k.replace('_', ' ').title()
+                    row_dict[col_label] = v
+                    # Format numeric values for PDF: VCF gets 5 decimals, others get 2
+                    if isinstance(v, (int, float)):
+                        if 'vcf' in k.lower():
+                            row_dict_pdf[col_label] = f"{float(v):,.5f}"
+                        else:
+                            row_dict_pdf[col_label] = f"{float(v):,.2f}"
+                    else:
+                        row_dict_pdf[col_label] = v
+            row_dict_pdf["Remarks"] = payload.get("remarks", "")
+        
         export_data.append(row_dict)
+        export_data_pdf.append(row_dict_pdf)
     
     # Export buttons
     st.markdown("### Export Options")
@@ -1544,31 +1633,123 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
         # PDF Download
         from reportlab.lib import colors
         from reportlab.lib.pagesizes import A4, landscape
-        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import inch
+        from reportlab.lib.enums import TA_CENTER
         
         pdf_buffer = io.BytesIO()
-        doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(A4))
+        doc = SimpleDocTemplate(
+            pdf_buffer, 
+            pagesize=landscape(A4),
+            rightMargin=30,
+            leftMargin=30,
+            topMargin=30,
+            bottomMargin=30
+        )
         elements = []
         
-        # Title
+        # Title with conventional styling
         styles = getSampleStyleSheet()
-        title_para = Paragraph(f"<b>{title}</b>", styles['Title'])
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            textColor=colors.HexColor('#1a1a1a'),
+            spaceAfter=20,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
+        title_para = Paragraph(f"{title}", title_style)
         elements.append(title_para)
+        elements.append(Spacer(1, 0.2*inch))
         
-        # Table data
-        table_data = [list(df.columns)] + df.values.tolist()
-        table = Table(table_data)
+        # Use PDF-specific data (without id, location_id, created_by, created_at)
+        df_pdf = pd.DataFrame(export_data_pdf)
+        
+        # Check if any remarks have more than 3 words to determine text wrapping
+        max_remarks_words = 0
+        remarks_col_idx = -1
+        if "Remarks" in df_pdf.columns:
+            remarks_col_idx = list(df_pdf.columns).index("Remarks")
+            for val in df_pdf["Remarks"]:
+                word_count = len(str(val).split())
+                if word_count > max_remarks_words:
+                    max_remarks_words = word_count
+        
+        needs_text_wrap = max_remarks_words > 3
+        
+        # Create header style for text wrapping
+        header_style = ParagraphStyle(
+            'HeaderStyle',
+            parent=styles['Normal'],
+            fontName='Helvetica-Bold',
+            fontSize=10,
+            textColor=colors.whitesmoke,
+            alignment=TA_CENTER,
+            leading=12
+        )
+        
+        # Content style for text wrapping
+        content_style = ParagraphStyle(
+            'ContentStyle',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=9,
+            alignment=TA_CENTER,
+            leading=11
+        )
+        
+        # Wrap headers in Paragraph objects for text wrapping
+        wrapped_headers = [Paragraph(str(col), header_style) for col in df_pdf.columns]
+        
+        # Prepare table data with wrapped content if needed
+        table_data = [wrapped_headers]
+        for idx, row in df_pdf.iterrows():
+            if needs_text_wrap:
+                wrapped_row = [Paragraph(str(val), content_style) for val in row]
+                table_data.append(wrapped_row)
+            else:
+                table_data.append(list(row))
+        
+        # Calculate column widths dynamically
+        # Give more width to Remarks if it has long content
+        available_width = landscape(A4)[0] - 60  # Total width minus margins
+        num_cols = len(df_pdf.columns)
+        
+        if remarks_col_idx >= 0 and needs_text_wrap:
+            # Allocate more space to remarks column
+            remarks_width = available_width * 0.35  # 35% for remarks
+            other_width = (available_width - remarks_width) / (num_cols - 1)
+            col_widths = [other_width] * num_cols
+            col_widths[remarks_col_idx] = remarks_width
+        else:
+            # Equal width for all columns
+            col_widths = [available_width / num_cols] * num_cols
+        
+        # Create table with conventional professional styling
+        table = Table(table_data, colWidths=col_widths, repeatRows=1)
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1f77b4')),
+            # Header styling - conventional blue
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4472C4')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+            
+            # Data rows styling - alternating white and light gray
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F2F2F2')]),
+            ('TOPPADDING', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+            
+            # Grid
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+            ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#666666')),
         ]))
         elements.append(table)
         doc.build(elements)
@@ -1633,7 +1814,19 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                         continue
                     keyset.add(k)
     
-    display_keys: List[str] = sorted(list(keyset))
+    # Custom column ordering for specific sections
+    if section == "meters":
+        # Specific order for meter records
+        meter_order = [
+            "meter_1_opening", "meter_1_closing", "meter_1_factor", "meter_1_net_bbl",
+            "meter_2_opening", "meter_2_closing", "meter_2_factor", "meter_2_net_bbl",
+            "net_total_bbl"
+        ]
+        display_keys: List[str] = [k for k in meter_order if k in keyset]
+        # Add any remaining columns that weren't in the predefined order (excluding remarks to avoid duplication)
+        display_keys.extend([k for k in sorted(list(keyset)) if k not in meter_order and k != "remarks"])
+    else:
+        display_keys: List[str] = sorted(list(keyset))
     # Keep ALL columns for edit operations (excluding system columns like id, location_id, etc.)
     all_keys = [k for k in sorted(list(all_columns_set)) 
                 if k not in {"id", "location_id", "created_at", "updated_at"}]
@@ -1865,7 +2058,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                                 s.delete(r)
                                 s.commit()
                 
-                if render_deletion_ui(
+                deletion_result = render_deletion_ui(
                     resource_type=f"FlexibleRecord:{section}",
                     resource_id=getattr(r, "id"),
                     resource_label=f"{section.title()} Record #{getattr(r, 'id')}",
@@ -1875,7 +2068,10 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                     on_success_message=f"{section.title()} record deleted successfully",
                     metadata={"section": section, "tx_date": str(getattr(r, 'tx_date', ''))},
                     button_key_prefix=f"vt_{section}_{i}"
-                ):
+                )
+                
+                # Close the prompt on any button click (delete success, cancel, or error)
+                if deletion_result is not None:
                     st.session_state[f"vt_{section}_show_delete_ui_{i}"] = False
                     st.rerun()
 
@@ -2178,19 +2374,28 @@ def _custom_flex_list(location_id: int, table_name: str, user: dict | None, titl
         return
     # Filters
     d_min, d_max = _get_flex_date_bounds(location_id, section=table_name.replace(f"flex_", ""))
-    default_date = d_max
-    c1, c2, c3 = st.columns([0.25, 0.35, 0.40], gap="small")
+    default_date_from = d_max
+    default_date_to = d_max
+    c1, c2, c3, c4 = st.columns([0.20, 0.20, 0.30, 0.30], gap="small")
     with c1:
-        d = st.date_input(
-            "Date",
-            value=default_date,
+        date_from = st.date_input(
+            "From Date",
+            value=default_date_from,
             min_value=d_min,
-            max_value=min(d_max, date.today()),
-            key=f"vt_custom_{table_name}_d",
+            max_value=date.today(),
+            key=f"vt_custom_{table_name}_date_from",
         )
     with c2:
-        created_by = (st.text_input("Created by", key=f"vt_custom_{table_name}_by") or "").strip()
+        date_to = st.date_input(
+            "To Date",
+            value=default_date_to,
+            min_value=d_min,
+            max_value=date.today(),
+            key=f"vt_custom_{table_name}_date_to",
+        )
     with c3:
+        created_by = (st.text_input("Created by", key=f"vt_custom_{table_name}_by") or "").strip()
+    with c4:
         search = (st.text_input("Search text", key=f"vt_custom_{table_name}_q") or "").strip()
 
     rows = []
@@ -2198,8 +2403,12 @@ def _custom_flex_list(location_id: int, table_name: str, user: dict | None, titl
         from db import get_flex_session
         with get_flex_session() as s:
             q = s.query(Model).filter(getattr(Model, "location_id") == location_id)
-            if d and hasattr(Model, "tx_date"):
-                q = q.filter(getattr(Model, "tx_date") == d)
+            if date_from and date_to and hasattr(Model, "tx_date"):
+                q = q.filter(getattr(Model, "tx_date") >= date_from, getattr(Model, "tx_date") <= date_to)
+            elif date_from and hasattr(Model, "tx_date"):
+                q = q.filter(getattr(Model, "tx_date") >= date_from)
+            elif date_to and hasattr(Model, "tx_date"):
+                q = q.filter(getattr(Model, "tx_date") <= date_to)
             if created_by and hasattr(Model, "created_by"):
                 q = q.filter(getattr(Model, "created_by").ilike(f"%{created_by}%"))
             if search and hasattr(Model, "remarks"):
@@ -2309,7 +2518,8 @@ def _custom_flex_list(location_id: int, table_name: str, user: dict | None, titl
                     if rec:
                         s.delete(rec)
                         s.commit()
-            if render_deletion_ui(
+            
+            deletion_result = render_deletion_ui(
                 resource_type=f"Custom:{title}",
                 resource_id=getattr(r, "id"),
                 resource_label=f"{title} Record #{getattr(r, 'id')}",
@@ -2319,7 +2529,10 @@ def _custom_flex_list(location_id: int, table_name: str, user: dict | None, titl
                 on_success_message=f"{title} record deleted successfully",
                 metadata={"table": table_name, "tx_date": str(getattr(r, 'tx_date', ''))},
                 button_key_prefix=f"vt_custom_{table_name}_{i}"
-            ):
+            )
+            
+            # Close the prompt on any button click (delete success, cancel, or error)
+            if deletion_result is not None:
                 st.session_state[f"vt_custom_show_delete_{table_name}_{i}"] = False
                 st.rerun()
 

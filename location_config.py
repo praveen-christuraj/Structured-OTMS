@@ -15,6 +15,7 @@ DEFAULT_CONFIG = {
     "page_visibility": {
         "show_tank_transactions": True,
         "show_tanker_transactions": True,
+        "show_tanker_tracking": False,
         "show_yade_transactions": True,
         "show_yade_vessel_mapping": True,
         "show_yade_tracking": True,
@@ -35,6 +36,7 @@ DEFAULT_CONFIG = {
         "Tank Transactions": True,
         "Yade Transactions": True,
         "Tanker Transactions": True,
+        "Tanker Tracking": True,
         "Yade Tracking": True,
         "Yade-Vessel Mapping": True,
         "Convoy Status": True,
@@ -68,6 +70,13 @@ DEFAULT_CONFIG = {
             "Mapping": True,
             "Comparison": True
         }
+    },
+    "tanker_tracking": {
+        "is_sender": False,
+        "is_receiver": False,
+        "sender_targets": [],
+        "receiver_sources": [],
+        "receiver_aliases": [],
     },
     "tank_transactions": {
         # Legacy list (kept for backward compatibility with older code paths)
@@ -151,6 +160,7 @@ class LocationConfig:
         config["yade_transactions"] = DEFAULT_CONFIG["yade_transactions"].copy()
         config["otr"] = DEFAULT_CONFIG["otr"].copy()
         config["otr_vessel"] = DEFAULT_CONFIG["otr_vessel"].copy()
+        config["tanker_tracking"] = DEFAULT_CONFIG["tanker_tracking"].copy()
         config["ui_customization"] = DEFAULT_CONFIG["ui_customization"].copy()
         config["tabs_access"] = {
             k: (v.copy() if isinstance(v, dict) else v)
@@ -165,6 +175,7 @@ class LocationConfig:
             # TANKER LOCATIONS (Ndoni, Aggu, Oguali, Ogini)
             if code in ["NDONI", "AGGU", "OGUALI", "OGINI"]:
                 config["page_visibility"]["show_tanker_transactions"] = True
+                config["page_visibility"]["show_tanker_tracking"] = True
 
             # YADE LOCATIONS (Ndoni only for now) – defaults only
             if code == "NDONI":
@@ -308,6 +319,32 @@ def get_location_page_visibility(session: Session, location_id: int) -> Dict[str
     """
     config = LocationConfig.get_config(session, location_id)
     return config.get("page_visibility", {})
+
+
+def get_tanker_tracking_config(session: Session, location_id: int) -> Dict[str, Any]:
+    """Return sanitized tanker tracking config for a location."""
+    cfg = LocationConfig.get_config(session, location_id)
+    tt_cfg = cfg.get("tanker_tracking", {}) or {}
+    page_enabled = bool(cfg.get("page_visibility", {}).get("show_tanker_tracking", False))
+
+    def _clean_ids(raw):
+        out: List[int] = []
+        for val in raw or []:
+            try:
+                out.append(int(val))
+            except Exception:
+                continue
+        return out
+
+    aliases = [str(a).strip() for a in tt_cfg.get("receiver_aliases", []) if str(a).strip()]
+    return {
+        "page_enabled": page_enabled,
+        "is_sender": bool(tt_cfg.get("is_sender", False)),
+        "is_receiver": bool(tt_cfg.get("is_receiver", False)),
+        "sender_targets": _clean_ids(tt_cfg.get("sender_targets", [])),
+        "receiver_sources": _clean_ids(tt_cfg.get("receiver_sources", [])),
+        "receiver_aliases": aliases,
+    }
 
 
 def get_service_types(session: Session, location_id: int) -> List[str]:

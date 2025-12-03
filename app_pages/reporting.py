@@ -389,7 +389,7 @@ def render_reporting_page(active_location_id: int, user: dict):
     with col3:
         try:
             engine = ReportEngine(config)
-            pdf_data = engine.export_pdf(df, report_name)
+            pdf_data = engine.export_pdf(df, report_name, user_filters)
             st.download_button(
                 label="📄 Download PDF",
                 data=pdf_data,
@@ -410,7 +410,7 @@ def render_reporting_page(active_location_id: int, user: dict):
         if st.button("👁️ View PDF", use_container_width=True):
             try:
                 engine = ReportEngine(config)
-                pdf_base64 = engine.get_pdf_base64(df, report_name)
+                pdf_base64 = engine.get_pdf_base64(df, report_name, user_filters)
                 components.html(
                     f"""
                     <script>
@@ -449,10 +449,26 @@ def render_reporting_page(active_location_id: int, user: dict):
         st.markdown("---")
         st.markdown("### 📈 Summary Statistics")
         summary_data = {}
+        
+        # Calculate number of days from date filter for proper daily average
+        num_days = 1  # default to 1 day if no filter applied
+        if 'date_range' in user_filters and isinstance(user_filters['date_range'], (list, tuple)) and len(user_filters['date_range']) >= 2:
+            try:
+                start_date = user_filters['date_range'][0]
+                end_date = user_filters['date_range'][1]
+                if isinstance(start_date, date) and isinstance(end_date, date):
+                    num_days = (end_date - start_date).days + 1  # +1 to include both start and end dates
+                    if num_days < 1:
+                        num_days = 1
+            except Exception:
+                num_days = 1
+        
         for col in numeric_cols:
+            total = df[col].sum()
+            daily_avg = total / num_days
             summary_data[col] = {
-                'Total': f"{df[col].sum():,.2f}",
-                'Average': f"{df[col].mean():,.2f}",
+                'Total': f"{total:,.2f}",
+                'Average': f"{daily_avg:,.2f}",
             }
         summary_df = pd.DataFrame(summary_data).T
         st.dataframe(summary_df, use_container_width=True)

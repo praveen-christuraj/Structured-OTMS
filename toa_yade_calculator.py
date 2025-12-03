@@ -453,8 +453,13 @@ def build_toa_pdf_yade(voyage_id: int) -> bytes:
         
         totals = preview_or_summary_totals(s, voyage_id)
         
-        def _fmt(x, nd=2):
+        def _fmt(x, nd=2, field_name=""):
+            """Format number for PDF - 2 decimals for quantities, 5 for VCF"""
             try:
+                # VCF gets 5 decimal places
+                if 'vcf' in field_name.lower():
+                    return f"{float(x):,.5f}"
+                # Everything else gets 2 decimal places
                 return f"{float(x):,.{nd}f}"
             except Exception:
                 return "-"
@@ -505,11 +510,11 @@ def build_toa_pdf_yade(voyage_id: int) -> bytes:
             ["TOV (bbls)", _fmt(before.get("TOV", 0)), _fmt(after.get("TOV", 0)), "-"],
             ["FW (bbls)", _fmt(before.get("FW", 0)), _fmt(after.get("FW", 0)), "-"],
             ["GOV (bbls)", _fmt(before.get("GOV", 0)), _fmt(after.get("GOV", 0)), _fmt(net.get("GOV", 0))],
-            ["GSV (bbls)", _fmt(before.get("GSV", 0), 0), _fmt(after.get("GSV", 0), 0), _fmt(net.get("GSV", 0), 0)],
-            ["BS&W (bbls)", _fmt(before.get("BSW", 0), 0), _fmt(after.get("BSW", 0), 0), _fmt(net.get("BSW", 0), 0)],
-            ["NSV (bbls)", _fmt(before.get("NSV", 0), 0), _fmt(after.get("NSV", 0), 0), _fmt(net.get("NSV", 0), 0)],
-            ["LT (bbl LT)", _fmt(before.get("LT", 0), 0), _fmt(after.get("LT", 0), 0), _fmt(net.get("LT", 0), 0)],
-            ["MT (tonnes)", _fmt(before.get("MT", 0), 0), _fmt(after.get("MT", 0), 0), _fmt(net.get("MT", 0), 0)],
+            ["GSV (bbls)", _fmt(before.get("GSV", 0)), _fmt(after.get("GSV", 0)), _fmt(net.get("GSV", 0))],
+            ["BS&W (bbls)", _fmt(before.get("BSW", 0)), _fmt(after.get("BSW", 0)), _fmt(net.get("BSW", 0))],
+            ["NSV (bbls)", _fmt(before.get("NSV", 0)), _fmt(after.get("NSV", 0)), _fmt(net.get("NSV", 0))],
+            ["LT (bbl LT)", _fmt(before.get("LT", 0)), _fmt(after.get("LT", 0)), _fmt(net.get("LT", 0))],
+            ["MT (tonnes)", _fmt(before.get("MT", 0)), _fmt(after.get("MT", 0)), _fmt(net.get("MT", 0))],
         ]
         
         data = [headers] + rows

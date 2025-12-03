@@ -65,56 +65,60 @@ def _locations_table():
         return
 
     # Single structured table with action buttons
-    hdr = st.columns([0.32, 0.18, 0.35, 0.15])
-    hdr[0].markdown("**Name (Code)**")
-    hdr[1].markdown("**Status**")
-    hdr[2].markdown("**Address**")
-    hdr[3].markdown("**Actions**")
+    hdr = st.columns([0.08, 0.30, 0.12, 0.38, 0.12])
+    hdr[0].markdown("**ID**")
+    hdr[1].markdown("**Name (Code)**")
+    hdr[2].markdown("**Status**")
+    hdr[3].markdown("**Address**")
+    hdr[4].markdown("**Actions**")
 
     for loc in locations:
         row_id = f"ml_loc_{loc.id}"
-        cols = st.columns([0.32, 0.18, 0.35, 0.15])
+        cols = st.columns([0.08, 0.30, 0.12, 0.38, 0.12])
         with cols[0]:
-            st.write(f"{loc.name} ({loc.code})")
+            st.markdown(f"<div style='padding-top:8px;'>{loc.id}</div>", unsafe_allow_html=True)
         with cols[1]:
-            st.write("Active" if loc.is_active else "Inactive")
+            st.markdown(f"<div style='padding-top:8px;'>{loc.name} ({loc.code})</div>", unsafe_allow_html=True)
         with cols[2]:
-            st.write((loc.address or "")[:80])
+            st.markdown(f"<div style='padding-top:8px;'>{'Active' if loc.is_active else 'Inactive'}</div>", unsafe_allow_html=True)
+        with cols[3]:
+            st.markdown(f"<div style='padding-top:8px;'>{(loc.address or '')[:80]}</div>", unsafe_allow_html=True)
         st.session_state.setdefault(f"{row_id}_edit_flag", False)
         st.session_state.setdefault(f"{row_id}_del_flag", False)
-        with cols[3]:
-            e1, e2 = st.columns(2)
-            if e1.button("✏️", key=f"{row_id}_edit_btn", help="Edit"):
-                st.session_state[f"{row_id}_edit_flag"] = True
+        with cols[4]:
             if not st.session_state[f"{row_id}_del_flag"]:
-                if e2.button("🗑️", key=f"{row_id}_del_btn", help="Delete"):
+                b1, b2 = st.columns(2)
+                if b1.button("✏️", key=f"{row_id}_edit_btn", help="Edit"):
+                    st.session_state[f"{row_id}_edit_flag"] = True
+                    st.rerun()
+                if b2.button("🗑️", key=f"{row_id}_del_btn", help="Delete"):
                     st.session_state[f"{row_id}_del_flag"] = True
+                    st.rerun()
             else:
-                c_yes, c_no = st.columns(2)
-                with c_yes:
-                    if st.button("✅", key=f"{row_id}_del_yes", help="Confirm delete"):
-                        try:
-                            with get_session() as session:
-                                LocationManager.delete_location(session, int(loc.id))
-                            u = st.session_state.get("auth_user", {})
-                            SecurityManager.log_audit(
-                                None,
-                                u.get("username", "system"),
-                                "DELETE",
-                                resource_type="Location",
-                                resource_id=str(loc.id),
-                                details=f"Soft-deleted location {loc.name} ({loc.code})",
-                                user_id=u.get("id"),
-                                location_id=loc.id,
-                            )
-                            st.success("Location deleted (soft).")
-                            st.session_state[f"{row_id}_del_flag"] = False
-                            st.rerun()
-                        except Exception as ex:
-                            st.error(str(ex))
-                with c_no:
-                    if st.button("❌", key=f"{row_id}_del_no", help="Cancel"):
+                c1, c2 = st.columns(2)
+                if c1.button("✅", key=f"{row_id}_del_yes", help="Confirm delete"):
+                    try:
+                        with get_session() as session:
+                            LocationManager.delete_location(session, int(loc.id))
+                        u = st.session_state.get("auth_user", {})
+                        SecurityManager.log_audit(
+                            None,
+                            u.get("username", "system"),
+                            "DELETE",
+                            resource_type="Location",
+                            resource_id=str(loc.id),
+                            details=f"Soft-deleted location {loc.name} ({loc.code})",
+                            user_id=u.get("id"),
+                            location_id=loc.id,
+                        )
+                        st.success("Location deleted (soft).")
                         st.session_state[f"{row_id}_del_flag"] = False
+                        st.rerun()
+                    except Exception as ex:
+                        st.error(str(ex))
+                if c2.button("❌", key=f"{row_id}_del_no", help="Cancel"):
+                    st.session_state[f"{row_id}_del_flag"] = False
+                    st.rerun()
 
         if st.session_state[f"{row_id}_edit_flag"]:
             with st.expander(f"Edit {loc.name} ({loc.code})", expanded=True):

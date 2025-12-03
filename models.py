@@ -105,6 +105,12 @@ class TaskStatus(enum.Enum):
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
 
+
+class TankerReceiptStatus(enum.Enum):
+    PENDING = "PENDING"
+    RECEIVED = "RECEIVED"
+    REJECTED = "REJECTED"
+
 class TankDailyStatus(Base):
     __tablename__ = "tank_daily_statuses"
 
@@ -186,6 +192,12 @@ class Location(Base):
         back_populates="location",
         lazy="dynamic",
         cascade="all, delete-orphan",
+    )
+    tanker_receipts = relationship(
+        "TankerReceipt",
+        primaryjoin="Location.id==TankerReceipt.receiver_location_id",
+        lazy="dynamic",
+        back_populates="receiver_location",
     )
 
     # Relationship for OFS production & evacuation records
@@ -485,6 +497,58 @@ class TankerCalibration(Base):
     chassis_no = Column(String(100), nullable=True)
     dip_mm = Column(Float, nullable=False)
     volume_litres = Column(Float, nullable=False)
+
+
+class TankerReceipt(Base):
+    """Receiver-side intake against a tanker dispatch (one per dispatch)."""
+
+    __tablename__ = "tanker_receipts"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    dispatch_id = Column(Integer, ForeignKey("tanker_transactions.id"), unique=True, nullable=False, index=True)
+    receiver_location_id = Column(Integer, ForeignKey("locations.id"), nullable=False, index=True)
+
+    status = Column(SAEnum(TankerReceiptStatus), nullable=False, default=TankerReceiptStatus.PENDING)
+    arrival_date = Column(Date, nullable=True)
+    arrival_time = Column(Time, nullable=True)
+    received_at = Column(DateTime, nullable=True)
+
+    total_dip_cm = Column(Float, default=0.0)
+    water_dip_cm = Column(Float, default=0.0)
+    tank_temp_c = Column(Float, nullable=True)
+    tank_temp_f = Column(Float, nullable=True)
+    sample_temp_c = Column(Float, nullable=True)
+    sample_temp_f = Column(Float, nullable=True)
+    api_observed = Column(Float, nullable=True)
+    density_observed = Column(Float, nullable=True)
+    api60 = Column(Float, nullable=True)
+    vcf = Column(Float, nullable=True)
+    bsw_pct = Column(Float, default=0.0)
+
+    total_volume_bbl = Column(Float, default=0.0)
+    water_volume_bbl = Column(Float, default=0.0)
+    gov_bbl = Column(Float, default=0.0)
+    gsv_bbl = Column(Float, default=0.0)
+    bsw_vol_bbl = Column(Float, default=0.0)
+    nsv_bbl = Column(Float, default=0.0)
+    lt = Column(Float, nullable=True)
+    mt = Column(Float, nullable=True)
+
+    receiver_notes = Column(String(500), nullable=True)
+    created_by = Column(String(50), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_by = Column(String(50), nullable=True)
+    updated_at = Column(DateTime, onupdate=func.now())
+
+    receiver_location = relationship("Location", back_populates="tanker_receipts", foreign_keys=[receiver_location_id])
+    dispatch = relationship("TankerTransaction", back_populates="receipt")
+
+    __table_args__ = (
+        Index("idx_tanker_receipt_receiver_date", "receiver_location_id", "arrival_date"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<TankerReceipt id={self.id} dispatch={self.dispatch_id} status={self.status}>"
 
 # ============================================================================
 # VESSEL MASTER (SHARED GLOBALLY LIKE YADE/TANKER)
@@ -1013,6 +1077,8 @@ class TankerTransaction(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_by = Column(String(50), nullable=True)
     updated_at = Column(DateTime, nullable=True)
+
+    receipt = relationship("TankerReceipt", back_populates="dispatch", uselist=False)
     
     # Relationship
     location = relationship("Location", back_populates="tanker_transactions")

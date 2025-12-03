@@ -158,6 +158,14 @@ def generate_otr_pdf(dataframe, selected_tank, filter_text, location_name, locat
         if drop_col in df_pdf.columns:
             df_pdf = df_pdf.drop(columns=[drop_col])
     
+    # Format numeric columns to 2 decimal places (VCF gets 5)
+    for col in df_pdf.columns:
+        if df_pdf[col].dtype in ['float64', 'int64']:
+            if 'vcf' in col.lower():
+                df_pdf[col] = df_pdf[col].apply(lambda x: f"{float(x):,.5f}" if pd.notna(x) else "")
+            else:
+                df_pdf[col] = df_pdf[col].apply(lambda x: f"{float(x):,.2f}" if pd.notna(x) else "")
+    
     # Calculate available width
     page_width = landscape(A4)[0] - (1.0 * cm)
     
