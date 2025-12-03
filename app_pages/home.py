@@ -9,7 +9,7 @@ from db import get_session
 from models import Location
 from dashboard_utils import DashboardMetrics
 from location_manager import LocationManager
-from ui_components import DashboardCard, Notifications, TableDisplay, FormBuilder
+from ui_components import DashboardCard, Notifications
 # Dashboard imports
 try:
     from dashboard_config import DashboardConfigManager
@@ -18,78 +18,12 @@ try:
 except ImportError:
     DASHBOARD_AVAILABLE = False
 
-# New imports for location visibility
-try:
-    from location_config import get_location_page_visibility
-except Exception:
-    get_location_page_visibility = None
-
-try:
-    from permission_manager import PermissionManager
-except Exception:
-    PermissionManager = None
-
 
 def _load_locations():
     """Small helper to load all active locations."""
     with get_session() as session:
         locations = LocationManager. get_all_locations(session, active_only=True)
     return locations
-
-
-def _render_location_access_overview(selected_location_id: int, user: dict):
-    """Show a quick preview of which operational pages are enabled for this location."""
-    st.markdown("#### 📋 Location Access Overview")
-
-    if not get_location_page_visibility:
-        st.info("Location visibility settings are not available in this build.")
-        return
-
-    # Role gate (can this role access operational pages at all?)
-    role_ok = True
-    if PermissionManager and user:
-        role_ok = PermissionManager.can_access_operational_pages(user)
-
-    # Load location flags
-    flags = {}
-    try:
-        with get_session() as session:
-            flags = get_location_page_visibility(session, selected_location_id) or {}
-    except Exception:
-        flags = {}
-
-    # Defaults if not set yet
-    show_tank = bool(flags.get("show_tank_transactions", True))
-    show_yade = bool(flags.get("show_yade_transactions", True))
-    show_fso = bool(flags.get("show_fso_operations", True))
-    show_rep = bool(flags.get("show_reports", True))
-
-    # Small helper to format a line
-    def line(enabled: bool, label: str, emoji: str) -> str:
-        if enabled:
-            return f"{emoji} **{label}** — ✅ Enabled"
-        return f"{emoji} **{label}** — ⛔ Disabled"
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(line(show_tank, "Tank Transactions", "🛢️"))
-        st.markdown(line(show_fso, "FSO Operations", "⚓"))
-    with col2:
-        st.markdown(line(show_yade, "YADE Transactions", "⛴️"))
-        st.markdown(line(show_rep, "Reports", "📄"))
-
-    # Role hint
-    role = (user or {}). get("role", "")
-    if not role_ok:
-        st.caption(
-            f"Your role **{role}** does not have access to operational pages. "
-            "Even if a page is enabled for this location, it won't appear for you."
-        )
-    else:
-        st.caption(
-            "Pages shown here are controlled by **Location Settings**. "
-            "Operational pages will appear in the sidebar when created and your role allows it."
-        )
 
 
 def render_admin_it_home(user: dict):
@@ -301,32 +235,6 @@ def render_location_dashboard(selected_location_id: int, user: dict):
         render_basic_summary(selected_location_id)
     
     st.markdown("---")
-    
-    # Quick Actions
-    st.markdown("### ⚡ Quick Actions")
-    FormBuilder.section_header("Common Operations", "Quick access to frequently used features")
-    action_cols = st.columns(4)
-    
-    with action_cols[0]:
-        if st.button("➕ New Tank Transaction", use_container_width=True, type="primary"):
-            st. session_state.page = "Tank Transactions"
-            st.rerun()
-    
-    with action_cols[1]:
-        if st.button("➕ New YADE Voyage", use_container_width=True, type="primary"):
-            st.session_state.page = "Yade Transactions"
-            st.rerun()
-    
-    with action_cols[2]:
-        if st. button("➕ New Tanker Dispatch", use_container_width=True, type="primary"):
-            st.session_state. page = "Tanker Transactions"
-            st.rerun()
-    
-    with action_cols[3]:
-        if st. button("👁️ View Transactions", use_container_width=True, type="primary"):
-            st.session_state.page = "View Transactions"
-            st.rerun()
-
 
 def render_basic_summary(selected_location_id: int):
     """Fallback basic summary if dashboard fails"""
@@ -515,14 +423,7 @@ def render_home_page(active_location_id, user):
             st.session_state["__prev_active_location_id"] = selected_location_id
             st.rerun()
     
-    st.markdown("---")
-    
-    # 4) Visibility preview for this location
-    _render_location_access_overview(selected_location_id, user)
-    
-    st.markdown("---")
-    
-    # 5) Render the full operational dashboard
+    # 4) Render the full operational dashboard
     if DASHBOARD_AVAILABLE:
         render_location_dashboard(selected_location_id, user)
     else:
@@ -531,12 +432,10 @@ def render_home_page(active_location_id, user):
         render_basic_summary(selected_location_id)
     
     # Footer note
-    st.markdown("---")
     st.caption(
         "💡 **Tip:** Use 'Dashboard Customization' (admin only) to configure widgets, "
         "charts, and data mappings for this location."
     )
-
 
 # Main entry point (if this file is run directly for testing)
 if __name__ == "__main__":

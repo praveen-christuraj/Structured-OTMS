@@ -890,6 +890,25 @@ def render_manage_reports(user: Dict[str, Any], active_location_id: int):
                 with st.expander("View configuration JSON", expanded=False):
                     st.json(config)
 
+                with st.expander("Edit configuration (advanced)", expanded=False):
+                    cfg_text = st.text_area(
+                        "Update report mapping/config JSON",
+                        value=json.dumps(config, indent=2, default=str),
+                        height=220,
+                        key=f"cfg_edit_{report.id}",
+                        help="Use this to correct mappings, joins, columns, or decimal places for this saved report.",
+                    )
+                    if st.button("Save configuration", key=f"cfg_save_{report.id}"):
+                        try:
+                            new_cfg = json.loads(cfg_text)
+                            report.config_json = json.dumps(new_cfg)
+                            session.commit()
+                            st.success("Configuration saved. Reload Reporting to apply changes.")
+                            st.rerun()
+                        except Exception as exc:
+                            session.rollback()
+                            st.error(f"Could not save configuration: {exc}")
+
                 new_name = st.text_input("Rename report", value=report.name, key=f"edit_name_{report.id}")
 
                 actions = st.columns(4)

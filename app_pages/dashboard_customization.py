@@ -250,7 +250,8 @@ def render_monthly_data_tab(config: dict):
             "unit": "bbls",
             "color": "#667eea",
             "show_labels": True,
-            "show_markers": True
+            "show_markers": True,
+            "show_average": False
         })
 
     for idx, v in enumerate(visuals):
@@ -304,6 +305,13 @@ def render_monthly_data_tab(config: dict):
                     v["field"] = st.text_input("Field Name", value=v.get("field", "Receipt"), key=f"md_field_{idx}")
                 v["show_labels"] = st.checkbox("Show Labels", value=bool(v.get("show_labels", True)), key=f"md_labels_{idx}")
                 v["show_markers"] = st.checkbox("Show Markers (for line)", value=bool(v.get("show_markers", True)), key=f"md_markers_{idx}")
+                if v.get("type", "card") == "card":
+                    v["show_average"] = st.checkbox(
+                        "Show average (selected month)",
+                        value=bool(v.get("show_average", False)),
+                        help="Displays the average for the selected month under the main value. For the current month, averages stop at today.",
+                        key=f"md_avg_{idx}"
+                    )
                 if v.get("type") in ("doughnut", "pie"):
                     v["inner_radius"] = st.number_input("Inner Radius (donut)", min_value=0, max_value=120, value=int(v.get("inner_radius", 60)), key=f"md_inner_{idx}")
                 v["height"] = st.number_input("Chart/Card Height", min_value=180, max_value=600, value=int(v.get("height", 280)), key=f"md_h_{idx}")

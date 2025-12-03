@@ -22,7 +22,10 @@ class WidgetRenderer:
         prev_value: Optional[float] = None,
         style: Dict = None,
         show_delta: bool = False,
-        display_date: Optional[date] = None
+        display_date: Optional[date] = None,
+        sub_value: Optional[Any] = None,
+        sub_label: str = "",
+        show_date: bool = False
     ):
         """Render a statistics card"""
         if style is None:
@@ -63,6 +66,11 @@ class WidgetRenderer:
             except:
                 pass
         
+        sub_html = ""
+        if sub_value is not None:
+            sub_text = sub_label or "Average"
+            sub_html = f"<div style='color:#6c757d;font-size:0.8rem;margin-top:0.15rem;'>{sub_text}: {_fmt(sub_value)}{' ' + unit if unit else ''}</div>"
+
         card_html = f"""
         <div style="
             background: {style. get('background', 'white')};
@@ -86,7 +94,8 @@ class WidgetRenderer:
                 color: {style. get('value_color', '#667eea')};
                 margin: 0.5rem 0;
             ">{value_html} {delta_html}</div>
-            <div style="color:#6c757d;font-size:0.75rem;">{display_date.strftime('%d-%b-%Y') if display_date else datetime.now().strftime('%d-%b-%Y')}</div>
+            {sub_html}
+            {f"<div style='color:#6c757d;font-size:0.75rem;'>{(display_date.strftime('%d-%b-%Y') if isinstance(display_date, (date, datetime)) else datetime.now().strftime('%d-%b-%Y'))}</div>" if show_date else ""}
         </div>
         """
         
@@ -536,7 +545,8 @@ class DashboardRenderer:
                         prev_value=prev_value,
                         style=config.get("styles", {}).get("card"),
                         show_delta=card.get("show_delta", False),
-                        display_date=selected_date_end
+                        display_date=selected_date_end,
+                        show_date=False
                     )
     
     @staticmethod
@@ -692,6 +702,10 @@ class DashboardRenderer:
             else:
                 next_month = range_start.replace(month=range_start.month + 1)
             range_end = next_month - timedelta(days=1)
+        # If current month selected, cap at today (do not include future days)
+        today = date.today()
+        if range_start.year == today.year and range_start.month == today.month and range_end > today:
+            range_end = today
 
         visuals = layout_cfg.get("cards") or []
         num_cols = int(layout_cfg.get("columns", 4) or 4)
@@ -873,6 +887,8 @@ class DashboardRenderer:
                         agg = str(card.get("aggregation", "sum")).lower()
                         field = card.get("field")
                         total = 0.0
+                        avg_value = None
+                        day_count = max(1, (range_end - range_start).days + 1)
                         if ds in ("material_balance", "fso_operations") and field:
                             rows = _agg_vals_per_day(ds, field)
                             series = [r["Value"] for r in rows]
@@ -884,12 +900,16 @@ class DashboardRenderer:
                                 total = float(pd.Series(series).max()) if series else 0.0
                             else:
                                 total = float(pd.Series(series).sum()) if series else 0.0
+                            if card.get("show_average"):
+                                avg_value = float(pd.Series(series).mean()) if series else 0.0
                         elif ds == "table":
                             table = card.get("table_name")
                             value_field = card.get("field")
                             crit = card.get("criteria") or []
                             if table and value_field:
                                 total = _table_sum_range(table, value_field, crit)
+                                if card.get("show_average"):
+                                    avg_value = (total / day_count) if day_count else total
                         style = dict(config.get("styles", {}).get("card", {}))
                         style["value_color"] = color
                         WidgetRenderer.render_stat_card(
@@ -899,7 +919,10 @@ class DashboardRenderer:
                             prev_value=None,
                             style=style,
                             show_delta=False,
-                            display_date=range_end
+                            display_date=range_end,
+                            sub_value=avg_value,
+                            sub_label="Average" if card.get("show_average") else "",
+                            show_date=True
                         )
 
                     elif vtype in ("line", "area", "bar"):
@@ -1122,14 +1145,15 @@ class DashboardRenderer:
                             prev_value=None,
                             style=style_override,
                             show_delta=False,
-                            display_date=d_end
+                            display_date=d_end,
+                            show_date=False
                         )
 
     @staticmethod
     def _render_convoy_status_section(config: Dict, location_id: int, section_date):
-        """Render convoy status section from saved snapshots"""
+        """Render convoy status section from saved snapshots - side by side with status grouping"""
         from db import get_session
-        from models import ConvoyStatusYade, ConvoyStatusVessel
+        from models import ConvoyStatusYade, ConvoyStatusVessel, YadeBarge
         if isinstance(section_date, tuple):
             selected_date = section_date[0]
         else:
@@ -1142,63 +1166,121 @@ class DashboardRenderer:
 
         show_yade = layout_cfg.get("show_yade", True)
         show_vessel = layout_cfg.get("show_vessel", True)
-        display_mode = layout_cfg.get("display_mode", "table")
         status_filters = [s.lower() for s in (layout_cfg.get("status_filters") or [])]
 
-        rows = []
+        # Fetch data
+        yade_rows = []
+        vessel_rows = []
+        
         with get_session() as s:
             if show_yade:
-                y_rows = s.query(ConvoyStatusYade).filter(
+                y_records = s.query(ConvoyStatusYade, YadeBarge.name).join(
+                    YadeBarge, ConvoyStatusYade.yade_barge_id == YadeBarge.id
+                ).filter(
                     ConvoyStatusYade.location_id == location_id,
                     ConvoyStatusYade.date == selected_date
-                ).all()
-                for r in y_rows:
-                    if status_filters and str(r.status).lower() not in status_filters:
+                ).order_by(ConvoyStatusYade.status, YadeBarge.name).all()
+                
+                for rec, yade_name in y_records:
+                    if status_filters and str(rec.status).lower() not in status_filters:
                         continue
-                    rows.append({
-                        "Type": "YADE",
-                        "Name": getattr(r.yade, "name", r.yade_barge_id),
-                        "Convoy": r.convoy_no or "",
-                        "Stock": r.stock_display or (f"{r.stock_value_bbl:.0f} bbl" if r.stock_value_bbl else ""),
-                        "Status": r.status,
-                        "Notes": r.notes or ""
+                    yade_rows.append({
+                        "Name": yade_name or str(rec.yade_barge_id),
+                        "Convoy": rec.convoy_no or "N/A",
+                        "Stock": rec.stock_display or "",
+                        "Stock_Value": rec.stock_value_bbl or 0.0,
+                        "Status": rec.status,
+                        "Notes": rec.notes or ""
                     })
+            
             if show_vessel:
-                v_rows = s.query(ConvoyStatusVessel).filter(
+                v_records = s.query(ConvoyStatusVessel).filter(
                     ConvoyStatusVessel.location_id == location_id,
                     ConvoyStatusVessel.date == selected_date
-                ).all()
-                for r in v_rows:
-                    if status_filters and str(r.status).lower() not in status_filters:
+                ).order_by(ConvoyStatusVessel.status, ConvoyStatusVessel.vessel_name).all()
+                
+                for rec in v_records:
+                    if status_filters and str(rec.status).lower() not in status_filters:
                         continue
-                    rows.append({
-                        "Type": "Vessel",
-                        "Name": r.vessel_name,
-                        "Convoy": r.shuttle_no or "",
-                        "Stock": r.stock_display or (f"{r.stock_value_bbl:.0f} bbl" if r.stock_value_bbl else ""),
-                        "Status": r.status,
-                        "Notes": r.notes or ""
+                    vessel_rows.append({
+                        "Name": rec.vessel_name,
+                        "Shuttle": rec.shuttle_no or "N/A",
+                        "Stock": rec.stock_display or "",
+                        "Stock_Value": rec.stock_value_bbl or 0.0,
+                        "Status": rec.status,
+                        "Notes": rec.notes or ""
                     })
 
-        if not rows:
+        if not yade_rows and not vessel_rows:
             st.info("No Convoy Status entries for the selected date.")
             return
 
-        if display_mode == "table":
-            st.dataframe(rows, use_container_width=True)
-        else:
-            cols = st.columns(3)
-            for i, row in enumerate(rows):
-                with cols[i % 3]:
-                    WidgetRenderer.render_stat_card(
-                        label=f"{row['Type']}: {row['Name']}",
-                        value=row.get("Stock") or row.get("Status"),
-                        unit="",
-                        prev_value=None,
-                        style=config.get("styles", {}).get("card"),
-                        show_delta=False,
-                        display_date=selected_date
-                    )
+        # Render side by side
+        col_left, col_right = st.columns(2)
+        
+        # Left: YADE Status
+        with col_left:
+            st.markdown("### ⛴️ YADE Convoy Status")
+            if not yade_rows:
+                st.info("No YADE entries for this date.")
+            else:
+                # Group by status
+                yade_by_status = {}
+                for row in yade_rows:
+                    status = row["Status"]
+                    if status not in yade_by_status:
+                        yade_by_status[status] = []
+                    yade_by_status[status].append(row)
+                
+                # Render each status group
+                for status, group in yade_by_status.items():
+                    st.markdown(f"#### 📋 {status}")
+                    # Create display data
+                    display_data = []
+                    total_stock = 0.0
+                    for item in group:
+                        display_data.append({
+                            "YADE": item["Name"],
+                            "Convoy": item["Convoy"],
+                            "Stock": item["Stock"] or "-"
+                        })
+                        total_stock += item["Stock_Value"]
+                    
+                    st.dataframe(display_data, use_container_width=True, hide_index=True)
+                    st.markdown(f"**Total Stock: {total_stock:,.2f} bbls**")
+                    st.markdown("---")
+        
+        # Right: Vessel Status
+        with col_right:
+            st.markdown("### 🛳️ Vessel Convoy Status")
+            if not vessel_rows:
+                st.info("No Vessel entries for this date.")
+            else:
+                # Group by status
+                vessel_by_status = {}
+                for row in vessel_rows:
+                    status = row["Status"]
+                    if status not in vessel_by_status:
+                        vessel_by_status[status] = []
+                    vessel_by_status[status].append(row)
+                
+                # Render each status group
+                for status, group in vessel_by_status.items():
+                    st.markdown(f"#### 📋 {status}")
+                    # Create display data
+                    display_data = []
+                    total_stock = 0.0
+                    for item in group:
+                        display_data.append({
+                            "Vessel": item["Name"],
+                            "Shuttle": item["Shuttle"],
+                            "Stock": item["Stock"] or "-"
+                        })
+                        total_stock += item["Stock_Value"]
+                    
+                    st.dataframe(display_data, use_container_width=True, hide_index=True)
+                    st.markdown(f"**Total Stock: {total_stock:,.2f} bbls**")
+                    st.markdown("---")
     
     @staticmethod
     def render_dashboard(config: Dict, location_id: int, selected_date: date):

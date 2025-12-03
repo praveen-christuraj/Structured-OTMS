@@ -101,18 +101,29 @@ def render_filter_inputs(filter_configs: list, location_id: int) -> dict:
     
     FormBuilder.section_header("🔍 Report Filters")
     
-    # Always include date range filter
-    col1, col2 = st.columns(2)
-    with col1:
-        start_date = FormBuilder.date_field("Start Date", "filter_start_date", required=True)
-        if start_date is None:
-            start_date = date.today() - timedelta(days=30)
-    with col2:
-        end_date = FormBuilder.date_field("End Date", "filter_end_date", required=True)
-        if end_date is None:
-            end_date = date.today()
-    
-    filters['date_range'] = [start_date, end_date]
+    # Date range filter (optional) so users can widen to all dates if needed
+    apply_date = st.checkbox("Filter by date range", value=True, key="filter_apply_date")
+    if apply_date:
+        col1, col2 = st.columns(2)
+        with col1:
+            start_date = FormBuilder.date_field(
+                "Start Date",
+                "filter_start_date",
+                required=True,
+                default_date=date.today() - timedelta(days=180)
+            )
+            if start_date is None:
+                start_date = date.today() - timedelta(days=180)
+        with col2:
+            end_date = FormBuilder.date_field(
+                "End Date",
+                "filter_end_date",
+                required=True,
+                default_date=date.today()
+            )
+            if end_date is None:
+                end_date = date.today()
+        filters['date_range'] = [start_date, end_date]
     filters['location_id'] = location_id
     
     # Render additional filters from config

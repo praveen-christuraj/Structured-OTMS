@@ -42,7 +42,7 @@ class FormBuilder:
         return st.selectbox("", options, key=key, label_visibility="collapsed")
     
     @staticmethod
-    def date_field(label, key, required=False):
+    def date_field(label, key, required=False, default_date=None):
         """Create a styled date field"""
         st. markdown(f"""
         <label style="font-weight: 600; color: #333; display: block; margin-bottom: 0.5rem;">
@@ -50,7 +50,14 @@ class FormBuilder:
         </label>
         """, unsafe_allow_html=True)
         from datetime import date
-        return st.date_input("", key=key, label_visibility="collapsed", max_value=date.today())
+        default_val = default_date or date.today()
+        return st.date_input(
+            "",
+            key=key,
+            value=default_val,
+            label_visibility="collapsed",
+            max_value=date.today()
+        )
     
     @staticmethod
     def textarea_field(label, key, placeholder="", rows=4, required=False):

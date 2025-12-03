@@ -340,6 +340,9 @@ class ReportEngine:
                 if ordered_keep:
                     df = df[ordered_keep]
 
+                # Apply numeric decimal-place rounding per column config
+                df = self._apply_decimal_places(df)
+
                 return df
         except IndexError as e:
             raise ValueError(f"String index error in report execution. Check report configuration. Details: {str(e)}")
@@ -738,6 +741,29 @@ class ReportEngine:
             except Exception:
                 continue
 
+        return df
+
+    def _apply_decimal_places(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Round numeric columns based on configured decimal_places so the preview
+        and exports respect the Report Customization settings.
+        """
+        if df is None or df.empty:
+            return df
+        for col_config in self.columns:
+            try:
+                if str(col_config.get("type")).lower() != "numeric":
+                    continue
+                label = col_config.get("label") or col_config.get("field") or col_config.get("source_field")
+                if not label or label not in df.columns:
+                    continue
+                dp = col_config.get("decimal_places")
+                if dp is None:
+                    continue
+                dp = int(dp)
+                df[label] = pd.to_numeric(df[label], errors="coerce").round(dp)
+            except Exception:
+                continue
         return df
     
     def export_csv(self, df: pd.DataFrame, filename: str = None) -> bytes:
