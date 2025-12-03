@@ -29,17 +29,32 @@ class WidgetRenderer:
     ):
         """Render a statistics card"""
         if style is None:
-            style = {
-                "background": "white",
-                "border_radius": 10,
-                "border_color": "#667eea",
-                "border_width": 4,
-                "padding": "1rem",
-                "value_color": "#667eea",
-                "label_color": "#666",
-                "value_size": "1.6rem",
-                "label_size": "0.8rem"
-            }
+            style = {}
+        
+        # Extract nested styles (from customization) or use flat style (backwards compat)
+        value_style = style.get("value", {})
+        label_style = style.get("label", {})
+        
+        # Card styles with defaults
+        card_bg = style.get("background", "white")
+        card_radius = style.get("border_radius", 10)
+        card_border_color = style.get("border_color", "#667eea")
+        card_border_width = style.get("border_width", 4)
+        card_padding = style.get("padding", "1rem")
+        card_shadow = style.get("shadow", "0 2px 8px rgba(0,0,0,0.1)")
+        card_width = style.get("width", 0)
+        card_height = style.get("height", 0)
+        
+        # Value text styles (nested or flat with fallback)
+        value_size = value_style.get("font_size") or style.get("value_size", "1.6rem")
+        value_weight = value_style.get("font_weight") or style.get("value_weight", "bold")
+        value_color = value_style.get("color") or style.get("value_color", "#667eea")
+        
+        # Label text styles (nested or flat with fallback)
+        label_size = label_style.get("font_size") or style.get("label_size", "0.8rem")
+        label_weight = label_style.get("font_weight") or style.get("label_weight", "bold")
+        label_color = label_style.get("color") or style.get("label_color", "#666")
+        label_transform = label_style.get("text_transform", "uppercase")
         
         def _fmt(v):
             if v is None:
@@ -73,25 +88,25 @@ class WidgetRenderer:
 
         card_html = f"""
         <div style="
-            background: {style. get('background', 'white')};
-            padding: {style.get('padding', '1rem')};
-            border-radius: {style.get('border_radius', 10)}px;
-            box-shadow: {style.get('shadow', '0 2px 8px rgba(0,0,0,0.1)')};
-            border-left: {style.get('border_width', 4)}px solid {style.get('border_color', '#667eea')};
-            width: {str(int(style.get('width'))) + 'px' if style.get('width') else '100%'};
-            min-height: {str(int(style.get('height'))) + 'px' if style.get('height') else 'auto'};
+            background: {card_bg};
+            padding: {card_padding};
+            border-radius: {card_radius}px;
+            box-shadow: {card_shadow};
+            border-left: {card_border_width}px solid {card_border_color};
+            width: {str(int(card_width)) + 'px' if card_width else '100%'};
+            min-height: {str(int(card_height)) + 'px' if card_height else 'auto'};
         ">
             <div style="
-                color: {style.get('label_color', '#666')};
-                font-size: {style.get('label_size', '0.8rem')};
-                font-weight: bold;
-                text-transform: uppercase;
+                color: {label_color};
+                font-size: {label_size};
+                font-weight: {label_weight};
+                text-transform: {label_transform};
                 letter-spacing: 1px;
             ">{label}</div>
             <div style="
-                font-size: {style.get('value_size', '1.6rem')};
-                font-weight: bold;
-                color: {style. get('value_color', '#667eea')};
+                font-size: {value_size};
+                font-weight: {value_weight};
+                color: {value_color};
                 margin: 0.5rem 0;
             ">{value_html} {delta_html}</div>
             {sub_html}
@@ -1218,9 +1233,19 @@ class DashboardRenderer:
         # Render side by side
         col_left, col_right = st.columns(2)
         
+        # Extract heading styles from config
+        heading_style = config.get("styles", {}).get("heading", {})
+        heading_size = heading_style.get("font_size", "1.5rem")
+        heading_weight = heading_style.get("font_weight", "bold")
+        heading_color = heading_style.get("color", "#333333")
+        
+        # Extract table styles
+        table_style = config.get("styles", {}).get("table", {})
+        table_font_size = table_style.get("font_size", "0.9rem")
+        
         # Left: YADE Status
         with col_left:
-            st.markdown("### ⛴️ YADE Convoy Status")
+            st.markdown(f"<h3 style='font-size:{heading_size};font-weight:{heading_weight};color:{heading_color};'>⛴️ YADE Convoy Status</h3>", unsafe_allow_html=True)
             if not yade_rows:
                 st.info("No YADE entries for this date.")
             else:
@@ -1234,7 +1259,7 @@ class DashboardRenderer:
                 
                 # Render each status group
                 for status, group in yade_by_status.items():
-                    st.markdown(f"#### 📋 {status}")
+                    st.markdown(f"<h4 style='font-size:{float(heading_size.replace('rem',''))*0.8}rem;font-weight:{heading_weight};color:{heading_color};'>📋 {status}</h4>", unsafe_allow_html=True)
                     # Create display data
                     display_data = []
                     total_stock = 0.0
@@ -1247,12 +1272,12 @@ class DashboardRenderer:
                         total_stock += item["Stock_Value"]
                     
                     st.dataframe(display_data, use_container_width=True, hide_index=True)
-                    st.markdown(f"**Total Stock: {total_stock:,.2f} bbls**")
+                    st.markdown(f"<p style='font-weight:bold;font-size:{table_font_size};'>Total Stock: {total_stock:,.2f} bbls</p>", unsafe_allow_html=True)
                     st.markdown("---")
         
         # Right: Vessel Status
         with col_right:
-            st.markdown("### 🛳️ Vessel Convoy Status")
+            st.markdown(f"<h3 style='font-size:{heading_size};font-weight:{heading_weight};color:{heading_color};'>🛳️ Vessel Convoy Status</h3>", unsafe_allow_html=True)
             if not vessel_rows:
                 st.info("No Vessel entries for this date.")
             else:
@@ -1266,7 +1291,7 @@ class DashboardRenderer:
                 
                 # Render each status group
                 for status, group in vessel_by_status.items():
-                    st.markdown(f"#### 📋 {status}")
+                    st.markdown(f"<h4 style='font-size:{float(heading_size.replace('rem',''))*0.8}rem;font-weight:{heading_weight};color:{heading_color};'>📋 {status}</h4>", unsafe_allow_html=True)
                     # Create display data
                     display_data = []
                     total_stock = 0.0
@@ -1279,7 +1304,7 @@ class DashboardRenderer:
                         total_stock += item["Stock_Value"]
                     
                     st.dataframe(display_data, use_container_width=True, hide_index=True)
-                    st.markdown(f"**Total Stock: {total_stock:,.2f} bbls**")
+                    st.markdown(f"<p style='font-weight:bold;font-size:{table_font_size};'>Total Stock: {total_stock:,.2f} bbls</p>", unsafe_allow_html=True)
                     st.markdown("---")
     
     @staticmethod
@@ -1288,9 +1313,15 @@ class DashboardRenderer:
         from db import get_session
         from models import Tank, TankTransaction, OTRRecord
         
+        # Extract styles for reuse
+        heading_style = config.get("styles", {}).get("heading", {})
+        heading_size = heading_style.get("font_size", "1.5rem")
+        heading_weight = heading_style.get("font_weight", "bold")
+        heading_color = heading_style.get("color", "#333333")
+        
         # Summary Cards
         if config["layout"]["summary_cards"]["enabled"]:
-            st.markdown("### 📊 Summary Statistics")
+            st.markdown(f"<h3 style='font-size:{heading_size};font-weight:{heading_weight};color:{heading_color};'>📊 Summary Statistics</h3>", unsafe_allow_html=True)
             cards = list(config["layout"]["summary_cards"].get("cards", []))
             num_cols = max(1, int(config["layout"]["summary_cards"].get("columns", 1)))
 
@@ -1320,7 +1351,7 @@ class DashboardRenderer:
         
         # Tank Visuals
         if config["layout"]["tank_visuals"]["enabled"]:
-            st.markdown("### 🛢️ Tank Stock Levels")
+            st.markdown(f"<h3 style='font-size:{heading_size};font-weight:{heading_weight};color:{heading_color};'>🛢️ Tank Stock Levels</h3>", unsafe_allow_html=True)
             tank_style = config["layout"]["tank_visuals"]["style"]
             num_cols = config["layout"]["tank_visuals"]["columns"]
             
@@ -1391,12 +1422,12 @@ class DashboardRenderer:
                 else:
                     st.info("No tanks configured. Go to Dashboard Customization to add tank visuals.")        # Monthly Data
         if config["layout"]["monthly_data"]["enabled"]:
-            st.markdown("### 📊 Monthly Data")
+            st.markdown(f"<h3 style='font-size:{heading_size};font-weight:{heading_weight};color:{heading_color};'>📊 Monthly Data</h3>", unsafe_allow_html=True)
             st.info("Monthly data section - configure in Dashboard Customization")
         
         # Trend Chart
         if config["layout"]["trend_chart"]["enabled"]:
-            st.markdown("### 📈 Production & Evacuation Trend")
+            st.markdown(f"<h3 style='font-size:{heading_size};font-weight:{heading_weight};color:{heading_color};'>📈 Production & Evacuation Trend</h3>", unsafe_allow_html=True)
             st.info("Trend chart section - configure in Dashboard Customization")
     
     @staticmethod

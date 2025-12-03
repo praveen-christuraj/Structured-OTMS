@@ -1361,6 +1361,82 @@ def render_styles_tab(config: dict):
     
     styles["label"] = label_style
     
+    st.markdown("---")
+    
+    # Heading styles
+    st.markdown("#### Section Heading Styles")
+    
+    heading_style = styles.get("heading", {})
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        current_heading_size = heading_style.get("font_size", "1.5rem")
+        heading_size_num = float(current_heading_size.replace("rem", "")) if "rem" in current_heading_size else 1.5
+        
+        heading_font_size_input = st.number_input(
+            "Font Size",
+            min_value=0.8,
+            max_value=3.0,
+            value=heading_size_num,
+            step=0.1,
+            help="Font size for section headings (1.5 = default)",
+            key="heading_size"
+        )
+        heading_style["font_size"] = f"{heading_font_size_input}rem"
+    
+    with col2:
+        heading_style["font_weight"] = st.selectbox(
+            "Font Weight",
+            options=["normal", "bold", "bolder"],
+            index=["normal", "bold", "bolder"].index(
+                heading_style.get("font_weight", "bold")
+            ),
+            key="heading_weight"
+        )
+    
+    with col3:
+        heading_style["color"] = st.color_picker(
+            "Color",
+            value=_ensure_hex_color(heading_style.get("color", "#333333"), "#333333"),
+            key="heading_color"
+        )
+    
+    styles["heading"] = heading_style
+    
+    st.markdown("---")
+    
+    # Table/Dataframe styles
+    st.markdown("#### Table & Dataframe Styles")
+    
+    table_style = styles.get("table", {})
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        current_table_font = table_style.get("font_size", "0.9rem")
+        table_font_num = float(current_table_font.replace("rem", "")) if "rem" in current_table_font else 0.9
+        
+        table_font_size_input = st.number_input(
+            "Font Size",
+            min_value=0.6,
+            max_value=2.0,
+            value=table_font_num,
+            step=0.1,
+            help="Font size for table text (0.9 = default)",
+            key="table_size"
+        )
+        table_style["font_size"] = f"{table_font_size_input}rem"
+    
+    with col2:
+        table_style["header_bg"] = st.color_picker(
+            "Header Background",
+            value=_ensure_hex_color(table_style.get("header_bg", "#f8f9fa"), "#f8f9fa"),
+            key="table_header_bg"
+        )
+    
+    styles["table"] = table_style
+    
     config["styles"] = styles
 
 

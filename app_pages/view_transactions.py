@@ -1346,6 +1346,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
     Features:
     - Automatic detection of all columns (system and user-defined)
     - Individual input fields based on data types (date, number, text, checkbox)
+    - Decimal place control for numeric columns (from tab config)
     - 24-hour edit restriction with visual lock indicator
     - Edit tracking (who edited and when) with visual badge
     - Comprehensive error logging for debugging
@@ -1360,6 +1361,33 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
     Future custom tables will automatically work with this code - no modifications needed.
     """
     _inject_css_once()
+    
+    # Load custom tab configuration to get column definitions including decimal_places
+    tab_config = None
+    tab_columns_config = []
+    try:
+        from location_config import get_custom_tabs
+        with get_session() as s:
+            custom_tabs = get_custom_tabs(s, location_id, "tank_transactions") or []
+        for ctab in custom_tabs:
+            table_name = ctab.get("table_name", "")
+            if section in table_name or table_name.endswith(f"_{section}_{location_id}"):
+                tab_config = ctab
+                tab_columns_config = ctab.get("columns", [])
+                break
+    except Exception:
+        pass
+    
+    # Build column config map for easy lookup {field_name: {decimal_places, type, ...}}
+    col_config_map = {}
+    for col_cfg in tab_columns_config:
+        col_name = col_cfg.get("name", "")
+        col_config_map[col_name] = {
+            "type": col_cfg.get("type", "text"),
+            "decimal_places": col_cfg.get("decimal_places", 2),
+            "label": col_cfg.get("label", col_name.replace('_', ' ').title())
+        }
+    
     try:
         from models import FlexibleRecord
     except Exception:
@@ -1431,11 +1459,153 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
     if not rows:
         st.info("No records found.")
         return
+    
+    # Collect all column names from the first row for export
+    all_columns_set = set()
+    if rows:
+        if is_custom:
+            # For custom tables, get all column names from the model
+            if Model and hasattr(Model, '__table__'):
+                all_columns_set = {col.name for col in Model.__table__.columns}
+        else:
+            # For legacy FlexibleRecord, collect all keys from data_json
+            for r in rows:
+                try:
+                    payload = json.loads(r.data_json or "{}")
+                    all_columns_set.update(payload.keys())
+                except Exception:
+                    pass
+    
+    # Prepare data for export (CSV, XLSX, PDF)
+    export_data = []
+    for r in rows:
+        if is_custom:
+            row_dict = {
+                "Date": str(getattr(r, 'tx_date', '')),
+                "Created By": getattr(r, "created_by", ""),
+                "Created At": str(getattr(r, "created_at", "")),
+                "Remarks": getattr(r, "remarks", "")
+            }
+            # Add all custom columns
+            for col_name in all_columns_set:
+                if col_name not in {"id", "location_id", "tx_date", "created_by", "created_at", "updated_by", "updated_at", "remarks"}:
+                    row_dict[col_name.replace('_', ' ').title()] = getattr(r, col_name, "")
+        else:
+            try:
+                payload = json.loads(r.data_json or "{}")
+            except Exception:
+                payload = {}
+            row_dict = {
+                "Date": str(getattr(r, 'tx_date', '')),
+                "Created By": getattr(r, "created_by", ""),
+                "Created At": str(getattr(r, "created_at", "")),
+                "Remarks": payload.get("remarks", "")
+            }
+            for k, v in payload.items():
+                if k not in ("remarks", "__edited_by__", "__edited_at__") and not isinstance(v, (dict, list, tuple)):
+                    row_dict[k.replace('_', ' ').title()] = v
+        export_data.append(row_dict)
+    
+    # Export buttons
+    st.markdown("### Export Options")
+    exp_col1, exp_col2, exp_col3, exp_col4 = st.columns([0.25, 0.25, 0.25, 0.25])
+    
+    with exp_col1:
+        # CSV Export
+        import pandas as pd
+        import io
+        df = pd.DataFrame(export_data)
+        csv_buffer = io.StringIO()
+        df.to_csv(csv_buffer, index=False)
+        csv_data = csv_buffer.getvalue()
+        st.download_button(
+            label="📥 Download CSV",
+            data=csv_data,
+            file_name=f"{section}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+            mime="text/csv",
+            key=f"vt_{section}_csv"
+        )
+    
+    with exp_col2:
+        # XLSX Export
+        xlsx_buffer = io.BytesIO()
+        with pd.ExcelWriter(xlsx_buffer, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name=title[:31])  # Sheet name max 31 chars
+        xlsx_data = xlsx_buffer.getvalue()
+        st.download_button(
+            label="📥 Download XLSX",
+            data=xlsx_data,
+            file_name=f"{section}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key=f"vt_{section}_xlsx"
+        )
+    
+    with exp_col3:
+        # PDF Download
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib.units import inch
+        
+        pdf_buffer = io.BytesIO()
+        doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(A4))
+        elements = []
+        
+        # Title
+        styles = getSampleStyleSheet()
+        title_para = Paragraph(f"<b>{title}</b>", styles['Title'])
+        elements.append(title_para)
+        
+        # Table data
+        table_data = [list(df.columns)] + df.values.tolist()
+        table = Table(table_data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1f77b4')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        elements.append(table)
+        doc.build(elements)
+        pdf_data = pdf_buffer.getvalue()
+        
+        st.download_button(
+            label="📥 Download PDF",
+            data=pdf_data,
+            file_name=f"{section}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+            mime="application/pdf",
+            key=f"vt_{section}_pdf"
+        )
+    
+    with exp_col4:
+        # View PDF in browser
+        import base64
+        pdf_b64 = base64.b64encode(pdf_data).decode('utf-8')
+        if st.button("👁️ View PDF", key=f"vt_{section}_view_pdf"):
+            st.components.v1.html(
+                f"""
+                <script>
+                    var pdfWindow = window.open("");
+                    pdfWindow.document.write(
+                        "<iframe width='100%' height='100%' src='data:application/pdf;base64,{pdf_b64}'></iframe>"
+                    );
+                </script>
+                """,
+                height=0
+            )
+            st.success("PDF opened in new tab!")
+    
+    st.markdown("---")
 
     # Automatically detect all columns from the table structure
     # This works for any number of custom columns defined in any flex_* table
     keyset = set()  # User-visible columns for display
-    all_columns_set = set()  # ALL columns including system ones for edit operations
+    # Note: all_columns_set already populated above for export
     
     if is_custom:
         try:
@@ -1443,7 +1613,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
         except Exception:
             cols = []
         for k in cols:
-            all_columns_set.add(k)  # Store all columns
+            # all_columns_set already populated above, just build keyset for display
             # Only add non-system columns to keyset for display
             if k in {"id", "location_id", "tx_date", "created_by", "created_at", "updated_by", "updated_at"}:
                 continue
@@ -1456,7 +1626,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                 p = {}
             if isinstance(p, dict):
                 for k, v in p.items():
-                    all_columns_set.add(k)  # Store all columns
+                    # all_columns_set already populated above for export
                     if k in ("remarks", "__edited_by__", "__edited_at__"):
                         continue
                     if isinstance(v, (dict, list, tuple)):
@@ -1471,28 +1641,37 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
     # Filter out date-related fields that will be shown separately to avoid duplication
     display_keys = [k for k in display_keys if k not in ('tx_date', 'date', 'transaction_date')]
     
-    widths = [0.16] + ([0.12] * len(display_keys)) + [0.20, 0.20, 0.10]
-    cols = st.columns(widths if display_keys else [0.18, 0.42, 0.20, 0.20, 0.10], gap="small")
+    # Calculate widths: Date, display columns, Remarks, Created By, then small space for action icons
+    num_action_buttons = 2 if section == "production" else 3
+    action_width = 0.03 * num_action_buttons  # Small width for icon buttons
+    widths = [0.16] + ([0.12] * len(display_keys)) + [0.20, 0.20] + ([0.03] * num_action_buttons)
+    cols = st.columns(widths if display_keys else [0.18, 0.42, 0.20, 0.20] + ([0.03] * num_action_buttons), gap="small")
     if display_keys:
         cols[0].markdown("**Date**")
         for i, k in enumerate(display_keys, start=1):
             cols[i].markdown(f"**{k.replace('_',' ').title()}**")
-        cols[-3].markdown("**Remarks**")
-        cols[-2].markdown("**Created By / At**")
-        cols[-1].markdown("**Actions**")
+        cols[-(2 + num_action_buttons)].markdown("**Remarks**")
+        cols[-(1 + num_action_buttons)].markdown("**Created By / At**")
+        # No header for action icon buttons
     else:
         cols[0].markdown("**Date**")
         cols[1].markdown("**Summary**")
         cols[2].markdown("**Remarks**")
         cols[3].markdown("**Created By / At**")
-        cols[4].markdown("**Actions**")
+        # No header for action icon buttons
 
-    def _fmt_val(v):
+    def _fmt_val(v, col_name=None):
+        """Format value with column-specific decimal places for numbers."""
         try:
             if v is None:
                 return ""
             if isinstance(v, (int, float)):
-                return f"{float(v):,.2f}"
+                # Check if we have column config with decimal places
+                if col_name and col_name in col_config_map:
+                    decimals = col_config_map[col_name].get("decimal_places", 2)
+                else:
+                    decimals = 2
+                return f"{float(v):,.{decimals}f}"
             s = str(v)
             return s if len(s) <= 140 else (s[:137] + "…")
         except Exception:
@@ -1560,21 +1739,21 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                     is_editable = True
             
             if display_keys:
+                num_action_buttons = 2 if section == "production" else 3
                 row_cols = st.columns(widths, gap="small")
                 # Display date with edited badge (no duplicate)
                 tx_date_str = str(getattr(r, 'tx_date', '') or '')
                 row_cols[0].markdown(f"<div class='ellip'>{tx_date_str}{edited_badge}</div>", unsafe_allow_html=True)
                 for j, k in enumerate(display_keys, start=1):
                     v = getattr(r, k) if is_custom else (payload or {}).get(k)
-                    row_cols[j].markdown(f"<div class='ellip'>{_fmt_val(v)}</div>", unsafe_allow_html=True)
-                row_cols[-3].markdown(f"<div class='ellip'>{remarks}</div>", unsafe_allow_html=True)
-                row_cols[-2].markdown(f"<div class='ellip'>{created_by} | {created}</div>", unsafe_allow_html=True)
+                    row_cols[j].markdown(f"<div class='ellip'>{_fmt_val(v, k)}</div>", unsafe_allow_html=True)
+                row_cols[-(2 + num_action_buttons)].markdown(f"<div class='ellip'>{remarks}</div>", unsafe_allow_html=True)
+                row_cols[-(1 + num_action_buttons)].markdown(f"<div class='ellip'>{created_by} | {created}</div>", unsafe_allow_html=True)
                 
-                # Action buttons - different for production section
+                # Inline action icon buttons at end of row
                 if section == "production":
                     # Production: Only Edit and Delete buttons
-                    act1, act2 = row_cols[-1].columns([0.50, 0.50], gap="small")
-                    with act1:
+                    with row_cols[-2]:
                         if is_editable:
                             edit_state_key = f"vt_{section}_edit_{i}"
                             is_editing = st.session_state.get(edit_state_key, False)
@@ -1583,20 +1762,19 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                                 st.rerun()
                         else:
                             st.button("🔒", key=f"vt_{section}_edit_{i}_locked", help="Edit locked (>24hrs)", disabled=True)
-                    with act2:
+                    with row_cols[-1]:
                         if st.button("🗑️", key=f"vt_{section}_del_{i}", help="Delete"):
-                            st.session_state[f"vt_{section}_del_confirm_{i}"] = True
+                            st.session_state[f"vt_{section}_show_delete_ui_{i}"] = True
                 else:
                     # Other sections: View, Edit, Delete buttons
-                    act1, act2, act3 = row_cols[-1].columns([0.34, 0.33, 0.33], gap="small")
-                    with act1:
+                    with row_cols[-3]:
                         view_state_key = f"vt_{section}_open_{i}"
                         is_viewing = st.session_state.get(view_state_key, False)
                         if st.button("👁️", key=f"vt_{section}_view_btn_{i}", help="View"):
                             st.session_state[view_state_key] = not is_viewing
                             st.session_state[f"vt_{section}_edit_{i}"] = False
                             st.rerun()
-                    with act2:
+                    with row_cols[-2]:
                         if is_editable:
                             edit_state_key = f"vt_{section}_edit_{i}"
                             is_editing = st.session_state.get(edit_state_key, False)
@@ -1606,59 +1784,55 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                                 st.rerun()
                         else:
                             st.button("🔒", key=f"vt_{section}_edit_{i}_locked", help="Edit locked (>24hrs)", disabled=True)
-                    with act3:
+                    with row_cols[-1]:
                         if st.button("🗑️", key=f"vt_{section}_del_{i}", help="Delete"):
                             st.session_state[f"vt_{section}_show_delete_ui_{i}"] = True
             else:
-                c1, c2, c3, c4, c5 = st.columns([0.18, 0.42, 0.20, 0.20, 0.10], gap="small")
-                with c1:
-                    st.markdown(f"<div class='ellip'>{str(getattr(r, 'tx_date', '') or '')}{edited_badge}</div>", unsafe_allow_html=True)
-                with c2:
-                    st.markdown(f"<div class='ellip'>{summ}</div>", unsafe_allow_html=True)
-                with c3:
-                    st.markdown(f"<div class='ellip'>{remarks}</div>", unsafe_allow_html=True)
-                with c4:
-                    st.markdown(f"<div class='ellip'>{created_by} | {created}</div>", unsafe_allow_html=True)
-                with c5:
-                    # Action buttons - different for production section
-                    if section == "production":
-                        # Production: Only Edit and Delete buttons
-                        a1, a2 = st.columns([0.50, 0.50], gap="small")
-                        with a1:
-                            if is_editable:
-                                edit_state_key = f"vt_{section}_edit_{i}"
-                                is_editing = st.session_state.get(edit_state_key, False)
-                                if st.button("✏️" if not is_editing else "✖️", key=f"vt_{section}_edit_btn2_{i}", help="Edit (within 24hrs)" if not is_editing else "Close"):
-                                    st.session_state[edit_state_key] = not is_editing
-                                    st.rerun()
-                            else:
-                                st.button("🔒", key=f"vt_{section}_edit2_{i}_locked", help="Edit locked (>24hrs)", disabled=True)
-                        with a2:
-                            if st.button("🗑️", key=f"vt_{section}_del2_{i}", help="Delete"):
-                                st.session_state[f"vt_{section}_show_delete_ui_{i}"] = True
-                    else:
-                        # Other sections: View, Edit, Delete buttons
-                        a1, a2, a3 = st.columns([0.34, 0.33, 0.33], gap="small")
-                        with a1:
-                            view_state_key = f"vt_{section}_open_{i}"
-                            is_viewing = st.session_state.get(view_state_key, False)
-                            if st.button("👁️", key=f"vt_{section}_view_btn2_{i}", help="View"):
-                                st.session_state[view_state_key] = not is_viewing
-                                st.session_state[f"vt_{section}_edit_{i}"] = False
+                num_action_buttons = 2 if section == "production" else 3
+                c_widths = [0.18, 0.42, 0.20, 0.20] + ([0.03] * num_action_buttons)
+                cols_row = st.columns(c_widths, gap="small")
+                cols_row[0].markdown(f"<div class='ellip'>{str(getattr(r, 'tx_date', '') or '')}{edited_badge}</div>", unsafe_allow_html=True)
+                cols_row[1].markdown(f"<div class='ellip'>{summ}</div>", unsafe_allow_html=True)
+                cols_row[2].markdown(f"<div class='ellip'>{remarks}</div>", unsafe_allow_html=True)
+                cols_row[3].markdown(f"<div class='ellip'>{created_by} | {created}</div>", unsafe_allow_html=True)
+                
+                # Inline action icon buttons
+                if section == "production":
+                    # Production: Only Edit and Delete buttons
+                    with cols_row[-2]:
+                        if is_editable:
+                            edit_state_key = f"vt_{section}_edit_{i}"
+                            is_editing = st.session_state.get(edit_state_key, False)
+                            if st.button("✏️" if not is_editing else "✖️", key=f"vt_{section}_edit_btn2_{i}", help="Edit (within 24hrs)" if not is_editing else "Close"):
+                                st.session_state[edit_state_key] = not is_editing
                                 st.rerun()
-                        with a2:
-                            if is_editable:
-                                edit_state_key = f"vt_{section}_edit_{i}"
-                                is_editing = st.session_state.get(edit_state_key, False)
-                                if st.button("✏️" if not is_editing else "✖️", key=f"vt_{section}_edit_btn2_{i}", help="Edit" if not is_editing else "Close"):
-                                    st.session_state[edit_state_key] = not is_editing
-                                    st.session_state[f"vt_{section}_open_{i}"] = False
-                                    st.rerun()
-                            else:
-                                st.button("🔒", key=f"vt_{section}_edit2_{i}_locked", help="Edit locked (>24hrs)", disabled=True)
-                        with a3:
-                            if st.button("🗑️", key=f"vt_{section}_del2_{i}", help="Delete"):
-                                st.session_state[f"vt_{section}_show_delete_ui_{i}"] = True
+                        else:
+                            st.button("🔒", key=f"vt_{section}_edit2_{i}_locked", help="Edit locked (>24hrs)", disabled=True)
+                    with cols_row[-1]:
+                        if st.button("🗑️", key=f"vt_{section}_del2_{i}", help="Delete"):
+                            st.session_state[f"vt_{section}_show_delete_ui_{i}"] = True
+                else:
+                    # Other sections: View, Edit, Delete buttons
+                    with cols_row[-3]:
+                        view_state_key = f"vt_{section}_open_{i}"
+                        is_viewing = st.session_state.get(view_state_key, False)
+                        if st.button("👁️", key=f"vt_{section}_view_btn2_{i}", help="View"):
+                            st.session_state[view_state_key] = not is_viewing
+                            st.session_state[f"vt_{section}_edit_{i}"] = False
+                            st.rerun()
+                    with cols_row[-2]:
+                        if is_editable:
+                            edit_state_key = f"vt_{section}_edit_{i}"
+                            is_editing = st.session_state.get(edit_state_key, False)
+                            if st.button("✏️" if not is_editing else "✖️", key=f"vt_{section}_edit_btn2_{i}", help="Edit" if not is_editing else "Close"):
+                                st.session_state[edit_state_key] = not is_editing
+                                st.session_state[f"vt_{section}_open_{i}"] = False
+                                st.rerun()
+                        else:
+                            st.button("🔒", key=f"vt_{section}_edit2_{i}_locked", help="Edit locked (>24hrs)", disabled=True)
+                    with cols_row[-1]:
+                        if st.button("🗑️", key=f"vt_{section}_del2_{i}", help="Delete"):
+                            st.session_state[f"vt_{section}_show_delete_ui_{i}"] = True
 
             # Deletion approval UI for flexible records
             if st.session_state.get(f"vt_{section}_show_delete_ui_{i}"):
@@ -1783,11 +1957,12 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                             if is_custom:
                                 try:
                                     from logger import log_info, log_error
+                                    from db import get_flex_session
                                     log_info(f"Attempting to save {section} record ID: {getattr(r, 'id', 'unknown')}")
                                     log_info(f"Editable columns: {editable_cols}")
                                     log_info(f"Edited values: {edited_values}")
                                     
-                                    with get_session() as s:
+                                    with get_flex_session() as s:
                                         M = get_custom_table_model(f"flex_{section}_{location_id}")
                                         if not M:
                                             log_error(f"Failed to get model for flex_{section}_{location_id}")
@@ -2274,5 +2449,11 @@ def render_view_transactions_page(active_location_id, user):
         else:
             render_tanker_transactions_view(user=user or {}, location_id=loc.id)
     except Exception as ex:
+        from logger import log_error
+        error_msg = f"View Transactions rendering error: {ex}"
+        log_error(error_msg, exc_info=True)
         _audit_error(f"Render failed: {ex}", user, active_location_id)
-        st.error("Unexpected error while rendering View Transactions. (Logged)")
+        st.error("❌ Unexpected error while rendering View Transactions")
+        with st.expander("🔍 Error Details"):
+            st.code(str(ex))
+            st.caption("Check the logs for full stack trace.")

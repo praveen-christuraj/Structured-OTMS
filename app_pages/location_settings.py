@@ -212,6 +212,18 @@ def _render_page_access(sel_location_id: int, user):
                 pv = full_cfg.get("page_visibility", {}).copy()
                 pv.update(new_flags)
                 full_cfg["page_visibility"] = pv
+                
+                # Sync permissions dictionary for PermissionManager compatibility
+                perms = full_cfg.get("permissions", {}).copy()
+                perms.update({
+                    "tank_transactions": bool(show_tank),
+                    "tanker_transactions": bool(show_tanker),
+                    "yade_transactions": bool(show_yade),
+                    "otr_vessel": bool(show_vessel_ops),
+                    "fso_operations": bool(show_fso),
+                })
+                full_cfg["permissions"] = perms
+                
                 LocationConfig.save_config(session, sel_location_id, full_cfg)
 
             SecurityManager.log_audit(

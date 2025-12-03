@@ -858,6 +858,22 @@ def render_page_customization(user: Dict[str, Any]):
                     key=f"pc_custom_new_col_req_{loc_key}_{i}"
                 )
             
+            # Decimal places for number columns
+            if current_cols[i].get("type") == "number":
+                c_dec1, c_dec2 = st.columns([0.7, 0.3])
+                with c_dec1:
+                    st.caption("Decimal Places (for display)")
+                with c_dec2:
+                    current_cols[i]["decimal_places"] = st.number_input(
+                        "Decimals",
+                        min_value=0,
+                        max_value=6,
+                        value=current_cols[i].get("decimal_places", 2),
+                        step=1,
+                        key=f"pc_custom_new_col_dec_{loc_key}_{i}",
+                        label_visibility="collapsed"
+                    )
+            
             # Formula configuration for number columns
             if current_cols[i].get("type") == "number":
                 with st.expander(f"➕ Formula for {current_cols[i].get('label', 'Column')} (Optional)", expanded=bool(current_cols[i].get("formula"))):
@@ -948,10 +964,14 @@ def render_page_customization(user: Dict[str, Any]):
                 try:
                     from location_config import add_custom_tab
                     from models import create_custom_tab_table
+                    from logger import log_error, log_info
+                    
+                    log_info(f"Creating custom tab '{new_tab_name}' for {target_page} at location {loc.id}")
                     
                     with get_session() as s:
                         # Add tab configuration
                         new_tab = add_custom_tab(s, loc.id, target_page, new_tab_name, current_cols)
+                        log_info(f"Tab configuration added: {new_tab['id']} - {new_tab['table_name']}")
                         
                         # Create database table
                         table_created = create_custom_tab_table(
@@ -966,14 +986,15 @@ def render_page_customization(user: Dict[str, Any]):
                                     s, (user or {}).get("username", "system"), "CREATE",
                                     resource_type="PageCustomization:CustomTab",
                                     resource_id=new_tab["id"],
-                                    details=f"Created custom tab '{new_tab_name}' with table '{new_tab['table_name']}'",
+                                    details=f"Created custom tab '{new_tab_name}' with table '{new_tab['table_name']}' and {len(current_cols)} columns",
                                     user_id=(user or {}).get("id"),
                                     location_id=loc.id,
                                     success=True,
                                     ip_address=st.session_state.get("client_ip")
                                 )
-                            except Exception:
-                                pass
+                                log_info(f"✅ Custom tab '{new_tab_name}' created successfully")
+                            except Exception as audit_ex:
+                                log_error(f"Failed to log audit for custom tab creation: {audit_ex}")
                             
                             st.success(f"✅ Custom tab '{new_tab_name}' created successfully!")
                             st.info(f"📊 Database table: `{new_tab['table_name']}`")
@@ -984,11 +1005,357 @@ def render_page_customization(user: Dict[str, Any]):
                             
                             st.rerun()
                         else:
-                            st.error("Failed to create database table for custom tab.")
+                            error_msg = "Failed to create database table for custom tab."
+                            st.error(error_msg)
+                            log_error(error_msg)
+                            try:
+                                SecurityManager.log_audit(
+                                    s, (user or {}).get("username", "system"), "CREATE",
+                                    resource_type="PageCustomization:CustomTab",
+                                    resource_id=new_tab.get("id", ""),
+                                    details=f"Failed to create table for '{new_tab_name}'",
+                                    user_id=(user or {}).get("id"),
+                                    location_id=loc.id,
+                                    success=False,
+                                    ip_address=st.session_state.get("client_ip")
+                                )
+                            except Exception:
+                                pass
                 except ValueError as ve:
-                    st.error(f"❌ {str(ve)}")
+                    error_msg = str(ve)
+                    st.error(f"❌ {error_msg}")
+                    log_error(f"Validation error creating custom tab: {error_msg}")
+                    try:
+                        with get_session() as s:
+                            SecurityManager.log_audit(
+                                s, (user or {}).get("username", "system"), "CREATE",
+                                resource_type="PageCustomization:CustomTab",
+                                resource_id="",
+                                details=f"Validation error: {error_msg}",
+                                user_id=(user or {}).get("id"),
+                                location_id=loc.id,
+                                success=False,
+                                ip_address=st.session_state.get("client_ip")
+                            )
+                    except Exception:
+                        pass
                 except Exception as ex:
-                    st.error(f"❌ Failed to create custom tab: {ex}")
+                    error_msg = f"Failed to create custom tab: {ex}"
+                    st.error(f"❌ {error_msg}")
+                    log_error(error_msg, exc_info=True)
+                    try:
+                        with get_session() as s:
+                            SecurityManager.log_audit(
+                                s, (user or {}).get("username", "system"), "CREATE",
+                                resource_type="PageCustomization:CustomTab",
+                                resource_id="",
+                                details=f"Error: {str(ex)}",
+                                user_id=(user or {}).get("id"),
+                                location_id=loc.id,
+                                success=False,
+                                ip_address=st.session_state.get("client_ip")
+                            )
+                    except Exception:
+                        pass
+    # ==============================
+    # ✏️ Manage Existing Custom Tabs
+    # ==============================
+    st.markdown("---")
+    with st.expander("✏️ Manage Existing Custom Tabs", expanded=False):
+        st.markdown("### Edit or Delete Custom Tabs")
+        st.caption("Modify existing custom tabs: change column names, types, decimal places, or reorder columns.")
+        
+        try:
+            from location_config import get_custom_tabs, update_custom_tab, delete_custom_tab
+            
+            # Show tabs for both Tank and Tanker transactions
+            for page in ["tank_transactions", "tanker_transactions"]:
+                page_display = "🛢️ Tank Transactions" if page == "tank_transactions" else "🚛 Tanker Transactions"
+                
+                with get_session() as s:
+                    existing_tabs = get_custom_tabs(s, loc.id, page) or []
+                
+                if existing_tabs:
+                    st.markdown(f"#### {page_display}")
+                    
+                    for tab_idx, tab in enumerate(existing_tabs):
+                        tab_id = tab.get("id", "")
+                        tab_name = tab.get("name", "Unnamed Tab")
+                        tab_table = tab.get("table_name", "")
+                        tab_active = tab.get("active", True)
+                        tab_columns = tab.get("columns", [])
+                        
+                        status_icon = "✅" if tab_active else "⏸️"
+                        st.markdown(f"**{status_icon} {tab_name}**")
+                        st.caption(f"Table: `{tab_table}` | {len(tab_columns)} columns")
+                        
+                        edit_col, del_col, active_col = st.columns([0.4, 0.3, 0.3])
+                        
+                        with active_col:
+                            # Toggle active status
+                            new_active = st.checkbox(
+                                "Active",
+                                value=tab_active,
+                                key=f"pc_tab_active_{page}_{loc_key}_{tab_idx}",
+                                help="Toggle tab visibility"
+                            )
+                            if new_active != tab_active:
+                                try:
+                                    with get_session() as s:
+                                        update_custom_tab(s, loc.id, page, tab_id, active=new_active)
+                                    st.success(f"Tab '{tab_name}' {'activated' if new_active else 'deactivated'}!")
+                                    st.rerun()
+                                except Exception as ex:
+                                    st.error(f"Failed to update tab status: {ex}")
+                        
+                        with del_col:
+                            if st.button(f"🗑️ Delete", key=f"pc_tab_del_{page}_{loc_key}_{tab_idx}", help=f"Delete '{tab_name}'"):
+                                st.session_state[f"pc_tab_confirm_del_{page}_{tab_idx}"] = True
+                        
+                        with edit_col:
+                            if st.button(f"✏️ Edit Columns", key=f"pc_tab_edit_{page}_{loc_key}_{tab_idx}", help=f"Edit columns for '{tab_name}'"):
+                                st.session_state[f"pc_tab_editing_{page}_{tab_idx}"] = not st.session_state.get(f"pc_tab_editing_{page}_{tab_idx}", False)
+                        
+                        # Delete confirmation
+                        if st.session_state.get(f"pc_tab_confirm_del_{page}_{tab_idx}"):
+                            st.warning(f"⚠️ Delete Custom Tab: '{tab_name}'")
+                            st.markdown("**Choose deletion option:**")
+                            
+                            dcol1, dcol2, dcol3 = st.columns([0.33, 0.33, 0.34])
+                            
+                            with dcol1:
+                                if st.button("🗑️ Delete Config Only", key=f"pc_tab_del_config_{page}_{loc_key}_{tab_idx}", help="Remove tab configuration but keep database table and data"):
+                                    try:
+                                        with get_session() as s:
+                                            delete_custom_tab(s, loc.id, page, tab_id)
+                                            
+                                            try:
+                                                SecurityManager.log_audit(
+                                                    s, (user or {}).get("username", "system"), "DELETE",
+                                                    resource_type="PageCustomization:CustomTab",
+                                                    resource_id=tab_id,
+                                                    details=f"Deleted custom tab config '{tab_name}' (kept table: {tab_table})",
+                                                    user_id=(user or {}).get("id"),
+                                                    location_id=loc.id,
+                                                    success=True,
+                                                    ip_address=st.session_state.get("client_ip")
+                                                )
+                                            except Exception:
+                                                pass
+                                        
+                                        st.success(f"✅ Tab config deleted! Database table `{tab_table}` preserved.")
+                                        if f"pc_tab_confirm_del_{page}_{tab_idx}" in st.session_state:
+                                            del st.session_state[f"pc_tab_confirm_del_{page}_{tab_idx}"]
+                                        st.rerun()
+                                    except Exception as ex:
+                                        st.error(f"Failed to delete tab config: {ex}")
+                            
+                            with dcol2:
+                                if st.button("💣 Delete Everything", key=f"pc_tab_del_all_{page}_{loc_key}_{tab_idx}", type="primary", help="Delete tab configuration AND drop database table with all data"):
+                                    # Second confirmation for destructive action
+                                    st.session_state[f"pc_tab_confirm_drop_{page}_{tab_idx}"] = True
+                                    st.rerun()
+                            
+                            with dcol3:
+                                if st.button("❌ Cancel", key=f"pc_tab_del_no_{page}_{loc_key}_{tab_idx}"):
+                                    if f"pc_tab_confirm_del_{page}_{tab_idx}" in st.session_state:
+                                        del st.session_state[f"pc_tab_confirm_del_{page}_{tab_idx}"]
+                                    st.rerun()
+                        
+                        # Final confirmation for dropping table
+                        if st.session_state.get(f"pc_tab_confirm_drop_{page}_{tab_idx}"):
+                            st.error(f"🚨 **FINAL WARNING**: This will permanently delete table `{tab_table}` and ALL data!")
+                            st.caption("This action CANNOT be undone. All saved records will be lost forever.")
+                            
+                            fcol1, fcol2 = st.columns([0.5, 0.5])
+                            with fcol1:
+                                if st.button("💣 YES, DELETE EVERYTHING", key=f"pc_tab_drop_confirm_{page}_{loc_key}_{tab_idx}", type="primary"):
+                                    try:
+                                        from models import drop_custom_tab_table
+                                        from logger import log_info, log_error
+                                        
+                                        # Drop the database table first
+                                        table_dropped = False
+                                        try:
+                                            log_info(f"Attempting to drop table {tab_table}")
+                                            table_dropped = drop_custom_tab_table(tab_table)
+                                            if table_dropped:
+                                                log_info(f"✅ Table {tab_table} dropped successfully")
+                                            else:
+                                                log_error(f"Failed to drop table {tab_table}")
+                                        except Exception as drop_ex:
+                                            log_error(f"Error dropping table {tab_table}: {drop_ex}", exc_info=True)
+                                        
+                                        # Delete tab configuration
+                                        with get_session() as s:
+                                            delete_custom_tab(s, loc.id, page, tab_id)
+                                            
+                                            try:
+                                                SecurityManager.log_audit(
+                                                    s, (user or {}).get("username", "system"), "DELETE",
+                                                    resource_type="PageCustomization:CustomTab",
+                                                    resource_id=tab_id,
+                                                    details=f"Deleted custom tab '{tab_name}' and dropped table '{tab_table}' (success: {table_dropped})",
+                                                    user_id=(user or {}).get("id"),
+                                                    location_id=loc.id,
+                                                    success=True,
+                                                    ip_address=st.session_state.get("client_ip")
+                                                )
+                                            except Exception:
+                                                pass
+                                        
+                                        if table_dropped:
+                                            st.success(f"✅ Custom tab '{tab_name}' and database table `{tab_table}` completely deleted!")
+                                        else:
+                                            st.warning(f"⚠️ Tab config deleted but table `{tab_table}` may still exist. Check database manually.")
+                                        
+                                        # Clean up session state
+                                        for key in list(st.session_state.keys()):
+                                            if f"{page}_{tab_idx}" in key:
+                                                del st.session_state[key]
+                                        
+                                        st.rerun()
+                                    except Exception as ex:
+                                        error_msg = f"Failed to delete: {ex}"
+                                        st.error(error_msg)
+                                        from logger import log_error
+                                        log_error(error_msg, exc_info=True)
+                            
+                            with fcol2:
+                                if st.button("❌ Cancel", key=f"pc_tab_drop_cancel_{page}_{loc_key}_{tab_idx}"):
+                                    if f"pc_tab_confirm_drop_{page}_{tab_idx}" in st.session_state:
+                                        del st.session_state[f"pc_tab_confirm_drop_{page}_{tab_idx}"]
+                                    if f"pc_tab_confirm_del_{page}_{tab_idx}" in st.session_state:
+                                        del st.session_state[f"pc_tab_confirm_del_{page}_{tab_idx}"]
+                                    st.rerun()
+                        
+                        # Edit UI
+                        if st.session_state.get(f"pc_tab_editing_{page}_{tab_idx}"):
+                            st.markdown("##### Edit Columns")
+                            
+                            # Initialize editing state
+                            if f"pc_tab_edit_cols_{page}_{tab_idx}" not in st.session_state:
+                                st.session_state[f"pc_tab_edit_cols_{page}_{tab_idx}"] = list(tab_columns)
+                            
+                            edit_cols = st.session_state[f"pc_tab_edit_cols_{page}_{tab_idx}"]
+                            
+                            # Number of columns
+                            new_num_cols = st.number_input(
+                                "Number of Columns",
+                                min_value=1,
+                                max_value=20,
+                                value=len(edit_cols),
+                                step=1,
+                                key=f"pc_tab_edit_num_{page}_{loc_key}_{tab_idx}"
+                            )
+                            
+                            # Adjust column count
+                            if len(edit_cols) < new_num_cols:
+                                for i in range(len(edit_cols), new_num_cols):
+                                    edit_cols.append({"name": f"col_{i+1}", "label": f"Column {i+1}", "type": "number", "required": False, "decimal_places": 2})
+                            elif len(edit_cols) > new_num_cols:
+                                edit_cols = edit_cols[:new_num_cols]
+                                st.session_state[f"pc_tab_edit_cols_{page}_{tab_idx}"] = edit_cols
+                            
+                            date_seen = any(c.get("type") == "date" for c in edit_cols)
+                            
+                            # Column editor
+                            for col_idx, col in enumerate(edit_cols):
+                                st.markdown(f"**Column {col_idx+1}**")
+                                ec1, ec2, ec3, ec4 = st.columns([0.28, 0.28, 0.24, 0.20])
+                                
+                                with ec1:
+                                    col["name"] = st.text_input(
+                                        "Field name",
+                                        value=col.get("name", f"col_{col_idx+1}"),
+                                        key=f"pc_tab_edit_name_{page}_{loc_key}_{tab_idx}_{col_idx}"
+                                    )
+                                
+                                with ec2:
+                                    col["label"] = st.text_input(
+                                        "Label",
+                                        value=col.get("label", f"Column {col_idx+1}"),
+                                        key=f"pc_tab_edit_label_{page}_{loc_key}_{tab_idx}_{col_idx}"
+                                    )
+                                
+                                with ec3:
+                                    current_type = col.get("type", "number")
+                                    type_choice = st.selectbox(
+                                        "Type",
+                                        ["text", "number", "date"],
+                                        index=["text", "number", "date"].index(current_type),
+                                        key=f"pc_tab_edit_type_{page}_{loc_key}_{tab_idx}_{col_idx}"
+                                    )
+                                    
+                                    if type_choice == "date":
+                                        if not date_seen or current_type == "date":
+                                            col["type"] = "date"
+                                            date_seen = True
+                                        else:
+                                            st.warning("Only one 'date' column allowed.")
+                                            col["type"] = "number"
+                                    else:
+                                        col["type"] = type_choice
+                                
+                                with ec4:
+                                    col["required"] = st.checkbox(
+                                        "Required",
+                                        value=bool(col.get("required", False)),
+                                        key=f"pc_tab_edit_req_{page}_{loc_key}_{tab_idx}_{col_idx}"
+                                    )
+                                
+                                # Decimal places for number columns
+                                if col.get("type") == "number":
+                                    dec1, dec2 = st.columns([0.7, 0.3])
+                                    with dec1:
+                                        st.caption("Decimal Places")
+                                    with dec2:
+                                        col["decimal_places"] = st.number_input(
+                                            "Decimals",
+                                            min_value=0,
+                                            max_value=6,
+                                            value=col.get("decimal_places", 2),
+                                            step=1,
+                                            key=f"pc_tab_edit_dec_{page}_{loc_key}_{tab_idx}_{col_idx}",
+                                            label_visibility="collapsed"
+                                        )
+                                
+                                # Formula display (read-only for now)
+                                if col.get("formula"):
+                                    f = col["formula"]
+                                    op = f.get("operation", "N/A")
+                                    cols = ", ".join(f.get("columns", []))
+                                    st.caption(f"📐 Formula: {op.upper()}({cols})")
+                                
+                                st.markdown("---")
+                            
+                            # Save changes
+                            scol1, scol2 = st.columns([0.5, 0.5])
+                            with scol1:
+                                if st.button("💾 Save Changes", key=f"pc_tab_save_{page}_{loc_key}_{tab_idx}", type="primary"):
+                                    try:
+                                        with get_session() as s:
+                                            update_custom_tab(s, loc.id, page, tab_id, columns=edit_cols)
+                                        st.success(f"Tab '{tab_name}' updated successfully!")
+                                        del st.session_state[f"pc_tab_editing_{page}_{tab_idx}"]
+                                        del st.session_state[f"pc_tab_edit_cols_{page}_{tab_idx}"]
+                                        st.rerun()
+                                    except Exception as ex:
+                                        st.error(f"Failed to save changes: {ex}")
+                            with scol2:
+                                if st.button("❌ Cancel Edit", key=f"pc_tab_cancel_{page}_{loc_key}_{tab_idx}"):
+                                    del st.session_state[f"pc_tab_editing_{page}_{tab_idx}"]
+                                    del st.session_state[f"pc_tab_edit_cols_{page}_{tab_idx}"]
+                                    st.rerun()
+                        
+                        st.markdown("---")
+                    
+                    st.markdown("---")
+                else:
+                    st.info(f"No custom tabs found for {page_display}. Create a new tab above to get started.")
+        
+        except Exception as ex:
+            st.error(f"Failed to load existing tabs: {ex}")
     
     # ============================
     # 📍 YADE Tracking — Custom Tables & Filters (per location)
@@ -1134,99 +1501,4 @@ def render_page_customization(user: Dict[str, Any]):
             except Exception as ex:
                 st.error(f"Failed to update Yade-Vessel Mapping tabs: {ex}")
 
-    # Manage existing custom tabs
-    with st.expander("📋 Manage Existing Custom Tabs", expanded=True):
-        st.markdown("### Existing Custom Tabs")
-        
-        from location_config import get_custom_tabs, delete_custom_tab, update_custom_tab
-        
-        # Show tabs for each page
-        for page in ["tank_transactions", "tanker_transactions"]:
-            page_display = "Tank Transactions" if page == "tank_transactions" else "Tanker Transactions"
-            
-            with get_session() as s:
-                tabs = get_custom_tabs(s, loc.id, page)
-            
-            if tabs:
-                st.markdown(f"#### {page_display}")
-                
-                for tab in tabs:
-                    tab_id = tab.get("id")
-                    tab_name = tab.get("name")
-                    table_name = tab.get("table_name")
-                    columns = tab.get("columns", [])
-                    active = tab.get("active", True)
-                    
-                    with st.container():
-                        col1, col2, col3 = st.columns([0.5, 0.3, 0.2])
-                        
-                        with col1:
-                            status_icon = "✅" if active else "⏸️"
-                            st.markdown(f"**{status_icon} {tab_name}**")
-                            st.caption(f"Table: `{table_name}` | {len(columns)} columns")
-                        
-                        with col2:
-                            # Toggle active status
-                            if st.button(
-                                "⏸️ Deactivate" if active else "▶️ Activate",
-                                key=f"pc_custom_tab_toggle_{tab_id}"
-                            ):
-                                try:
-                                    with get_session() as s:
-                                        update_custom_tab(s, loc.id, page, tab_id, active=not active)
-                                    st.success(f"Tab {'deactivated' if active else 'activated'}.")
-                                    st.rerun()
-                                except Exception as ex:
-                                    st.error(f"Failed to update: {ex}")
-                        
-                        with col3:
-                            # Delete tab
-                            if st.button("🗑️ Delete", key=f"pc_custom_tab_delete_{tab_id}"):
-                                try:
-                                    from models import drop_custom_tab_table
-                                    
-                                    with get_session() as s:
-                                        # Delete from config
-                                        delete_custom_tab(s, loc.id, page, tab_id)
-                                        
-                                        # Try to drop table (optional - may want to keep data)
-                                        # drop_custom_tab_table(table_name)
-                                        
-                                        try:
-                                            SecurityManager.log_audit(
-                                                s, (user or {}).get("username", "system"), "DELETE",
-                                                resource_type="PageCustomization:CustomTab",
-                                                resource_id=tab_id,
-                                                details=f"Deleted custom tab '{tab_name}' (table: {table_name})",
-                                                user_id=(user or {}).get("id"),
-                                                location_id=loc.id,
-                                                success=True,
-                                                ip_address=st.session_state.get("client_ip")
-                                            )
-                                        except Exception:
-                                            pass
-                                    
-                                    st.success(f"Tab '{tab_name}' deleted.")
-                                    st.info("Note: Database table was preserved. Contact IT to drop the table if needed.")
-                                    st.rerun()
-                                except Exception as ex:
-                                    st.error(f"Failed to delete: {ex}")
-                        
-                        # Show column details
-                        with st.expander(f"View Columns for {tab_name}"):
-                            for idx, col in enumerate(columns, 1):
-                                formula_info = ""
-                                if col.get("formula"):
-                                    f = col["formula"]
-                                    op = f.get("operation", "N/A")
-                                    cols = ", ".join(f.get("columns", []))
-                                    formula_info = f" — **Formula**: {op.upper()}({cols})"
-                                
-                                st.write(f"{idx}. `{col['name']}` — {col['label']} — *{col['type']}* — {'required' if col.get('required') else 'optional'}{formula_info}")
-                        
-                        st.markdown("---")
-            else:
-                st.info(f"No custom tabs defined for {page_display} yet.")
-            
-            st.markdown("---")
 

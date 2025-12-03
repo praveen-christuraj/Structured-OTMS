@@ -44,7 +44,7 @@ def render_login_page(notice: str | None = None):
             place-items: center;
             min-height: 300px;
             padding: 0.5rem;
-            margin-top: -7.5rem;
+            margin-top: -10.5rem;
         }
         .brand-tagline {
             margin: 0.5rem 0 0 0;

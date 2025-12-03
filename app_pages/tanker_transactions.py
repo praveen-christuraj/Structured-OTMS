@@ -1432,6 +1432,7 @@ def _render_custom_tanker_tab(loc, user, tab_def: dict):
     """
     import json
     from models import get_custom_table_model
+    from logger import log_error, log_warning, log_info
     
     # Import the formula evaluator from tank_transactions
     try:
@@ -1499,6 +1500,37 @@ def _render_custom_tanker_tab(loc, user, tab_def: dict):
     
     if not table_name:
         st.error("No table name defined for this custom tab.")
+        return
+    
+    # Validate table exists BEFORE rendering the form
+    CustomModel = get_custom_table_model(table_name)
+    if not CustomModel:
+        error_msg = f"❌ Database table `{table_name}` does not exist!"
+        log_error(error_msg)
+        st.error(error_msg)
+        
+        # Offer to recreate table
+        st.warning("The database table is missing. This can happen if the table creation failed previously.")
+        if st.button("🔧 Recreate Database Table", key=f"recreate_table_{table_name}"):
+            try:
+                from models import create_custom_tab_table
+                log_info(f"Attempting to recreate table {table_name}")
+                
+                table_created = create_custom_tab_table(table_name, columns, loc.id)
+                
+                if table_created:
+                    st.success(f"✅ Table `{table_name}` recreated successfully! Please refresh the page.")
+                    log_info(f"Table {table_name} recreated successfully")
+                    st.rerun()
+                else:
+                    st.error("Failed to recreate table. Check logs for details.")
+                    log_error(f"Failed to recreate table {table_name}")
+            except Exception as recreate_ex:
+                error_msg = f"Error recreating table: {recreate_ex}"
+                st.error(error_msg)
+                log_error(error_msg, exc_info=True)
+        
+        st.info("💡 Alternative: Use Page Customization to delete this tab completely and create a new one.")
         return
     
     # Separate manual and calculated columns
@@ -1579,25 +1611,53 @@ def _render_custom_tanker_tab(loc, user, tab_def: dict):
     
     # Save to custom table
     try:
+        from logger import log_error, log_warning, log_info
+        
+        # Get the model (table already validated above)
         CustomModel = get_custom_table_model(table_name)
         
-        if CustomModel:
-            with get_session() as s:
-                # Prepare data for insertion
+        with get_session() as s:
+                # Get actual columns that exist in the database table
+                actual_columns = set()
+                try:
+                    if hasattr(CustomModel, '__table__'):
+                        actual_columns = {col.name for col in CustomModel.__table__.columns}
+                except Exception:
+                    pass
+                
+                # Prepare data for insertion - only include standard columns first
                 record_data = {
                     "location_id": loc.id,
                     "tx_date": tx_date,
                     "created_by": (user or {}).get("username", "system"),
                 }
                 
-                # Add custom columns
+                # Reserved Python keywords and built-in names that can't be used as kwargs
+                reserved_names = {
+                    'date', 'time', 'datetime', 'id', 'type', 'class', 'def', 'return',
+                    'import', 'from', 'as', 'if', 'else', 'elif', 'for', 'while', 'break',
+                    'continue', 'pass', 'try', 'except', 'finally', 'raise', 'with', 'lambda',
+                    'yield', 'assert', 'del', 'global', 'nonlocal', 'is', 'in', 'not', 'and',
+                    'or', 'True', 'False', 'None'
+                }
+                
+                # Add custom columns only if they exist in the actual table
                 for col in columns:
                     col_name = col.get("name")
-                    if col_name and col_name in row:
-                        record_data[col_name] = row[col_name]
+                    if col_name and col_name in row and col_name in actual_columns:
+                        # If column name is reserved, we'll set it after object creation
+                        if col_name.lower() not in reserved_names:
+                            record_data[col_name] = row[col_name]
                 
-                # Create record
+                # Create record with safe column names
                 record = CustomModel(**record_data)
+                
+                # Set reserved column names using setattr (only if they exist in table)
+                for col in columns:
+                    col_name = col.get("name")
+                    if col_name and col_name in row and col_name in actual_columns and col_name.lower() in reserved_names:
+                        setattr(record, col_name, row[col_name])
+                
                 s.add(record)
                 s.commit()
                 
@@ -1608,17 +1668,38 @@ def _render_custom_tanker_tab(loc, user, tab_def: dict):
                         "CREATE",
                         resource_type=f"CustomTab:{tab_name}",
                         resource_id=str(getattr(record, "id", "")),
-                        details=f"Custom tanker tab row saved: {row}",
+                        details=f"Custom tanker tab entry created in table {table_name}",
                         user_id=(user or {}).get("id"),
                         location_id=loc.id,
                         ip_address=st.session_state.get("client_ip"),
                         success=True
                     )
-                except Exception:
-                    pass
+                except Exception as audit_ex:
+                    from logger import log_error
+                    log_error(f"Failed to log audit for custom tab save: {audit_ex}")
                 
-                st.success(f"Row saved to {tab_name}.")
-        else:
-            st.error(f"Database table `{table_name}` not found. Please contact administrator.")
+                st.success(f"✅ Row saved to {tab_name}.")
+                log_info(f"Successfully saved entry to {table_name}")
+                st.rerun()
     except Exception as ex:
-        st.error(f"Failed to save: {ex}")
+        error_msg = f"Save failed: {ex}"
+        st.error(error_msg)
+        from logger import log_error
+        log_error(f"Custom tab save error for {tab_name}: {ex}", exc_info=True)
+        
+        try:
+            from security import SecurityManager
+            with get_session() as s:
+                SecurityManager.log_audit(
+                    s, (user or {}).get("username", "system"),
+                    "CREATE",
+                    resource_type=f"CustomTab:{tab_name}",
+                    resource_id="",
+                    details=f"Save failed: {str(ex)}",
+                    user_id=(user or {}).get("id"),
+                    location_id=loc.id,
+                    ip_address=st.session_state.get("client_ip"),
+                    success=False
+                )
+        except Exception as audit_ex:
+            log_error(f"Failed to log audit for custom tab error: {audit_ex}")

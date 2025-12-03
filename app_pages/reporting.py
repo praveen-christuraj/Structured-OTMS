@@ -34,27 +34,28 @@ def get_user_reports(user: dict, location_id: int = None):
             ReportDefinition.is_active == True
         )
         
-        # Admins see all reports
+        # First filter: Only show reports for current location or global reports
+        if location_id:
+            query = query.filter(
+                (ReportDefinition.location_id == None) |  # noqa: E711  (global reports)
+                (ReportDefinition.location_id == location_id)  # reports for this location
+            )
+        
+        # Admins see all reports (that match location filter above)
         if PermissionManager.can_access_management_pages(user):
             reports = query.all()
         else:
             # Regular users see only reports they have access to
             query = query.join(ReportAccess, ReportDefinition.id == ReportAccess.report_id)
             
-            # Filter by role, user_id, or location (scoped to current location unless global)
+            # Filter by access grants: role, user_id, or location
+            # Only show if user has access grant that matches their role, user_id, or current location
             query = query.filter(
+                (ReportAccess.role == user['role']) |
+                (ReportAccess.user_id == user['id']) |
                 (
-                    (ReportAccess.role == user['role']) |
-                    (ReportAccess.user_id == user['id']) |
-                    (ReportAccess.location_id == location_id)
-                )
-                & (
-                    (ReportAccess.location_id == None) |  # noqa: E711
-                    (ReportAccess.location_id == location_id)
-                )
-                & (
-                    (ReportDefinition.location_id == None) |  # noqa: E711
-                    (ReportDefinition.location_id == location_id)
+                    (ReportAccess.location_id == location_id) &
+                    (location_id != None)  # noqa: E711
                 )
             )
             

@@ -12,10 +12,9 @@ connect_args = {"check_same_thread": False} if DB_URL.startswith("sqlite") else 
 engine = create_engine(DB_URL, echo=False, future=True, connect_args=connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
-FLEX_DB_URL = os.getenv("FLEX_DB_URL", "sqlite:///otms_flex.db")
-flex_connect_args = {"check_same_thread": False} if FLEX_DB_URL.startswith("sqlite") else {}
-flex_engine = create_engine(FLEX_DB_URL, echo=False, future=True, connect_args=flex_connect_args)
-FlexibleSessionLocal = sessionmaker(bind=flex_engine, autoflush=False, autocommit=False, future=True)
+# Unified database: flex_engine now points to the same database as main engine
+flex_engine = engine
+FlexibleSessionLocal = SessionLocal
 
 # Import AFTER engine so models bind to this MetaData one time
 from models import Base  # noqa: E402

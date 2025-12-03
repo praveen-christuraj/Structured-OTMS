@@ -284,50 +284,50 @@ def render_convoy_status_page(active_location_id: Optional[int], user: Optional[
                         st.session_state[status_key] = status_opts_yade[0]
                 rc[3].selectbox("Status", status_opts_yade, key=status_key, label_visibility="collapsed")
 
-        save_key = f"convoy_status_yade_save_{target_location_id}"
-        if st.button(" Save YADE Status", key=save_key, use_container_width=True):
-            try:
-                with get_session() as s:
-                    existing = s.query(ConvoyStatusYade).filter(ConvoyStatusYade.location_id == target_location_id, ConvoyStatusYade.date == yade_date).all()
-                    existing_map = {row.yade_barge_id: row for row in existing}
-                    changes = 0
-                    for yade in yade_barges:
-                        yname = _norm(yade.name)
-                        convoy_key = f"convoy_status_yade_{yade_date.isoformat()}_{yade.id}_convoy"
-                        stock_key = f"convoy_status_yade_{yade_date.isoformat()}_{yade.id}_stock"
-                        status_key = f"convoy_status_yade_{yade_date.isoformat()}_{yade.id}_status"
-                        selected_convoy = st.session_state.get(convoy_key, "N/A")
-                        selected_stock = st.session_state.get(stock_key, "N/A")
-                        selected_status = st.session_state.get(status_key, "Select status")
-                        if selected_status in ("Select status", "N/A", ""):
-                            continue
-                        stock_value = None
-                        for opt in yade_stock_map.get((yname, selected_convoy), []):
-                            if opt["label"] == selected_stock:
-                                stock_value = opt["value"]
-                                break
-                        record = existing_map.get(yade.id)
-                        if not record:
-                            record = ConvoyStatusYade(location_id=target_location_id, date=yade_date, yade_barge_id=yade.id, created_by=user.get("username", "unknown"))
-                            s.add(record)
-                        record.convoy_no = None if selected_convoy == "N/A" else selected_convoy
-                        record.stock_display = None if selected_stock == "N/A" else selected_stock
-                        record.stock_value_bbl = stock_value
-                        record.status = selected_status
-                        record.updated_by = user.get("username")
-                        changes += 1
+            save_key = f"convoy_status_yade_save_{target_location_id}"
+            if st.button(" Save YADE Status", key=save_key, use_container_width=True):
+                try:
+                    with get_session() as s:
+                        existing = s.query(ConvoyStatusYade).filter(ConvoyStatusYade.location_id == target_location_id, ConvoyStatusYade.date == yade_date).all()
+                        existing_map = {row.yade_barge_id: row for row in existing}
+                        changes = 0
+                        for yade in yade_barges:
+                            yname = _norm(yade.name)
+                            convoy_key = f"convoy_status_yade_{yade_date.isoformat()}_{yade.id}_convoy"
+                            stock_key = f"convoy_status_yade_{yade_date.isoformat()}_{yade.id}_stock"
+                            status_key = f"convoy_status_yade_{yade_date.isoformat()}_{yade.id}_status"
+                            selected_convoy = st.session_state.get(convoy_key, "N/A")
+                            selected_stock = st.session_state.get(stock_key, "N/A")
+                            selected_status = st.session_state.get(status_key, "Select status")
+                            if selected_status in ("Select status", "N/A", ""):
+                                continue
+                            stock_value = None
+                            for opt in yade_stock_map.get((yname, selected_convoy), []):
+                                if opt["label"] == selected_stock:
+                                    stock_value = opt["value"]
+                                    break
+                            record = existing_map.get(yade.id)
+                            if not record:
+                                record = ConvoyStatusYade(location_id=target_location_id, date=yade_date, yade_barge_id=yade.id, created_by=user.get("username", "unknown"))
+                                s.add(record)
+                            record.convoy_no = None if selected_convoy == "N/A" else selected_convoy
+                            record.stock_display = None if selected_stock == "N/A" else selected_stock
+                            record.stock_value_bbl = stock_value
+                            record.status = selected_status
+                            record.updated_by = user.get("username")
+                            changes += 1
+                        if changes > 0:
+                            s.commit()
+                            SecurityManager.log_audit(None, user["username"], "UPDATE", resource_type="ConvoyStatusYade", resource_id=f"{target_location_id}:{yade_date.isoformat()}", location_id=target_location_id, details=f"Saved {changes} YADE convoy rows for {yade_date}", user_id=user.get("id"))
+                            st.success(f"YADE convoy status saved. {changes} record(s) updated.")
+                        else:
+                            st.warning("No valid entries to save. Please select a status for at least one YADE barge.")
                     if changes > 0:
-                        s.commit()
-                        SecurityManager.log_audit(None, user["username"], "UPDATE", resource_type="ConvoyStatusYade", resource_id=f"{target_location_id}:{yade_date.isoformat()}", location_id=target_location_id, details=f"Saved {changes} YADE convoy rows for {yade_date}", user_id=user.get("id"))
-                        st.success(f"YADE convoy status saved. {changes} record(s) updated.")
-                    else:
-                        st.warning("No valid entries to save. Please select a status for at least one YADE barge.")
-                if changes > 0:
-                    _st_safe_rerun()
-            except Exception as ex:
-                st.error(f"Failed to save YADE status: {ex}")
-                import traceback
-                st.code(traceback.format_exc())
+                        _st_safe_rerun()
+                except Exception as ex:
+                    st.error(f"Failed to save YADE status: {ex}")
+                    import traceback
+                    st.code(traceback.format_exc())
     
     with tabs[tab_idx["vessel"]]:
         if "convoy_status_vessel_date" not in st.session_state:

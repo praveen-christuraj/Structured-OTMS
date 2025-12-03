@@ -1194,7 +1194,11 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
             log_info(f"Inserting record into '{table_name}' with data: {record_data}")
             rec = CustomModel(**record_data)
             s.add(rec)
+            s.flush()  # Flush to get the ID before commit
+            record_id = getattr(rec, "id", "unknown")
+            log_info(f"Record created with ID: {record_id}, about to commit...")
             s.commit()
+            log_info(f"✅ Commit successful for record {record_id} in table '{table_name}'")
 
             try:
                 flex_payload = {}
@@ -1204,7 +1208,7 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
                     page="tank_transactions",
                     section=section_key,
                     tx_date=tx_date,
-                    data_json=json.dumps(flex_payload),
+                    data_json=json.dumps(flex_payload, default=str),  # Use default=str to handle dates
                     created_by=(user or {}).get("username", "system"),
                 )
                 s.add(flex_row)
@@ -1213,7 +1217,6 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
             except Exception as flex_ex:
                 log_warning(f"Failed to persist FlexibleRecord mirror for '{section_key}': {str(flex_ex)}")
             
-            record_id = getattr(rec, "id", "unknown")
             log_info(f"✅ Successfully saved record {record_id} to table '{table_name}'")
             
             try:

@@ -2806,3 +2806,1229 @@
 2025-12-03 08:17:53 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
 2025-12-03 08:17:53 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
 2025-12-03 08:17:53 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 10:01:17 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:01:17 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:17 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:01:18 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:01:18 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:02:55 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:02:55 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:33 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:33 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:34 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:34 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:34 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:03:34 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:03:34 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Loading columns for standard data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Retrieved 22 columns for data source 'otr_records'
+2025-12-03 10:06:05 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:05 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:05 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:05 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:05 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:06:06 - OTMS - INFO - Reflecting table 'otr_records' from flex database...
+2025-12-03 10:06:06 - OTMS - INFO - Successfully created model for table 'otr_records' from flex database
+2025-12-03 10:17:44 - OTMS - INFO - Loaded 61 tables from primary database
+2025-12-03 10:17:44 - OTMS - INFO - Loaded 54 tables from flexible database
+2025-12-03 10:17:44 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-03 10:17:44 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 10:17:44 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 10:17:44 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 10:17:44 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 10:17:44 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 10:17:44 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 10:17:44 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 10:17:44 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 10:17:44 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 10:17:44 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 10:17:44 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 10:17:44 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 10:17:44 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 10:17:44 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 10:22:23 - OTMS - INFO - Attempting to create custom table 'custom_no_of_tankers_3' for location_id=3
+2025-12-03 10:22:23 - OTMS - INFO - Database connection verified for table 'custom_no_of_tankers_3' creation
+2025-12-03 10:22:23 - OTMS - INFO - Table 'custom_no_of_tankers_3' does not exist. Creating new table...
+2025-12-03 10:22:23 - OTMS - INFO - Processing 4 custom column definitions for table 'custom_no_of_tankers_3'
+2025-12-03 10:22:23 - OTMS - INFO - Added column 'Date' (date) to table 'custom_no_of_tankers_3'
+2025-12-03 10:22:23 - OTMS - INFO - Added column 'Tankers from Aggu' (number) to table 'custom_no_of_tankers_3'
+2025-12-03 10:22:23 - OTMS - INFO - Added column 'In-Transit Loaded' (number) to table 'custom_no_of_tankers_3'
+2025-12-03 10:22:23 - OTMS - INFO - Added column 'Standby at Aggu' (number) to table 'custom_no_of_tankers_3'
+2025-12-03 10:22:23 - OTMS - INFO - Creating table 'custom_no_of_tankers_3' with 11 columns in database...
+2025-12-03 10:22:24 - OTMS - INFO - ✅ Successfully created table 'custom_no_of_tankers_3'
+2025-12-03 10:23:07 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:23:07 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:23:18 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:23:18 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:29:54 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:29:54 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:31:10 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:31:10 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:31:31 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:31:31 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:31:44 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:31:44 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:32:43 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:32:43 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:33:06 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:33:06 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:33:45 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:33:45 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:34:33 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:34:33 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:36:37 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:36:37 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:36:58 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:36:58 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:37:08 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:37:08 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 10:37:20 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 10:37:20 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:21:30 - OTMS - INFO - Loaded 62 tables from primary database
+2025-12-03 11:21:30 - OTMS - INFO - Loaded 58 tables from flexible database
+2025-12-03 11:21:30 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-03 11:21:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:21:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:21:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:21:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:21:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:21:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:21:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:21:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:21:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:21:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:21:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:21:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:21:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:21:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:23:21 - OTMS - INFO - Attempting to create custom table 'custom_no_of_tankers_3' for location_id=3
+2025-12-03 11:23:21 - OTMS - INFO - Database connection verified for table 'custom_no_of_tankers_3' creation
+2025-12-03 11:23:21 - OTMS - INFO - Table 'custom_no_of_tankers_3' already exists. Skipping creation.
+2025-12-03 11:27:58 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:27:58 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:29:14 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:29:14 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:32:16 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:32:16 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:32:16 - OTMS - ERROR - Custom tab save error for No of Tankers: 'tankers_loaded' is an invalid keyword argument for Custom_custom_no_of_tankers_3
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1611, in _render_custom_tanker_tab
+    record = CustomModel(**record_data)
+  File "<string>", line 4, in __init__
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+        "%r is an invalid keyword argument for %s" % (k, cls_.__name__)
+    )
+TypeError: 'tankers_loaded' is an invalid keyword argument for Custom_custom_no_of_tankers_3
+2025-12-03 11:32:36 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:32:36 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:32:36 - OTMS - ERROR - Custom tab save error for No of Tankers: 'tankers_loaded' is an invalid keyword argument for Custom_custom_no_of_tankers_3
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1611, in _render_custom_tanker_tab
+    record = CustomModel(**record_data)
+  File "<string>", line 4, in __init__
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+        "%r is an invalid keyword argument for %s" % (k, cls_.__name__)
+    )
+TypeError: 'tankers_loaded' is an invalid keyword argument for Custom_custom_no_of_tankers_3
+2025-12-03 11:35:48 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:35:48 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:35:56 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:35:56 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:14 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:14 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:14 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:14 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:21 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:21 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:21 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:21 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:21 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:21 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:24 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:24 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:24 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:24 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:26 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:26 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:26 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:26 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:36:27 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:36:27 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:42:33 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:42:33 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:42:39 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:42:39 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:42:53 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:42:53 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:43:01 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:43:01 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:43:01 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:43:01 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:43:04 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:43:04 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:43:04 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:43:04 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:43:04 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:43:04 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:43:06 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:43:06 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:43:06 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:43:06 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:44:19 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:44:19 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:44:19 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:44:19 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:44:19 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:44:19 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:44:28 - OTMS - INFO - Loaded 62 tables from primary database
+2025-12-03 11:44:28 - OTMS - INFO - Loaded 58 tables from flexible database
+2025-12-03 11:44:28 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-03 11:44:28 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:44:28 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:44:28 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:44:28 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:44:28 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:44:28 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:44:28 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:44:28 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:44:28 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:44:28 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:44:28 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-03 11:44:28 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-03 11:44:28 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-03 11:44:28 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-03 11:45:48 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:45:48 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:49:13 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:49:13 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:49:19 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:49:19 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:51:05 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:51:05 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:51:10 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:51:10 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:51:18 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:51:18 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:56:40 - OTMS - INFO - Creating custom tab 'No of Tankers' for tanker_transactions at location 3
+2025-12-03 11:56:40 - OTMS - INFO - Tab configuration added: d3e125f3-fd9d-4a25-a10d-716a1e264d86 - custom_no_of_tankers_3
+2025-12-03 11:56:40 - OTMS - INFO - Attempting to create custom table 'custom_no_of_tankers_3' for location_id=3
+2025-12-03 11:56:40 - OTMS - INFO - Database connection verified for table 'custom_no_of_tankers_3' creation
+2025-12-03 11:56:40 - OTMS - INFO - Table 'custom_no_of_tankers_3' already exists. Skipping creation.
+2025-12-03 11:56:41 - OTMS - INFO - ✅ Custom tab 'No of Tankers' created successfully
+2025-12-03 11:56:56 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:56:56 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:57:21 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 11:57:21 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 11:57:21 - OTMS - ERROR - Custom tab save error for No of Tankers: (sqlite3.OperationalError) no such table: custom_no_of_tankers_3
+[SQL: INSERT INTO custom_no_of_tankers_3 (location_id, tx_date, created_by, updated_by, updated_at, "Date", "Tankers from Aggu", "In-Transit Loaded", "Standby at Aggu") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at]
+[parameters: (3, '2025-12-03', 'Aggu', None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: custom_no_of_tankers_3
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1628, in _render_custom_tanker_tab
+    s.commit()
+    ~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<string>", line 2, in commit
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "<string>", line 2, in _prepare_impl
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+    ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+    ~~~~~~~~~~~^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.mapper,
+        ^^^^^^^^^^^^
+        uow.states_for_mapper_hierarchy(self.mapper, False, False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        uow,
+        ^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        base_mapper,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        insert,
+        ^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+        statement,
+        params,
+        execution_options=execution_options,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: custom_no_of_tankers_3
+[SQL: INSERT INTO custom_no_of_tankers_3 (location_id, tx_date, created_by, updated_by, updated_at, "Date", "Tankers from Aggu", "In-Transit Loaded", "Standby at Aggu") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at]
+[parameters: (3, '2025-12-03', 'Aggu', None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-03 12:03:20 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:03:20 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:03:20 - OTMS - ERROR - Custom tab save error for No of Tankers: (sqlite3.OperationalError) no such table: custom_no_of_tankers_3
+[SQL: INSERT INTO custom_no_of_tankers_3 (location_id, tx_date, created_by, updated_by, updated_at, "Date", "Tankers from Aggu", "In-Transit Loaded", "Standby at Aggu") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at]
+[parameters: (3, '2025-12-03', 'Aggu', None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: custom_no_of_tankers_3
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1659, in _render_custom_tanker_tab
+    s.commit()
+    ~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<string>", line 2, in commit
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "<string>", line 2, in _prepare_impl
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+    ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+    ~~~~~~~~~~~^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.mapper,
+        ^^^^^^^^^^^^
+        uow.states_for_mapper_hierarchy(self.mapper, False, False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        uow,
+        ^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        base_mapper,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        insert,
+        ^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+        statement,
+        params,
+        execution_options=execution_options,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: custom_no_of_tankers_3
+[SQL: INSERT INTO custom_no_of_tankers_3 (location_id, tx_date, created_by, updated_by, updated_at, "Date", "Tankers from Aggu", "In-Transit Loaded", "Standby at Aggu") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at]
+[parameters: (3, '2025-12-03', 'Aggu', None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-03 12:03:58 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:03:58 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:03:58 - OTMS - ERROR - Custom tab save error for No of Tankers: (sqlite3.OperationalError) no such table: custom_no_of_tankers_3
+[SQL: INSERT INTO custom_no_of_tankers_3 (location_id, tx_date, created_by, updated_by, updated_at, "Date", "Tankers from Aggu", "In-Transit Loaded", "Standby at Aggu") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at]
+[parameters: (3, '2025-12-03', 'admin', None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: custom_no_of_tankers_3
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1659, in _render_custom_tanker_tab
+    s.commit()
+    ~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<string>", line 2, in commit
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "<string>", line 2, in _prepare_impl
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+    ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+    ~~~~~~~~~~~^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.mapper,
+        ^^^^^^^^^^^^
+        uow.states_for_mapper_hierarchy(self.mapper, False, False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        uow,
+        ^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        base_mapper,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        insert,
+        ^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+        statement,
+        params,
+        execution_options=execution_options,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: custom_no_of_tankers_3
+[SQL: INSERT INTO custom_no_of_tankers_3 (location_id, tx_date, created_by, updated_by, updated_at, "Date", "Tankers from Aggu", "In-Transit Loaded", "Standby at Aggu") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at]
+[parameters: (3, '2025-12-03', 'admin', None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-03 12:04:49 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:04:49 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:04:49 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:04:49 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:05:00 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:05:00 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:05:00 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:05:01 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:06:16 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:06:16 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:06:16 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:06:16 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:06:16 - OTMS - ERROR - Custom tab save error for No of Tankers: (sqlite3.OperationalError) no such table: custom_no_of_tankers_3
+[SQL: INSERT INTO custom_no_of_tankers_3 (location_id, tx_date, created_by, updated_by, updated_at, "Date", "Tankers from Aggu", "In-Transit Loaded", "Standby at Aggu") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at]
+[parameters: (3, '2025-12-03', 'Aggu', None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: custom_no_of_tankers_3
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\tanker_transactions.py", line 1662, in _render_custom_tanker_tab
+    s.commit()
+    ~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<string>", line 2, in commit
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "<string>", line 2, in _prepare_impl
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+    ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+    ~~~~~~~~~~~^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.mapper,
+        ^^^^^^^^^^^^
+        uow.states_for_mapper_hierarchy(self.mapper, False, False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        uow,
+        ^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        base_mapper,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        insert,
+        ^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+        statement,
+        params,
+        execution_options=execution_options,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: custom_no_of_tankers_3
+[SQL: INSERT INTO custom_no_of_tankers_3 (location_id, tx_date, created_by, updated_by, updated_at, "Date", "Tankers from Aggu", "In-Transit Loaded", "Standby at Aggu") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at]
+[parameters: (3, '2025-12-03', 'Aggu', None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-03 12:06:35 - OTMS - INFO - Attempting to drop table custom_no_of_tankers_3
+2025-12-03 12:06:35 - OTMS - INFO - ✅ Table custom_no_of_tankers_3 dropped successfully
+2025-12-03 12:07:22 - OTMS - INFO - Creating custom tab 'No of Tankers' for tanker_transactions at location 3
+2025-12-03 12:07:22 - OTMS - INFO - Tab configuration added: fc5c7f15-5179-404f-86ab-cfd581c49cf7 - custom_no_of_tankers_3
+2025-12-03 12:07:22 - OTMS - INFO - Attempting to create custom table 'custom_no_of_tankers_3' for location_id=3
+2025-12-03 12:07:22 - OTMS - INFO - Database connection verified for table 'custom_no_of_tankers_3' creation
+2025-12-03 12:07:22 - OTMS - INFO - Table 'custom_no_of_tankers_3' does not exist. Creating new table...
+2025-12-03 12:07:22 - OTMS - INFO - Processing 4 custom column definitions for table 'custom_no_of_tankers_3'
+2025-12-03 12:07:22 - OTMS - INFO - Added column 'date' (date) to table 'custom_no_of_tankers_3'
+2025-12-03 12:07:22 - OTMS - INFO - Added column 'tankers_loaded_from_Agu' (number) to table 'custom_no_of_tankers_3'
+2025-12-03 12:07:22 - OTMS - INFO - Added column 'in_transit_loaded' (number) to table 'custom_no_of_tankers_3'
+2025-12-03 12:07:22 - OTMS - INFO - Added column 'standby_at_aggu' (number) to table 'custom_no_of_tankers_3'
+2025-12-03 12:07:22 - OTMS - INFO - Creating table 'custom_no_of_tankers_3' with 11 columns in database...
+2025-12-03 12:07:22 - OTMS - INFO - ✅ Successfully created table 'custom_no_of_tankers_3'
+2025-12-03 12:07:22 - OTMS - INFO - ✅ Custom tab 'No of Tankers' created successfully
+2025-12-03 12:07:56 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:07:56 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:07:56 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:07:56 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:07:56 - OTMS - INFO - Successfully saved entry to custom_no_of_tankers_3
+2025-12-03 12:07:56 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:07:56 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:08:00 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:08:00 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:08:05 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:08:05 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:08:07 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:08:07 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:08:13 - OTMS - INFO - Reflecting table 'custom_no_of_tankers_3' from flex database...
+2025-12-03 12:08:13 - OTMS - INFO - Successfully created model for table 'custom_no_of_tankers_3' from flex database
+2025-12-03 12:12:34 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:12:35 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:12:35 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:13:01 - OTMS - INFO - Saving production data to table 'flex_production_5' for location_id=5, username=admin
+2025-12-03 12:13:01 - OTMS - INFO - Attempting to create/verify table 'flex_production_5' with 6 columns
+2025-12-03 12:13:01 - OTMS - INFO - Attempting to create custom table 'flex_production_5' for location_id=5
+2025-12-03 12:13:01 - OTMS - INFO - Database connection verified for table 'flex_production_5' creation
+2025-12-03 12:13:01 - OTMS - INFO - Table 'flex_production_5' already exists. Skipping creation.
+2025-12-03 12:13:01 - OTMS - INFO - Table 'flex_production_5' is ready for use
+2025-12-03 12:13:01 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:13:01 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:13:01 - OTMS - INFO - Successfully loaded model for table 'flex_production_5'. Proceeding to save data...
+2025-12-03 12:13:01 - OTMS - INFO - Inserting record into 'flex_production_5' with data: {'location_id': 5, 'tx_date': datetime.date(2025, 12, 3), 'created_by': 'admin', 'date': datetime.date(2025, 12, 3), 'okw_production': 16000.0, 'gpp1_production': 2000.0, 'gpp2_production': 4000.0, 'gpp_closing_stock': 12500.0, 'gpp_total_production': 6000.0}
+2025-12-03 12:13:01 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'production': Object of type date is not JSON serializable
+2025-12-03 12:13:01 - OTMS - INFO - ✅ Successfully saved record 3 to table 'flex_production_5'
+2025-12-03 12:13:11 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:13:11 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:13:11 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:15:00 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:15:00 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:15:00 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:15:00 - OTMS - ERROR - View Transactions rendering error: cannot access local variable 'all_columns_set' where it is not associated with a value
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\view_transactions.py", line 2428, in render_view_transactions_page
+    _render_tank_view_tabs(loc.id, loc_label, user)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\view_transactions.py", line 2152, in _render_tank_view_tabs
+    fn(location_id, user)
+    ~~^^^^^^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\view_transactions.py", line 2099, in _render_production_tab
+    _flex_list(location_id, "production", user, "Production")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project OTMS-Rebuild\app_pages\view_transactions.py", line 1474, in _flex_list
+    for col_name in all_columns_set:
+                    ^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'all_columns_set' where it is not associated with a value
+2025-12-03 12:16:19 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:16:19 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:16:19 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:16:40 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:16:40 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:16:41 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:16:52 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:16:52 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:16:52 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:18:21 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:18:21 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:18:21 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:19:42 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:19:42 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:19:42 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:20:59 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:20:59 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:20:59 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:21:00 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:21:00 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:21:00 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:21:04 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:21:04 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:21:04 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:21:04 - OTMS - INFO - Save button clicked for production record 3
+2025-12-03 12:21:04 - OTMS - INFO - Attempting to save production record ID: 3
+2025-12-03 12:21:04 - OTMS - INFO - Editable columns: ['date', 'gpp1_production', 'gpp2_production', 'gpp_closing_stock', 'gpp_total_production', 'okw_production', 'tx_date']
+2025-12-03 12:21:04 - OTMS - INFO - Edited values: {'date': datetime.date(2025, 12, 3), 'gpp1_production': 2000.0, 'gpp2_production': 4000.0, 'gpp_closing_stock': 12500.0, 'gpp_total_production': 6000.0, 'okw_production': 16000.0, 'tx_date': datetime.date(2025, 12, 3)}
+2025-12-03 12:21:04 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:21:04 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:21:04 - OTMS - ERROR - Record with ID 3 not found in database
+2025-12-03 12:21:04 - OTMS - ERROR - Edit production failed: Record not found in database
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\view_transactions.py", line 1973, in _flex_list
+    raise Exception(f"Record not found in database")
+Exception: Record not found in database
+2025-12-03 12:21:10 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:21:10 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:21:10 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:21:10 - OTMS - INFO - Edit cancelled for production record 3
+2025-12-03 12:21:10 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:21:10 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:21:10 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:21:12 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:21:13 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:21:13 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:21:17 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:21:17 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:21:17 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:21:19 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:21:19 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:21:19 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:21:20 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:21:20 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:21:20 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:22:12 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:22:12 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:22:12 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:22:39 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:22:39 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:22:39 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:22:41 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:22:41 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:22:41 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:22:41 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:22:41 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:22:41 - OTMS - INFO - [DELETE] FlexibleRecord:production #3 by admin - Deleted Production Record #3 with direct approval by admin (admin-operations)
+2025-12-03 12:22:42 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:22:42 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:22:42 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:23:13 - OTMS - INFO - Saving production data to table 'flex_production_5' for location_id=5, username=admin
+2025-12-03 12:23:13 - OTMS - INFO - Attempting to create/verify table 'flex_production_5' with 6 columns
+2025-12-03 12:23:13 - OTMS - INFO - Attempting to create custom table 'flex_production_5' for location_id=5
+2025-12-03 12:23:13 - OTMS - INFO - Database connection verified for table 'flex_production_5' creation
+2025-12-03 12:23:13 - OTMS - INFO - Table 'flex_production_5' already exists. Skipping creation.
+2025-12-03 12:23:13 - OTMS - INFO - Table 'flex_production_5' is ready for use
+2025-12-03 12:23:13 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:23:13 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:23:13 - OTMS - INFO - Successfully loaded model for table 'flex_production_5'. Proceeding to save data...
+2025-12-03 12:23:13 - OTMS - INFO - Inserting record into 'flex_production_5' with data: {'location_id': 5, 'tx_date': datetime.date(2025, 12, 3), 'created_by': 'admin', 'date': datetime.date(2025, 12, 3), 'okw_production': 15000.0, 'gpp1_production': 1200.0, 'gpp2_production': 3250.0, 'gpp_closing_stock': 13000.0, 'gpp_total_production': 4450.0}
+2025-12-03 12:23:13 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'production': Object of type date is not JSON serializable
+2025-12-03 12:23:13 - OTMS - INFO - ✅ Successfully saved record 3 to table 'flex_production_5'
+2025-12-03 12:23:19 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:23:19 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:23:19 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:23:44 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:23:44 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:23:44 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:23:45 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:23:45 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:23:45 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:23:54 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:23:54 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:23:54 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:23:54 - OTMS - INFO - Save button clicked for production record 3
+2025-12-03 12:23:54 - OTMS - INFO - Attempting to save production record ID: 3
+2025-12-03 12:23:54 - OTMS - INFO - Editable columns: ['date', 'gpp1_production', 'gpp2_production', 'gpp_closing_stock', 'gpp_total_production', 'okw_production', 'tx_date']
+2025-12-03 12:23:54 - OTMS - INFO - Edited values: {'date': datetime.date(2025, 12, 3), 'gpp1_production': 1200.0, 'gpp2_production': 3250.0, 'gpp_closing_stock': 13000.0, 'gpp_total_production': 4450.0, 'okw_production': 15000.0, 'tx_date': datetime.date(2025, 12, 3)}
+2025-12-03 12:23:54 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:23:54 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:23:54 - OTMS - ERROR - Record with ID 3 not found in database
+2025-12-03 12:23:54 - OTMS - ERROR - Edit production failed: Record not found in database
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\view_transactions.py", line 1973, in _flex_list
+    raise Exception(f"Record not found in database")
+Exception: Record not found in database
+2025-12-03 12:24:43 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:24:43 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:24:43 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:02 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:02 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:02 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:02 - OTMS - INFO - Save button clicked for production record 3
+2025-12-03 12:25:02 - OTMS - INFO - Attempting to save production record ID: 3
+2025-12-03 12:25:02 - OTMS - INFO - Editable columns: ['date', 'gpp1_production', 'gpp2_production', 'gpp_closing_stock', 'gpp_total_production', 'okw_production', 'tx_date']
+2025-12-03 12:25:02 - OTMS - INFO - Edited values: {'date': datetime.date(2025, 12, 3), 'gpp1_production': 1200.0, 'gpp2_production': 3250.0, 'gpp_closing_stock': 13000.0, 'gpp_total_production': 4450.0, 'okw_production': 15000.0, 'tx_date': datetime.date(2025, 12, 3)}
+2025-12-03 12:25:02 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:02 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:02 - OTMS - INFO - Found record in database, updating fields...
+2025-12-03 12:25:02 - OTMS - INFO - Updated date: 2025-12-03 -> 2025-12-03
+2025-12-03 12:25:02 - OTMS - INFO - Updated gpp1_production: 1200.0 -> 1200.0
+2025-12-03 12:25:02 - OTMS - INFO - Updated gpp2_production: 3250.0 -> 3250.0
+2025-12-03 12:25:02 - OTMS - INFO - Updated gpp_closing_stock: 13000.0 -> 13000.0
+2025-12-03 12:25:02 - OTMS - INFO - Updated gpp_total_production: 4450.0 -> 4450.0
+2025-12-03 12:25:02 - OTMS - INFO - Updated okw_production: 15000.0 -> 15000.0
+2025-12-03 12:25:02 - OTMS - INFO - Updated tx_date: 2025-12-03 -> 2025-12-03
+2025-12-03 12:25:02 - OTMS - INFO - Set updated_by to admin
+2025-12-03 12:25:02 - OTMS - INFO - Successfully committed changes to database
+2025-12-03 12:25:02 - OTMS - INFO - Audit log created successfully
+2025-12-03 12:25:03 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:03 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:03 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:12 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:12 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:12 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:14 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:14 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:14 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:14 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:14 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:14 - OTMS - INFO - [DELETE] FlexibleRecord:production #3 by admin - Deleted Production Record #3 with direct approval by admin (admin-operations)
+2025-12-03 12:25:14 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:14 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:14 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:32 - OTMS - INFO - Saving production data to table 'flex_production_5' for location_id=5, username=admin
+2025-12-03 12:25:32 - OTMS - INFO - Attempting to create/verify table 'flex_production_5' with 6 columns
+2025-12-03 12:25:32 - OTMS - INFO - Attempting to create custom table 'flex_production_5' for location_id=5
+2025-12-03 12:25:32 - OTMS - INFO - Database connection verified for table 'flex_production_5' creation
+2025-12-03 12:25:32 - OTMS - INFO - Table 'flex_production_5' already exists. Skipping creation.
+2025-12-03 12:25:32 - OTMS - INFO - Table 'flex_production_5' is ready for use
+2025-12-03 12:25:32 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:32 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:32 - OTMS - INFO - Successfully loaded model for table 'flex_production_5'. Proceeding to save data...
+2025-12-03 12:25:32 - OTMS - INFO - Inserting record into 'flex_production_5' with data: {'location_id': 5, 'tx_date': datetime.date(2025, 12, 3), 'created_by': 'admin', 'date': datetime.date(2025, 12, 3), 'okw_production': 16000.0, 'gpp1_production': 1240.0, 'gpp2_production': 3880.0, 'gpp_closing_stock': 6577.0, 'gpp_total_production': 5120.0}
+2025-12-03 12:25:32 - OTMS - WARNING - Failed to persist FlexibleRecord mirror for 'production': Object of type date is not JSON serializable
+2025-12-03 12:25:32 - OTMS - INFO - ✅ Successfully saved record 3 to table 'flex_production_5'
+2025-12-03 12:25:44 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:44 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:44 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:51 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:51 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:51 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:51 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:51 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:51 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:58 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:58 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:58 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:58 - OTMS - INFO - Save button clicked for production record 3
+2025-12-03 12:25:58 - OTMS - INFO - Attempting to save production record ID: 3
+2025-12-03 12:25:58 - OTMS - INFO - Editable columns: ['date', 'gpp1_production', 'gpp2_production', 'gpp_closing_stock', 'gpp_total_production', 'okw_production', 'tx_date']
+2025-12-03 12:25:58 - OTMS - INFO - Edited values: {'date': datetime.date(2025, 12, 3), 'gpp1_production': 1240.0, 'gpp2_production': 3880.0, 'gpp_closing_stock': 6560.0, 'gpp_total_production': 5120.0, 'okw_production': 16000.0, 'tx_date': datetime.date(2025, 12, 3)}
+2025-12-03 12:25:58 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:58 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:25:58 - OTMS - INFO - Found record in database, updating fields...
+2025-12-03 12:25:58 - OTMS - INFO - Updated date: 2025-12-03 -> 2025-12-03
+2025-12-03 12:25:58 - OTMS - INFO - Updated gpp1_production: 1240.0 -> 1240.0
+2025-12-03 12:25:58 - OTMS - INFO - Updated gpp2_production: 3880.0 -> 3880.0
+2025-12-03 12:25:58 - OTMS - INFO - Updated gpp_closing_stock: 6577.0 -> 6560.0
+2025-12-03 12:25:58 - OTMS - INFO - Updated gpp_total_production: 5120.0 -> 5120.0
+2025-12-03 12:25:58 - OTMS - INFO - Updated okw_production: 16000.0 -> 16000.0
+2025-12-03 12:25:58 - OTMS - INFO - Updated tx_date: 2025-12-03 -> 2025-12-03
+2025-12-03 12:25:58 - OTMS - INFO - Set updated_by to admin
+2025-12-03 12:25:58 - OTMS - INFO - Successfully committed changes to database
+2025-12-03 12:25:58 - OTMS - INFO - Audit log created successfully
+2025-12-03 12:25:58 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:25:58 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:25:58 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:26:02 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:26:02 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:26:02 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:26:16 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:26:17 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:26:17 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:28:38 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:28:38 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:28:38 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database
+2025-12-03 12:29:13 - OTMS - WARNING - Table 'flex_condensate_5' does not exist in primary or flex databases.
+2025-12-03 12:29:13 - OTMS - INFO - Reflecting table 'flex_production_5' from flex database...
+2025-12-03 12:29:13 - OTMS - INFO - Successfully created model for table 'flex_production_5' from flex database

@@ -538,11 +538,22 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
 
         # Table with totals row
         st.markdown("---")
+        
+        # Identify opening/closing columns (including custom ones) that should not have totals
+        exclude_from_totals = ["Opening Stock", "Closing Stock", "Book Closing Stock"]
+        if use_custom:
+            # Add custom opening and closing column labels
+            opening_labels = [c.get("label") for c in custom_cols if (c.get("type") or "").lower() == "opening"]
+            closing_labels = [c.get("label") for c in custom_cols if (c.get("type") or "").lower() == "closing"]
+            exclude_from_totals.extend(opening_labels)
+            exclude_from_totals.extend(closing_labels)
+        
         totals_row: Dict[str, Any] = {"Date": "TOTAL"}
         for col in df.columns:
             if col == "Date":
                 continue
-            if col in ["Opening Stock", "Closing Stock", "Book Closing Stock"]:
+            # Skip totals for Opening Stock, Closing Stock, and Book Closing Stock (they are just stock values, not cumulative)
+            if col in exclude_from_totals:
                 totals_row[col] = ""
             elif col == "Loss/Gain":
                 totals_row[col] = round(df[col].sum(), 2)

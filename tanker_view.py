@@ -1175,8 +1175,44 @@ def _render_custom_tanker_tab_view(location_id: Optional[int], tab_def: dict, us
     
     CustomModel = get_custom_table_model(table_name)
     if not CustomModel:
-        st.error(f"Database table `{table_name}` not found.")
+        from logger import log_error, log_info
+        error_msg = f"❌ Database table `{table_name}` does not exist!"
+        log_error(error_msg)
+        st.error(error_msg)
+        
+        st.warning("The database table is missing. This can happen if the table creation failed previously.")
+        
+        # Offer to recreate table
+        if st.button("🔧 Recreate Database Table", key=f"recreate_view_{table_name}"):
+            try:
+                from models import create_custom_tab_table
+                log_info(f"Attempting to recreate table {table_name}")
+                
+                table_created = create_custom_tab_table(table_name, columns, location_id)
+                
+                if table_created:
+                    st.success(f"✅ Table `{table_name}` recreated successfully!")
+                    log_info(f"Table {table_name} recreated successfully")
+                    st.rerun()
+                else:
+                    st.error("Failed to recreate table. Check logs for details.")
+                    log_error(f"Failed to recreate table {table_name}")
+            except Exception as recreate_ex:
+                error_msg = f"Error recreating table: {recreate_ex}"
+                st.error(error_msg)
+                log_error(error_msg, exc_info=True)
+        
+        st.info("💡 Alternative: Use Page Customization to delete this tab completely and create a new one.")
         return
+    
+    # Get actual columns in the database table
+    actual_columns = set()
+    try:
+        if hasattr(CustomModel, '__table__'):
+            actual_columns = {col.name for col in CustomModel.__table__.columns}
+    except Exception as ex:
+        from logger import log_error
+        log_error(f"Failed to get table columns for {table_name}: {ex}")
     
     # Filters
     today = date.today()
@@ -1222,19 +1258,27 @@ def _render_custom_tanker_tab_view(location_id: Optional[int], tab_def: dict, us
             "Created At": getattr(rec, "created_at").strftime("%Y-%m-%d %H:%M") if hasattr(rec, "created_at") and getattr(rec, "created_at") else "",
         }
         
-        # Add custom columns
+        # Add custom columns (only if they exist in actual table)
         for col in columns:
             col_name = col.get("name")
             col_label = col.get("label", col_name)
-            if col_name and hasattr(rec, col_name):
-                value = getattr(rec, col_name)
-                if col.get("type") == "number" and value is not None:
-                    row_dict[col_label] = f"{float(value):.2f}"
-                elif col.get("type") == "date" and value:
-                    row_dict[col_label] = str(value)
-                else:
-                    row_dict[col_label] = value or ""
+            # Check if column exists in actual table, not just in config
+            if col_name and col_name in actual_columns:
+                try:
+                    value = getattr(rec, col_name, None)
+                    if col.get("type") == "number" and value is not None:
+                        decimal_places = col.get("decimal_places", 2)
+                        row_dict[col_label] = f"{float(value):.{decimal_places}f}"
+                    elif col.get("type") == "date" and value:
+                        row_dict[col_label] = str(value)
+                    else:
+                        row_dict[col_label] = str(value) if value is not None else ""
+                except Exception as ex:
+                    from logger import log_error
+                    log_error(f"Error reading column {col_name} from record: {ex}")
+                    row_dict[col_label] = ""
             else:
+                # Column not in table, show as empty
                 row_dict[col_label] = ""
         
         table_data.append(row_dict)
@@ -1276,19 +1320,23 @@ def _render_custom_tanker_tab_view(location_id: Optional[int], tab_def: dict, us
             if tx_date:
                 summary_parts.append(str(tx_date))
             
-            # Add first 2 custom column values as preview
+            # Add first 2 custom column values as preview (only from actual table)
             preview_count = 0
             for col in columns[:3]:
                 col_name = col.get("name")
                 col_label = col.get("label", col_name)
-                if col_name and hasattr(rec, col_name) and preview_count < 2:
-                    value = getattr(rec, col_name)
-                    if value is not None:
-                        if col.get("type") == "number":
-                            summary_parts.append(f"{col_label}: {float(value):.2f}")
-                        else:
-                            summary_parts.append(f"{col_label}: {value}")
-                        preview_count += 1
+                if col_name and col_name in actual_columns and preview_count < 2:
+                    try:
+                        value = getattr(rec, col_name, None)
+                        if value is not None:
+                            if col.get("type") == "number":
+                                decimal_places = col.get("decimal_places", 2)
+                                summary_parts.append(f"{col_label}: {float(value):.{decimal_places}f}")
+                            else:
+                                summary_parts.append(f"{col_label}: {value}")
+                            preview_count += 1
+                    except Exception:
+                        pass
             
             summary = " • ".join(summary_parts)
             
@@ -1431,6 +1479,7 @@ def _render_ctv_edit_modal(record, tab_def: dict, user: Dict[str, Any] | None):
 def _render_ctv_delete_confirmation(record, tab_def: dict, user: Dict[str, Any] | None):
     """Delete confirmation for custom tanker tab record"""
     from models import get_custom_table_model
+    from logger import log_error
     
     tab_name = tab_def.get("name", "Custom Tab")
     table_name = tab_def.get("table_name")
@@ -1444,10 +1493,14 @@ def _render_ctv_delete_confirmation(record, tab_def: dict, user: Dict[str, Any] 
         if st.button("🗑️ Confirm Delete", key=f"confirm_delete_ctv_{table_name}_{rec_id}", type="primary"):
             try:
                 CustomModel = get_custom_table_model(table_name)
+                if not CustomModel:
+                    st.error(f"Database table `{table_name}` not found.")
+                    return
+                    
                 with get_session() as s:
-                    rec = s.query(CustomModel).get(rec_id)
+                    rec = s.query(CustomModel).filter(CustomModel.id == rec_id).first()
                     if rec:
-                        location_id = getattr(rec, "location_id")
+                        location_id = getattr(rec, "location_id", None)
                         
                         # Audit log before deleting
                         try:
@@ -1455,32 +1508,52 @@ def _render_ctv_delete_confirmation(record, tab_def: dict, user: Dict[str, Any] 
                                 s, (user or {}).get("username", "system"), "DELETE",
                                 resource_type=f"CustomTankerTab:{tab_name}",
                                 resource_id=str(rec_id),
-                                details=f"Deleted {tab_name} record",
+                                details=f"Deleted {tab_name} record ID {rec_id} from table {table_name}",
                                 user_id=(user or {}).get("id"),
                                 location_id=location_id,
-                                ip_address=None,
+                                ip_address=st.session_state.get("client_ip"),
                                 success=True
                             )
-                        except Exception:
-                            pass
+                        except Exception as audit_ex:
+                            log_error(f"Failed to log audit for custom tab deletion: {audit_ex}")
                         
                         s.delete(rec)
                         s.commit()
                         
                         st.success(f"✅ {tab_name} record deleted successfully!")
-                        del st.session_state[f"deleting_ctv_{table_name}_{rec_id}"]
+                        if f"deleting_ctv_{table_name}_{rec_id}" in st.session_state:
+                            del st.session_state[f"deleting_ctv_{table_name}_{rec_id}"]
                         st.rerun()
+                    else:
+                        st.error(f"Record ID {rec_id} not found.")
+                        if f"deleting_ctv_{table_name}_{rec_id}" in st.session_state:
+                            del st.session_state[f"deleting_ctv_{table_name}_{rec_id}"]
             except Exception as ex:
-                st.error(f"Failed to delete: {ex}")
+                error_msg = f"Failed to delete: {ex}"
+                st.error(error_msg)
+                log_error(f"Custom tanker tab deletion error for {table_name} record {rec_id}: {ex}", exc_info=True)
+                
+                # Log failed deletion
+                try:
+                    with get_session() as s:
+                        SecurityManager.log_audit(
+                            s, (user or {}).get("username", "system"), "DELETE",
+                            resource_type=f"CustomTankerTab:{tab_name}",
+                            resource_id=str(rec_id),
+                            details=f"Delete failed: {str(ex)}",
+                            user_id=(user or {}).get("id"),
+                            location_id=getattr(record, "location_id", None),
+                            ip_address=st.session_state.get("client_ip"),
+                            success=False
+                        )
+                except Exception:
+                    pass
     
     with col2:
         if st.button("❌ Cancel", key=f"cancel_delete_ctv_{table_name}_{rec_id}"):
-            del st.session_state[f"deleting_ctv_{table_name}_{rec_id}"]
+            if f"deleting_ctv_{table_name}_{rec_id}" in st.session_state:
+                del st.session_state[f"deleting_ctv_{table_name}_{rec_id}"]
             st.rerun()
-
-            st.rerun()
-    with action_col2:
-        st.caption("Edit functionality would be implemented in tanker_transactions.py entry form")
 
 
 def _delete_tanker_transaction(row_id: int, user: Dict[str, Any]) -> None:
