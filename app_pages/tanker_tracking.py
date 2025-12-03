@@ -403,19 +403,62 @@ def _prefill_receipt_state(selected_id: int, dispatch: TankerTransaction, receip
     ss["tt_notes"] = getattr(receipt, "receiver_notes", "") or ""
 
 
-def _render_sender_tab(loc: Location, rows: List[Dict[str, Any]], can_edit: bool) -> None:
+def _render_sender_tab(
+    loc: Location,
+    rows: List[Dict[str, Any]],
+    can_edit: bool,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+) -> None:
     st.markdown("#### Sender Desk")
     st.caption("Shows dispatches from this location and whether the receiver has acknowledged them.")
     if not rows:
         st.info("No tanker dispatches recorded for this location in the selected window.")
         return
 
-    pending = sum(1 for r in rows if (r.get("Status") or "").upper() == "PENDING")
-    received = sum(1 for r in rows if (r.get("Status") or "").upper() == "RECEIVED")
+    # Filters (date range, convoy, tanker, status)
+    dates = [r.get("Date") for r in rows if isinstance(r.get("Date"), date)]
+    min_date = min(dates) if dates else date.today()
+    max_date = max(dates) if dates else date.today()
+    d_start = start_date or max(min_date, max_date - timedelta(days=7))
+    d_end = end_date or max_date
+    if d_start > d_end:
+        d_start, d_end = d_end, d_start
+
+    convoys = sorted({r.get("Convoy") for r in rows if r.get("Convoy")})
+    tankers = sorted({r.get("Tanker") for r in rows if r.get("Tanker")})
+    statuses = sorted({r.get("Status") for r in rows if r.get("Status")})
+
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        dr = st.date_input("Date Range", value=(d_start, d_end), key="tt_sender_dates")
+        if isinstance(dr, (list, tuple)) and len(dr) == 2:
+            d_start, d_end = dr
+        elif isinstance(dr, date):
+            d_start = d_end = dr
+        if d_start > d_end:
+            d_start, d_end = d_end, d_start
+    with c2:
+        sel_convoys = st.multiselect("Convoy No", convoys, default=convoys, key="tt_sender_convoys")
+    with c3:
+        sel_tankers = st.multiselect("Tanker No", tankers, default=tankers, key="tt_sender_tankers")
+    with c4:
+        sel_status = st.multiselect("Status", statuses or ["PENDING", "RECEIVED"], default=statuses or ["PENDING", "RECEIVED"], key="tt_sender_status")
+
+    filtered = [
+        r for r in rows
+        if d_start <= r.get("Date", d_start) <= d_end
+        and (not sel_convoys or r.get("Convoy") in sel_convoys)
+        and (not sel_tankers or r.get("Tanker") in sel_tankers)
+        and (not sel_status or r.get("Status") in sel_status)
+    ]
+
+    pending = sum(1 for r in filtered if (r.get("Status") or "").upper() == "PENDING")
+    received = sum(1 for r in filtered if (r.get("Status") or "").upper() == "RECEIVED")
     st.metric("Pending Receipts", pending)
     st.metric("Received", received)
 
-    st.dataframe(rows, use_container_width=True, hide_index=True)
+    st.dataframe(filtered, use_container_width=True, hide_index=True)
 
 
 def _render_receiver_tab(
@@ -742,10 +785,27 @@ def render_tanker_tracking_page(active_location_id: Optional[int], user: Optiona
 
     pending_dispatches, completed_dispatches = _split_receiver_lists(receiver_dispatches, receipts)
 
-    tabs = st.tabs(["Receiver Desk", "Completed Trips", "Comparison Report"])
+    tab_labels: List[str] = []
+    if tt_cfg.get("is_sender"):
+        tab_labels.append("Sender Desk")
+    if tt_cfg.get("is_receiver"):
+        tab_labels += ["Receiver Desk", "Completed Trips", "Comparison Report"]
+
+    if not tab_labels:
+        st.info("This location is neither sender nor receiver for tanker tracking.")
+        return
+
+    tabs = st.tabs(tab_labels) if len(tab_labels) > 1 else [st.container()]
+    tab_idx = 0
+
+    if tt_cfg.get("is_sender"):
+        with tabs[tab_idx]:
+            rows = _build_rows(sender_dispatches, receipts, loc_lookup)
+            _render_sender_tab(loc, rows, can_make_entries, start_date=start_date, end_date=end_date)
+        tab_idx += 1
 
     if tt_cfg.get("is_receiver"):
-        with tabs[0]:
+        with tabs[tab_idx]:
             aliases = tt_cfg.get("receiver_aliases") or [loc.name, loc.code]
             _render_receipt_editor(
                 loc=loc,
@@ -757,7 +817,9 @@ def render_tanker_tracking_page(active_location_id: Optional[int], user: Optiona
                 tab_key="pending",
                 show_delete=False,
             )
-        with tabs[1]:
+        tab_idx += 1
+
+        with tabs[tab_idx]:
             aliases = tt_cfg.get("receiver_aliases") or [loc.name, loc.code]
             _render_receipt_editor(
                 loc=loc,
@@ -769,7 +831,9 @@ def render_tanker_tracking_page(active_location_id: Optional[int], user: Optiona
                 tab_key="completed",
                 show_delete=True,
             )
-        with tabs[2]:
+        tab_idx += 1
+
+        with tabs[tab_idx]:
             aliases = tt_cfg.get("receiver_aliases") or [loc.name, loc.code]
             _render_comparison_tab(
                 loc,
