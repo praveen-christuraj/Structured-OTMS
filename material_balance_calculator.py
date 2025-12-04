@@ -36,12 +36,13 @@ DEFAULT_MB_END_TIME = dt_time(6, 0)
 
 try:
     from db import get_session
-    from models import OTRRecord, TankTransaction, Operation
+    from models import OTRRecord, TankTransaction, Operation, RecycleBinEntry
 except Exception:
     get_session = None      # type: ignore
     OTRRecord = None        # type: ignore
     TankTransaction = None  # type: ignore
     Operation = None        # type: ignore
+    RecycleBinEntry = None  # type: ignore
 
 try:
     # Optional per-location Material Balance window configuration
@@ -75,6 +76,20 @@ def _norm_location(code: str) -> str:
     if c in {"utapate", "oml-13", "oml13"}:
         return "UTAPATE"
     return (code or "").upper()
+
+
+def _get_deleted_tank_transaction_ids(sess) -> set:
+    """Get set of deleted TankTransaction IDs from recycle bin."""
+    deleted_ids = set()
+    try:
+        if RecycleBinEntry:
+            deleted_records = sess.query(RecycleBinEntry.resource_id).filter(
+                RecycleBinEntry.resource_type == "TankTransaction"
+            ).all()
+            deleted_ids = {int(r[0]) for r in deleted_records if r[0].isdigit()}
+    except Exception:
+        pass
+    return deleted_ids
 
 
 def _mb_window_for_location(location_id: Optional[int]) -> tuple[dt_time, dt_time]:
@@ -166,6 +181,7 @@ def _vcf_from_api60_and_temp(api60: float, tank_temp_c: float, input_mode: str =
 
 def _sum_bfs_condensate_gsv(sess, location_id: int, day_date) -> float:
     # All condensate TankTransactions for the specific day (use your op labels)
+    deleted_ids = _get_deleted_tank_transaction_ids(sess)
     rows = (
         sess.query(TankTransaction)
         .filter(
@@ -174,6 +190,9 @@ def _sum_bfs_condensate_gsv(sess, location_id: int, day_date) -> float:
         )
         .all()
     )
+    # Filter out deleted records
+    rows = [r for r in rows if r.id not in deleted_ids]
+    
     total = 0.0
     for r in rows:
         label = (r.operation.value if hasattr(r.operation, "value") else str(r.operation or ""))
@@ -413,6 +432,7 @@ class MaterialBalanceCalculator:
                 op_value = None
 
         with get_session() as s:
+            deleted_ids = _get_deleted_tank_transaction_ids(s)
             rows = (
                 s.query(TankTransaction)
                 .filter(
@@ -422,6 +442,8 @@ class MaterialBalanceCalculator:
                 )
                 .all()
             )
+            # Filter out deleted records
+            rows = [r for r in rows if r.id not in deleted_ids]
 
         totals: Dict[str, float] = {}
         for row in rows:

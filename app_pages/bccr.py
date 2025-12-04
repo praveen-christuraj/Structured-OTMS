@@ -457,7 +457,7 @@ def render_bccr_page(active_location_id, user):
                 }
             )
         can_map = bool(yade_selected and otr_selected)
-        if st.button("MAP Selected Rows", disabled=not can_map, type="primary"):
+        if st.button("🗺️", disabled=not can_map, type="primary", help="MAP Selected Rows"):
             if not can_map:
                 st.warning("Please select at least one YADE record and one Dispatch record.")
             else:
@@ -518,7 +518,7 @@ def render_bccr_page(active_location_id, user):
                     difference_value = new_bccr_qty - new_net_yade
                     st.metric("Difference (BCCR - YADE)", f"{difference_value:,.2f} bbls")
                 new_remarks = st.text_area("Remarks", value="")
-                if st.form_submit_button("Save BCCR Mapping", type="primary"):
+                if st.form_submit_button("💾", type="primary", help="Save BCCR Mapping"):
                     record = {
                         "sno": int(new_sno),
                         "date": new_date.strftime("%Y-%m-%d"),
@@ -644,13 +644,13 @@ def render_bccr_page(active_location_id, user):
             st.markdown("#### Export & Downloads")
             col_csv, col_xlsx, col_pdf, col_view = st.columns(4)
             with col_csv:
-                st.download_button("📥 CSV", data=csv_bytes, file_name=f"{base_filename}.csv", mime="text/csv", disabled=export_disabled, key=f"bccr_csv_{target_location_id}")
+                st.download_button("📥", data=csv_bytes, file_name=f"{base_filename}.csv", mime="text/csv", disabled=export_disabled, key=f"bccr_csv_{target_location_id}", help="Download CSV")
             with col_xlsx:
-                st.download_button("📥 XLSX", data=xlsx_bytes, file_name=f"{base_filename}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", disabled=export_disabled, key=f"bccr_xlsx_{target_location_id}")
+                st.download_button("📥", data=xlsx_bytes, file_name=f"{base_filename}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", disabled=export_disabled, key=f"bccr_xlsx_{target_location_id}", help="Download XLSX")
             with col_pdf:
-                st.download_button("📥 PDF", data=pdf_bytes, file_name=f"{base_filename}.pdf", mime="application/pdf", disabled=export_disabled or pdf_error_message is not None, key=f"bccr_pdf_{target_location_id}")
+                st.download_button("📄", data=pdf_bytes, file_name=f"{base_filename}.pdf", mime="application/pdf", disabled=export_disabled or pdf_error_message is not None, key=f"bccr_pdf_{target_location_id}", help="Download PDF")
             with col_view:
-                if st.button("👁️ View PDF", key=f"bccr_pdf_view_{target_location_id}", disabled=export_disabled or pdf_error_message is not None):
+                if st.button("👁️", key=f"bccr_pdf_view_{target_location_id}", disabled=export_disabled or pdf_error_message is not None, help="View PDF"):
                     import base64
                     import streamlit.components.v1 as components
                     b64 = base64.b64encode(pdf_bytes).decode("utf-8")

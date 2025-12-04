@@ -952,7 +952,7 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
     )
 
     st.markdown("---")
-    save_all = st.button("💾 Save", type="primary")
+    save_all = st.button("💾", type="primary", help="Save")
     
     # Placeholder for success message (will appear below button after save)
     success_placeholder = st.empty()
@@ -1215,18 +1215,18 @@ def _render_yade_list(location_id: int, user: Dict[str, Any] | None):
         with c5:
             ac1, ac2 = st.columns([1, 1])
             with ac1:
-                if st.button("✏️ Edit", key=f"yade_edit_{v.id}", use_container_width=True):
+                if st.button("✏️", key=f"yade_edit_{v.id}", use_container_width=True, help="Edit"):
                     st.session_state["yade_edit_id"] = v.id
                     _st_safe_rerun()
             with ac2:
-                if st.button("🗑️ Delete", key=f"yade_del_{v.id}", use_container_width=True):
+                if st.button("🗑️", key=f"yade_del_{v.id}", use_container_width=True, help="Delete"):
                     st.session_state[f"confirm_del_yade_{v.id}"] = True
 
         if st.session_state.get(f"confirm_del_yade_{v.id}"):
             st.error("Are you sure you want to delete this YADE voyage? This cannot be undone.")
             dc1, dc2 = st.columns([1, 1])
             with dc1:
-                if st.button("✅ Yes, delete", key=f"y_del_yade_{v.id}", use_container_width=True):
+                if st.button("✅", key=f"y_del_yade_{v.id}", use_container_width=True, help="Yes, delete"):
                     try:
                         with get_session() as s:
                             obj = s.query(YadeVoyage).filter(YadeVoyage.id == v.id).one_or_none()
@@ -1279,7 +1279,7 @@ def _render_yade_list(location_id: int, user: Dict[str, Any] | None):
                     except Exception as ex:
                         st.error(f"Failed to delete: {ex}")
             with dc2:
-                if st.button("❌ Cancel", key=f"n_del_yade_{v.id}", use_container_width=True):
+                if st.button("❌", key=f"n_del_yade_{v.id}", use_container_width=True, help="Cancel"):
                     st.session_state.pop(f"confirm_del_yade_{v.id}", None)
                     _st_safe_rerun()
 

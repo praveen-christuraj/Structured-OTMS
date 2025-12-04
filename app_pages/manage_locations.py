@@ -13,7 +13,7 @@ def _create_location_form(user):
         code = st.text_input("Short Code *", placeholder="e.g. ASJ")
         address = st.text_area("Address (optional)")
 
-        submitted = st.form_submit_button("Create Location")
+        submitted = st.form_submit_button("➕", help="Create Location")
 
     if submitted:
         if not name.strip() or not code.strip():

@@ -12,7 +12,7 @@ from ui import header
 from logger import log_error
 from security import SecurityManager
 from models import Location, Tanker, TankerCalibration, TankerTransaction
-from location_config import LocationConfig, get_active_operation_names, list_operations
+from location_config import LocationConfig, get_active_operation_names, get_active_operation_names_by_category, list_operations
 from timezone_utils import format_local_datetime
 from utils_calc import (
     api60_from_api_obs,
@@ -479,12 +479,12 @@ def _render_transaction_view(tx: TankerTransaction, can_edit: bool) -> None:
 
     action_col1, action_col2 = st.columns([0.4, 0.6])
     with action_col1:
-        if st.button("Close Viewer", key=f"close_{tx.id}"):
+        if st.button("✖️", key=f"close_{tx.id}", help="Close Viewer"):
             st.session_state.pop("tanker_view_selected", None)
             _safe_rerun()
     with action_col2:
         if can_edit:
-            if st.button("Edit This Transaction", key=f"edit_{tx.id}"):
+            if st.button("✏️", key=f"edit_{tx.id}", help="Edit This Transaction"):
                 if not _deny_edit_for_lock(tx, f"{tx.tanker_name}-{tx.convoy_no}"):
                     # Store transaction data in flag to prefill on next render
                     st.session_state["tanker_tx_prefill_data"] = tx
@@ -530,10 +530,10 @@ def _render_saved_transactions(location_id: int, can_edit: bool) -> None:
 
     view_col, refresh_col = st.columns([0.4, 0.6])
     with view_col:
-        if st.button("View Details", key="view_tanker_details"):
+        if st.button("👁️", key="view_tanker_details", help="View Details"):
             st.session_state["tanker_view_selected"] = selected_id
     with refresh_col:
-        if st.button("Refresh Transactions", key="refresh_tanker_transactions"):
+        if st.button("🔄", key="refresh_tanker_transactions", help="Refresh Transactions"):
             st.session_state["tanker_view_selected"] = selected_id
             _safe_rerun()
 
@@ -593,18 +593,22 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
     tanker_by_name: Dict[str, Tanker] = {t.name: t for t in tankers}
 
     op_options: List[str] = []
+    cargo_options_cfg: List[str] = []
     dest_options_cfg: List[str] = []
     loading_options_cfg: List[str] = []
     try:
         with get_session() as s:
-            op_options = get_active_operation_names(s, location.id, asset="tanker") or []
-            dest_options_cfg = _list_names_from_ops(s, location.id, asset="tanker", category="Destination")
-            loading_options_cfg = _list_names_from_ops(s, location.id, asset="tanker", category="Loading Berth")
+            op_options = get_active_operation_names_by_category(s, location.id, asset="tanker", category="Operation") or []
+            cargo_options_cfg = get_active_operation_names_by_category(s, location.id, asset="tanker", category="Cargo Type") or []
+            dest_options_cfg = get_active_operation_names_by_category(s, location.id, asset="tanker", category="Destination") or []
+            loading_options_cfg = get_active_operation_names_by_category(s, location.id, asset="tanker", category="Loading Berth") or []
     except Exception as exc:
         log_error(f"Tanker operations lookup failed: {exc}", exc_info=True)
 
     if not op_options:
         op_options = ["N/A (configure in Location Settings)"]
+    if not cargo_options_cfg:
+        cargo_options_cfg = CARGO_OPTIONS
     if not dest_options_cfg:
         dest_options_cfg = ["N/A (configure in Location Settings)"]
     if not loading_options_cfg:
@@ -638,8 +642,8 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
         with meta_c3:
             cargo = st.selectbox(
                 "Cargo *",
-                CARGO_OPTIONS,
-                index=_select_index(CARGO_OPTIONS, ss.get("tanker_tx_cargo")),
+                cargo_options_cfg,
+                index=_select_index(cargo_options_cfg, ss.get("tanker_tx_cargo")),
                 key="tanker_tx_cargo",
             )
             tx_time_str = st.text_input("Time (HH:MM) *", key="tanker_tx_time")
@@ -896,18 +900,22 @@ def _render_entry_form_legacy(location: Location, can_submit: bool, tankers: Lis
 
     # Location Settings driven dropdowns for tanker asset
     op_options: List[str] = []
+    cargo_options_cfg: List[str] = []
     dest_options_cfg: List[str] = []
     loading_options_cfg: List[str] = []
     try:
         with get_session() as s:
-            op_options = get_active_operation_names(s, location.id, asset="tanker") or []
-            dest_options_cfg = _list_names_from_ops(s, location.id, asset="tanker", category="Destination")
-            loading_options_cfg = _list_names_from_ops(s, location.id, asset="tanker", category="Loading Berth")
+            op_options = get_active_operation_names_by_category(s, location.id, asset="tanker", category="Operation") or []
+            cargo_options_cfg = get_active_operation_names_by_category(s, location.id, asset="tanker", category="Cargo Type") or []
+            dest_options_cfg = get_active_operation_names_by_category(s, location.id, asset="tanker", category="Destination") or []
+            loading_options_cfg = get_active_operation_names_by_category(s, location.id, asset="tanker", category="Loading Berth") or []
     except Exception as exc:
         log_error(f"Tanker operations lookup failed: {exc}", exc_info=True)
 
     if not op_options:
         op_options = ["N/A (configure in Location Settings)"]
+    if not cargo_options_cfg:
+        cargo_options_cfg = CARGO_OPTIONS
     if not dest_options_cfg:
         dest_options_cfg = ["N/A (configure in Location Settings)"]
     if not loading_options_cfg:
@@ -942,8 +950,8 @@ def _render_entry_form_legacy(location: Location, can_submit: bool, tankers: Lis
             with meta_c3:
                 cargo = st.selectbox(
                     "Cargo *",
-                    CARGO_OPTIONS,
-                    index=_select_index(CARGO_OPTIONS, ss.get("tanker_tx_cargo")),
+                    cargo_options_cfg,
+                    index=_select_index(cargo_options_cfg, ss.get("tanker_tx_cargo")),
                     key="tanker_tx_cargo",
                 )
                 tx_time_str = st.text_input("Time (HH:MM) *", key="tanker_tx_time")
@@ -1511,7 +1519,7 @@ def _render_custom_tanker_tab(loc, user, tab_def: dict):
         
         # Offer to recreate table
         st.warning("The database table is missing. This can happen if the table creation failed previously.")
-        if st.button("🔧 Recreate Database Table", key=f"recreate_table_{table_name}"):
+        if st.button("🔧", key=f"recreate_table_{table_name}", help="Recreate Database Table"):
             try:
                 from models import create_custom_tab_table
                 log_info(f"Attempting to recreate table {table_name}")
@@ -1539,42 +1547,53 @@ def _render_custom_tanker_tab(loc, user, tab_def: dict):
     manual_columns = [c for c in columns if not c.get("formula")]
     calculated_columns = [c for c in columns if c.get("formula")]
     
-    with st.form(key=f"custom_tanker_tab_form_{table_name}_{loc.id}"):
-        row = {}
+    # Initialize session state for live calculation
+    form_key = f"custom_tanker_tab_form_{table_name}_{loc.id}"
+    if form_key not in st.session_state:
+        st.session_state[form_key] = {}
+    
+    row = st.session_state[form_key]
+    
+    # Render manual input columns (NOT in a form - allows live updates)
+    st.markdown("##### 📝 Input Fields")
+    for i, col in enumerate(manual_columns):
+        ctype = col.get("type", "text")
+        label = col.get("label") or col.get("name")
+        name = col.get("name")
+        widget_key = f"{form_key}_input_{i}"
         
-        # Render manual input columns
-        for i, col in enumerate(manual_columns):
-            ctype = col.get("type", "text")
-            label = col.get("label") or col.get("name")
-            name = col.get("name")
+        if ctype == "date":
+            row[name] = st.date_input(label, max_value=date.today(), key=widget_key)
+        elif ctype == "number":
+            row[name] = st.number_input(label, step=0.01, format="%.2f", key=widget_key)
+        else:
+            row[name] = st.text_input(label, key=widget_key)
+    
+    # Calculate and display calculated columns (LIVE)
+    if calculated_columns:
+        st.markdown("##### 🧮 Calculated Columns (Auto-computed)")
+        for calc_col in calculated_columns:
+            formula = calc_col.get("formula")
+            label = calc_col.get("label") or calc_col.get("name")
+            name = calc_col.get("name")
             
-            if ctype == "date":
-                row[name] = st.date_input(label, max_value=date.today(), key=f"custom_tanker_{table_name}_{loc.id}_date_{i}")
-            elif ctype == "number":
-                row[name] = st.number_input(label, step=0.01, format="%.2f", key=f"custom_tanker_{table_name}_{loc.id}_num_{i}")
+            # Calculate using current row values (live)
+            calculated_value = _evaluate_formula(formula, row)
+            
+            if calculated_value is not None:
+                st.metric(label, f"{calculated_value:.2f}")
+                row[name] = calculated_value
             else:
-                row[name] = st.text_input(label, key=f"custom_tanker_{table_name}_{loc.id}_txt_{i}")
-        
-        # Calculate and display calculated columns
-        if calculated_columns:
-            st.markdown("##### 🧮 Calculated Columns (Auto-computed)")
-            for calc_col in calculated_columns:
-                formula = calc_col.get("formula")
-                label = calc_col.get("label") or calc_col.get("name")
-                name = calc_col.get("name")
-                
-                calculated_value = _evaluate_formula(formula, row)
-                
-                if calculated_value is not None:
-                    st.metric(label, f"{calculated_value:.2f}")
-                    row[name] = calculated_value
-                else:
-                    operation = formula.get("operation", "N/A")
-                    cols_used = ", ".join(formula.get("columns", []))
-                    st.info(f"**{label}**: {operation.upper()}({cols_used}) - Will be calculated after input")
-                    row[name] = None
-        
-        submitted = st.form_submit_button("💾 Save Row", type="primary")
+                operation = formula.get("operation", "N/A")
+                cols_used = ", ".join(formula.get("columns", []))
+                st.info(f"**{label}**: {operation.upper()}({cols_used}) - Fill in the required fields to auto-compute")
+                row[name] = None
+    
+    # Save button (outside form for better control)
+    if st.button("💾", type="primary", key=f"{form_key}_submit", help="Save Row"):
+        submitted = True
+    else:
+        submitted = False
     
     if not submitted:
         return
@@ -1680,6 +1699,10 @@ def _render_custom_tanker_tab(loc, user, tab_def: dict):
                 
                 st.success(f"✅ Row saved to {tab_name}.")
                 log_info(f"Successfully saved entry to {table_name}")
+                # Clear session state for this form
+                form_key = f"custom_tanker_tab_form_{table_name}_{loc.id}"
+                if form_key in st.session_state:
+                    del st.session_state[form_key]
                 st.rerun()
     except Exception as ex:
         error_msg = f"Save failed: {ex}"

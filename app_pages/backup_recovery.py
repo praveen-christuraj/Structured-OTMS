@@ -61,7 +61,7 @@ def render_backup_recovery_page(active_location_id, user):
                         st.warning("⚠️ Restoring will replace your current database")
                         st.caption("A backup of the current database will be created before restoration.")
                         confirm_restore = st.text_input('Type "RESTORE" to confirm', key="br_restore_confirm")
-                        if st.button("♻️ Restore Database", key="br_restore_btn", type="primary"):
+                        if st.button("♻️", key="br_restore_btn", type="primary", help="Restore Database"):
                             if confirm_restore == "RESTORE":
                                 try:
                                     result = BackupManager.restore_backup(backup_ts, create_backup_before=True)
@@ -100,7 +100,7 @@ def render_backup_recovery_page(active_location_id, user):
                         if "delete_backup_pending" not in st.session_state:
                             st.session_state.delete_backup_pending = None
                         if st.session_state.delete_backup_step == 0:
-                            if st.button("🗑️ Delete Backup", key="br_delete_backup_btn_step1"):
+                            if st.button("🗑️", key="br_delete_backup_btn_step1", help="Delete Backup"):
                                 st.session_state.delete_backup_step = 1
                                 st.session_state.delete_backup_pending = backup_ts
                                 st.rerun()
@@ -112,7 +112,7 @@ def render_backup_recovery_page(active_location_id, user):
                             user_input = st.text_input("Confirmation", key="br_delete_backup_confirm_input", placeholder=confirm_text)
                             col_confirm, col_cancel = st.columns(2)
                             with col_confirm:
-                                if st.button("Confirm Delete", key="br_delete_backup_btn_step2", type="primary"):
+                                if st.button("✅", key="br_delete_backup_btn_step2", type="primary", help="Confirm Delete"):
                                     if user_input.strip() == confirm_text:
                                         try:
                                             BackupManager.delete_backup(st.session_state.delete_backup_pending)
@@ -134,7 +134,7 @@ def render_backup_recovery_page(active_location_id, user):
                                     else:
                                         st.error("Confirmation text does not match")
                             with col_cancel:
-                                if st.button("Cancel", key="br_delete_backup_cancel"):
+                                if st.button("❌", key="br_delete_backup_cancel", help="Cancel"):
                                     st.session_state.delete_backup_step = 0
                                     st.session_state.delete_backup_pending = None
                                     st.info("Deletion cancelled")
@@ -146,7 +146,7 @@ def render_backup_recovery_page(active_location_id, user):
                     days = st.number_input("Delete backups older than (days)", min_value=1, value=30, step=1, key="br_cleanup_days")
                     keep_min = st.number_input("Always keep minimum", min_value=1, value=5, step=1, key="br_cleanup_keep_min")
                 with cleanup_col2:
-                    if st.button("🧹 Run Cleanup", key="br_cleanup_btn"):
+                    if st.button("🧹", key="br_cleanup_btn", help="Run Cleanup"):
                         try:
                             result = BackupManager.cleanup_old_backups(days=days, keep_minimum=keep_min)
                             st.success(f"Cleanup complete. Deleted: {result['deleted']}, Kept: {result['kept']}")
@@ -163,7 +163,7 @@ def render_backup_recovery_page(active_location_id, user):
         st.markdown("#### Create Manual Backup")
         with st.form("br_create_backup_form"):
             description = st.text_input("Backup Description", placeholder="e.g., Before data migration, End of month backup, etc.", key="br_backup_description")
-            submitted = st.form_submit_button("🗄️ Create Backup Now", type="primary")
+            submitted = st.form_submit_button("🗄️", type="primary", help="Create Backup Now")
             if submitted:
                 try:
                     backup_info = BackupManager.create_backup(description=description or "Manual backup", backup_type="manual")
@@ -213,7 +213,7 @@ def render_backup_recovery_page(active_location_id, user):
             if locations:
                 loc_options = {f"{loc.name} ({loc.code})": loc.id for loc in locations}
                 selected_loc = st.selectbox("Select Location to Export", options=list(loc_options.keys()), key="br_export_location_select")
-                if st.button("📤 Export Location Data", key="br_export_location_btn", type="primary"):
+                if st.button("📤", key="br_export_location_btn", type="primary", help="Export Location Data"):
                     if selected_loc:
                         loc_id = loc_options[selected_loc]
                         with st.spinner("Exporting location data..."):
@@ -222,7 +222,7 @@ def render_backup_recovery_page(active_location_id, user):
                                 st.success("Location data exported successfully")
                                 st.info(f"File: {export_path.name}")
                                 with open(export_path, "rb") as f:
-                                    st.download_button("⬇️ Download Export", data=f.read(), file_name=export_path.name, mime="application/zip")
+                                    st.download_button("⬇️", data=f.read(), file_name=export_path.name, mime="application/zip", help="Download Export")
                                 with get_session() as s:
                                     SecurityManager.log_audit(
                                         s,

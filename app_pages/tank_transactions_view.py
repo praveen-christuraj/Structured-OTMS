@@ -427,7 +427,7 @@ def _render_row_card(r: Dict[str, Any]):
 def _export_bar(df: pd.DataFrame):
     # CSV
     csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button("⬇️ CSV", data=csv, file_name="transactions_view.csv", mime="text/csv")
+    st.download_button("⬇️", data=csv, file_name="transactions_view.csv", mime="text/csv", help="CSV")
 
     # Excel
     try:
@@ -436,7 +436,7 @@ def _export_bar(df: pd.DataFrame):
         bio = io.BytesIO()
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
             df.to_excel(writer, index=False, sheet_name="Transactions")
-        st.download_button("⬇️ Excel", data=bio.getvalue(), file_name="transactions_view.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        st.download_button("⬇️", data=bio.getvalue(), file_name="transactions_view.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", help="Excel")
     except Exception as ex:
         st.info(f"Excel export unavailable: {ex}")
 
@@ -602,7 +602,7 @@ def _render_flexible_tab(location_id: int, section: str, title: str, date_from, 
             with col2:
                 st.caption(f"By: {rec.created_by or 'Unknown'}")
             with col3:
-                if st.button("✏️ Edit", key=f"edit_flex_{section}_{rec.id}"):
+                if st.button("✏️", key=f"edit_flex_{section}_{rec.id}", help="Edit"):
                     st.session_state[f"editing_flex_{section}_{rec.id}"] = True
                     st.rerun()
             with col4:
@@ -759,12 +759,12 @@ def _render_custom_tab_data(location_id: int, tab_def: dict, date_from, date_to,
                 st.caption(f"By: {created_by or 'Unknown'} • {created_str}")
             
             with col3:
-                if st.button("✏️ Edit", key=f"edit_custom_{table_name}_{rec_id}"):
+                if st.button("✏️", key=f"edit_custom_{table_name}_{rec_id}", help="Edit"):
                     st.session_state[f"editing_custom_{table_name}_{rec_id}"] = True
                     st.rerun()
             
             with col4:
-                if st.button("🗑️ Delete", key=f"delete_custom_{table_name}_{rec_id}"):
+                if st.button("🗑️", key=f"delete_custom_{table_name}_{rec_id}", help="Delete"):
                     st.session_state[f"deleting_custom_{table_name}_{rec_id}"] = True
                     st.rerun()
             
@@ -796,7 +796,7 @@ def _render_flex_edit_modal(record, section: str, title: str, user):
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.form_submit_button("💾 Save Changes", type="primary"):
+            if st.form_submit_button("💾", type="primary", help="Save Changes"):
                 try:
                     new_data = json.loads(edited_json)
                     with get_session() as s:
@@ -827,7 +827,7 @@ def _render_flex_edit_modal(record, section: str, title: str, user):
                     st.error(f"Failed to update: {ex}")
         
         with col2:
-            if st.form_submit_button("❌ Cancel"):
+            if st.form_submit_button("❌", help="Cancel"):
                 del st.session_state[f"editing_flex_{section}_{record.id}"]
                 st.rerun()
 
@@ -839,7 +839,7 @@ def _render_flex_delete_confirmation(record, section: str, title: str, user):
     
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🗑️ Confirm Delete", key=f"confirm_delete_flex_{section}_{record.id}", type="primary"):
+        if st.button("🗑️", key=f"confirm_delete_flex_{section}_{record.id}", type="primary", help="Confirm Delete"):
             try:
                 with get_session() as s:
                     rec = s.query(_get_flexible_model()).get(record.id)
@@ -869,7 +869,7 @@ def _render_flex_delete_confirmation(record, section: str, title: str, user):
                 st.error(f"Failed to delete: {ex}")
     
     with col2:
-        if st.button("❌ Cancel", key=f"cancel_delete_flex_{section}_{record.id}"):
+        if st.button("❌", key=f"cancel_delete_flex_{section}_{record.id}", help="Cancel"):
             del st.session_state[f"deleting_flex_{section}_{record.id}"]
             st.rerun()
 
@@ -935,7 +935,7 @@ def _render_custom_edit_modal(record, tab_def: dict, user):
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.form_submit_button("💾 Save Changes", type="primary"):
+            if st.form_submit_button("💾", type="primary", help="Save Changes"):
                 try:
                     CustomModel = get_custom_table_model(table_name)
                     from db import get_flex_session
@@ -975,7 +975,7 @@ def _render_custom_edit_modal(record, tab_def: dict, user):
                     st.error(f"Failed to update: {ex}")
         
         with col2:
-            if st.form_submit_button("❌ Cancel"):
+            if st.form_submit_button("❌", help="Cancel"):
                 del st.session_state[f"editing_custom_{table_name}_{rec_id}"]
                 st.rerun()
 
@@ -993,7 +993,7 @@ def _render_custom_delete_confirmation(record, tab_def: dict, user):
     
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🗑️ Confirm Delete", key=f"confirm_delete_custom_{table_name}_{rec_id}", type="primary"):
+        if st.button("🗑️", key=f"confirm_delete_custom_{table_name}_{rec_id}", type="primary", help="Confirm Delete"):
             try:
                 CustomModel = get_custom_table_model(table_name)
                 from db import get_flex_session
@@ -1027,6 +1027,6 @@ def _render_custom_delete_confirmation(record, tab_def: dict, user):
                 st.error(f"Failed to delete: {ex}")
     
     with col2:
-        if st.button("❌ Cancel", key=f"cancel_delete_custom_{table_name}_{rec_id}"):
+        if st.button("❌", key=f"cancel_delete_custom_{table_name}_{rec_id}", help="Cancel"):
             del st.session_state[f"deleting_custom_{table_name}_{rec_id}"]
             st.rerun()

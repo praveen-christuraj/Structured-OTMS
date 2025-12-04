@@ -70,8 +70,8 @@ def render_recycle_bin_page(active_location_id, user):
     with hdr:
         h0, h1, h2, h3, h4, h5 = st.columns([0.10, 0.24, 0.18, 0.26, 0.12, 0.10])
         with h0:
-            b_all = st.button("✔️ All", key="rb_mark_all", use_container_width=True)
-            b_none = st.button("✖️ None", key="rb_unmark_all", use_container_width=True)
+            b_all = st.button("✔️", key="rb_mark_all", use_container_width=True, help="All")
+            b_none = st.button("✖️", key="rb_unmark_all", use_container_width=True, help="None")
         h1.caption("Type")
         h2.caption("ID")
         h3.caption("Deleted At")
@@ -118,7 +118,7 @@ def render_recycle_bin_page(active_location_id, user):
                 st.code(json.dumps(payload, indent=2, default=str), language="json")
                 cc = st.columns([0.12, 0.88])
                 with cc[0]:
-                    if st.button("✖️ Close", key=f"rb_view_close_{e.id}", use_container_width=True):
+                    if st.button("✖️", key=f"rb_view_close_{e.id}", use_container_width=True, help="Close"):
                         st.session_state[view_key] = False
                         st.rerun()
 
@@ -159,13 +159,13 @@ def render_recycle_bin_page(active_location_id, user):
         with bulk:
             bc1, bc2 = st.columns([0.18, 0.82])
             with bc1:
-                bulk_click = st.button("🗑️ Purge Selected", key="rb_bulk_purge", type="primary", use_container_width=True)
+                bulk_click = st.button("🗑️", key="rb_bulk_purge", type="primary", use_container_width=True, help="Purge Selected")
             if bulk_click:
                 st.session_state["rb_bulk_confirm"] = True
             if st.session_state.get("rb_bulk_confirm"):
                 bc_yes, bc_no = st.columns([0.12, 0.12])
                 with bc_yes:
-                    if st.button("✅ Confirm", key="rb_bulk_yes", use_container_width=True):
+                    if st.button("✅", key="rb_bulk_yes", use_container_width=True, help="Confirm"):
                         try:
                             with get_session() as s:
                                 count = 0
@@ -193,5 +193,5 @@ def render_recycle_bin_page(active_location_id, user):
                         except Exception as ex:
                             st.error(f"Bulk purge failed: {ex}")
                 with bc_no:
-                    if st.button("❌ Cancel", key="rb_bulk_no", use_container_width=True):
+                    if st.button("❌", key="rb_bulk_no", use_container_width=True, help="Cancel"):
                         st.session_state["rb_bulk_confirm"] = False

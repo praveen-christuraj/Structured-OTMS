@@ -187,7 +187,7 @@ def render_back_data_page(active_location_id: int, user: Dict):
 
     # Import button
     if df is not None:
-        if st.button("Import to Database", type="primary"):
+        if st.button("📥", type="primary", help="Import to Database"):
             table = _reflect_table(dbname, table_name)
             if table is None:
                 st.error("Failed to reflect target table.")

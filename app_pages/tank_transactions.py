@@ -27,6 +27,7 @@ from location_config import (
     get_dynamic_table_def,
     get_location_meters,
     get_active_operation_names,
+    get_active_operation_names_by_category,
 )
 
 # ----- Optional helpers -----
@@ -240,7 +241,7 @@ def _get_calibration_min_max(session, tank_id: int) -> tuple[float, float]:
 def _get_operation_labels_for_tank(location_id: int) -> list[str]:
     try:
         with get_session() as s:
-            names = get_active_operation_names(s, location_id, asset="tank")
+            names = get_active_operation_names_by_category(s, location_id, asset="tank", category="Operation")
         return names or []
     except Exception:
         return []
@@ -397,7 +398,7 @@ def _render_tab_tank_entry(loc, loc_label, user):
         st.info("ℹ️ Ticket ID will be generated upon save")
 
     # Save button
-    if st.button("💾 Save to DB", type="primary", key="tx_save_btn"):
+    if st.button("💾", type="primary", key="tx_save_btn", help="Save to DB"):
         errs = []
         if selected_tank_label not in tank_by_label:
             errs.append("Please select a valid tank.")
@@ -697,7 +698,7 @@ def _render_tab_meter_records(loc, user):
 
     remarks = st.text_input("📝 Remarks", value="", max_chars=250, key=f"meter_remarks_{loc.id}")
 
-    if st.button("💾 Save Meter Record", type="primary", key=f"meter_save_{loc.id}"):
+    if st.button("💾", type="primary", key=f"meter_save_{loc.id}", help="Save Meter Record"):
         if net_total_bbl <= 0:
             st.error("Net total is zero or negative. Please check your inputs.")
             return
@@ -907,7 +908,7 @@ def _render_tab_condensate(loc, user):
 
     remarks = st.text_input("📝 Remarks", value="", max_chars=250, key=f"cond_remarks_{loc.id}")
 
-    if st.button("💾 Save Condensate Record", type="primary", key=f"cond_save_{loc.id}"):
+    if st.button("💾", type="primary", key=f"cond_save_{loc.id}", help="Save Condensate Record"):
         errs = []
         if GOV_total_bbl <= 0:
             errs.append("Net GOV from meters is zero or negative.")
@@ -1111,7 +1112,7 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
                     st.info(f"**{label}**: {operation.upper()}({cols_used}) - Will be calculated after input")
                     row[name] = None
 
-        submitted = st.form_submit_button("💾 Save Row", type="primary")
+        submitted = st.form_submit_button("💾", type="primary", help="Save Row")
 
     if not submitted:
         return
@@ -1320,7 +1321,7 @@ def _render_custom_tab(loc, user, tab_def: dict):
                     st.info(f"**{label}**: {operation.upper()}({cols_used}) - Will be calculated after input")
                     row[name] = None
         
-        submitted = st.form_submit_button("💾 Save Row", type="primary")
+        submitted = st.form_submit_button("💾", type="primary", help="Save Row")
     
     if not submitted:
         return

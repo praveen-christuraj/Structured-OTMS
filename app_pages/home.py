@@ -75,12 +75,12 @@ def render_admin_it_home(user: dict):
     quick_col1, quick_col2, quick_col3 = st. columns(3)
     
     with quick_col1:
-        if st.button("👥 Manage Users", use_container_width=True):
+        if st.button("👥", use_container_width=True, help="Manage Users"):
             st. session_state.page = "Manage Users"
             st.rerun()
     
     with quick_col2:
-        if st.button("📜 View Audit Log", use_container_width=True):
+        if st.button("📜", use_container_width=True, help="View Audit Log"):
             st. session_state.page = "Audit Log"
             st.rerun()
     

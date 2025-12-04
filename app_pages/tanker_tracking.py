@@ -690,7 +690,7 @@ def _render_receipt_editor(
     if disabled:
         st.caption("You have read-only access at this location.")
 
-    if st.button("💾 Save Receipt", type="primary", disabled=disabled, key=f"tt_save_receipt_{tab_key}"):
+    if st.button("💾", type="primary", disabled=disabled, key=f"tt_save_receipt_{tab_key}", help="Save Receipt"):
         if not arrival_date or not isinstance(arrival_date, date):
             st.error("Arrival date is required.")
             return

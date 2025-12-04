@@ -1767,7 +1767,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
         # View PDF in browser
         import base64
         pdf_b64 = base64.b64encode(pdf_data).decode('utf-8')
-        if st.button("👁️ View PDF", key=f"vt_{section}_view_pdf"):
+        if st.button("👁️", key=f"vt_{section}_view_pdf", help="View PDF"):
             st.components.v1.html(
                 f"""
                 <script>
@@ -2084,7 +2084,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                         st.code(json.dumps(data_dict, indent=2, default=str), language="json")
                     else:
                         st.code(json.dumps(payload, indent=2, default=str), language="json")
-                    if st.button("✖️ Close", key=f"vt_{section}_close_{i}"):
+                    if st.button("✖️", key=f"vt_{section}_close_{i}", help="Close"):
                         st.session_state[f"vt_{section}_open_{i}"] = False
                         st.rerun()
                     st.markdown("</div>", unsafe_allow_html=True)
@@ -2093,7 +2093,7 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                 # Check if editing is still allowed (24-hour window)
                 if not is_editable:
                     st.warning("⏱️ This record cannot be edited (more than 24 hours old)")
-                    if st.button("Close", key=f"vt_{section}_edit_close_{i}"):
+                    if st.button("✖️", key=f"vt_{section}_edit_close_{i}", help="Close"):
                         st.session_state[f"vt_{section}_edit_{i}"] = False
                         st.rerun()
                 else:
@@ -2142,9 +2142,9 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                             
                             bcol1, bcol2 = st.columns([0.20, 0.80])
                             with bcol1:
-                                save = st.form_submit_button("💾 Save", type="primary")
+                                save = st.form_submit_button("💾", type="primary", help="Save")
                             with bcol2:
-                                cancel = st.form_submit_button("↩️ Cancel")
+                                cancel = st.form_submit_button("↩️", help="Cancel")
                         
                         if save:
                             from logger import log_info, log_error
@@ -2568,8 +2568,8 @@ def _custom_flex_list(location_id: int, table_name: str, user: dict | None, titl
                     else:
                         edited_values[col_name] = st.text_input(label, value=str(current_value) if current_value else "", key=f"edit_custom_{table_name}_{i}_{col_name}")
 
-                save = st.form_submit_button("💾 Save", type="primary")
-                cancel = st.form_submit_button("↩️ Cancel")
+                save = st.form_submit_button("💾", type="primary", help="Save")
+                cancel = st.form_submit_button("↩️", help="Cancel")
             if save:
                 try:
                     with get_session() as s:

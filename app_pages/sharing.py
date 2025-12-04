@@ -32,7 +32,7 @@ def render_sharing_page(active_location_id: Optional[int], user: Dict[str, Any])
         file = st.file_uploader("Select file", type=None, accept_multiple_files=False, key="sharing_uploader")
         remarks = st.text_area("Remarks (optional)", placeholder="Enter context or instructions for the recipient")
 
-        share_btn = st.button("Share", type="primary")
+        share_btn = st.button("🔗", type="primary", help="Share")
         if share_btn:
             if not file:
                 st.error("Please select a file to upload.")
@@ -136,7 +136,7 @@ def render_sharing_page(active_location_id: Optional[int], user: Dict[str, Any])
                 with c2:
                     if is_admin:
                         del_key = f"del_{rec.unique_id}"
-                        if st.button("🗑️ Delete", use_container_width=True, key=del_key):
+                        if st.button("🗑️", use_container_width=True, key=del_key, help="Delete"):
                             try:
                                 with get_session() as s:
                                     dbrec = s.query(SharedFile).get(rec.id)
@@ -178,7 +178,7 @@ def render_sharing_page(active_location_id: Optional[int], user: Dict[str, Any])
                                 except Exception:
                                     pass
                     else:
-                        st.button("🗑️ Delete (Admin only)", disabled=True, use_container_width=True, key=f"d_{rec.unique_id}")
+                        st.button("🗑️", disabled=True, use_container_width=True, key=f"d_{rec.unique_id}", help="Delete (Admin only)")
                 with c3:
                     st.caption(" ")
                 st.markdown("---")

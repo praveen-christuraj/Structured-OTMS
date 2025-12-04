@@ -651,7 +651,7 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
         filter_info = f"Tank: {f_tank} | Period: {mb_from} to {mb_to}"
 
         with ex2:
-            if st.button("📄 Download PDF", key="mb_pdf_dl_new", use_container_width=True):
+            if st.button("📄", key="mb_pdf_dl_new", use_container_width=True, help="Download PDF"):
                 pdf_bytes = _build_pdf(df, df_with_totals, filter_info, location_name, user["username"])
                 st.download_button(
                     "💾 Save PDF",
@@ -663,7 +663,7 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
                 )
 
         with ex3:
-            if st.button("👁️ View PDF", key="mb_pdf_view_new", use_container_width=True):
+            if st.button("👁️", key="mb_pdf_view_new", use_container_width=True, help="View PDF"):
                 pdf_bytes = _build_pdf(df, df_with_totals, filter_info, location_name, user["username"])
                 b64 = base64.b64encode(pdf_bytes).decode("utf-8")
                 components.html(

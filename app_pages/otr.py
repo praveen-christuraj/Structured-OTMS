@@ -11,9 +11,9 @@ from db import get_session
 from ui import header
 
 try:
-    from models import Location, Tank, OTRRecord, TankTransaction
+    from models import Location, Tank, OTRRecord, TankTransaction, RecycleBinEntry
 except Exception:
-    Location, Tank, OTRRecord, TankTransaction = None, None, None, None
+    Location, Tank, OTRRecord, TankTransaction, RecycleBinEntry = None, None, None, None, None
 
 # OTR Reporting Period: 06:01 to 06:00
 REPORT_DAY_START_TIME = time(6, 1)
@@ -249,7 +249,7 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
     with col_info:
         st.info(f"📍 **Active Location:** {loc.name} ({loc.code})")
     with col_refresh:
-        if st.button("🔄 Refresh", key="otr_refresh", use_container_width=True):
+        if st.button("🔄", key="otr_refresh", use_container_width=True, help="Refresh"):
             st.rerun()
 
     # Determine earliest/latest OTR entry dates for default filter bounds
@@ -313,11 +313,20 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
         use_tank_transactions = True
         try:
             with get_session() as s:
+                # Get deleted transaction IDs from recycle bin
+                deleted_ids = set()
+                if RecycleBinEntry:
+                    deleted_records = s.query(RecycleBinEntry.resource_id).filter(
+                        RecycleBinEntry.resource_type == "TankTransaction"
+                    ).all()
+                    deleted_ids = {int(r[0]) for r in deleted_records if r[0].isdigit()}
+                
+                # Query all transactions and filter out deleted ones
                 q = s.query(TankTransaction).filter(TankTransaction.location_id == loc.id)
-                # Exclude soft-deleted records if the column exists
-                if hasattr(TankTransaction, 'is_deleted'):
-                    q = q.filter(TankTransaction.is_deleted != True)
                 rows = q.order_by(TankTransaction.date.asc(), TankTransaction.time.asc()).all()
+                
+                # Filter out deleted records
+                rows = [r for r in rows if r.id not in deleted_ids]
         except Exception:
             pass
 
@@ -531,17 +540,15 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
         if fmt == "CSV":
             data_bytes = fdf.to_csv(index=False).encode("utf-8")
             filename = f"OTR_{loc.code}_{f_from}_{f_to}.csv"
-            st.download_button("📥 Download", data=data_bytes, file_name=filename, mime="text/csv", key="otr_dl_csv", use_container_width=True)
+            st.download_button("📥", data=data_bytes, file_name=filename, mime="text/csv", key="otr_dl_csv", use_container_width=True, help="Download CSV")
         else:
             bio = BytesIO()
             with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
                 fdf.to_excel(writer, sheet_name="OTR", index=False)
             filename = f"OTR_{loc.code}_{f_from}_{f_to}.xlsx"
-            st.download_button("⬇️ Download", data=bio.getvalue(), file_name=filename,
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            key="otr_dl_xlsx", use_container_width=True)
-
-    # PDF export
+            st.download_button("⬇️", data=bio.getvalue(), file_name=filename,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key="otr_dl_xlsx", use_container_width=True, help="Download Excel")    # PDF export
     import base64
     import streamlit.components.v1 as components
 
@@ -557,13 +564,13 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
             filter_text_parts.append(f"Ticket: {f_ticket}")
         filter_text = ", ".join(filter_text_parts) if filter_text_parts else "No filters applied"
 
-        if st.button("📄 Download PDF", key="otr_pdf_dl", use_container_width=True):
+        if st.button("📄", key="otr_pdf_dl", use_container_width=True, help="Download PDF"):
             pdf_bytes = generate_otr_pdf(fdf, selected_tank, filter_text, loc.name, loc.code)
             filename = f"OTR_{loc.code}_{f_from}_{f_to}.pdf"
-            st.download_button("⬇️ Download PDF", data=pdf_bytes, file_name=filename,
+            st.download_button("📄", data=pdf_bytes, file_name=filename,
                             mime="application/pdf", key="otr_pdf_dl_real", use_container_width=True)
         
-        if st.button("👁️ View PDF", key="otr_pdf_view", use_container_width=True):
+        if st.button("👁️", key="otr_pdf_view", use_container_width=True, help="View PDF"):
             pdf_bytes = generate_otr_pdf(fdf, selected_tank, filter_text, loc.name, loc.code)
             b64 = base64.b64encode(pdf_bytes).decode("utf-8")
             components.html(

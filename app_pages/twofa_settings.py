@@ -88,7 +88,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
             """
         )
 
-        if st.button("🔐 Enable 2FA", key="enable_2fa_btn", type="primary"):
+        if st.button("🔐", key="enable_2fa_btn", type="primary", help="Enable 2FA"):
             try:
                 with get_session() as s:
                     secret, backup_codes, provisioning_uri = TwoFactorAuth.enable_2fa(s, user["id"])
@@ -135,7 +135,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
                     placeholder="000000",
                     key="2fa_verify_code",
                 )
-                verify_btn = st.form_submit_button("✅ Verify & Enable", type="primary")
+                verify_btn = st.form_submit_button("✅", type="primary", help="Verify & Enable")
 
             if verify_btn:
                 if not verification_code or len(verification_code) != 6 or not verification_code.isdigit():
@@ -190,7 +190,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
                 key="download_backup_codes_initial",
             )
 
-            if st.button("✅ I've Saved My Backup Codes - Continue", key="finish_2fa_setup"):
+            if st.button("✅", key="finish_2fa_setup", help="I've Saved My Backup Codes - Continue"):
                 st.session_state.pop("2fa_backup_codes_ready", None)
                 st.success("Setup complete! You can now use 2FA to login.")
                 time.sleep(1)
@@ -225,7 +225,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
                 st.session_state["backup_codes_visible"] = False
 
             if not st.session_state["backup_codes_visible"]:
-                if st.button("👁️ Show Backup Codes", key="btn_show_backup_codes", type="primary"):
+                if st.button("👁️", key="btn_show_backup_codes", type="primary", help="Show Backup Codes"):
                     st.session_state["backup_codes_visible"] = True
                     st.rerun()
             else:
@@ -243,7 +243,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
                         use_container_width=True,
                     )
                 with col2:
-                    if st.button("🙈 Hide Codes", key="btn_hide_backup_codes", use_container_width=True):
+                    if st.button("🙈", key="btn_hide_backup_codes", use_container_width=True, help="Hide Codes"):
                         st.session_state["backup_codes_visible"] = False
                         st.rerun()
         else:
@@ -268,7 +268,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
             st.session_state["new_backup_codes"] = None
 
         if st.session_state["new_backup_codes"] is None:
-            if st.button("🔐 Generate New Backup Codes", key="btn_regen_backup_codes", type="primary"):
+            if st.button("🔐", key="btn_regen_backup_codes", type="primary", help="Generate New Backup Codes"):
                 try:
                     with get_session() as s:
                         new_codes = TwoFactorAuth.regenerate_backup_codes(s, user["id"])
@@ -309,7 +309,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
                     use_container_width=True,
                 )
             with col2:
-                if st.button("✅ Done - Clear", key="btn_clear_new_backup_codes", use_container_width=True):
+                if st.button("✅", key="btn_clear_new_backup_codes", use_container_width=True, help="Done - Clear"):
                     st.session_state["new_backup_codes"] = None
                     st.rerun()
 
@@ -347,7 +347,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
                 key="disable_2fa_username",
                 placeholder="Type username here",
             )
-            disable_btn = st.form_submit_button("🚫 Disable 2FA", type="primary")
+            disable_btn = st.form_submit_button("🚫", type="primary", help="Disable 2FA")
 
         if disable_btn:
             if not current_pwd:

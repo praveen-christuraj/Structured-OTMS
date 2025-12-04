@@ -274,7 +274,7 @@ def render_login_history_page(
             use_container_width=True,
         )
     with col_refresh:
-        if st.button("🔄 Refresh", use_container_width=True):
+        if st.button("🔄", use_container_width=True, help="Refresh"):
             st.rerun()
 
     # ---------- Additional insights ----------

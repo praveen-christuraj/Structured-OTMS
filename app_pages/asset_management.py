@@ -127,7 +127,7 @@ def _tab_tanks(active_location_id, user):
             with c2: t_capacity = st.number_input("Capacity (bbl)", min_value=0.0, step=1.0)
             with c3: t_product = st.text_input("Product", value="Crude")
             with c4: status_label = st.selectbox("Status", ["ACTIVE", "INACTIVE"], index=0)
-            submitted = st.form_submit_button("💾 Save Tank", use_container_width=True)
+            submitted = st.form_submit_button("💾", use_container_width=True, help="Save Tank")
 
         if submitted:
             try:
@@ -179,8 +179,8 @@ def _tab_tanks(active_location_id, user):
                         with ec4:
                             new_status_label = st.selectbox("Status", ["ACTIVE","INACTIVE"],
                                                             index=0 if t.status == TankStatus.ACTIVE else 1)
-                        saved = st.form_submit_button("💾 Update", use_container_width=True)
-                        cancel = st.form_submit_button("❌ Cancel", use_container_width=True)
+                        saved = st.form_submit_button("💾", use_container_width=True, help="Update")
+                        cancel = st.form_submit_button("❌", use_container_width=True, help="Cancel")
 
                     if saved:
                         try:
@@ -279,7 +279,7 @@ def _tab_tanks(active_location_id, user):
             overwrite_ok = False
             st.error(f"Can't check existing calibration: {ex}")
 
-        if st.button("Import Calibration to DB", key="tank_cal_import_btn", use_container_width=True):
+        if st.button("📥", key="tank_cal_import_btn", use_container_width=True, help="Import Calibration to DB"):
             if not overwrite_ok:
                 st.error("Please tick the overwrite confirmation to proceed.")
             else:
@@ -316,7 +316,7 @@ def _tab_tanks(active_location_id, user):
     if tank_labels:
         q_tank = st.selectbox("Tank", tank_labels, key="quick_tank")
         q_dip = st.number_input("Dip (cm)", min_value=0.0, step=0.1, format="%.1f", key="quick_dip")
-        if st.button("Calculate Volume (bbl)", use_container_width=True, key="quick_calc_btn"):
+        if st.button("🧮", use_container_width=True, key="quick_calc_btn", help="Calculate Volume (bbl)"):
             with get_session() as s:
                 vol = _interpolate_volume_bbl(s, loc.id, q_tank, float(q_dip or 0.0))
             st.success(f"Estimated Volume: **{vol:,.2f} bbl**")
@@ -344,7 +344,7 @@ def _tab_vessels_assign(active_location_id, user):
             with c2: v_type = st.text_input("Type (e.g., MT, Barge)", max_chars=50)
             with c3: v_capacity = st.number_input("Capacity (bbl)", min_value=0.0, step=1.0)
             with c4: v_reg = st.text_input("Registration No.", max_chars=50)
-            submitted_v = st.form_submit_button("💾 Save Vessel", use_container_width=True)
+            submitted_v = st.form_submit_button("💾", use_container_width=True, help="Save Vessel")
 
         if submitted_v:
             try:
@@ -393,8 +393,8 @@ def _tab_vessels_assign(active_location_id, user):
                         with ec2: new_type = st.text_input("Type", value=v.vessel_type or "", max_chars=50)
                         with ec3: new_cap = st.number_input("Capacity (bbl)", value=float(v.capacity_bbl or 0.0), step=1.0)
                         with ec4: new_reg = st.text_input("Registration No.", value=v.registration_no or "", max_chars=50)
-                        saved = st.form_submit_button("💾 Update", use_container_width=True)
-                        cancel = st.form_submit_button("❌ Cancel", use_container_width=True)
+                        saved = st.form_submit_button("💾", use_container_width=True, help="Update")
+                        cancel = st.form_submit_button("❌", use_container_width=True, help="Cancel")
 
                     if saved:
                         try:
@@ -458,7 +458,7 @@ def _tab_vessels_assign(active_location_id, user):
                               default=[v.name for v in vessels if v.id in assigned_ids])
     target_ids = {by_name[n].id for n in selected}
 
-    if st.button("💾 Save Assignments", use_container_width=True):
+    if st.button("💾", use_container_width=True, help="Save Assignments"):
         try:
             with get_session() as s:
                 # add new
@@ -508,7 +508,7 @@ def _tab_fso_assign(active_location_id, user):
             with c2: v_capacity = st.number_input("Capacity (bbl)", min_value=0.0, step=1.0)
             with c3: v_reg = st.text_input("Registration No.", max_chars=50)
             with c4: status_label = st.selectbox("Status", ["ACTIVE", "INACTIVE"], index=0)
-            submitted_v = st.form_submit_button("💾 Save FSO", use_container_width=True)
+            submitted_v = st.form_submit_button("💾", use_container_width=True, help="Save FSO")
 
         if submitted_v:
             try:
@@ -558,8 +558,8 @@ def _tab_fso_assign(active_location_id, user):
                         with ec3: new_reg = st.text_input("Registration No.", value=v.registration_no or "", max_chars=50)
                         with ec4:
                             new_status_label = st.selectbox("Status", ["ACTIVE","INACTIVE"], index=0 if (v.status or "ACTIVE") == "ACTIVE" else 1)
-                        saved = st.form_submit_button("💾 Update", use_container_width=True)
-                        cancel = st.form_submit_button("❌ Cancel", use_container_width=True)
+                        saved = st.form_submit_button("💾", use_container_width=True, help="Update")
+                        cancel = st.form_submit_button("❌", use_container_width=True, help="Cancel")
 
                     if saved:
                         try:
@@ -605,7 +605,7 @@ def _tab_fso_assign(active_location_id, user):
                               default=[v.name for v in fsos if v.id in assigned_ids]) if names else []
     target_ids = {by_name[n].id for n in selected} if selected else set()
 
-    if st.button("💾 Save FSO Assignments", use_container_width=True):
+    if st.button("💾", use_container_width=True, help="Save FSO Assignments"):
         try:
             with get_session() as s:
                 for v in fsos:
@@ -651,7 +651,7 @@ def _tab_tankers(user):
             with c4: t_status = st.selectbox("Status", ["ACTIVE", "INACTIVE"], index=0)
             st.caption("Optionally upload initial calibration chart for this tanker (CSV/XLSX)")
             up_new_cal = st.file_uploader("Calibration file (optional)", type=["csv","xlsx"], key="tanker_cal_new")
-            submitted = st.form_submit_button("💾 Save Tanker", use_container_width=True)
+            submitted = st.form_submit_button("💾", use_container_width=True, help="Save Tanker")
 
         if submitted:
             try:
@@ -745,8 +745,8 @@ def _tab_tankers(user):
                         with ec4:
                             new_status = st.selectbox("Status", ["ACTIVE", "INACTIVE"],
                                                       index=0 if tk.status == TankStatus.ACTIVE else 1)
-                        saved = st.form_submit_button("💾 Update", use_container_width=True)
-                        cancel = st.form_submit_button("❌ Cancel", use_container_width=True)
+                        saved = st.form_submit_button("💾", use_container_width=True, help="Update")
+                        cancel = st.form_submit_button("❌", use_container_width=True, help="Cancel")
 
                     if saved:
                         try:
@@ -839,7 +839,7 @@ def _tab_tankers(user):
             tc_over_ok = False
             st.error(f"Can't check existing tanker calibration: {ex}")
 
-        if st.button("Import Tanker Calibration to DB", key="tanker_cal_import_btn", use_container_width=True):
+        if st.button("📥", key="tanker_cal_import_btn", use_container_width=True, help="Import Tanker Calibration to DB"):
             if not tc_over_ok:
                 st.error("Please tick the overwrite confirmation to proceed.")
             else:
@@ -896,7 +896,7 @@ def _tab_yade_barges(user):
             c1, c2 = st.columns(2)
             with c1: b_name = st.text_input("Barge Name", max_chars=100)
             with c2: b_design = st.selectbox("Design", ["6", "4"], index=0)
-            submitted = st.form_submit_button("💾 Save Barge", use_container_width=True)
+            submitted = st.form_submit_button("💾", use_container_width=True, help="Save Barge")
 
         if submitted:
             try:
@@ -946,8 +946,8 @@ def _tab_yade_barges(user):
                         ec1, ec2 = st.columns(2)
                         with ec1: new_name = st.text_input("Barge Name", value=b.name, max_chars=100)
                         with ec2: new_design = st.selectbox("Design", ["6","4"], index=0 if b.design == "6" else 1)
-                        saved = st.form_submit_button("💾 Update", use_container_width=True)
-                        cancel = st.form_submit_button("❌ Cancel", use_container_width=True)
+                        saved = st.form_submit_button("💾", use_container_width=True, help="Update")
+                        cancel = st.form_submit_button("❌", use_container_width=True, help="Cancel")
 
                     if saved:
                         try:
@@ -1037,7 +1037,7 @@ def _tab_yade_barges(user):
             y_over_ok = False
             st.error(f"Can't check existing YADE calibration: {ex}")
 
-        if st.button("Import YADE Calibration to DB", key="yade_cal_import_btn", use_container_width=True):
+        if st.button("📥", key="yade_cal_import_btn", use_container_width=True, help="Import YADE Calibration to DB"):
             if not y_over_ok:
                 st.error("Please tick the overwrite confirmation to proceed.")
             else:
@@ -1118,7 +1118,7 @@ def _tab_astm_table11(user):
             st.error(f"Can't check existing ASTM Table 11: {ex}")
             astm_overwrite_ok = False
 
-        if st.button("Import ASTM Table 11 to DB", key="astm11_import_btn", use_container_width=True):
+        if st.button("📥", key="astm11_import_btn", use_container_width=True, help="Import ASTM Table 11 to DB"):
             if not astm_overwrite_ok:
                 st.error("Please tick the overwrite confirmation to proceed.")
             else:

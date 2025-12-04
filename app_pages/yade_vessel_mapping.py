@@ -847,9 +847,9 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                             placeholder="Add remarks (optional)",
                             label_visibility="collapsed",
                         )
-                    submitted = st.form_submit_button("Save comparison row", use_container_width=True)
+                    submitted = st.form_submit_button("💾", use_container_width=True, help="Save comparison row")
 
-                if st.button("Discard pending selection", type="secondary", key="yvm_discard_pending"):
+                if st.button("🗑️", type="secondary", key="yvm_discard_pending", help="Discard pending selection"):
                     st.session_state["yvm_pending_payload"] = None
                     _st_safe_rerun()
 

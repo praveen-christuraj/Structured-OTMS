@@ -306,7 +306,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                 if op_labels == _DEFAULT_OPS:
                     st.caption("⚙️ Tip: you can add custom operation labels in master (VesselOperation). Using defaults for now.")
 
-                submit = st.form_submit_button("💾 Save Entry", type="primary")
+                submit = st.form_submit_button("💾", type="primary", help="Save Entry")
                 if submit:
                     if not e_shuttle.strip():
                         st.error("Shuttle No is required.")
@@ -503,9 +503,9 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
 
                     sc, cc = st.columns(2)
                     with sc:
-                        save = st.form_submit_button("💾 Save", type="primary")
+                        save = st.form_submit_button("💾", type="primary", help="Save")
                     with cc:
-                        cancel = st.form_submit_button("✖️ Cancel")
+                        cancel = st.form_submit_button("✖️", help="Cancel")
                     if save:
                         ttxt = (ed_time or "").strip()
                         if not ed_shuttle.strip():
@@ -559,7 +559,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                 st.warning("Confirm delete?")
                 dc1, dc2 = st.columns(2)
                 with dc1:
-                    if st.button("🗑️ Yes, delete", key=f"vop_del_yes_{entry.id}", type="primary"):
+                    if st.button("🗑️", key=f"vop_del_yes_{entry.id}", type="primary", help="Yes, delete"):
                         try:
                             with get_session() as s:
                                 row = s.query(VesselOpsEntry).filter(VesselOpsEntry.id == entry.id).one_or_none()
@@ -637,7 +637,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                         except Exception as ex:
                             st.error(f"Delete failed: {ex}")
                 with dc2:
-                    if st.button("✖️ Cancel", key=f"vop_del_no_{entry.id}"):
+                    if st.button("✖️", key=f"vop_del_no_{entry.id}", help="Cancel"):
                         st.session_state.pop(f"vop_deleting_{entry.id}", None)
                         _st_safe_rerun()
 
@@ -686,7 +686,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                 use_container_width=True,
             )
         except ImportError:
-            st.button("📊 Excel", disabled=True, help="Install openpyxl", use_container_width=True)
+            st.button("📊", disabled=True, help="Install openpyxl", use_container_width=True)
 
     totals = {
         "receipts": sum(r.net_receipt_dispatch or 0 for r in rows if (r.net_receipt_dispatch or 0) > 0),
@@ -715,7 +715,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
         )
 
     with ex4:
-        if st.button("👁️ View PDF", use_container_width=True):
+        if st.button("👁️", use_container_width=True, help="View PDF"):
             b64 = base64.b64encode(pdf_bytes).decode("utf-8")
             html = f"""
                 <script>

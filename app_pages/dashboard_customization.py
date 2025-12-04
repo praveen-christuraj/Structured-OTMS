@@ -109,7 +109,7 @@ def render_dashboard_customization():
     with tabs[1]:
         render_summary_cards_tab(config)
         st.markdown("---")
-        if st.button("💾 Save Configuration", key="save_cards", type="primary"):
+        if st.button("💾", key="save_cards", type="primary", help="Save Configuration"):
             if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
                 st.success("✅ Configuration saved successfully!")
                 st.session_state.dashboard_config = config
@@ -120,7 +120,7 @@ def render_dashboard_customization():
     with tabs[2]:
         render_tank_visuals_tab(config)
         st.markdown("---")
-        if st.button("💾 Save Configuration", key="save_tanks", type="primary"):
+        if st.button("💾", key="save_tanks", type="primary", help="Save Configuration"):
             if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
                 st.success("✅ Configuration saved successfully!")
                 st.session_state.dashboard_config = config
@@ -131,7 +131,7 @@ def render_dashboard_customization():
     with tabs[3]:
         render_monthly_data_tab(config)
         st.markdown("---")
-        if st.button("💾 Save Configuration", key="save_monthly", type="primary"):
+        if st.button("💾", key="save_monthly", type="primary", help="Save Configuration"):
             if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
                 st.success("✅ Configuration saved successfully!")
                 st.session_state.dashboard_config = config
@@ -142,7 +142,7 @@ def render_dashboard_customization():
     with tabs[4]:
         render_charts_tab(config)
         st.markdown("---")
-        if st.button("💾 Save Configuration", key="save_charts", type="primary"):
+        if st.button("💾", key="save_charts", type="primary", help="Save Configuration"):
             if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
                 st.success("✅ Configuration saved successfully!")
                 st.session_state.dashboard_config = config
@@ -153,7 +153,7 @@ def render_dashboard_customization():
     with tabs[5]:
         render_convoy_status_tab(config, location_id)
         st.markdown("---")
-        if st.button("💾 Save Configuration", key="save_convoy", type="primary"):
+        if st.button("💾", key="save_convoy", type="primary", help="Save Configuration"):
             if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
                 st.success("✅ Configuration saved successfully!")
                 st.session_state.dashboard_config = config
@@ -164,7 +164,7 @@ def render_dashboard_customization():
     with tabs[6]:
         render_sections_manager_tab(config)
         st.markdown("---")
-        if st.button("💾 Save Configuration", key="save_sections", type="primary"):
+        if st.button("💾", key="save_sections", type="primary", help="Save Configuration"):
             if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
                 st.success("✅ Configuration saved successfully!")
                 st.session_state.dashboard_config = config
@@ -175,7 +175,7 @@ def render_dashboard_customization():
     with tabs[7]:
         render_styles_tab(config)
         st.markdown("---")
-        if st.button("💾 Save Configuration", key="save_styles", type="primary"):
+        if st.button("💾", key="save_styles", type="primary", help="Save Configuration"):
             if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
                 st.success("✅ Configuration saved successfully!")
                 st.session_state.dashboard_config = config
@@ -198,7 +198,7 @@ def render_dashboard_customization():
             cur = bool(enabled.get(sid, sec.get("enabled", True)))
             enabled[sid] = st.toggle(f"Include: {sname}", value=cur, key=f"pdf_inc_{sid}")
         st.markdown("---")
-        if st.button("💾 Save Configuration", key="save_pdf", type="primary"):
+        if st.button("💾", key="save_pdf", type="primary", help="Save Configuration"):
             if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
                 st.success("✅ Configuration saved successfully!")
                 st.session_state.dashboard_config = config
@@ -240,7 +240,7 @@ def render_monthly_data_tab(config: dict):
     st.markdown("### Monthly Visuals")
     visuals = layout.setdefault("cards", [])
 
-    if st.button("➕ Add Visual"):
+    if st.button("➕", help="Add Visual"):
         visuals.append({
             "name": "New Visual",
             "type": "card",
@@ -287,7 +287,7 @@ def render_monthly_data_tab(config: dict):
                         v["palette"] = [c.strip() for c in pal_str.split(",") if c.strip()]
                     st.markdown("**Filters**")
                     criteria = v.setdefault("criteria", [])
-                    if st.button("➕ Add Filter", key=f"md_add_filter_{idx}"):
+                    if st.button("➕", key=f"md_add_filter_{idx}", help="Add Filter"):
                         criteria.append({"column": (cols or [""])[0] if cols else "", "operator": "equals", "value": ""})
                     for c_i, crit in enumerate(list(criteria)):
                         fc1, fc2, fc3, fc4 = st.columns([1.6, 1.2, 1.6, 0.6])
@@ -470,7 +470,7 @@ def render_overview_tab(config: dict, location_id: int):
         config["layout"]["trend_chart"]["enabled"] = trend_enabled
     
     # Preview button
-    if st.button("🔍 Preview Dashboard", type="primary"):
+    if st.button("🔍", type="primary", help="Preview Dashboard"):
         st.info("Preview will be shown in the Home page")
 
 
@@ -505,7 +505,7 @@ def render_summary_cards_tab(config: dict):
     cards = config["layout"]["summary_cards"]["cards"]
     
     # Add new card button
-    if st.button("➕ Add New Card"):
+    if st.button("➕", help="Add New Card"):
         cards.append({
             "name": "New Card",
             "data_source": "material_balance",
@@ -579,7 +579,7 @@ def render_summary_cards_tab(config: dict):
                         )
                         st.markdown("**Filters**")
                         criteria = card.setdefault("criteria", [])
-                        if st.button("➕ Add Filter", key=f"card_add_filter_{idx}"):
+                        if st.button("➕", key=f"card_add_filter_{idx}", help="Add Filter"):
                             criteria.append({"column": (cols or [""])[0] if cols else "", "operator": "equals", "value": ""})
                         for c_i, crit in enumerate(list(criteria)):
                             fc1, fc2, fc3, fc4 = st.columns([1.6, 1.2, 1.6, 0.6])
@@ -658,7 +658,7 @@ def render_summary_cards_tab(config: dict):
                         )
                         st.markdown("Sub-Data Filters")
                         sub_criteria = card.setdefault("sub_criteria", [])
-                        if st.button("➕ Add Sub-Filter", key=f"card_add_sub_filter_{idx}"):
+                        if st.button("➕", key=f"card_add_sub_filter_{idx}", help="Add Sub-Filter"):
                             sub_criteria.append({"column": (cols or [""])[0] if cols else "", "operator": "equals", "value": ""})
                         for c_i, crit in enumerate(list(sub_criteria)):
                             fc1, fc2, fc3, fc4 = st.columns([1.6, 1.2, 1.6, 0.6])
@@ -896,7 +896,7 @@ def render_tank_visuals_tab(config: dict):
                                 st.rerun()
                 
                 # Add new tank button
-                if st.button("➕ Add Tank Visual", type="secondary"):
+                if st.button("➕", type="secondary", help="Add Tank Visual"):
                     tank_list.append({
                         "tank_id": all_tanks[0].id if all_tanks else None,
                         "display_name": all_tanks[0].name if all_tanks else "",
@@ -1076,7 +1076,7 @@ def render_sections_manager_tab(config: dict):
     st.markdown("---")
     
     # Add new section
-    if st.button("➕ Add New Section", type="secondary"):
+    if st.button("➕", type="secondary", help="Add New Section"):
         new_order = max([s.get("order", 0) for s in sections]) + 1 if sections else 1
         sections.append({
             "id": f"custom_{len(sections)}",
@@ -1140,7 +1140,7 @@ def render_charts_tab(config: dict):
     series_list = config["layout"]["trend_chart"]["series"]
     
     # Add series button
-    if st.button("➕ Add Series"):
+    if st.button("➕", help="Add Series"):
         series_list.append({
             "name": "New Series",
             "data_source": "material_balance",
@@ -1191,7 +1191,7 @@ def render_charts_tab(config: dict):
                     )
                     st.markdown("**Filters**")
                     criteria = series.setdefault("criteria", [])
-                    if st.button("➕ Add Filter", key=f"series_add_filter_{idx}"):
+                    if st.button("➕", key=f"series_add_filter_{idx}", help="Add Filter"):
                         criteria.append({"column": (cols or [""])[0] if cols else "", "operator": "equals", "value": ""})
                     for c_i, crit in enumerate(list(criteria)):
                         fc1, fc2, fc3, fc4 = st.columns([1.6, 1.2, 1.6, 0.6])
@@ -1519,7 +1519,7 @@ def render_save_load_tab(config: dict, location_id: int, user: dict):
     with col2:
         st.write("")  # Spacing
         st.write("")  # Spacing
-        if st.button("💾 Save Configuration", type="primary"):
+        if st.button("💾", type="primary", help="Save Configuration"):
             success = DashboardConfigManager.save_config(
                 location_id=location_id,
                 config_name=config_name,

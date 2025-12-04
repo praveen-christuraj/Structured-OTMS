@@ -285,7 +285,7 @@ def render_convoy_status_page(active_location_id: Optional[int], user: Optional[
                 rc[3].selectbox("Status", status_opts_yade, key=status_key, label_visibility="collapsed")
 
             save_key = f"convoy_status_yade_save_{target_location_id}"
-            if st.button(" Save YADE Status", key=save_key, use_container_width=True):
+            if st.button("💾", key=save_key, use_container_width=True, help="Save YADE Status"):
                 try:
                     with get_session() as s:
                         existing = s.query(ConvoyStatusYade).filter(ConvoyStatusYade.location_id == target_location_id, ConvoyStatusYade.date == yade_date).all()
@@ -379,7 +379,7 @@ def render_convoy_status_page(active_location_id: Optional[int], user: Optional[
             rc[3].selectbox("Status", status_opts_vessel, key=status_key, label_visibility="collapsed")
 
         v_save_key = f"convoy_status_vessel_save_{target_location_id}"
-        if st.button(" Save Vessel Status", key=v_save_key, use_container_width=True):
+        if st.button("💾", key=v_save_key, use_container_width=True, help="Save Vessel Status"):
             try:
                 with get_session() as s:
                     existing = s.query(ConvoyStatusVessel).filter(ConvoyStatusVessel.location_id == target_location_id, ConvoyStatusVessel.date == vessel_date).all()

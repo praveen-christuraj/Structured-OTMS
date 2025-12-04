@@ -112,7 +112,7 @@ def _create_user_form():
             password_never_expires = False
             st.info("ℹ️ Non-admin users must change password every 30 days")
 
-        submitted = FormBuilder.form_submit_button("Create User", "✓")
+        submitted = FormBuilder.form_submit_button("✅", "✅", label_help="Create User")
 
     if submitted:
         if not username.strip() or not full_name.strip():
@@ -255,7 +255,7 @@ def _user_maintenance_section():
         )
         new_location_id = loc_id_by_label2.get(new_loc_label)
 
-        submitted_update = st.form_submit_button("Update User Details")
+        submitted_update = st.form_submit_button("💾", help="Update User Details")
 
     if submitted_update:
         try:
@@ -293,7 +293,7 @@ def _user_maintenance_section():
     with st.form("reset_password_form"):
         new_pwd = st.text_input("New Password *", type="password")
         new_pwd_confirm = st.text_input("Confirm New Password *", type="password")
-        submit_pwd = st.form_submit_button("Reset Password")
+        submit_pwd = st.form_submit_button("🔐", help="Reset Password")
 
     if submit_pwd:
         if not new_pwd:
@@ -329,7 +329,7 @@ def _user_maintenance_section():
     col_a1, col_a2 = st.columns(2)
     with col_a1:
         if selected_user.is_active:
-            deactivate_clicked = st.button("⛔ Deactivate User")
+            deactivate_clicked = st.button("⛔", help="Deactivate User")
             if deactivate_clicked:
                 with get_session() as session:
                     u = session.query(User).get(selected_user.id)
@@ -350,7 +350,7 @@ def _user_maintenance_section():
                     location_id=selected_user.location_id,
                 )
         else:
-            activate_clicked = st.button("✅ Activate User")
+            activate_clicked = st.button("✅", help="Activate User")
             if activate_clicked:
                 with get_session() as session:
                     u = session.query(User).get(selected_user.id)
@@ -373,7 +373,7 @@ def _user_maintenance_section():
 
     # --- 4) 2FA reset (disable 2FA) ---
     with col_a2:
-        reset_2fa_clicked = st.button("🔁 Reset 2FA (Disable)")
+        reset_2fa_clicked = st.button("🔁", help="Reset 2FA (Disable)")
         if reset_2fa_clicked:
             try:
                 with get_session() as session:
@@ -406,7 +406,7 @@ def _user_maintenance_section():
             help="To prevent mistakes, type the exact username here.",
         )
     with col_d2:
-        delete_clicked = st.button("Delete User")
+        delete_clicked = st.button("🗑️", help="Delete User")
 
     if delete_clicked:
         if confirm_text.strip() != selected_user.username:

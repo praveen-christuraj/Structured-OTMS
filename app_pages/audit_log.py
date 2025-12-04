@@ -27,7 +27,7 @@ def render_audit_log_page(active_location_id, user):
 
     c1, c2 = st.columns([0.2, 0.8])
     with c1:
-        if st.button("🔄 Refresh Now", use_container_width=True):
+        if st.button("🔄", use_container_width=True, help="Refresh Now"):
             st.rerun()
 
     FormBuilder.section_header("Filter Options", "Customize your audit log view")

@@ -105,26 +105,34 @@ def render_mb_customization_page(user: Dict[str, Any]):
 
     col1, col2 = st.columns(2)
     with col1:
-        start_time = st.time_input(
-            "Start Time",
-            value=start_time_val,
+        start_time_str = st.text_input(
+            "Start Time (HH:MM)",
+            value=start_str,
+            placeholder="06:01",
             disabled=not use_custom,
             key=f"mb_window_start_{loc.id}",
+            help="Enter time in HH:MM format (e.g., 06:01, 14:30)"
         )
+        # Validate and convert to time object for consistency
+        start_time = _parse_time_str(start_time_str, start_time_val)
     with col2:
-        end_time = st.time_input(
-            "End Time",
-            value=end_time_val,
+        end_time_str = st.text_input(
+            "End Time (HH:MM)",
+            value=end_str,
+            placeholder="06:00",
             disabled=not use_custom,
             key=f"mb_window_end_{loc.id}",
+            help="Enter time in HH:MM format (e.g., 06:00, 18:30)"
         )
+        # Validate and convert to time object for consistency
+        end_time = _parse_time_str(end_time_str, end_time_val)
 
     st.caption(
         "If End Time is **earlier than or equal to** Start Time, "
         "the window will automatically roll over into the next calendar day."
     )
 
-    if st.button("💾 Save Material Balance Settings", type="primary", key=f"mb_save_{loc.id}"):
+    if st.button("💾", type="primary", key=f"mb_save_{loc.id}", help="Save Material Balance Settings"):
         payload = {
             "use_custom_window": bool(use_custom),
             "start_time": start_time.strftime("%H:%M"),
@@ -194,7 +202,7 @@ def render_mb_customization_page(user: Dict[str, Any]):
                     default=op_names,
                     key=f"mb_col_ops_{loc.id}"
                 )
-        if st.button("Add Column", key=f"mb_add_col_btn_{loc.id}"):
+        if st.button("➕", key=f"mb_add_col_btn_{loc.id}", help="Add Column"):
             if (new_label or "").strip():
                 col_def = {
                     "label": new_label.strip(),
@@ -235,7 +243,7 @@ def render_mb_customization_page(user: Dict[str, Any]):
             if del_flag:
                 d1, d2 = st.columns([0.5, 0.5])
                 with d1:
-                    if st.button("✅ Confirm Delete", key=f"{row_key}_confirm"):
+                    if st.button("✅", key=f"{row_key}_confirm", help="Confirm Delete"):
                         new_list = [x for j, x in enumerate(existing_cols) if j != idx]
                         try:
                             with get_session() as s:
@@ -244,4 +252,4 @@ def render_mb_customization_page(user: Dict[str, Any]):
                         except Exception as ex:
                             st.error(f"Failed to delete column: {ex}")
                 with d2:
-                    st.button("❌ Cancel", key=f"{row_key}_cancel")
+                    st.button("❌", key=f"{row_key}_cancel", help="Cancel")

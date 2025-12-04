@@ -642,7 +642,7 @@ def render_create_report_form(user: Dict[str, Any], active_location_id: int):
             )
 
     st.markdown("---")
-    if st.button("Save Custom Report", type="primary", use_container_width=True):
+    if st.button("💾", type="primary", use_container_width=True, help="Save Custom Report"):
         errors = []
         if not report_name:
             errors.append("Report name is required.")
@@ -846,7 +846,7 @@ def render_manage_reports(user: Dict[str, Any], active_location_id: int):
                         help="Reports stay hidden in Reporting unless the current location is enabled here.",
                         key=f"loc_access_{report.id}",
                     )
-                    if st.button("Save Location Access", key=f"save_loc_access_{report.id}"):
+                    if st.button("💾", key=f"save_loc_access_{report.id}", help="Save Location Access"):
                         try:
                             new_loc_ids = {loc_map[lbl] for lbl in loc_selection if lbl in loc_map}
                             if not new_loc_ids:
@@ -898,7 +898,7 @@ def render_manage_reports(user: Dict[str, Any], active_location_id: int):
                         key=f"cfg_edit_{report.id}",
                         help="Use this to correct mappings, joins, columns, or decimal places for this saved report.",
                     )
-                    if st.button("Save configuration", key=f"cfg_save_{report.id}"):
+                    if st.button("💾", key=f"cfg_save_{report.id}", help="Save configuration"):
                         try:
                             new_cfg = json.loads(cfg_text)
                             report.config_json = json.dumps(new_cfg)
@@ -913,20 +913,21 @@ def render_manage_reports(user: Dict[str, Any], active_location_id: int):
 
                 actions = st.columns(4)
                 with actions[0]:
-                    if st.button("Save Name", key=f"save_{report.id}"):
+                    if st.button("💾", key=f"save_{report.id}", help="Save Name"):
                         report.name = new_name
                         session.commit()
                         st.success("Report updated.")
                         st.rerun()
                 with actions[1]:
                     toggle_label = "Deactivate" if report.is_active else "Activate"
-                    if st.button(toggle_label, key=f"toggle_{report.id}"):
+                    toggle_icon = "⛔" if report.is_active else "✅"
+                    if st.button(toggle_icon, key=f"toggle_{report.id}", help=toggle_label):
                         report.is_active = not report.is_active
                         session.commit()
                         st.success(f"Report {toggle_label.lower()}d.")
                         st.rerun()
                 with actions[2]:
-                    if st.button("View Access", key=f"access_{report.id}"):
+                    if st.button("👁️", key=f"access_{report.id}", help="View Access"):
                         accesses = session.query(ReportAccess).filter(ReportAccess.report_id == report.id).all()
                         if accesses:
                             roles = [a.role for a in accesses if a.role]
@@ -938,14 +939,14 @@ def render_manage_reports(user: Dict[str, Any], active_location_id: int):
                     if delete_key not in st.session_state:
                         st.session_state[delete_key] = False
                     if not st.session_state[delete_key]:
-                        if st.button("Delete", key=f"delete_{report.id}"):
+                        if st.button("🗑️", key=f"delete_{report.id}", help="Delete"):
                             st.session_state[delete_key] = True
                             st.rerun()
                     else:
                         st.warning("Confirm deletion?")
                         d1, d2 = st.columns(2)
                         with d1:
-                            if st.button("Yes, delete", key=f"confirm_yes_{report.id}"):
+                            if st.button("✅", key=f"confirm_yes_{report.id}", help="Yes, delete"):
                                 session.query(ReportAccess).filter(ReportAccess.report_id == report.id).delete()
                                 session.delete(report)
                                 session.commit()
@@ -953,6 +954,6 @@ def render_manage_reports(user: Dict[str, Any], active_location_id: int):
                                 st.success("Report deleted.")
                                 st.rerun()
                         with d2:
-                            if st.button("No, keep", key=f"confirm_no_{report.id}"):
+                            if st.button("❌", key=f"confirm_no_{report.id}", help="No, keep"):
                                 st.session_state[delete_key] = False
                                 st.rerun()

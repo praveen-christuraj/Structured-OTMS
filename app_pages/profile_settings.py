@@ -96,7 +96,7 @@ def render_password_change_section(user_dict: dict):
         new_password = FormBuilder.input_field("New Password", "new_pwd", "Must be at least 8 characters", "password", required=True)
         confirm_password = FormBuilder.input_field("Confirm New Password", "confirm_pwd", "Re-enter new password", "password", required=True)
         
-        submitted = FormBuilder.form_submit_button("Change Password", "🔒")
+        submitted = FormBuilder.form_submit_button("🔐", "🔐", label_help="Change Password")
         
         if submitted:
             if not current_password or not new_password or not confirm_password:
@@ -174,7 +174,7 @@ def render_2fa_section(user_dict: dict):
             if user.force_2fa:
                 st.info("ℹ️ 2FA is mandatory for your account and cannot be disabled")
             else:
-                if st.button("🔓 Disable 2FA", type="secondary"):
+                if st.button("🔓", type="secondary", help="Disable 2FA"):
                     user.totp_enabled = False
                     user.totp_secret = None
                     user.backup_codes = None
@@ -203,7 +203,7 @@ def render_2fa_section(user_dict: dict):
             else:
                 st.info("ℹ️ 2FA is recommended for enhanced security")
             
-            if st.button("🔐 Setup 2FA Now", type="primary"):
+            if st.button("🔐", type="primary", help="Setup 2FA Now"):
                 st.session_state["show_2fa_setup"] = True
                 st.rerun()
     
@@ -242,7 +242,7 @@ def render_2fa_section(user_dict: dict):
                 
                 with st.form("verify_2fa_setup"):
                     verification_code = st.text_input("6-Digit Code", max_chars=6)
-                    verify_btn = st.form_submit_button("Verify & Enable 2FA")
+                    verify_btn = st.form_submit_button("✅", help="Verify & Enable 2FA")
                     
                     if verify_btn:
                         if TwoFactorAuth.verify_totp(secret, verification_code):
@@ -285,12 +285,12 @@ def render_2fa_section(user_dict: dict):
                             del st.session_state["temp_totp_secret"]
                             del st.session_state["show_2fa_setup"]
                             
-                            if st.button("Continue"):
+                            if st.button("▶️", help="Continue"):
                                 st.rerun()
                         else:
                             st.error("❌ Invalid code. Please try again.")
         
-        if st.button("❌ Cancel 2FA Setup"):
+        if st.button("❌", help="Cancel 2FA Setup"):
             del st.session_state["temp_totp_secret"]
             del st.session_state["show_2fa_setup"]
             st.rerun()
@@ -317,7 +317,7 @@ def render_forgot_password_section(user_dict: dict):
             help="Check this if you've also lost access to your 2FA device"
         )
         
-        submitted = st.form_submit_button("🚨 Send Reset Request to Admins")
+        submitted = st.form_submit_button("🚨", help="Send Reset Request to Admins")
         
         if submitted:
             try:
@@ -374,7 +374,7 @@ def render_supervisor_code_section(user_dict: dict):
         new_code = st.text_input("New Supervisor Code", type="password")
         confirm_code = st.text_input("Confirm New Supervisor Code", type="password")
         
-        submitted = st.form_submit_button("Update Supervisor Code")
+        submitted = st.form_submit_button("🔄", help="Update Supervisor Code")
         
         if submitted:
             if not new_code or not confirm_code:

@@ -196,7 +196,7 @@ def _render_page_access(sel_location_id: int, user):
 
     st.caption("These switches control which operational pages this location can access.")
 
-    if st.button("💾 Save Settings", type="primary", key="ls_save_page_flags"):
+    if st.button("💾", type="primary", key="ls_save_page_flags", help="Save Settings"):
         new_flags = {
             "show_tank_transactions": bool(show_tank),
             "show_tanker_transactions": bool(show_tanker),
@@ -371,7 +371,7 @@ def _render_reporting_tabs(sel_location_id: int, user):
         cur = bool(rep_map.get(slug, True))
         toggles[slug] = col.toggle(label, value=cur, key=f"ls_rep_tab_{slug}")
 
-    if st.button("💾 Save Reporting Tabs", type="primary", key="ls_rep_tabs_save"):
+    if st.button("💾", type="primary", key="ls_rep_tabs_save", help="Save Reporting Tabs"):
         try:
             with get_session() as s:
                 cfg = LocationConfig.get_config(s, sel_location_id)
@@ -419,7 +419,7 @@ def _render_convoy_status_settings(sel_location_id: int, user):
     with col1:
         st.markdown("**YADE Status Options**")
         new_yade = st.text_input("Add YADE status", key="ls_convoy_yade_new")
-        if st.button("➕ Add YADE Status", key="ls_convoy_yade_add"):
+        if st.button("➕", key="ls_convoy_yade_add", help="Add YADE Status"):
             val = (new_yade or "").strip()
             if val:
                 st.session_state[state_yade_key] = yade_statuses + [val]
@@ -437,7 +437,7 @@ def _render_convoy_status_settings(sel_location_id: int, user):
     with col2:
         st.markdown("**Vessel Status Options**")
         new_vessel = st.text_input("Add Vessel status", key="ls_convoy_vessel_new")
-        if st.button("➕ Add Vessel Status", key="ls_convoy_vessel_add"):
+        if st.button("➕", key="ls_convoy_vessel_add", help="Add Vessel Status"):
             val = (new_vessel or "").strip()
             if val:
                 st.session_state[state_vessel_key] = vessel_statuses + [val]
@@ -453,7 +453,7 @@ def _render_convoy_status_settings(sel_location_id: int, user):
                 vessel_statuses = list(st.session_state[state_vessel_key])
                 st.success(f"Removed '{name}'")
 
-    if st.button("💾 Save Convoy Status", type="primary", key="ls_convoy_save"):
+    if st.button("💾", type="primary", key="ls_convoy_save", help="Save Convoy Status"):
         try:
             with get_session() as s:
                 cfg = LocationConfig.get_config(s, sel_location_id)
@@ -492,7 +492,7 @@ def _render_service_types(sel_location_id: int, user):
     new_type = st.text_input("Add Service Type", key="ls_service_type_new")
     colA, colB = st.columns([0.25, 0.75])
     with colA:
-        if st.button("➕ Add", key="ls_service_type_add", type="primary"):
+        if st.button("➕", key="ls_service_type_add", type="primary", help="Add"):
             val = (new_type or "").strip()
             if not val:
                 st.error("Enter a valid service type name.")
@@ -611,7 +611,7 @@ def _render_tanker_tracking_settings(sel_location_id: int, user):
     receiver_ids = [label_to_id.get(label) for label in receiver_sources if label in label_to_id]
     alias_list = [a.strip() for a in (alias_input or "").split(",") if a.strip()]
 
-    if st.button("💾 Save Tanker Tracking", type="primary", key="ls_tt_save"):
+    if st.button("💾", type="primary", key="ls_tt_save", help="Save Tanker Tracking"):
         try:
             with get_session() as session:
                 cfg = LocationConfig.get_config(session, sel_location_id)
@@ -717,7 +717,7 @@ def _render_operations_config(selected_location_id, user):
 
     c1, c2 = st.columns([0.25, 0.75])
     with c1:
-        if st.button("➕ Add Operation", type="primary", key="ops_add_btn"):
+        if st.button("➕", type="primary", key="ops_add_btn", help="Add Operation"):
             if not op_name or not op_name.strip():
                 st.error(f"Please enter a valid {category.lower()} name.")
             else:
@@ -803,7 +803,7 @@ def _render_operations_config(selected_location_id, user):
                 help="Toggle to enable/disable this operation in dropdowns"
             )
         with colC:
-            if st.button("💾 Save", key=f"ops_save_{row_key}", help="Save the active/inactive status"):
+            if st.button("💾", key=f"ops_save_{row_key}", help="Save the active/inactive status"):
                 with get_session() as s:
                     set_operation_active(s, selected_location_id, op_id=o["id"], active=on)
                     try:
@@ -822,7 +822,7 @@ def _render_operations_config(selected_location_id, user):
                         pass
                 st.success(f"✅ '{o['name']}' status updated.")
         with colD:
-            if st.button("🗑️ Delete", key=f"ops_del_{row_key}", help="Permanently delete this operation"):
+            if st.button("🗑️", key=f"ops_del_{row_key}", help="Permanently delete this operation"):
                 with get_session() as s:
                     delete_operation(s, selected_location_id, op_id=o["id"])
                     try:

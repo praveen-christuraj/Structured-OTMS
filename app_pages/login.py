@@ -126,7 +126,7 @@ def render_login_page(notice: str | None = None):
                 label_visibility="collapsed",
             )
 
-            submitted = st.form_submit_button("Sign in", use_container_width=True, type="primary")
+            submitted = st.form_submit_button("🔑", use_container_width=True, type="primary", help="Sign in")
 
         with st.expander("Need a password reset?", expanded=False):
             st.caption("Send a quick request to your administrator.")
@@ -138,7 +138,7 @@ def render_login_page(notice: str | None = None):
                     placeholder="Enter your username",
                     label_visibility="collapsed",
                 )
-                fp_submit = st.form_submit_button("Send request", use_container_width=True, type="secondary")
+                fp_submit = st.form_submit_button("📧", use_container_width=True, type="secondary", help="Send request")
 
     if submitted:
         if not username or not password:

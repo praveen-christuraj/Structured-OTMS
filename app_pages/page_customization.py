@@ -105,7 +105,7 @@ def render_page_customization(user: Dict[str, Any]):
         with add_cols[2]:
             new_unit = st.selectbox("Unit", ["bbls", "m3"], index=0, key=f"pc_cond_unit_{loc_key}")
         with add_cols[3]:
-            add_btn = st.button("➕ Add", key=f"pc_cond_add_{loc_key}", use_container_width=True)
+            add_btn = st.button("➕", key=f"pc_cond_add_{loc_key}", use_container_width=True, help="Add")
 
         if add_btn:
             if not new_label.strip():
@@ -151,7 +151,7 @@ def render_page_customization(user: Dict[str, Any]):
                 with ecols[3]:
                     new_active_i = st.checkbox("Active", value=bool(m.get("active",True)), key=f"{row_key}_act")
                 with ecols[4]:
-                    save_i = st.button("💾 Save", key=f"{row_key}_save", use_container_width=True)
+                    save_i = st.button("💾", key=f"{row_key}_save", use_container_width=True, help="Save")
 
                 if save_i:
                     c_meters[idx] = _row({"label": new_label_i, "factor": new_factor_i, "unit": new_unit_i, "active": new_active_i})
@@ -185,12 +185,12 @@ def render_page_customization(user: Dict[str, Any]):
                 dcols = st.columns([0.84, 0.16])
                 with dcols[1]:
                     if not st.session_state[del_flag_key]:
-                        if st.button("🗑️ Delete", key=f"{row_key}_del", use_container_width=True):
+                        if st.button("🗑️", key=f"{row_key}_del", use_container_width=True, help="Delete"):
                             st.session_state[del_flag_key] = True
                     else:
                         st.warning("Confirm delete?")
                         c1, c2 = st.columns(2)
-                        if c1.button("✅ Yes", key=f"{row_key}_del_yes", use_container_width=True):
+                        if c1.button("✅", key=f"{row_key}_del_yes", use_container_width=True, help="Yes"):
                             try:
                                 new_list = [x for j, x in enumerate(c_meters) if j != idx]
                                 with get_session() as s:
@@ -214,7 +214,7 @@ def render_page_customization(user: Dict[str, Any]):
                                 st.rerun()
                             except Exception as ex:
                                 st.error(f"Delete failed: {ex}")
-                        if c2.button("❌ No", key=f"{row_key}_del_no", use_container_width=True):
+                        if c2.button("❌", key=f"{row_key}_del_no", use_container_width=True, help="No"):
                             st.session_state[del_flag_key] = False
 
     # ============================
@@ -338,7 +338,7 @@ def render_page_customization(user: Dict[str, Any]):
             
             st.markdown("---")
 
-        if st.button("💾 Save Produced Water Table", type="primary", key=f"pc_pw_save_{loc_key}"):
+        if st.button("💾", type="primary", key=f"pc_pw_save_{loc_key}", help="Save Produced Water Table"):
             try:
                 with get_session() as s:
                     set_dynamic_table_def(s, loc.id, "tank_transactions", "produced_water", {"columns": pw_columns})
@@ -503,7 +503,7 @@ def render_page_customization(user: Dict[str, Any]):
             
             st.markdown("---")  # Separator between columns
 
-        if st.button("💾 Save Production Table", type="primary", key=f"pc_prod_save_{loc_key}"):
+        if st.button("💾", type="primary", key=f"pc_prod_save_{loc_key}", help="Save Production Table"):
             try:
                 with get_session() as s:
                     set_dynamic_table_def(s, loc.id, "tank_transactions", "production", {"columns": prod_columns})
@@ -593,7 +593,7 @@ def render_page_customization(user: Dict[str, Any]):
             st.caption("Update factor here after each Meter Proving. Unit defines how readings are interpreted in Meter Records.")
             st.markdown("---")
 
-        if st.button("💾 Save Meters & Factors", type="primary", key=f"pc_meters_save_{loc_key}"):
+        if st.button("💾", type="primary", key=f"pc_meters_save_{loc_key}", help="Save Meters & Factors"):
             try:
                 payload = {"meters": meters}
                 with get_session() as s:
@@ -650,20 +650,20 @@ def render_page_customization(user: Dict[str, Any]):
                 if not st.session_state[edit_flag_key]:
                     # View row
                     with c4:
-                        if st.button("✏️ Edit", key=f"pc_meter_edit_btn_{row_key}"):
+                        if st.button("✏️", key=f"pc_meter_edit_btn_{row_key}", help="Edit"):
                             st.session_state[edit_flag_key] = True
                             st.session_state[f"pc_edit_label_{row_key}"] = label
                             st.session_state[f"pc_edit_factor_{row_key}"] = factor
                             st.session_state[f"pc_edit_unit_{row_key}"] = unit
                     with c5:
                         if not st.session_state[del_flag_key]:
-                            if st.button("🗑️ Delete", key=f"pc_meter_del_btn_{row_key}"):
+                            if st.button("🗑️", key=f"pc_meter_del_btn_{row_key}", help="Delete"):
                                 st.session_state[del_flag_key] = True
                         else:
                             st.warning("Confirm delete?")
                             d1, d2 = st.columns(2)
                             with d1:
-                                if st.button("✅ Yes", key=f"pc_meter_del_yes_{row_key}"):
+                                if st.button("✅", key=f"pc_meter_del_yes_{row_key}", help="Yes"):
                                     try:
                                         new_list = [x for j, x in enumerate(meters_live) if j != idx]
                                         payload = {"meters": new_list}
@@ -693,7 +693,7 @@ def render_page_customization(user: Dict[str, Any]):
                                         st.error(f"Delete failed: {ex}")
 
                             with d2:
-                                if st.button("❌ No", key=f"pc_meter_del_no_{row_key}"):
+                                if st.button("❌", key=f"pc_meter_del_no_{row_key}", help="No"):
                                     st.session_state[del_flag_key] = False
                 else:
                     # Edit row UI
@@ -718,7 +718,7 @@ def render_page_customization(user: Dict[str, Any]):
                             key=f"pc_meter_edit_unit_{row_key}"
                         )
                     with c4:
-                        if st.button("💾 Save", key=f"pc_meter_edit_save_{row_key}"):
+                        if st.button("💾", key=f"pc_meter_edit_save_{row_key}", help="Save"):
                             try:
                                 meters_live[idx] = {
                                     "label": (new_label or f"Meter {idx+1}").strip(),
@@ -752,7 +752,7 @@ def render_page_customization(user: Dict[str, Any]):
                                 st.error(f"Update failed: {ex}")
 
                     with c5:
-                        if st.button("↩️ Cancel", key=f"pc_meter_edit_cancel_{row_key}"):
+                        if st.button("↩️", key=f"pc_meter_edit_cancel_{row_key}", help="Cancel"):
                             st.session_state[edit_flag_key] = False
 
                 st.markdown("---")
@@ -955,7 +955,7 @@ def render_page_customization(user: Dict[str, Any]):
             st.markdown("---")
         
         # Create button
-        if st.button("✅ Create Custom Tab", type="primary", key=f"pc_custom_tab_create_{loc_key}"):
+        if st.button("✅", type="primary", key=f"pc_custom_tab_create_{loc_key}", help="Create Custom Tab"):
             if not new_tab_name or not new_tab_name.strip():
                 st.error("Tab name is required.")
             elif not current_cols:
@@ -1109,11 +1109,11 @@ def render_page_customization(user: Dict[str, Any]):
                                     st.error(f"Failed to update tab status: {ex}")
                         
                         with del_col:
-                            if st.button(f"🗑️ Delete", key=f"pc_tab_del_{page}_{loc_key}_{tab_idx}", help=f"Delete '{tab_name}'"):
+                            if st.button(f"🗑️", key=f"pc_tab_del_{page}_{loc_key}_{tab_idx}", help=f"Delete '{tab_name}'"):
                                 st.session_state[f"pc_tab_confirm_del_{page}_{tab_idx}"] = True
                         
                         with edit_col:
-                            if st.button(f"✏️ Edit Columns", key=f"pc_tab_edit_{page}_{loc_key}_{tab_idx}", help=f"Edit columns for '{tab_name}'"):
+                            if st.button(f"✏️", key=f"pc_tab_edit_{page}_{loc_key}_{tab_idx}", help=f"Edit columns for '{tab_name}'"):
                                 st.session_state[f"pc_tab_editing_{page}_{tab_idx}"] = not st.session_state.get(f"pc_tab_editing_{page}_{tab_idx}", False)
                         
                         # Delete confirmation
@@ -1124,7 +1124,7 @@ def render_page_customization(user: Dict[str, Any]):
                             dcol1, dcol2, dcol3 = st.columns([0.33, 0.33, 0.34])
                             
                             with dcol1:
-                                if st.button("🗑️ Delete Config Only", key=f"pc_tab_del_config_{page}_{loc_key}_{tab_idx}", help="Remove tab configuration but keep database table and data"):
+                                if st.button("🗑️", key=f"pc_tab_del_config_{page}_{loc_key}_{tab_idx}", help="Delete Config Only - Remove tab configuration but keep database table and data"):
                                     try:
                                         with get_session() as s:
                                             delete_custom_tab(s, loc.id, page, tab_id)
@@ -1151,13 +1151,13 @@ def render_page_customization(user: Dict[str, Any]):
                                         st.error(f"Failed to delete tab config: {ex}")
                             
                             with dcol2:
-                                if st.button("💣 Delete Everything", key=f"pc_tab_del_all_{page}_{loc_key}_{tab_idx}", type="primary", help="Delete tab configuration AND drop database table with all data"):
+                                if st.button("💣", key=f"pc_tab_del_all_{page}_{loc_key}_{tab_idx}", type="primary", help="Delete Everything - Delete tab configuration AND drop database table with all data"):
                                     # Second confirmation for destructive action
                                     st.session_state[f"pc_tab_confirm_drop_{page}_{tab_idx}"] = True
                                     st.rerun()
                             
                             with dcol3:
-                                if st.button("❌ Cancel", key=f"pc_tab_del_no_{page}_{loc_key}_{tab_idx}"):
+                                if st.button("❌", key=f"pc_tab_del_no_{page}_{loc_key}_{tab_idx}", help="Cancel"):
                                     if f"pc_tab_confirm_del_{page}_{tab_idx}" in st.session_state:
                                         del st.session_state[f"pc_tab_confirm_del_{page}_{tab_idx}"]
                                     st.rerun()
@@ -1169,7 +1169,7 @@ def render_page_customization(user: Dict[str, Any]):
                             
                             fcol1, fcol2 = st.columns([0.5, 0.5])
                             with fcol1:
-                                if st.button("💣 YES, DELETE EVERYTHING", key=f"pc_tab_drop_confirm_{page}_{loc_key}_{tab_idx}", type="primary"):
+                                if st.button("💣", key=f"pc_tab_drop_confirm_{page}_{loc_key}_{tab_idx}", type="primary", help="YES, DELETE EVERYTHING"):
                                     try:
                                         from models import drop_custom_tab_table
                                         from logger import log_info, log_error
@@ -1222,7 +1222,7 @@ def render_page_customization(user: Dict[str, Any]):
                                         log_error(error_msg, exc_info=True)
                             
                             with fcol2:
-                                if st.button("❌ Cancel", key=f"pc_tab_drop_cancel_{page}_{loc_key}_{tab_idx}"):
+                                if st.button("❌", key=f"pc_tab_drop_cancel_{page}_{loc_key}_{tab_idx}", help="Cancel"):
                                     if f"pc_tab_confirm_drop_{page}_{tab_idx}" in st.session_state:
                                         del st.session_state[f"pc_tab_confirm_drop_{page}_{tab_idx}"]
                                     if f"pc_tab_confirm_del_{page}_{tab_idx}" in st.session_state:
@@ -1332,7 +1332,7 @@ def render_page_customization(user: Dict[str, Any]):
                             # Save changes
                             scol1, scol2 = st.columns([0.5, 0.5])
                             with scol1:
-                                if st.button("💾 Save Changes", key=f"pc_tab_save_{page}_{loc_key}_{tab_idx}", type="primary"):
+                                if st.button("💾", key=f"pc_tab_save_{page}_{loc_key}_{tab_idx}", type="primary", help="Save Changes"):
                                     try:
                                         with get_session() as s:
                                             update_custom_tab(s, loc.id, page, tab_id, columns=edit_cols)
@@ -1343,7 +1343,7 @@ def render_page_customization(user: Dict[str, Any]):
                                     except Exception as ex:
                                         st.error(f"Failed to save changes: {ex}")
                             with scol2:
-                                if st.button("❌ Cancel Edit", key=f"pc_tab_cancel_{page}_{loc_key}_{tab_idx}"):
+                                if st.button("❌", key=f"pc_tab_cancel_{page}_{loc_key}_{tab_idx}", help="Cancel Edit"):
                                     del st.session_state[f"pc_tab_editing_{page}_{tab_idx}"]
                                     del st.session_state[f"pc_tab_edit_cols_{page}_{tab_idx}"]
                                     st.rerun()
@@ -1446,7 +1446,7 @@ def render_page_customization(user: Dict[str, Any]):
 
             tables[i] = t
 
-        if st.button("💾 Save YADE Tracking Customization", key=f"pc_yt_save_{loc_key}"):
+        if st.button("💾", key=f"pc_yt_save_{loc_key}", help="Save YADE Tracking Customization"):
             try:
                 with get_session() as s:
                     set_page_section_config(s, loc.id, page="yade_tracking", section="customization", cfg={"tables": tables})
@@ -1470,7 +1470,7 @@ def render_page_customization(user: Dict[str, Any]):
             value=tabs_access.get("Comparison", True),
             key=f"pc_yvm_tab_comp_{loc_key}",
         )
-        if st.button("💾 Save Yade-Vessel Tabs", key=f"pc_yvm_tab_save_{loc_key}"):
+        if st.button("💾", key=f"pc_yvm_tab_save_{loc_key}", help="Save Yade-Vessel Tabs"):
             try:
                 with get_session() as s:
                     fresh_cfg = LocationConfig.get_config(s, loc.id)

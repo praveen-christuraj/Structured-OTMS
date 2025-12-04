@@ -729,6 +729,33 @@ def get_active_operation_names(
     return [o["name"] for o in ops if o.get("active", True)]
 
 
+def get_active_operation_names_by_category(
+    session: Session,
+    location_id: int,
+    *,
+    asset: str,
+    category: str,
+) -> List[str]:
+    """
+    Get active operation names for a specific asset AND category.
+    
+    Examples:
+      - get_active_operation_names_by_category(..., asset="tanker", category="Operation")
+        → Returns operations like ['Receipt from Aggu', 'Dispatch to GPP', ...]
+      
+      - get_active_operation_names_by_category(..., asset="tanker", category="Cargo Type")
+        → Returns cargo types like ['Crude Oil', 'Condensate', ...]
+      
+      - get_active_operation_names_by_category(..., asset="tanker", category="Destination")
+        → Returns destinations like ['Aggu', 'OFS', 'GPP', ...]
+      
+      - get_active_operation_names_by_category(..., asset="tanker", category="Loading Berth")
+        → Returns berths like ['Aggu', 'Ogini', 'OFS', ...]
+    """
+    ops = list_operations(session, location_id, asset=asset, category=category)
+    return [o["name"] for o in ops if o.get("active", True)]
+
+
 # ==================== Custom Tabs Management ====================
 def get_custom_tabs(session: Session, location_id: int, page: str) -> List[Dict[str, Any]]:
     """

@@ -311,10 +311,10 @@ def render_reporting_page(active_location_id: int, user: dict):
 
     nav1, nav2, nav3, nav4, nav5 = st.columns([1, 1, 2, 1, 1])
     with nav1:
-        if st.button("⏮️ First"):
+        if st.button("⏮️", help="First"):
             st.session_state[page_key] = 1
     with nav2:
-        if st.button("◀️ Previous"):
+        if st.button("◀️", help="Previous"):
             current = int(st.session_state[page_key])
             if current > 1:
                 st.session_state[page_key] = current - 1
@@ -324,12 +324,12 @@ def render_reporting_page(active_location_id: int, user: dict):
             unsafe_allow_html=True
         )
     with nav4:
-        if st.button("Next ▶️"):
+        if st.button("▶️", help="Next"):
             current = int(st.session_state[page_key])
             if current < total_pages:
                 st.session_state[page_key] = current + 1
     with nav5:
-        if st.button("Last ⏭️"):
+        if st.button("⏭️", help="Last"):
             st.session_state[page_key] = total_pages
 
     current_page_num = int(st.session_state[page_key])
@@ -407,7 +407,7 @@ def render_reporting_page(active_location_id: int, user: dict):
             st.error(f"PDF export error: {e}")
 
     with col4:
-        if st.button("👁️ View PDF", use_container_width=True):
+        if st.button("👁️", use_container_width=True, help="View PDF"):
             try:
                 engine = ReportEngine(config)
                 pdf_base64 = engine.get_pdf_base64(df, report_name, user_filters)

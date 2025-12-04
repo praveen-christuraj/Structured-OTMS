@@ -75,7 +75,7 @@ def render_services_page(active_location_id, user):
             description = st.text_area("Description")
             contact_number = st.text_input("Contact Number")
             ip_number = st.text_input("IP Number")
-            submitted = st.form_submit_button("Submit Request", type="primary")
+            submitted = st.form_submit_button("📫", type="primary", help="Submit Request")
 
         if submitted:
             if not description.strip() or not contact_number.strip():
