@@ -9,6 +9,7 @@ import pandas as pd
 
 from db import get_session
 from ui import header
+from action_logger_utils import log_export_action
 from logger import log_error
 from models import User, LoginAttempt
 from security import SecurityManager
@@ -272,6 +273,7 @@ def render_login_history_page(
             file_name=f"login_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime="text/csv",
             use_container_width=True,
+            on_click=lambda: log_export_action("LoginHistory", "CSV", len(df), st.session_state.get("auth_user"), st.session_state.get("active_location_id"))
         )
     with col_refresh:
         if st.button("🔄", use_container_width=True, help="Refresh"):

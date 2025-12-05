@@ -15,6 +15,7 @@ from db import get_session
 from ui import header
 from security import SecurityManager
 from logger import log_error
+from action_logger_utils import log_export_action
 
 from models import (
     Location,
@@ -1573,7 +1574,8 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                         label="📥 Download CSV",
                         data=csv,
                         file_name=f"FSO_OTR_{st.session_state.selected_fso_vessel}_{date.today()}.csv",
-                        mime="text/csv"
+                        mime="text/csv",
+                        on_click=lambda: log_export_action("FSO-OTR", "CSV", len(df), user, active_location_id)
                     )
                 
                 with export_col2:
@@ -1586,7 +1588,8 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                         label="⬇️ Download Excel",
                         data=excel_data,
                         file_name=f"FSO_OTR_{st.session_state.selected_fso_vessel}_{date.today()}.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        on_click=lambda: log_export_action("FSO-OTR", "XLSX", len(df), user, active_location_id)
                     )
                 
                 with export_col3:
@@ -1613,7 +1616,8 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                 data=pdf_data,
                                 file_name=f"FSO_OTR_{st.session_state.selected_fso_vessel}_{date.today()}.pdf",
                                 mime="application/pdf",
-                                key="download_pdf_btn"
+                                key="download_pdf_btn",
+                                on_click=lambda: log_export_action("FSO-OTR", "PDF", len(df), user, active_location_id)
                             )
                         except Exception as ex:
                             st.error(f"PDF generation failed: {ex}")
@@ -2058,7 +2062,8 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                             data=csv_mb,
                             file_name=f"FSO_Material_Balance_{st.session_state.selected_fso_vessel}_{date.today()}.csv",
                             mime="text/csv",
-                            use_container_width=True
+                            use_container_width=True,
+                            on_click=lambda: log_export_action("FSO-MaterialBalance", "CSV", len(mb_df), user, active_location_id)
                         )
                     
                     # Excel Export
@@ -2073,7 +2078,8 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                             data=mb_excel_data,
                             file_name=f"FSO_Material_Balance_{st.session_state.selected_fso_vessel}_{date.today()}.xlsx",
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True
+                            use_container_width=True,
+                            on_click=lambda: log_export_action("FSO-MaterialBalance", "XLSX", len(mb_df), user, active_location_id)
                         )
                     
                     # PDF Download
@@ -2098,7 +2104,8 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                     file_name=f"FSO_Material_Balance_{st.session_state.selected_fso_vessel}_{date.today()}.pdf",
                                     mime="application/pdf",
                                     key="mb_save_pdf_btn",
-                                    use_container_width=True
+                                    use_container_width=True,
+                                    on_click=lambda: log_export_action("FSO-MaterialBalance", "PDF", len(mb_df), user, active_location_id)
                                 )
                             except Exception as ex:
                                 st.error(f"PDF generation failed: {ex}")
@@ -2136,6 +2143,20 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                 import streamlit.components.v1 as components
                                 components.html(pdf_html, height=0)
                                 st.success("PDF opened in new tab!")
+                                try:
+                                    SecurityManager.log_audit(
+                                        None,
+                                        user.get("username", "system"),
+                                        "VIEW",
+                                        resource_type="FSO-MaterialBalance",
+                                        resource_id=str(active_location_id),
+                                        details="Viewed FSO Material Balance PDF",
+                                        user_id=user.get("id"),
+                                        location_id=active_location_id,
+                                        success=True,
+                                    )
+                                except Exception:
+                                    pass
                                 
                             except Exception as ex:
                                 st.error(f"PDF view failed: {ex}")

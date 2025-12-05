@@ -13,6 +13,7 @@ from sqlalchemy import func
 from db import get_session
 from security import SecurityManager
 from ui import header
+from action_logger_utils import log_export_action
 try:
     from recycle_bin import RecycleBinManager
 except Exception:
@@ -672,6 +673,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
             file_name=f"vessel_ops_{location_name.replace(' ', '_')}_{datetime.now():%Y%m%d_%H%M%S}.csv",
             mime="text/csv",
             use_container_width=True,
+            on_click=lambda: log_export_action("VesselOperations", "CSV", len(df), user, active_location_id)
         )
     with ex2:
         excel_buf = BytesIO()
@@ -684,6 +686,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                 file_name=f"vessel_ops_{location_name.replace(' ', '_')}_{datetime.now():%Y%m%d_%H%M%S}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
+                on_click=lambda: log_export_action("VesselOperations", "XLSX", len(df), user, active_location_id)
             )
         except ImportError:
             st.button("📊", disabled=True, help="Install openpyxl", use_container_width=True)
@@ -712,6 +715,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
             file_name=f"vessel_ops_{location_name.replace(' ', '_')}_{date.today()}.pdf",
             mime="application/pdf",
             use_container_width=True,
+            on_click=lambda: log_export_action("VesselOperations", "PDF", len(df), user, active_location_id)
         )
 
     with ex4:
@@ -727,3 +731,17 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
             import streamlit.components.v1 as components
             components.html(html, height=0)
             st.success("PDF opened in a new tab.")
+            try:
+                SecurityManager.log_audit(
+                    None,
+                    user.get("username", "system"),
+                    "VIEW",
+                    resource_type="VesselOperations",
+                    resource_id=str(active_location_id),
+                    details="Viewed Vessel Operations PDF",
+                    user_id=user.get("id"),
+                    location_id=active_location_id,
+                    success=True,
+                )
+            except Exception:
+                pass

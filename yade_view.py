@@ -636,16 +636,18 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
     min_date = min(all_dates) if all_dates else date.today()
     max_date = date.today()  # No future dates allowed
 
-    # Compact filters in 4 columns
-    f1, f2, f3, f4 = st.columns(4)
+    f1, f2, f3, f4, f5 = st.columns(5)
     with f1:
-        filter_date = st.date_input("📅 Date", value=max_date, min_value=min_date, max_value=max_date, 
-                                     format="DD/MM/YYYY", key="yade_filter_date")
+        filter_date_from = st.date_input("📅 From Date", value=max_date, min_value=min_date, max_value=max_date,
+                                         format="DD/MM/YYYY", key="yade_filter_date_from")
     with f2:
-        filter_yade = st.selectbox("🚢 YADE No", ["All"] + all_yades, key="yade_filter_yade")
+        filter_date_to = st.date_input("📅 To Date", value=max_date, min_value=min_date, max_value=max_date,
+                                       format="DD/MM/YYYY", key="yade_filter_date_to")
     with f3:
-        filter_convoy = st.selectbox("🚛 Convoy No", ["All"] + all_convoys, key="yade_filter_convoy")
+        filter_yade = st.selectbox("🚢 YADE No", ["All"] + all_yades, key="yade_filter_yade")
     with f4:
+        filter_convoy = st.selectbox("🚛 Convoy No", ["All"] + all_convoys, key="yade_filter_convoy")
+    with f5:
         filter_creator = st.selectbox("👤 Created By", ["All"] + all_creators, key="yade_filter_creator")
 
     tabs = st.tabs(["List", "Yade Loading/Offloading"])
@@ -656,7 +658,7 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
         )
         edit_id = st.session_state.get("yade_row_open")
         for v in voyages:
-            if filter_date and v.date != filter_date:
+            if filter_date_from and filter_date_to and not (filter_date_from <= v.date <= filter_date_to):
                 continue
             if filter_yade != "All" and v.yade_name != filter_yade:
                 continue
@@ -1266,7 +1268,7 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
         # Apply existing filters
         frows = []
         for r in rows:
-            if filter_date and r["Date"] != filter_date:
+            if filter_date_from and filter_date_to and not (filter_date_from <= r["Date"] <= filter_date_to):
                 continue
             if filter_yade != "All" and r["Yade No"] != filter_yade:
                 continue
@@ -1307,7 +1309,7 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
 
         def _generate_lo_pdf(dfpdf: pd.DataFrame) -> bytes:
             try:
-                from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+                from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
                 from reportlab.lib.pagesizes import A4, landscape
                 from reportlab.lib import colors
                 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -1315,20 +1317,90 @@ def render_yade_transactions_view(user: Dict[str, Any] | None = None, location_i
                 buf = BytesIO()
                 doc = SimpleDocTemplate(buf, pagesize=landscape(A4), leftMargin=0.6*cm, rightMargin=0.6*cm, topMargin=0.7*cm, bottomMargin=0.7*cm)
                 styles = getSampleStyleSheet()
-                title = Paragraph("Yade Loading/Offloading", ParagraphStyle(name="title", parent=styles["Heading2"], alignment=1))
-                elements = [title, Spacer(1, 0.3*cm)]
+                header_style = ParagraphStyle(name="hdr", parent=styles["Heading2"], alignment=1, textColor=colors.white)
+                subtitle_style = ParagraphStyle(name="sub", parent=styles["Normal"], alignment=1, fontSize=9)
+                elements = []
+                hdr_para = Paragraph("YADE Loading/Offloading", header_style)
+                hdr_tbl = Table([[hdr_para]], colWidths=[doc.width])
+                hdr_tbl.setStyle(TableStyle([
+                    ("BACKGROUND", (0,0), (-1,-1), colors.HexColor("#0B3D91")),
+                    ("ALIGN", (0,0), (-1,-1), "CENTER"),
+                    ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+                    ("FONTSIZE", (0,0), (-1,-1), 14),
+                    ("BOTTOMPADDING", (0,0), (-1,-1), 10),
+                    ("TOPPADDING", (0,0), (-1,-1), 10),
+                ]))
+                elements.append(hdr_tbl)
+                dates = []
+                if "Date" in dfpdf.columns:
+                    try:
+                        dates = sorted(set(pd.to_datetime(dfpdf["Date"]).dt.date))
+                    except Exception:
+                        pass
+                if dates:
+                    dr_text = f"Date: {dates[0].strftime('%d/%m/%Y')}" if len(dates) == 1 else f"Date Range: {dates[0].strftime('%d/%m/%Y')} — {dates[-1].strftime('%d/%m/%Y')}"
+                    elements.append(Spacer(1, 0.15*cm))
+                    elements.append(Paragraph(dr_text, subtitle_style))
+                    elements.append(Spacer(1, 0.25*cm))
                 headers = dfpdf.columns.tolist()
                 data = [headers] + dfpdf.astype(str).values.tolist()
                 tbl = Table(data, repeatRows=1)
                 tbl.setStyle(TableStyle([
-                    ("GRID", (0,0), (-1,-1), 0.25, colors.grey),
-                    ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#f5f7fb")),
+                    ("GRID", (0,0), (-1,-1), 0.25, colors.HexColor("#D0D4DA")),
+                    ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#E9EDF5")),
+                    ("TEXTCOLOR", (0,0), (-1,0), colors.HexColor("#0B3D91")),
                     ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
                     ("ALIGN", (0,0), (-1,-1), "CENTER"),
                     ("FONTSIZE", (0,0), (-1,-1), 9),
-                    ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.white, colors.HexColor("#fbfcff")]),
+                    ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.white, colors.HexColor("#F7F9FC")]),
                 ]))
                 elements.append(tbl)
+                elements.append(Spacer(1, 0.25*cm))
+                cols_to_sum = [
+                    "ROB Qty",
+                    "ROB Water",
+                    "TOB Qty",
+                    "TOB Water",
+                    "Net Loaded/Unloaded (bbls)",
+                    "Net Water Loaded/Unloaded (bbls)",
+                ]
+                totals = {}
+                for c in cols_to_sum:
+                    try:
+                        totals[c] = pd.to_numeric(dfpdf[c], errors="coerce").sum()
+                    except Exception:
+                        totals[c] = 0.0
+                try:
+                    rng = []
+                    if "Date" in dfpdf.columns:
+                        dts = sorted(set(pd.to_datetime(dfpdf["Date"]).dt.date))
+                        if dts:
+                            rng = [dts[0], dts[-1]]
+                    rng_text = "—" if not rng else (rng[0].strftime('%d/%m/%Y') if rng[0] == rng[-1] else f"{rng[0].strftime('%d/%m/%Y')} — {rng[-1].strftime('%d/%m/%Y')}")
+                except Exception:
+                    rng_text = "—"
+                summary_cells = [
+                    f"ROB Qty: {totals['ROB Qty']:,.2f}",
+                    f"ROB Water: {totals['ROB Water']:,.2f}",
+                    f"TOB Qty: {totals['TOB Qty']:,.2f}",
+                    f"TOB Water: {totals['TOB Water']:,.2f}",
+                    f"Net Qty: {totals['Net Loaded/Unloaded (bbls)']:,.2f}",
+                    f"Net Water: {totals['Net Water Loaded/Unloaded (bbls)']:,.2f}",
+                ]
+                col_w = doc.width/6.0
+                grid = Table([summary_cells], colWidths=[col_w, col_w, col_w, col_w, col_w, col_w])
+                grid.setStyle(TableStyle([
+                    ("GRID", (0,0), (-1,-1), 0.25, colors.HexColor("#D0D4DA")),
+                    ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#E9EDF5")),
+                    ("TEXTCOLOR", (0,0), (-1,0), colors.HexColor("#0B3D91")),
+                    ("FONTNAME", (0,0), (-1,-1), "Helvetica"),
+                    ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+                    ("ALIGN", (0,0), (-1,-1), "CENTER"),
+                    ("FONTSIZE", (0,0), (-1,-1), 9),
+                    ("TOPPADDING", (0,0), (-1,-1), 6),
+                    ("BOTTOMPADDING", (0,0), (-1,-1), 6),
+                ]))
+                elements.append(grid)
                 doc.build(elements)
                 out = buf.getvalue()
                 buf.close()

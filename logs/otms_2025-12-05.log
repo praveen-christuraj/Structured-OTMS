@@ -1,0 +1,46 @@
+2025-12-05 04:31:08 - OTMS - INFO - Loaded 68 tables from primary database
+2025-12-05 04:31:08 - OTMS - INFO - Loaded 68 tables from flexible database
+2025-12-05 04:31:08 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-05 04:31:08 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-05 04:31:08 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-05 04:31:08 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-05 04:31:08 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-05 04:31:08 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-05 04:31:08 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-05 04:31:08 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-05 04:31:08 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-05 04:31:08 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-05 04:31:08 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-05 04:31:08 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-05 04:31:08 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-05 04:31:08 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-05 04:31:08 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-05 04:43:09 - OTMS - INFO - Reflecting table 'flex_meters_2' from flex database...
+2025-12-05 04:43:09 - OTMS - INFO - Successfully created model for table 'flex_meters_2' from flex database
+2025-12-05 04:43:23 - OTMS - INFO - Reflecting table 'flex_meters_2' from flex database...
+2025-12-05 04:43:23 - OTMS - INFO - Successfully created model for table 'flex_meters_2' from flex database
+2025-12-05 04:43:23 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from flex database...
+2025-12-05 04:43:23 - OTMS - INFO - Successfully created model for table 'flex_produced_water_2' from flex database
+2025-12-05 04:56:07 - OTMS - INFO - Reflecting table 'custom_tanker_offloading_summary_4' from flex database...
+2025-12-05 04:56:07 - OTMS - INFO - Successfully created model for table 'custom_tanker_offloading_summary_4' from flex database
+2025-12-05 04:56:24 - OTMS - INFO - [DELETE] YadeVoyage #2 by admin - Deleted YADE Voyage 2121 with direct approval by admin (admin-operations)
+2025-12-05 05:06:03 - OTMS - INFO - Reflecting table 'flex_meters_2' from flex database...
+2025-12-05 05:06:03 - OTMS - INFO - Successfully created model for table 'flex_meters_2' from flex database
+2025-12-05 05:06:03 - OTMS - INFO - Reflecting table 'flex_produced_water_2' from flex database...
+2025-12-05 05:06:03 - OTMS - INFO - Successfully created model for table 'flex_produced_water_2' from flex database

@@ -27,6 +27,7 @@ from models import (
 )
 from location_config import get_tanker_tracking_config
 from deletion_approval import render_deletion_ui
+from action_logger_utils import log_export_action
 from utils_calc import (
     api60_from_api_obs,
     api60_from_density_obs,
@@ -979,11 +980,11 @@ def _render_comparison_tab(
 
         btns = st.columns(4)
         with btns[0]:
-            st.download_button("📄", data=pdf_bytes, file_name="tanker_comparison.pdf", mime="application/pdf", help="Download PDF")
+            st.download_button("📄", data=pdf_bytes, file_name="tanker_comparison.pdf", mime="application/pdf", help="Download PDF", on_click=lambda: log_export_action("TankerTracking", "PDF", len(rows), user, loc.id))
         with btns[1]:
-            st.download_button("📑", data=csv_data, file_name="tanker_comparison.csv", mime="text/csv", help="Download CSV")
+            st.download_button("📑", data=csv_data, file_name="tanker_comparison.csv", mime="text/csv", help="Download CSV", on_click=lambda: log_export_action("TankerTracking", "CSV", len(rows), user, loc.id))
         with btns[2]:
-            st.download_button("📊", data=xlsx_buffer.getvalue(), file_name="tanker_comparison.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", help="Download XLSX")
+            st.download_button("📊", data=xlsx_buffer.getvalue(), file_name="tanker_comparison.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", help="Download XLSX", on_click=lambda: log_export_action("TankerTracking", "XLSX", len(rows), user, loc.id))
         with btns[3]:
             if st.button("🖨️", help="View PDF", key="tt_cmp_viewpdf"):
                 components.html(
@@ -1003,5 +1004,19 @@ def _render_comparison_tab(
                     """,
                     height=0,
                 )
+                try:
+                    SecurityManager.log_audit(
+                        None,
+                        (user or {}).get("username", "system"),
+                        "VIEW",
+                        resource_type="TankerTracking",
+                        resource_id=str(loc.id),
+                        details="Viewed tanker comparison PDF",
+                        user_id=(user or {}).get("id"),
+                        location_id=loc.id,
+                        success=True,
+                    )
+                except Exception:
+                    pass
     except Exception as exc:
         st.warning(f"Export unavailable: {exc}")

@@ -9,6 +9,7 @@ from io import BytesIO
 
 from db import get_session
 from ui import header
+from action_logger_utils import log_export_action
 
 try:
     from models import Location, Tank, OTRRecord, TankTransaction, RecycleBinEntry
@@ -540,15 +541,31 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
         if fmt == "CSV":
             data_bytes = fdf.to_csv(index=False).encode("utf-8")
             filename = f"OTR_{loc.code}_{f_from}_{f_to}.csv"
-            st.download_button("📥", data=data_bytes, file_name=filename, mime="text/csv", key="otr_dl_csv", use_container_width=True, help="Download CSV")
+            st.download_button(
+                "📥",
+                data=data_bytes,
+                file_name=filename,
+                mime="text/csv",
+                key="otr_dl_csv",
+                use_container_width=True,
+                help="Download CSV",
+                on_click=lambda: log_export_action("OTR", "CSV", len(fdf), user, active_location_id)
+            )
         else:
             bio = BytesIO()
             with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
                 fdf.to_excel(writer, sheet_name="OTR", index=False)
             filename = f"OTR_{loc.code}_{f_from}_{f_to}.xlsx"
-            st.download_button("⬇️", data=bio.getvalue(), file_name=filename,
+            st.download_button(
+                "⬇️",
+                data=bio.getvalue(),
+                file_name=filename,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                key="otr_dl_xlsx", use_container_width=True, help="Download Excel")    # PDF export
+                key="otr_dl_xlsx",
+                use_container_width=True,
+                help="Download Excel",
+                on_click=lambda: log_export_action("OTR", "XLSX", len(fdf), user, active_location_id)
+            )    # PDF export
     import base64
     import streamlit.components.v1 as components
 
@@ -567,8 +584,15 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
         if st.button("📄", key="otr_pdf_dl", use_container_width=True, help="Download PDF"):
             pdf_bytes = generate_otr_pdf(fdf, selected_tank, filter_text, loc.name, loc.code)
             filename = f"OTR_{loc.code}_{f_from}_{f_to}.pdf"
-            st.download_button("📄", data=pdf_bytes, file_name=filename,
-                            mime="application/pdf", key="otr_pdf_dl_real", use_container_width=True)
+            st.download_button(
+                "📄",
+                data=pdf_bytes,
+                file_name=filename,
+                mime="application/pdf",
+                key="otr_pdf_dl_real",
+                use_container_width=True,
+                on_click=lambda: log_export_action("OTR", "PDF", len(fdf), user, active_location_id)
+            )
         
         if st.button("👁️", key="otr_pdf_view", use_container_width=True, help="View PDF"):
             pdf_bytes = generate_otr_pdf(fdf, selected_tank, filter_text, loc.name, loc.code)
@@ -590,6 +614,21 @@ def render_otr_page(active_location_id: Optional[int], user: Dict[str, Any] | No
                 """,
                 height=0
             )
+            try:
+                from security import SecurityManager
+                SecurityManager.log_audit(
+                    None,
+                    (user or {}).get("username", "system"),
+                    "VIEW",
+                    resource_type="OTR",
+                    resource_id=str(active_location_id),
+                    details="Viewed OTR PDF",
+                    user_id=(user or {}).get("id"),
+                    location_id=active_location_id,
+                    success=True,
+                )
+            except Exception:
+                pass
     
     # --- Summary Statistics ---
     st.markdown("---")

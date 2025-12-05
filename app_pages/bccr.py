@@ -11,6 +11,7 @@ from ui import header
 from auth import AuthManager
 from permission_manager import PermissionManager
 from location_config import LocationConfig
+from action_logger_utils import log_export_action
 
 
 def render_bccr_page(active_location_id, user):
@@ -644,11 +645,38 @@ def render_bccr_page(active_location_id, user):
             st.markdown("#### Export & Downloads")
             col_csv, col_xlsx, col_pdf, col_view = st.columns(4)
             with col_csv:
-                st.download_button("📥", data=csv_bytes, file_name=f"{base_filename}.csv", mime="text/csv", disabled=export_disabled, key=f"bccr_csv_{target_location_id}", help="Download CSV")
+                st.download_button(
+                    "📥",
+                    data=csv_bytes,
+                    file_name=f"{base_filename}.csv",
+                    mime="text/csv",
+                    disabled=export_disabled,
+                    key=f"bccr_csv_{target_location_id}",
+                    help="Download CSV",
+                    on_click=lambda: log_export_action("BCCR", "CSV", len(download_df), user, target_location_id)
+                )
             with col_xlsx:
-                st.download_button("📥", data=xlsx_bytes, file_name=f"{base_filename}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", disabled=export_disabled, key=f"bccr_xlsx_{target_location_id}", help="Download XLSX")
+                st.download_button(
+                    "📥",
+                    data=xlsx_bytes,
+                    file_name=f"{base_filename}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    disabled=export_disabled,
+                    key=f"bccr_xlsx_{target_location_id}",
+                    help="Download XLSX",
+                    on_click=lambda: log_export_action("BCCR", "XLSX", len(download_df), user, target_location_id)
+                )
             with col_pdf:
-                st.download_button("📄", data=pdf_bytes, file_name=f"{base_filename}.pdf", mime="application/pdf", disabled=export_disabled or pdf_error_message is not None, key=f"bccr_pdf_{target_location_id}", help="Download PDF")
+                st.download_button(
+                    "📄",
+                    data=pdf_bytes,
+                    file_name=f"{base_filename}.pdf",
+                    mime="application/pdf",
+                    disabled=export_disabled or pdf_error_message is not None,
+                    key=f"bccr_pdf_{target_location_id}",
+                    help="Download PDF",
+                    on_click=lambda: log_export_action("BCCR", "PDF", len(download_df), user, target_location_id)
+                )
             with col_view:
                 if st.button("👁️", key=f"bccr_pdf_view_{target_location_id}", disabled=export_disabled or pdf_error_message is not None, help="View PDF"):
                     import base64
@@ -672,6 +700,21 @@ def render_bccr_page(active_location_id, user):
                         height=0,
                     )
                     st.success("BCCR PDF opened in a new tab.")
+                    try:
+                        from security import SecurityManager
+                        SecurityManager.log_audit(
+                            None,
+                            (user or {}).get("username", "system"),
+                            "VIEW",
+                            resource_type="BCCR",
+                            resource_id=str(target_location_id),
+                            details="Viewed BCCR PDF",
+                            user_id=(user or {}).get("id"),
+                            location_id=target_location_id,
+                            success=True,
+                        )
+                    except Exception:
+                        pass
             if pdf_error_message:
                 st.warning(f"PDF export unavailable: {pdf_error_message}")
         if filtered_records:

@@ -14,6 +14,7 @@ try:
     from recycle_bin import RecycleBinManager
 except Exception:
     RecycleBinManager = None
+from action_logger_utils import log_export_action
 
 from yade_view import render_yade_transactions_view
 from tanker_view import render_tanker_transactions_view
@@ -1612,7 +1613,8 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
             data=csv_data,
             file_name=f"{section}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime="text/csv",
-            key=f"vt_{section}_csv"
+            key=f"vt_{section}_csv",
+            on_click=lambda: log_export_action("ViewTransactions", "CSV", len(df), user, location_id)
         )
     
     with exp_col2:
@@ -1626,7 +1628,8 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
             data=xlsx_data,
             file_name=f"{section}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            key=f"vt_{section}_xlsx"
+            key=f"vt_{section}_xlsx",
+            on_click=lambda: log_export_action("ViewTransactions", "XLSX", len(df), user, location_id)
         )
     
     with exp_col3:
@@ -1760,7 +1763,8 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
             data=pdf_data,
             file_name=f"{section}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
             mime="application/pdf",
-            key=f"vt_{section}_pdf"
+            key=f"vt_{section}_pdf",
+            on_click=lambda: log_export_action("ViewTransactions", "PDF", len(df), user, location_id)
         )
     
     with exp_col4:
@@ -1780,6 +1784,20 @@ def _flex_list(location_id: int, section: str, user: dict | None, title: str):
                 height=0
             )
             st.success("PDF opened in new tab!")
+            try:
+                SecurityManager.log_audit(
+                    None,
+                    (user or {}).get("username", "system"),
+                    "VIEW",
+                    resource_type="ViewTransactions",
+                    resource_id=str(location_id),
+                    details=f"Viewed PDF for section {section}",
+                    user_id=(user or {}).get("id"),
+                    location_id=location_id,
+                    success=True,
+                )
+            except Exception:
+                pass
     
     st.markdown("---")
 

@@ -13,6 +13,7 @@ from security import SecurityManager
 from auth import AuthManager
 from models import User
 from logger import log_error
+from action_logger_utils import log_export_action
 
 
 def _clear_2fa_session_states() -> None:
@@ -188,6 +189,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
                 file_name=f"otms_backup_codes_{user['username']}.txt",
                 mime="text/plain",
                 key="download_backup_codes_initial",
+                on_click=lambda: log_export_action("2FA", "TXT", len(backup_codes), user, active_location_id)
             )
 
             if st.button("✅", key="finish_2fa_setup", help="I've Saved My Backup Codes - Continue"):
@@ -241,6 +243,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
                         mime="text/plain",
                         key="download_existing_backup_codes",
                         use_container_width=True,
+                        on_click=lambda: log_export_action("2FA", "TXT", len(backup_codes), user, active_location_id)
                     )
                 with col2:
                     if st.button("🙈", key="btn_hide_backup_codes", use_container_width=True, help="Hide Codes"):
@@ -307,6 +310,7 @@ def render_twofa_settings_page(active_location_id: int | None, user: Dict[str, A
                     mime="text/plain",
                     key="download_new_backup_codes",
                     use_container_width=True,
+                    on_click=lambda: log_export_action("2FA", "TXT", len(new_codes), user, active_location_id)
                 )
             with col2:
                 if st.button("✅", key="btn_clear_new_backup_codes", use_container_width=True, help="Done - Clear"):

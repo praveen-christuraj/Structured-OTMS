@@ -26,6 +26,7 @@ from logger import log_warning
 from models import FSOOperation, OTRVessel, TOAYadeStage, YadeVoyage, YadeVesselMappingRecord
 from security import SecurityManager
 from ui import header
+from action_logger_utils import log_export_action
 
 try:  # pragma: no cover
     from permission_manager import PermissionManager
@@ -775,6 +776,8 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                 mime="text/csv",
                 use_container_width=True,
                 disabled=comparison_df.empty,
+                key="yvm_dl_csv",
+                on_click=lambda: log_export_action("YadeVesselMapping", "CSV", len(comparison_df), user, active_location_id)
             )
             download_cols[1].download_button(
                 "📥 XLSX",
@@ -783,6 +786,8 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
                 disabled=comparison_df.empty,
+                key="yvm_dl_xlsx",
+                on_click=lambda: log_export_action("YadeVesselMapping", "XLSX", len(comparison_df), user, active_location_id)
             )
             download_cols[2].download_button(
                 "📥 PDF",
@@ -791,8 +796,10 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                 mime="application/pdf",
                 use_container_width=True,
                 disabled=comparison_df.empty,
+                key="yvm_dl_pdf",
+                on_click=lambda: log_export_action("YadeVesselMapping", "PDF", len(comparison_df), user, active_location_id)
             )
-            if download_cols[3].button("👁️ View PDF", use_container_width=True, disabled=comparison_df.empty):
+            if download_cols[3].button("👁️ View PDF", use_container_width=True, disabled=comparison_df.empty, key="yvm_view_pdf"):
                 if pdf_bytes:
                     encoded_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
                     components.html(
@@ -804,6 +811,20 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                         """,
                         height=0,
                     )
+                    try:
+                        SecurityManager.log_audit(
+                            None,
+                            user.get("username", "unknown"),
+                            "VIEW",
+                            resource_type="YadeVesselMapping",
+                            resource_id=str(active_location_id),
+                            details="Viewed Yade-Vessel Mapping comparison PDF",
+                            user_id=user.get("id"),
+                            location_id=active_location_id,
+                            success=True,
+                        )
+                    except Exception:
+                        pass
 
             if pending_payload:
                 st.info("Mapping selection received. Provide the next available S.No and date, then save to lock it in.")

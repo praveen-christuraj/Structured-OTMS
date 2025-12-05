@@ -347,6 +347,31 @@ def get_tanker_tracking_config(session: Session, location_id: int) -> Dict[str, 
     }
 
 
+def get_yade_tracking_config(session: Session, location_id: int) -> Dict[str, Any]:
+    cfg = LocationConfig.get_config(session, location_id)
+    yt_cfg = cfg.get("yade_tracking", {}) or {}
+    page_enabled = bool(cfg.get("page_visibility", {}).get("show_yade_tracking", True))
+
+    def _clean_ids(raw):
+        out: List[int] = []
+        for val in raw or []:
+            try:
+                out.append(int(val))
+            except Exception:
+                continue
+        return out
+
+    aliases = [str(a).strip() for a in yt_cfg.get("receiver_aliases", []) if str(a).strip()]
+    return {
+        "page_enabled": page_enabled,
+        "is_sender": bool(yt_cfg.get("is_sender", False)),
+        "is_receiver": bool(yt_cfg.get("is_receiver", False)),
+        "sender_targets": _clean_ids(yt_cfg.get("sender_targets", [])),
+        "receiver_sources": _clean_ids(yt_cfg.get("receiver_sources", [])),
+        "receiver_aliases": aliases,
+    }
+
+
 def get_service_types(session: Session, location_id: int) -> List[str]:
     # Global list shared across all locations, stored under LocationPageConfig with location_id=0
     data = get_page_section_config(session, 0, "Services", "Service Types")

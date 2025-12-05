@@ -24,6 +24,7 @@ from location_config import get_page_section_config
 from report_engine import get_columns_for_source, ReportEngine
 from models import get_custom_table_model
 from ui_components import FormBuilder, Notifications, DashboardCard, TableDisplay, apply_custom_css
+from action_logger_utils import log_export_action
 
 try:
     from models import Location, Tank, OTRRecord
@@ -631,6 +632,7 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
                     mime="text/csv",
                     key="mb_dl_csv_new",
                     use_container_width=True,
+                    on_click=lambda: log_export_action("MaterialBalance", "CSV", len(df), user, active_location_id)
                 )
             else:
                 bio = BytesIO()
@@ -646,6 +648,7 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
                     ),
                     key="mb_dl_xlsx_new",
                     use_container_width=True,
+                    on_click=lambda: log_export_action("MaterialBalance", "XLSX", len(df), user, active_location_id)
                 )
 
         filter_info = f"Tank: {f_tank} | Period: {mb_from} to {mb_to}"
@@ -660,6 +663,7 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
                     mime="application/pdf",
                     key="mb_pdf_dl_real_new",
                     use_container_width=True,
+                    on_click=lambda: log_export_action("MaterialBalance", "PDF", len(df), user, active_location_id)
                 )
 
         with ex3:
@@ -684,6 +688,21 @@ def render_material_balance_page(active_location_id: Optional[int], user: Dict[s
                     height=0,
                 )
                 st.success("PDF opened in new tab.")
+                try:
+                    from security import SecurityManager
+                    SecurityManager.log_audit(
+                        None,
+                        (user or {}).get("username", "system"),
+                        "VIEW",
+                        resource_type="MaterialBalance",
+                        resource_id=str(active_location_id),
+                        details="Viewed Material Balance PDF",
+                        user_id=(user or {}).get("id"),
+                        location_id=active_location_id,
+                        success=True,
+                    )
+                except Exception:
+                    pass
 
     except Exception as ex:
         st.error(f"Failed to calculate material balance: {ex}")

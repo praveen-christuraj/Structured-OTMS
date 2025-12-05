@@ -9,6 +9,7 @@ import streamlit as st
 from db import get_session
 from models import Location  # always present in your project
 from security import SecurityManager
+from action_logger_utils import log_export_action
 
 # ---------- Helpers: safe imports ----------
 def _get_flexible_model():
@@ -427,7 +428,14 @@ def _render_row_card(r: Dict[str, Any]):
 def _export_bar(df: pd.DataFrame):
     # CSV
     csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button("⬇️", data=csv, file_name="transactions_view.csv", mime="text/csv", help="CSV")
+    st.download_button(
+        "⬇️",
+        data=csv,
+        file_name="transactions_view.csv",
+        mime="text/csv",
+        help="CSV",
+        on_click=lambda: log_export_action("TransactionsView", "CSV", len(df), st.session_state.get("auth_user"), st.session_state.get("active_location_id"))
+    )
 
     # Excel
     try:
@@ -436,7 +444,14 @@ def _export_bar(df: pd.DataFrame):
         bio = io.BytesIO()
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
             df.to_excel(writer, index=False, sheet_name="Transactions")
-        st.download_button("⬇️", data=bio.getvalue(), file_name="transactions_view.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", help="Excel")
+        st.download_button(
+            "⬇️",
+            data=bio.getvalue(),
+            file_name="transactions_view.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            help="Excel",
+            on_click=lambda: log_export_action("TransactionsView", "XLSX", len(df), st.session_state.get("auth_user"), st.session_state.get("active_location_id"))
+        )
     except Exception as ex:
         st.info(f"Excel export unavailable: {ex}")
 
@@ -711,7 +726,8 @@ def _render_custom_tab_data(location_id: int, tab_def: dict, date_from, date_to,
                 "⬇️ Download CSV",
                 data=csv,
                 file_name=f"{tab_name.lower().replace(' ', '_')}_data.csv",
-                mime="text/csv"
+                mime="text/csv",
+                on_click=lambda: log_export_action("TransactionsView", "CSV", len(df), st.session_state.get("auth_user"), st.session_state.get("active_location_id"))
             )
         
         st.markdown("---")
