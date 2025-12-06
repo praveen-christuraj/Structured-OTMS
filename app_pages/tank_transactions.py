@@ -241,8 +241,20 @@ def _get_calibration_min_max(session, tank_id: int) -> tuple[float, float]:
 def _get_operation_labels_for_tank(location_id: int) -> list[str]:
     try:
         with get_session() as s:
-            names = get_active_operation_names_by_category(s, location_id, asset="tank", category="Operation")
-        return names or []
+            cats = [
+                "Operation",
+                "Opening",
+                "Closing",
+                "Receipt",
+                "Dispatch",
+                "Draining",
+                "Others",
+            ]
+            all_names: list[str] = []
+            for c in cats:
+                ns = get_active_operation_names_by_category(s, location_id, asset="tank", category=c) or []
+                all_names.extend(ns)
+            return sorted({n.strip() for n in all_names if n and n.strip()})
     except Exception:
         return []
 

@@ -152,7 +152,7 @@ class ReportEngine:
                         conditions.append(getattr(primary_model, left_key) == getattr(join_model, right_key))
 
                 if conditions:
-                    join_type = join_config.get('type', '').lower()
+                    join_type = (join_config.get('type') or join_config.get('join_type') or '').lower()
                     if join_type == 'left':
                         query = query.outerjoin(join_model, and_(*conditions))
                     else:
@@ -434,10 +434,15 @@ class ReportEngine:
                     rec = {}
                     # include join keys used by any col in this src_table
                     needed_jk = set()
+                    # 1) Column-specific join keys
                     for c in cols:
                         for jk in c.get('join_keys', []) or []:
                             if jk.get('source'):
                                 needed_jk.add(jk['source'])
+                    for jk in relationship_map.get(src_table, []) or []:
+                        if jk.get('source'):
+                            needed_jk.add(jk['source'])
+                    # Add the required source-side join fields to the record
                     for jkf in needed_jk:
                         if hasattr(r, jkf):
                             rec[jkf] = getattr(r, jkf)
@@ -662,7 +667,12 @@ class ReportEngine:
             if not isinstance(field, str) or field not in df.columns:
                 continue
             value = user_filters.get(field)
+            # Skip empty values to avoid filtering everything accidentally
             if value is None:
+                continue
+            if isinstance(value, str) and value.strip() == "":
+                continue
+            if isinstance(value, (list, tuple)) and len(value) == 0:
                 continue
             try:
                 if operator == 'equals':

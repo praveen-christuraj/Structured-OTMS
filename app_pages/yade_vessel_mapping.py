@@ -88,6 +88,9 @@ def _fetch_yade_rows(sess, location_id: int, limit: int = 500) -> List[Dict[str,
         per_stage = stage_map.get(voyage.id, {})
         rob = float(getattr(per_stage.get("before"), "nsv_bbl", 0.0) or 0.0)
         tob = float(getattr(per_stage.get("after"), "nsv_bbl", 0.0) or 0.0)
+        bfw = float(getattr(per_stage.get("before"), "fw_bbl", 0.0) or 0.0)
+        afw = float(getattr(per_stage.get("after"), "fw_bbl", 0.0) or 0.0)
+        net_w = afw - bfw
         rows.append(
             {
                 "id": voyage.id,
@@ -97,6 +100,7 @@ def _fetch_yade_rows(sess, location_id: int, limit: int = 500) -> List[Dict[str,
                 "TOB Qty": round(tob, 2),
                 "ROB Qty": round(rob, 2),
                 "Net Loaded/Unloaded (bbls)": round(tob - rob, 2),
+                "Net Water (bbls)": round(net_w, 2),
                 "SortKey": _combine_datetime(voyage.date, voyage.time),
             }
         )
@@ -126,6 +130,7 @@ def _fetch_vessel_rows(sess, location_id: int, limit: int = 500) -> List[Dict[st
                 "Shuttle No": entry.shuttle_no or "",
                 "Vessel Name": vessel_name,
                 "Net Receipt/Dispatch": round(float(entry.net_receipt_dispatch or 0.0), 2),
+                "Net Water (bbls)": round(float(entry.net_water or 0.0), 2),
                 "SortKey": _combine_datetime(entry.date, entry.time or "00:00"),
             }
         )
@@ -149,6 +154,7 @@ def _fetch_fso_rows(sess, location_id: int, limit: int = 500) -> List[Dict[str, 
                 "Shuttle No": entry.shuttle_no or "",
                 "Vessel Name": entry.vessel_name or "",
                 "Qty Received": round(float(entry.net_receipt_dispatch or 0.0), 2),
+                "Net Water (bbls)": round(float(entry.net_water or 0.0), 2),
                 "SortKey": _combine_datetime(entry.date, entry.time),
             }
         )
@@ -213,15 +219,47 @@ def _render_selection_table(
     return chosen
 
 
+def _compute_water_totals(yade_ids: List[int], vessel_ids: List[int], fso_ids: List[int]) -> Dict[str, float]:
+    totals = {"yade_water": 0.0, "vessel_water": 0.0, "fso_water": 0.0}
+    try:
+        with get_session() as s:
+            if yade_ids:
+                stages = s.query(TOAYadeStage).filter(TOAYadeStage.voyage_id.in_(yade_ids)).all()
+                smap: Dict[int, Dict[str, TOAYadeStage]] = {}
+                for stg in stages:
+                    key = (stg.stage or "").strip().lower()
+                    smap.setdefault(stg.voyage_id, {})[key] = stg
+                for vid in yade_ids:
+                    bef = smap.get(vid, {}).get("before")
+                    aft = smap.get(vid, {}).get("after")
+                    bfw = float(getattr(bef, "fw_bbl", 0.0) or 0.0)
+                    afw = float(getattr(aft, "fw_bbl", 0.0) or 0.0)
+                    totals["yade_water"] += abs(afw - bfw)
+            if vessel_ids:
+                vals = s.query(OTRVessel.net_water).filter(OTRVessel.id.in_(vessel_ids)).all()
+                totals["vessel_water"] = sum(abs(float(r[0] or 0.0)) for r in vals)
+            if fso_ids:
+                vals = s.query(FSOOperation.net_water).filter(FSOOperation.id.in_(fso_ids)).all()
+                totals["fso_water"] = sum(abs(float(r[0] or 0.0)) for r in vals)
+    except Exception:
+        pass
+    return {k: round(v, 2) for k, v in totals.items()}
+
+
 def _comparison_dataframe(records: List[Dict[str, Any]]) -> pd.DataFrame:
     columns = [
         "S.No",
         "Date",
         "Yade Dispatch (bbls)",
+        "Yade Water (bbls)",
         "Vessel Receipt (bbls)",
-        "Difference Y vs V (bbls)",
+        "Vessel Water Receipt (bbls)",
         "FSO Receipt (bbls)",
+        "FSO Water Receipt (bbls)",
+        "Difference Y vs V (bbls)",
         "Difference V vs TT (bbls)",
+        "Difference Y vs V (Water)",
+        "Difference V vs TT (Water)",
         "Remarks",
     ]
     if not records:
@@ -232,15 +270,25 @@ def _comparison_dataframe(records: List[Dict[str, Any]]) -> pd.DataFrame:
         date_value = row.get("date")
         if hasattr(date_value, "strftime"):
             date_value = date_value.strftime("%Y-%m-%d")
+        src = row.get("source_ids") or {}
+        water = _compute_water_totals(src.get("yade_ids", []), src.get("vessel_ids", []), src.get("fso_ids", []))
+        yw = water.get("yade_water", 0.0)
+        vw = water.get("vessel_water", 0.0)
+        fw = water.get("fso_water", 0.0)
         payload.append(
             {
                 "S.No": row.get("s_no"),
                 "Date": date_value,
                 "Yade Dispatch (bbls)": row.get("yade_dispatch", 0.0),
+                "Yade Water (bbls)": yw,
                 "Vessel Receipt (bbls)": row.get("vessel_receipt", 0.0),
-                "Difference Y vs V (bbls)": row.get("diff_y_vs_v", 0.0),
+                "Vessel Water Receipt (bbls)": vw,
                 "FSO Receipt (bbls)": row.get("fso_receipt", 0.0),
+                "FSO Water Receipt (bbls)": fw,
+                "Difference Y vs V (bbls)": row.get("diff_y_vs_v", 0.0),
                 "Difference V vs TT (bbls)": row.get("diff_v_vs_tt", 0.0),
+                "Difference Y vs V (Water)": round(vw - yw, 2),
+                "Difference V vs TT (Water)": round(fw - vw, 2),
                 "Remarks": row.get("remarks", ""),
             }
         )
@@ -284,9 +332,55 @@ def _generate_mapping_pdf(df: pd.DataFrame, location_name: str, username: str) -
         ),
         Spacer(1, 6),
     ]
-    header_row = list(df.columns)
-    table_data = [header_row] + df.round(2).astype(str).values.tolist()
-    table = Table(table_data, repeatRows=1)
+    header_style = ParagraphStyle(
+        "yvmHeader",
+        parent=styles["Normal"],
+        alignment=TA_CENTER,
+        fontSize=7,
+        leading=8,
+        wordWrap="LTR",
+    )
+    headers_list = list(df.columns)
+    header_cells = [Paragraph(f"<b><font color='white'>{str(h)}</font></b>", header_style) for h in headers_list]
+
+    # Build body rows (wrap only Remarks if > 3 words) and add totals row at the end
+    numeric_df = df.apply(lambda s: pd.to_numeric(s, errors="coerce"))
+    body_rows = []
+    remark_idx = list(df.columns).index("Remarks") if "Remarks" in df.columns else -1
+    cell_style = ParagraphStyle("cell", parent=styles["Normal"], fontSize=7, leading=8, alignment=TA_CENTER)
+    remark_style = ParagraphStyle("remark", parent=styles["Normal"], fontSize=7, leading=8, alignment=TA_CENTER, wordWrap="LTR")
+    for row_vals in df.round(2).astype(str).values.tolist():
+        row_cells = []
+        for i, val in enumerate(row_vals):
+            if i == remark_idx:
+                words = [w for w in str(val).split() if w]
+                if len(words) > 3:
+                    row_cells.append(Paragraph(val, remark_style))
+                else:
+                    row_cells.append(val)
+            else:
+                row_cells.append(val)
+        body_rows.append(row_cells)
+    totals_row = []
+    for idx, col in enumerate(df.columns):
+        if idx == 0:
+            totals_row.append("Total")
+            continue
+        series = numeric_df[col]
+        if series.notna().any():
+            try:
+                totals_row.append(f"{float(series.fillna(0).sum()):,.2f}")
+            except Exception:
+                totals_row.append("—")
+        else:
+            totals_row.append("—")
+
+    table_data = [header_cells] + body_rows + [totals_row]
+
+    # Dynamic widths to fit single page
+    ncols = len(headers_list)
+    col_widths = [doc.width / ncols] * ncols
+    table = Table(table_data, repeatRows=1, colWidths=col_widths)
     table.setStyle(
         TableStyle(
             [
@@ -295,11 +389,19 @@ def _generate_mapping_pdf(df: pd.DataFrame, location_name: str, username: str) -
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
                 ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                 ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#dfe3eb")),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.HexColor("#f7f9fc")]),
-                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -2), [colors.whitesmoke, colors.HexColor("#f7f9fc")]),
+                ("FONTSIZE", (0, 0), (-1, 0), 7),
+                ("FONTSIZE", (0, 1), (-1, -1), 7),
             ]
         )
     )
+    # Totals row styling (last row)
+    nrows = len(table_data)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, nrows-1), (-1, nrows-1), colors.HexColor("#eef5ff")),
+        ("TEXTCOLOR", (0, nrows-1), (-1, nrows-1), colors.HexColor("#1f4788")),
+        ("FONTNAME", (0, nrows-1), (-1, nrows-1), "Helvetica-Bold"),
+    ]))
     elements.append(table)
     doc.build(elements)
     buffer.seek(0)
@@ -424,6 +526,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
         "TOB Qty": st.column_config.NumberColumn("TOB Qty (bbls)", format="%.2f"),
         "ROB Qty": st.column_config.NumberColumn("ROB Qty (bbls)", format="%.2f"),
         "Net Loaded/Unloaded (bbls)": st.column_config.NumberColumn("Net Loaded/Unloaded (bbls)", format="%.2f"),
+        "Net Water (bbls)": st.column_config.NumberColumn("Net Water (bbls)", format="%.2f"),
     }
     vessel_column_config = {
         "Select": st.column_config.CheckboxColumn("Select", help="Include shuttle entry in mapping."),
@@ -431,6 +534,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
         "Shuttle No": st.column_config.TextColumn("Shuttle No"),
         "Vessel Name": st.column_config.TextColumn("Vessel Name"),
         "Net Receipt/Dispatch": st.column_config.NumberColumn("Net R/D (bbls)", format="%.2f"),
+        "Net Water (bbls)": st.column_config.NumberColumn("Net Water (bbls)", format="%.2f"),
     }
     fso_column_config = {
         "Select": st.column_config.CheckboxColumn("Select", help="Include FSO entry in mapping."),
@@ -438,6 +542,7 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
         "Shuttle No": st.column_config.TextColumn("Shuttle No"),
         "Vessel Name": st.column_config.TextColumn("Vessel Name"),
         "Qty Received": st.column_config.NumberColumn("Qty Received (bbls)", format="%.2f"),
+        "Net Water (bbls)": st.column_config.NumberColumn("Net Water (bbls)", format="%.2f"),
     }
 
     if "Mapping" in tab_map:
@@ -684,7 +789,6 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                         st.session_state["yvm_records"] = stored_rows
                 except Exception:
                     log_warning("Failed to load saved Yade-Vessel mappings from database", exc_info=True)
-            comparison_df = _comparison_dataframe(stored_rows)
             next_s_no = (max((row["s_no"] for row in stored_rows), default=0) + 1) if stored_rows else 1
             delete_target = st.session_state.get("yvm_delete_target")
 
@@ -759,6 +863,26 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                 if confirm_cols[1].button("Cancel", key="yvm_cancel_delete"):
                     st.session_state["yvm_delete_target"] = None
                     _st_safe_rerun()
+
+            # Date range filter for Comparison
+            if stored_rows:
+                all_dates = [r["date"] for r in stored_rows if r.get("date")]
+                min_date = min(all_dates) if all_dates else date.today()
+                max_date = max(all_dates) if all_dates else date.today()
+            else:
+                min_date = date.today()
+                max_date = date.today()
+
+            fc = st.columns(2)
+            with fc[0]:
+                comp_from = st.date_input("From", value=min_date, max_value=max_date, key="yvm_comp_from")
+            with fc[1]:
+                comp_to = st.date_input("To", value=max_date, min_value=min_date, max_value=date.today(), key="yvm_comp_to")
+            if comp_to < comp_from:
+                comp_to = comp_from
+
+            filtered_rows = [r for r in stored_rows if r.get("date") and r["date"] >= comp_from and r["date"] <= comp_to]
+            comparison_df = _comparison_dataframe(filtered_rows)
 
             download_cols = st.columns(4)
             csv_data = comparison_df.to_csv(index=False).encode("utf-8") if not comparison_df.empty else b""
@@ -944,11 +1068,16 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                         background: #fff;
                     }
                     .yvm-table-header {
-                        background: #f5f7fb;
-                        border-bottom: 1px solid #dfe3e8;
+                        background: #1f4788;
+                        border-bottom: 1px solid #1a3a6f;
                         padding: 0.15rem 0.15rem;
-                        font-weight: 600;
+                        font-weight: 700;
                         font-size: 0.82rem;
+                        color: #fff;
+                    }
+                    .yvm-table-header .markdown-text-container {
+                        color: #fff !important;
+                        font-weight: 700 !important;
                     }
                     .yvm-table-body {
                         max-height: 340px;
@@ -974,20 +1103,40 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                     .yvm-compare .yvm-table-body button {
                         padding: 0.15rem 0.35rem;
                     }
+                    .yvm-total-row {
+                        background: #eef5ff !important;
+                    }
+                    .yvm-total-row .markdown-text-container {
+                        color: #1f4788 !important;
+                        font-weight: 700 !important;
+                    }
+
+                    /* Mapping table headers (DataEditor/DataFrame) */
+                    .yvm-mapping [data-testid="stDataEditor"] thead tr th,
+                    .yvm-mapping [data-testid="stDataFrame"] thead tr th {
+                        background: #1f4788 !important;
+                        color: #fff !important;
+                        font-weight: 700 !important;
+                    }
                     </style>
                     <div class="yvm-table-wrapper yvm-mapping yvm-compare">
                     """,
                     unsafe_allow_html=True,
                 )
-                column_widths = [0.7, 1.0, 1.2, 1.2, 1.1, 1.1, 1.1, 1.3, 0.5]
+                column_widths = [0.6, 0.9, 1.2, 1.0, 1.2, 1.0, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.3, 0.5]
                 headers = [
                     "S.No",
                     "Date",
                     "Yade Dispatch (bbls)",
+                    "Yade Water (bbls)",
                     "Vessel Receipt (bbls)",
-                    "Difference Y vs V",
+                    "Vessel Water (bbls)",
                     "FSO Receipt (bbls)",
-                    "Difference V vs TT",
+                    "FSO Water (bbls)",
+                    "Diff Y vs V (Qty)",
+                    "Diff V vs TT (Qty)",
+                    "Diff Y vs V (Water)",
+                    "Diff V vs TT (Water)",
                     "Remarks",
                     "Actions",
                 ]
@@ -999,24 +1148,76 @@ def render_yade_vessel_mapping_page(active_location_id: Optional[int], user: Opt
                 st.markdown("</div>", unsafe_allow_html=True)
 
                 st.markdown('<div class="yvm-table-body">', unsafe_allow_html=True)
-                sorted_rows = sorted(stored_rows, key=lambda row: (row["s_no"], row["date"]))
+                sorted_rows = sorted(filtered_rows, key=lambda row: (row["s_no"], row["date"]))
+                sum_yade_qty = 0.0
+                sum_yade_water = 0.0
+                sum_vessel_qty = 0.0
+                sum_vessel_water = 0.0
+                sum_fso_qty = 0.0
+                sum_fso_water = 0.0
+                sum_diff_qty_yv = 0.0
+                sum_diff_qty_vt = 0.0
+                sum_diff_water_yv = 0.0
+                sum_diff_water_vt = 0.0
+
                 for idx, row_data in enumerate(sorted_rows):
                     st.markdown('<div class="yvm-table-row">', unsafe_allow_html=True)
                     row_cols = st.columns(column_widths)
                     row_cols[0].markdown(str(row_data["s_no"]))
                     row_cols[1].markdown(row_data["date"].strftime("%Y-%m-%d"))
                     row_cols[2].markdown(f"{row_data['yade_dispatch']:,.2f}")
-                    row_cols[3].markdown(f"{row_data['vessel_receipt']:,.2f}")
-                    row_cols[4].markdown(f"{row_data['diff_y_vs_v']:,.2f}")
-                    row_cols[5].markdown(f"{row_data['fso_receipt']:,.2f}")
-                    row_cols[6].markdown(f"{row_data['diff_v_vs_tt']:,.2f}")
-                    row_cols[7].markdown(row_data.get("remarks") or "—")
+                    src = row_data.get("source_ids") or {}
+                    water = _compute_water_totals(src.get("yade_ids", []), src.get("vessel_ids", []), src.get("fso_ids", []))
+                    yw = water.get("yade_water", 0.0)
+                    vw = water.get("vessel_water", 0.0)
+                    fw = water.get("fso_water", 0.0)
+                    row_cols[3].markdown(f"{yw:,.2f}")
+                    row_cols[4].markdown(f"{row_data['vessel_receipt']:,.2f}")
+                    row_cols[5].markdown(f"{vw:,.2f}")
+                    row_cols[6].markdown(f"{row_data['fso_receipt']:,.2f}")
+                    row_cols[7].markdown(f"{fw:,.2f}")
+                    row_cols[8].markdown(f"{row_data['diff_y_vs_v']:,.2f}")
+                    row_cols[9].markdown(f"{row_data['diff_v_vs_tt']:,.2f}")
+                    row_cols[10].markdown(f"{(vw - yw):,.2f}")
+                    row_cols[11].markdown(f"{(fw - vw):,.2f}")
+                    row_cols[12].markdown(row_data.get("remarks") or "—")
                     row_id = row_data.get("record_id") or f"{row_data['s_no']}_{row_data['date']}_{idx}"
                     if can_delete_mapping_rows:
-                        if row_cols[8].button("🗑️", key=f"yvm_remove_{row_id}", help="Request deletion"):
+                        if row_cols[13].button("🗑️", key=f"yvm_remove_{row_id}", help="Request deletion"):
                             st.session_state["yvm_delete_target"] = row_data.copy()
                             _st_safe_rerun()
                     else:
-                        row_cols[8].markdown("—")
+                        row_cols[13].markdown("—")
                     st.markdown("</div>", unsafe_allow_html=True)
+
+                    sum_yade_qty += float(row_data.get('yade_dispatch', 0.0) or 0.0)
+                    sum_yade_water += float(yw)
+                    sum_vessel_qty += float(row_data.get('vessel_receipt', 0.0) or 0.0)
+                    sum_vessel_water += float(vw)
+                    sum_fso_qty += float(row_data.get('fso_receipt', 0.0) or 0.0)
+                    sum_fso_water += float(fw)
+                    sum_diff_qty_yv += float(row_data.get('diff_y_vs_v', 0.0) or 0.0)
+                    sum_diff_qty_vt += float(row_data.get('diff_v_vs_tt', 0.0) or 0.0)
+                    sum_diff_water_yv += float(vw - yw)
+                    sum_diff_water_vt += float(fw - vw)
+
+                # totals row
+                st.markdown('<div class="yvm-table-row yvm-total-row">', unsafe_allow_html=True)
+                total_cols = st.columns(column_widths)
+                total_cols[0].markdown("Total")
+                total_cols[1].markdown("—")
+                total_cols[2].markdown(f"{sum_yade_qty:,.2f}")
+                total_cols[3].markdown(f"{sum_yade_water:,.2f}")
+                total_cols[4].markdown(f"{sum_vessel_qty:,.2f}")
+                total_cols[5].markdown(f"{sum_vessel_water:,.2f}")
+                total_cols[6].markdown(f"{sum_fso_qty:,.2f}")
+                total_cols[7].markdown(f"{sum_fso_water:,.2f}")
+                total_cols[8].markdown(f"{sum_diff_qty_yv:,.2f}")
+                total_cols[9].markdown(f"{sum_diff_qty_vt:,.2f}")
+                total_cols[10].markdown(f"{sum_diff_water_yv:,.2f}")
+                total_cols[11].markdown(f"{sum_diff_water_vt:,.2f}")
+                total_cols[12].markdown("—")
+                total_cols[13].markdown("—")
+                st.markdown("</div>", unsafe_allow_html=True)
+
                 st.markdown("</div></div>", unsafe_allow_html=True)

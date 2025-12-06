@@ -75,8 +75,7 @@ class FormBuilder:
         return st.columns(num_columns)
     
     @staticmethod
-    def form_submit_button(label="Submit", icon="✓"):
-        """Create a styled submit button"""
+    def form_submit_button(label="Submit", icon="✓", help=None, label_help=None, type="secondary"):
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            return st.form_submit_button(f"{icon} {label}", use_container_width=True)
+            return st.form_submit_button(f"{icon} {label}", help=(help if help is not None else label_help), type=type, use_container_width=True)
