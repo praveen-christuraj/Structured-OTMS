@@ -92,7 +92,8 @@ def render_dashboard_customization():
         "🗂️ Sections Manager",
         "🎨 Styles",
         "💾 Save & Load",
-        "🖨️ PDF Export"
+        "🖨️ PDF Export",
+        "📄 PDF Customization"
     ])
     
     # Load current configuration
@@ -204,6 +205,10 @@ def render_dashboard_customization():
                 st.session_state.dashboard_config = config
             else:
                 st.error("❌ Failed to save configuration")
+    
+    # Tab 10: PDF Customization
+    with tabs[10]:
+        render_pdf_customization_tab(config, location_id, user)
 
 def render_monthly_data_tab(config: dict):
     """Render monthly data configuration tab"""
@@ -1604,6 +1609,774 @@ def render_save_load_tab(config: dict, location_id: int, user: dict):
                 st.rerun()
             except Exception as e:
                 st.error(f"❌ Failed to import configuration: {e}")
+
+
+def render_pdf_customization_tab(config: dict, location_id: int, user: dict):
+    """Render PDF customization tab with visual drag-and-drop layout designer"""
+    st.markdown("### 📄 PDF Layout Designer")
+    st.markdown("Design your PDF layout visually - drag, resize, and position widgets like Power BI")
+    
+    # Initialize PDF layout config
+    pdf_layout_cfg = config.setdefault("pdf_layout", {})
+    
+    # Page Size Configuration
+    st.markdown("#### 📏 Page Settings")
+    page_col1, page_col2, page_col3 = st.columns(3)
+    
+    with page_col1:
+        page_size = st.selectbox(
+            "Page Size",
+            ["A4", "A3", "Letter", "Legal"],
+            index=["A4", "A3", "Letter", "Legal"].index(pdf_layout_cfg.get("page_size", "A4")),
+            key="pdf_page_size"
+        )
+        pdf_layout_cfg["page_size"] = page_size
+    
+    with page_col2:
+        orientation = st.selectbox(
+            "Orientation",
+            ["Portrait", "Landscape"],
+            index=["Portrait", "Landscape"].index(pdf_layout_cfg.get("orientation", "Landscape")),
+            key="pdf_orientation"
+        )
+        pdf_layout_cfg["orientation"] = orientation
+    
+    with page_col3:
+        grid_cols = st.number_input(
+            "Grid Columns",
+            min_value=2,
+            max_value=12,
+            value=pdf_layout_cfg.get("grid_columns", 12),
+            help="Number of columns in the grid (like Power BI)",
+            key="pdf_grid_cols"
+        )
+        pdf_layout_cfg["grid_columns"] = grid_cols
+    
+    st.markdown("---")
+    
+    # Get available sections
+    sections = config.get("sections", [])
+    pdf_cfg = config.get("pdf_export", {})
+    enabled_sections = pdf_cfg.get("enabled_sections", {})
+    
+    # Initialize widgets list with grid positions
+    widgets = pdf_layout_cfg.setdefault("widgets", [])
+    
+    # Available widget types
+    available_widget_types = []
+    for sec in sections:
+        sid = sec.get("id")
+        if enabled_sections.get(sid, sec.get("enabled", True)):
+            available_widget_types.append({
+                "id": sid,
+                "name": sec.get("name") or sid,
+                "type": sec.get("type")
+            })
+    
+    if not available_widget_types:
+        st.info("ℹ️ No widgets enabled. Enable sections in the 'PDF Export' tab first.")
+        return
+    
+    # Visual Canvas Layout Designer
+    st.markdown("#### 🎨 Visual Layout Canvas")
+    
+    # Sidebar for adding widgets
+    with st.expander("➕ Add Widget to Canvas", expanded=True):
+        widget_options = [f"{w['name']} ({w['type']})" for w in available_widget_types]
+        selected_widget = st.selectbox(
+            "Select Widget",
+            widget_options,
+            key="new_widget_select"
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("➕ Add to Canvas", type="primary", key="add_widget_btn", use_container_width=True):
+                selected_idx = widget_options.index(selected_widget)
+                widget_data = available_widget_types[selected_idx]
+                
+                # Calculate next available position
+                max_row = max([w.get("row", 0) + w.get("height", 1) for w in widgets]) if widgets else 0
+                
+                new_widget = {
+                    "id": widget_data["id"],
+                    "name": widget_data["name"],
+                    "type": widget_data["type"],
+                    "col": 0,  # Grid column position (0-based)
+                    "row": max_row,  # Grid row position (0-based)
+                    "width": 6,  # Width in grid columns
+                    "height": 4,  # Height in grid rows
+                    "display_type": "table",  # "table" or "visual"
+                }
+                widgets.append(new_widget)
+                st.success(f"✅ Added {widget_data['name']} to canvas")
+                st.rerun()
+        
+        with col2:
+            if st.button("🗑️ Clear All", key="clear_all_btn", use_container_width=True):
+                widgets.clear()
+                st.success("✅ Canvas cleared")
+                st.rerun()
+    
+    # Display visual canvas with interactive widget controls
+    if widgets:
+        st.markdown("##### Canvas - Full Drag & Resize (Power BI Style):")
+        st.caption("💡 Tip: Interactive canvas with real-time adjustments. Change values below to see live updates.")
+        
+        # Create visual representation using HTML/CSS with enhanced interactivity
+        import streamlit.components.v1 as components
+        
+        # Generate widget data for JavaScript
+        widgets_json = json.dumps(widgets)
+        grid_cols_val = grid_cols
+        
+        # Enhanced interactive canvas HTML with 6-point drag handles
+        canvas_html = f"""
+        <style>
+            .canvas-toolbar {{
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 10px 12px;
+                background: #0f172a;
+                color: white;
+                border: 1px solid #1f2937;
+                border-radius: 10px;
+                box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+                position: sticky;
+                top: 0;
+                z-index: 50;
+            }}
+            .canvas-toolbar .group-title {{
+                font-weight: 700;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: #cbd5e1;
+                margin-right: 6px;
+            }}
+            .canvas-toolbar button {{
+                background: #1d4ed8;
+                color: white;
+                border: 1px solid #1d4ed8;
+                border-radius: 6px;
+                padding: 6px 10px;
+                font-size: 12px;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            }}
+            .canvas-toolbar button:hover {{
+                background: #2563eb;
+                border-color: #2563eb;
+                transform: translateY(-1px);
+            }}
+            .canvas-toolbar button:active {{
+                transform: translateY(0);
+            }}
+            .pdf-canvas {{
+                background: linear-gradient(90deg, #f0f0f0 1px, transparent 1px),
+                            linear-gradient(#f0f0f0 1px, transparent 1px);
+                background-size: calc(100% / {grid_cols_val}) 30px;
+                border: 3px solid #1e3a8a;
+                border-radius: 12px;
+                min-height: 720px;
+                position: relative;
+                padding: 10px;
+                margin: 16px 0;
+                background-color: #fafafa;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }}
+            .align-guides {{
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                z-index: 5;
+            }}
+            .align-guides .guide-line {{
+                position: absolute;
+                background: rgba(14,165,233,0.6);
+            }}
+            .widget-box {{
+                position: absolute;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                transition: all 0.08s ease;
+                cursor: move;
+                border: 3px solid #4c63d2;
+                font-family: Arial, sans-serif;
+                user-select: none;
+            }}
+            .widget-box.selected {{
+                box-shadow: 0 0 20px rgba(79, 172, 254, 0.8), inset 0 0 10px rgba(255,255,255,0.3);
+                border: 3px solid #0ea5e9;
+            }}
+            .widget-name {{
+                font-weight: bold;
+                font-size: 14px;
+                margin-bottom: 5px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }}
+            .widget-info {{
+                font-size: 11px;
+                opacity: 0.95;
+                margin: 3px 0;
+            }}
+            .resize-handle {{
+                position: absolute;
+                background: #0ea5e9;
+                border: 2px solid white;
+                border-radius: 50%;
+                width: 12px;
+                height: 12px;
+                cursor: pointer;
+                z-index: 1000;
+                transition: all 0.2s ease;
+            }}
+            .resize-handle:hover {{
+                width: 16px;
+                height: 16px;
+                background: #06b6d4;
+            }}
+            .resize-handle.tl {{ top: -6px; left: -6px; cursor: nwse-resize; }}
+            .resize-handle.tr {{ top: -6px; right: -6px; cursor: nesw-resize; }}
+            .resize-handle.bl {{ bottom: -6px; left: -6px; cursor: nesw-resize; }}
+            .resize-handle.br {{ bottom: -6px; right: -6px; cursor: nwse-resize; }}
+            .resize-handle.tm {{ top: -6px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }}
+            .resize-handle.bm {{ bottom: -6px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }}
+            .drag-handle {{
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 30px;
+                background: linear-gradient(180deg, rgba(0,0,0,0.3), transparent);
+                border-radius: 6px 6px 0 0;
+                cursor: move;
+                display: flex;
+                align-items: center;
+                padding-left: 8px;
+            }}
+            .drag-indicator {{
+                color: rgba(255,255,255,0.8);
+                font-size: 12px;
+            }}
+            .nudge-hint {{
+                font-size: 11px;
+                color: #475569;
+                margin-left: 4px;
+            }}
+        </style>
+
+        <div class="canvas-toolbar">
+            <span class="group-title">Arrange</span>
+            <button data-action="align-left">Align Left</button>
+            <button data-action="align-center">Align Center</button>
+            <button data-action="align-right">Align Right</button>
+            <button data-action="align-top">Align Top</button>
+            <button data-action="align-middle">Align Middle</button>
+            <button data-action="align-bottom">Align Bottom</button>
+            <span class="group-title" style="margin-left:10px;">Nudge</span>
+            <button data-action="nudge-up">▲</button>
+            <button data-action="nudge-left">◀</button>
+            <button data-action="nudge-right">▶</button>
+            <button data-action="nudge-down">▼</button>
+            <span class="nudge-hint">Arrow keys also work (Shift=resize)</span>
+        </div>
+
+        <div class="pdf-canvas" id="pdfCanvas">
+            <div class="align-guides" id="alignGuides"></div>
+            <div style="text-align:center; padding:30px; color:#999;">
+                <p style="font-size:18px; margin:0;">📊 Interactive PDF Layout Canvas</p>
+                <p style="font-size:12px; margin:10px 0 0 0;">Drag widgets to move • Use handles to resize • Arrow keys to nudge • Shift + arrows to resize</p>
+            </div>
+        </div>
+        <script>
+            (function() {{
+                var widgets = {widgets_json};
+                var gridCols = {grid_cols_val};
+                var canvas = document.getElementById('pdfCanvas');
+                var guides = document.getElementById('alignGuides');
+                var cellWidth = canvas.getBoundingClientRect().width / gridCols;
+                var cellHeight = 30;
+                function recalcGrid() {{
+                    cellWidth = canvas.getBoundingClientRect().width / gridCols;
+                    widgets.forEach(function(w, idx) {{ updateWidgetEl(idx, w); }});
+                }}
+                var selectedWidget = null;
+                var dragStart = null;
+                var resizeDir = null;
+                var isDragging = false;
+                var isResizing = false;
+
+                function clamp(val, min, max) {{
+                    return Math.max(min, Math.min(max, val));
+                }}
+
+                function snapCol(x) {{
+                    return clamp(Math.round(x / cellWidth), 0, gridCols - 1);
+                }}
+
+                function snapRow(y) {{
+                    return Math.max(0, Math.round(y / cellHeight));
+                }}
+
+                function renderGuides(col, row, w, h) {{
+                    if (!guides) return;
+                    guides.innerHTML = '';
+                    var v = document.createElement('div');
+                    v.className = 'guide-line';
+                    v.style.width = '2px';
+                    v.style.height = '100%';
+                    v.style.left = (col * cellWidth) + 'px';
+                    v.style.top = '0';
+                    v.style.opacity = '0.35';
+                    guides.appendChild(v);
+                    var v2 = document.createElement('div');
+                    v2.className = 'guide-line';
+                    v2.style.width = '2px';
+                    v2.style.height = '100%';
+                    v2.style.left = ((col + w) * cellWidth) + 'px';
+                    v2.style.top = '0';
+                    v2.style.opacity = '0.2';
+                    guides.appendChild(v2);
+                    var hLine = document.createElement('div');
+                    hLine.className = 'guide-line';
+                    hLine.style.height = '2px';
+                    hLine.style.width = '100%';
+                    hLine.style.top = (row * cellHeight) + 'px';
+                    hLine.style.left = '0';
+                    hLine.style.opacity = '0.35';
+                    guides.appendChild(hLine);
+                    var h2 = document.createElement('div');
+                    h2.className = 'guide-line';
+                    h2.style.height = '2px';
+                    h2.style.width = '100%';
+                    h2.style.top = ((row + h) * cellHeight) + 'px';
+                    h2.style.left = '0';
+                    h2.style.opacity = '0.2';
+                    guides.appendChild(h2);
+                }}
+
+                if (widgets.length > 0) {{
+                    canvas.innerHTML = '<div class="align-guides" id="alignGuides"></div>';
+                    guides = canvas.querySelector('#alignGuides');
+                }}
+                
+                function updateWidgetEl(idx, w) {{
+                    var widgetEl = document.getElementById('widget_' + idx);
+                    if (!widgetEl) return;
+                    widgetEl.style.left = (w.col * cellWidth) + 'px';
+                    widgetEl.style.top = (w.row * cellHeight) + 'px';
+                    widgetEl.style.width = (w.width * cellWidth - 6) + 'px';
+                    widgetEl.style.height = (w.height * cellHeight - 6) + 'px';
+                    var info = widgetEl.querySelectorAll('.widget-info');
+                    if (info && info.length >= 2) {{
+                        info[1].textContent = 'Position: Col ' + w.col + ', Row ' + w.row;
+                        info[2].textContent = 'Size: ' + w.width + 'x' + w.height;
+                    }}
+                    renderGuides(w.col, w.row, w.width, w.height);
+                }}
+                
+                function updateWidgetElPixels(idx, left, top, width, height) {{
+                    var widgetEl = document.getElementById('widget_' + idx);
+                    if (!widgetEl) return;
+                    widgetEl.style.left = left + 'px';
+                    widgetEl.style.top = top + 'px';
+                    widgetEl.style.width = width + 'px';
+                    widgetEl.style.height = height + 'px';
+                }}
+                
+                widgets.forEach(function(widget, index) {{
+                    var widgetDiv = document.createElement('div');
+                    widgetDiv.className = 'widget-box';
+                    widgetDiv.id = 'widget_' + index;
+                    
+                    var colorSchemes = [
+                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
+                    ];
+                    widgetDiv.style.background = colorSchemes[index % colorSchemes.length];
+                    
+                    function updatePosition() {{
+                        widgetDiv.style.left = (widget.col * cellWidth) + 'px';
+                        widgetDiv.style.top = (widget.row * cellHeight) + 'px';
+                        widgetDiv.style.width = (widget.width * cellWidth - 6) + 'px';
+                        widgetDiv.style.height = (widget.height * cellHeight - 6) + 'px';
+                    }}
+                    updatePosition();
+                    
+                    var displayType = widget.display_type || 'table';
+                    widgetDiv.innerHTML = '<div class="drag-handle"><span class="drag-indicator">⋮⋮</span></div>' +
+                                         '<div class="widget-name">' + widget.name + '</div>' +
+                                         '<div class="widget-info">📊 ' + widget.type + ' (' + displayType + ')</div>' +
+                                         '<div class="widget-info">Position: Col ' + widget.col + ', Row ' + widget.row + '</div>' +
+                                         '<div class="widget-info">Size: ' + widget.width + 'x' + widget.height + '</div>';
+                    
+                    var handles = ['tl', 'tr', 'bl', 'br', 'tm', 'bm'];
+                    handles.forEach(function(handle) {{
+                        var handleDiv = document.createElement('div');
+                        handleDiv.className = 'resize-handle ' + handle;
+                        handleDiv.data_direction = handle;
+                        handleDiv.addEventListener('mousedown', function(e) {{
+                            e.preventDefault();
+                            e.stopPropagation();
+                            selectedWidget = {{ index: index, widget: widget, element: widgetDiv }};
+                            resizeDir = handle;
+                            isResizing = true;
+                            isDragging = false;
+                            var rect = widgetDiv.getBoundingClientRect();
+                            var canvasRect = canvas.getBoundingClientRect();
+                            dragStart = {{ 
+                                x: e.clientX, 
+                                y: e.clientY, 
+                                widget: {{...widget}},
+                                left: rect.left - canvasRect.left,
+                                top: rect.top - canvasRect.top,
+                                width: rect.width,
+                                height: rect.height
+                            }};
+                            widgetDiv.classList.add('selected');
+                            document.body.style.cursor = getComputedStyle(handleDiv).cursor;
+                        }});
+                        widgetDiv.appendChild(handleDiv);
+                    }});
+                    
+                    widgetDiv.addEventListener('mousedown', function(e) {{
+                        if (e.target.classList.contains('resize-handle')) return;
+                        e.preventDefault();
+                        isDragging = true;
+                        isResizing = false;
+                        selectedWidget = {{ index: index, widget: widget, element: widgetDiv }};
+                        var rect = widgetDiv.getBoundingClientRect();
+                        var canvasRect = canvas.getBoundingClientRect();
+                        dragStart = {{ 
+                            x: e.clientX, 
+                            y: e.clientY, 
+                            widget: {{...widget}},
+                            left: rect.left - canvasRect.left,
+                            top: rect.top - canvasRect.top,
+                            width: rect.width,
+                            height: rect.height
+                        }};
+                        resizeDir = null;
+                        widgetDiv.classList.add('selected');
+                        document.body.style.cursor = 'move';
+                        renderGuides(widget.col, widget.row, widget.width, widget.height);
+                    }});
+                    
+                    canvas.appendChild(widgetDiv);
+                }});
+                
+                function pushUpdate() {{
+                    if (!selectedWidget) return;
+                    window.parent.postMessage({{
+                        type: 'streamlit:setComponentValue',
+                        sessionID: 'widget_update',
+                        value: selectedWidget.widget
+                    }}, '*');
+                }}
+                
+                document.addEventListener('mousemove', function(e) {{
+                    if (!dragStart || !selectedWidget) return;
+                    if (!isDragging && !isResizing) return;
+                    
+                    e.preventDefault();
+                    var dx = e.clientX - dragStart.x;
+                    var dy = e.clientY - dragStart.y;
+                    
+                    if (isResizing && resizeDir) {{
+                        var newLeft = dragStart.left;
+                        var newTop = dragStart.top;
+                        var newWidth = dragStart.width;
+                        var newHeight = dragStart.height;
+                        
+                        if (resizeDir.includes('l')) {{
+                            newLeft = dragStart.left + dx;
+                            newWidth = dragStart.width - dx;
+                            if (newWidth < cellWidth) {{
+                                newWidth = cellWidth;
+                                newLeft = dragStart.left + dragStart.width - cellWidth;
+                            }}
+                        }}
+                        if (resizeDir.includes('r')) {{
+                            newWidth = dragStart.width + dx;
+                            if (newWidth < cellWidth) newWidth = cellWidth;
+                        }}
+                        if (resizeDir.includes('t')) {{
+                            newTop = dragStart.top + dy;
+                            newHeight = dragStart.height - dy;
+                            if (newHeight < cellHeight) {{
+                                newHeight = cellHeight;
+                                newTop = dragStart.top + dragStart.height - cellHeight;
+                            }}
+                        }}
+                        if (resizeDir.includes('b')) {{
+                            newHeight = dragStart.height + dy;
+                            if (newHeight < cellHeight) newHeight = cellHeight;
+                        }}
+                        
+                        updateWidgetElPixels(selectedWidget.index, newLeft, newTop, newWidth, newHeight);
+                        
+                    }} else if (isDragging) {{
+                        var newLeft = dragStart.left + dx;
+                        var newTop = dragStart.top + dy;
+                        if (newLeft < 0) newLeft = 0;
+                        if (newTop < 0) newTop = 0;
+                        updateWidgetElPixels(selectedWidget.index, newLeft, newTop, dragStart.width, dragStart.height);
+                    }}
+                }});
+                
+                document.addEventListener('mouseup', function(e) {{
+                    if (selectedWidget && (isDragging || isResizing)) {{
+                        var widgetEl = document.getElementById('widget_' + selectedWidget.index);
+                        if (widgetEl) {{
+                            widgetEl.classList.remove('selected');
+                            var rect = widgetEl.getBoundingClientRect();
+                            var canvasRect = canvas.getBoundingClientRect();
+                            var left = rect.left - canvasRect.left;
+                            var top = rect.top - canvasRect.top;
+                            var width = rect.width;
+                            var height = rect.height;
+                            
+                            var newCol = Math.max(0, Math.min(Math.round(left / cellWidth), gridCols - 1));
+                            var newRow = Math.max(0, Math.round(top / cellHeight));
+                            var newWidth = Math.max(1, Math.min(Math.round(width / cellWidth), gridCols - newCol));
+                            var newHeight = Math.max(1, Math.round(height / cellHeight));
+                            
+                            selectedWidget.widget.col = newCol;
+                            selectedWidget.widget.row = newRow;
+                            selectedWidget.widget.width = newWidth;
+                            selectedWidget.widget.height = newHeight;
+                            
+                            updateWidgetEl(selectedWidget.index, selectedWidget.widget);
+                            pushUpdate();
+                        }}
+                    }}
+                    document.body.style.cursor = '';
+                    dragStart = null;
+                    resizeDir = null;
+                    isDragging = false;
+                    isResizing = false;
+                    selectedWidget = null;
+                    renderGuides(-1, -1, 0, 0);
+                }});
+
+                // Recalculate sizing on window resize for smoother drag/resize
+                window.addEventListener('resize', function() {{
+                    recalcGrid();
+                }});
+
+                // Keyboard nudging: arrows move, Shift+arrows resize
+                document.addEventListener('keydown', function(e) {{
+                    if (!selectedWidget) return;
+                    var w = selectedWidget.widget;
+                    var delta = e.ctrlKey || e.metaKey ? 2 : 1;
+                    var changed = false;
+                    if (e.key === 'ArrowLeft') {{
+                        if (e.shiftKey) {{ w.width = Math.max(1, w.width - delta); changed = true; }}
+                        else {{ w.col = clamp(w.col - delta, 0, gridCols - w.width); changed = true; }}
+                    }} else if (e.key === 'ArrowRight') {{
+                        if (e.shiftKey) {{ w.width = clamp(w.width + delta, 1, gridCols - w.col); changed = true; }}
+                        else {{ w.col = clamp(w.col + delta, 0, gridCols - w.width); changed = true; }}
+                    }} else if (e.key === 'ArrowUp') {{
+                        if (e.shiftKey) {{ w.height = Math.max(1, w.height - delta); changed = true; }}
+                        else {{ w.row = Math.max(0, w.row - delta); changed = true; }}
+                    }} else if (e.key === 'ArrowDown') {{
+                        if (e.shiftKey) {{ w.height = Math.max(1, w.height + delta); changed = true; }}
+                        else {{ w.row = Math.max(0, w.row + delta); changed = true; }}
+                    }}
+                    if (changed) {{
+                        updateWidgetEl(selectedWidget.index, w);
+                        pushUpdate();
+                        e.preventDefault();
+                    }}
+                }});
+
+                // Toolbar actions for Excel/Power BI like alignment
+                document.querySelectorAll('.canvas-toolbar button').forEach(function(btn) {{
+                    btn.addEventListener('click', function() {{
+                        if (!selectedWidget) return;
+                        var w = selectedWidget.widget;
+                        var action = btn.getAttribute('data-action');
+                        if (action === 'align-left') w.col = 0;
+                        if (action === 'align-center') w.col = Math.round((gridCols - w.width) / 2);
+                        if (action === 'align-right') w.col = Math.max(0, gridCols - w.width);
+                        if (action === 'align-top') w.row = 0;
+                        if (action === 'align-middle') w.row = Math.max(0, Math.round(5 - (w.height / 2)));
+                        if (action === 'align-bottom') w.row = Math.max(0, widgets.reduce(function(max, it) {{ return Math.max(max, (it.row || 0) + (it.height || 1)); }}, 0));
+                        if (action === 'nudge-left') w.col = clamp(w.col - 1, 0, gridCols - w.width);
+                        if (action === 'nudge-right') w.col = clamp(w.col + 1, 0, gridCols - w.width);
+                        if (action === 'nudge-up') w.row = Math.max(0, w.row - 1);
+                        if (action === 'nudge-down') w.row = Math.max(0, w.row + 1);
+                        updateWidgetEl(selectedWidget.index, w);
+                        pushUpdate();
+                    }});
+                }});
+            }})();
+        </script>
+        """
+        
+        components.html(canvas_html, height=800, scrolling=False)
+        
+        # Widget controls section - removed old duplicated HTML
+        st.markdown("---")
+        st.markdown("##### ⚙️ Widget Configuration & Display Options:")
+        
+        for idx, widget in enumerate(widgets):
+            with st.expander(f"📊 {widget.get('name', 'Widget')} - {widget.get('type', 'unknown')}", expanded=False):
+                ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4, ctrl_col5 = st.columns([2, 2, 2, 2, 1])
+                
+                with ctrl_col1:
+                    new_col = st.number_input(
+                        "Column",
+                        min_value=0,
+                        max_value=grid_cols - 1,
+                        value=widget.get("col", 0),
+                        help=f"Starting column (0 to {grid_cols-1})",
+                        key=f"widget_col_{idx}"
+                    )
+                    widget["col"] = new_col
+                
+                with ctrl_col2:
+                    new_row = st.number_input(
+                        "Row",
+                        min_value=0,
+                        max_value=100,
+                        value=widget.get("row", 0),
+                        help="Starting row position",
+                        key=f"widget_row_{idx}"
+                    )
+                    widget["row"] = new_row
+                
+                with ctrl_col3:
+                    # Clamp width to current grid columns
+                    current_width = min(widget.get("width", 6), grid_cols)
+                    new_width = st.number_input(
+                        "Width (cols)",
+                        min_value=1,
+                        max_value=grid_cols,
+                        value=current_width,
+                        help=f"Widget width in grid columns (1-{grid_cols})",
+                        key=f"widget_width_{idx}"
+                    )
+                    widget["width"] = new_width
+                
+                with ctrl_col4:
+                    new_height = st.number_input(
+                        "Height (rows)",
+                        min_value=1,
+                        max_value=20,
+                        value=widget.get("height", 4),
+                        help="Widget height in grid rows",
+                        key=f"widget_height_{idx}"
+                    )
+                    widget["height"] = new_height
+                
+                with ctrl_col5:
+                    if st.button("🗑️", key=f"delete_widget_{idx}", help="Delete this widget"):
+                        widgets.pop(idx)
+                        st.success("✅ Widget deleted")
+                        st.rerun()
+                
+                # Display type selector (Table vs Visual)
+                st.markdown("**Display Type:**")
+                display_type_col1, display_type_col2 = st.columns(2)
+                
+                current_display_type = widget.get("display_type", "table")
+                
+                with display_type_col1:
+                    if st.button("📋 Table", key=f"display_table_{idx}", 
+                               use_container_width=True,
+                               type="primary" if current_display_type == "table" else "secondary"):
+                        widget["display_type"] = "table"
+                        st.rerun()
+                
+                with display_type_col2:
+                    if st.button("📊 Visual", key=f"display_visual_{idx}", 
+                               use_container_width=True,
+                               type="primary" if current_display_type == "visual" else "secondary"):
+                        widget["display_type"] = "visual"
+                        st.rerun()
+                
+                st.caption(f"Current: **{current_display_type.title()}** mode")
+                
+                # Quick position buttons
+                st.markdown("**Quick Positions:**")
+                quick_col1, quick_col2, quick_col3, quick_col4 = st.columns(4)
+                
+                with quick_col1:
+                    if st.button("↖️ Top Left", key=f"pos_tl_{idx}"):
+                        widget["col"] = 0
+                        widget["row"] = 0
+                        st.rerun()
+                
+                with quick_col2:
+                    if st.button("↗️ Top Right", key=f"pos_tr_{idx}"):
+                        widget["col"] = grid_cols - widget["width"]
+                        widget["row"] = 0
+                        st.rerun()
+                
+                with quick_col3:
+                    if st.button("↙️ Bottom Left", key=f"pos_bl_{idx}"):
+                        widget["col"] = 0
+                        max_row = max([w.get("row", 0) + w.get("height", 1) for w in widgets])
+                        widget["row"] = max_row
+                        st.rerun()
+                
+                with quick_col4:
+                    if st.button("↘️ Bottom Right", key=f"pos_br_{idx}"):
+                        widget["col"] = grid_cols - widget["width"]
+                        max_row = max([w.get("row", 0) + w.get("height", 1) for w in widgets])
+                        widget["row"] = max_row
+                        st.rerun()
+    else:
+        st.info("ℹ️ No widgets on canvas. Add widgets using the form above.")
+        
+        # Show empty canvas
+        import streamlit.components.v1 as components
+        empty_canvas = f"""
+        <style>
+            .pdf-canvas-empty {{
+                background: linear-gradient(90deg, #f0f0f0 1px, transparent 1px),
+                            linear-gradient(#f0f0f0 1px, transparent 1px);
+                background-size: calc(100% / {grid_cols}) 30px;
+                border: 2px dashed #ccc;
+                border-radius: 8px;
+                min-height: 400px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #999;
+                font-size: 18px;
+                margin: 20px 0;
+            }}
+        </style>
+        <div class="pdf-canvas-empty">
+            <div style="text-align:center;">
+                <p style="font-size:24px; margin:0;">📄</p>
+                <p style="margin:10px 0 0 0;">Empty Canvas - Add widgets to start designing</p>
+            </div>
+        </div>
+        """
+        components.html(empty_canvas, height=450, scrolling=False)
+    
+    # Save button
+    st.markdown("---")
+    if st.button("💾 Save PDF Layout Configuration", type="primary", key="save_pdf_layout"):
+        if DashboardConfigManager.save_config(location_id, "default", config, user["username"]):
+            st.success("✅ PDF layout configuration saved successfully!")
+            st.session_state.dashboard_config = config
+        else:
+            st.error("❌ Failed to save configuration")
 
 
 if __name__ == "__main__":

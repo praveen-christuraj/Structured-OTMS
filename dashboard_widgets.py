@@ -162,7 +162,7 @@ class WidgetRenderer:
         liquid_y = tank_height - liquid_height
         
         svg_code = f'''
-        <svg width="100%" height="{tank_height + 60}" viewBox="0 0 140 {tank_height + 60}" xmlns="http://www.w3. org/2000/svg">
+        <svg width="100%" height="{tank_height + 60}" viewBox="0 0 140 {tank_height + 60}" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <linearGradient id="tankGrad_{tank_code}" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" style="stop-color:#c0c0c0;stop-opacity:1" />
@@ -217,7 +217,15 @@ class WidgetRenderer:
                     unsafe_allow_html=True
                 )
             
-            components.html(svg_code, height=tank_height + 60)
+            # Use components.html for proper SVG rendering with data attribute for PDF export
+            components.html(
+                f"""
+                <div style="text-align: center;" data-tank-svg="true">
+                    {svg_code}
+                </div>
+                """,
+                height=tank_height + 70
+            )
             
             st.markdown(f"""
                 <div style='font-size: 0.75rem; line-height: 1.3; color: #666;'>

@@ -149,76 +149,112 @@ def render_location_dashboard(selected_location_id: int, user: dict):
     )
     c1, c2 = st.columns([0.9, 0.1])
     with c2:
-        if st.button("🖨️", help="Export Dashboard to PDF", use_container_width=True):
+        # Use unique key with timestamp to prevent duplicate executions
+        pdf_export_key = f"pdf_export_btn_{selected_location_id}"
+        
+        if st.button("🖨️", help="Export Dashboard to PDF", use_container_width=True, key=pdf_export_key):
             try:
                 from logger import log_info
                 log_info("Dashboard PDF export triggered")
             except Exception:
                 pass
+            
             try:
+                # Use DashboardPdfEngine with customized layout
+                from dashboard_pdf_engine import DashboardPdfEngine
+                import base64
                 import streamlit.components.v1 as components
+                import time
+                
+                # Load configuration to use customized PDF layout
+                config = DashboardConfigManager.load_config(selected_location_id)
+                
+                # Generate PDF using customized layout
+                pdf_bytes = DashboardPdfEngine.export_pdf(config, selected_location_id, user)
+                
+                # Encode to base64
+                pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+                
+                # Generate unique ID to prevent duplicate executions
+                export_id = f"pdf_export_{int(time.time() * 1000)}_{selected_location_id}"
+                
+                # Open in new tab with lock mechanism
                 components.html(
-                    """
+                    f"""
                     <script>
-                    (async function(){
-                        function loadScript(src){
-                            return new Promise(function(resolve, reject){
-                                try {
-                                    var s = document.createElement('script');
-                                    s.src = src;
-                                    s.onload = resolve;
-                                    s.onerror = function(){ reject(new Error('Failed to load '+src)); };
-                                    var doc2 = (window.parent && window.parent.document) ? window.parent.document : document;
-                                    (doc2.body || doc2.head || doc2.documentElement).appendChild(s);
-                                } catch(e){ reject(e); }
-                            });
-                        }
-                        try {
-                            var doc = (window.parent && window.parent.document) ? window.parent.document : document;
-                            if (!window.parent.__otmsPdfLibsLoaded) {
-                                await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
-                                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-                                window.parent.__otmsPdfLibsLoaded = true;
-                            }
-                            var target = doc.querySelector('[data-testid="stAppViewContainer"] .block-container')
-                                || doc.querySelector('.block-container')
-                                || doc.querySelector('main')
-                                || doc.body;
-                            var h2c = (window.parent && window.parent.html2canvas) ? window.parent.html2canvas : window.html2canvas;
-                            await new Promise(function(r){ requestAnimationFrame(r); });
-                            var canvas = await h2c(target, { scale: 1.5, useCORS: true, backgroundColor: '#ffffff' });
-                            var imgData = canvas.toDataURL('image/png');
-                            var jpdf = (window.parent && window.parent.jspdf) ? window.parent.jspdf : window.jspdf;
-                            var jsPDF = jpdf.jsPDF || jpdf;
-                            var pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-                            var pageWidth = pdf.internal.pageSize.getWidth();
-                            var pageHeight = pdf.internal.pageSize.getHeight();
-                            var imgWidth = pageWidth;
-                            var imgHeight = canvas.height * (imgWidth / canvas.width);
-                            var y = 0;
-                            pdf.addImage(imgData, 'PNG', 0, y, imgWidth, imgHeight);
-                            var heightLeft = imgHeight - pageHeight;
-                            while (heightLeft > 0) {
-                                pdf.addPage();
-                                y = heightLeft - imgHeight;
-                                pdf.addImage(imgData, 'PNG', 0, y, imgWidth, imgHeight);
-                                heightLeft -= pageHeight;
-                            }
-                            var blob = pdf.output('blob');
-                            var url = ((window.parent || window).URL || URL).createObjectURL(blob);
-                            (window.parent || window).open(url, '_blank');
-                        } catch (err) {
-                            console.error(err);
-                            try { (window.parent || window).print(); } catch(e2) {}
-                            alert('Failed to export dashboard to PDF. Print dialog opened as fallback.');
-                        }
-                    })();
+                    (function() {{
+                        var exportId = "{export_id}";
+                        var parentWin = window.parent || window;
+                        
+                        // Check if this exact export is already in progress
+                        if (parentWin.__otmsPdfExportInProgress === exportId) {{
+                            return;
+                        }}
+                        
+                        // Check if any export is in progress
+                        if (parentWin.__otmsPdfExportInProgress) {{
+                            console.log('PDF export already in progress, skipping...');
+                            return;
+                        }}
+                        
+                        // Set lock
+                        parentWin.__otmsPdfExportInProgress = exportId;
+                        
+                        try {{
+                            var pdfData = "{pdf_base64}";
+                            var byteCharacters = atob(pdfData);
+                            var byteNumbers = new Array(byteCharacters.length);
+                            for (var i = 0; i < byteCharacters.length; i++) {{
+                                byteNumbers[i] = byteCharacters.charCodeAt(i);
+                            }}
+                            var byteArray = new Uint8Array(byteNumbers);
+                            var blob = new Blob([byteArray], {{ type: 'application/pdf' }});
+                            var url = URL.createObjectURL(blob);
+                            
+                            // Open in new tab
+                            var newWindow = parentWin.open(url, '_blank');
+                            
+                            if (!newWindow) {{
+                                alert('Please allow popups to view the PDF');
+                            }}
+                        }} catch (err) {{
+                            console.error('PDF Export Error:', err);
+                            alert('Failed to export dashboard to PDF: ' + err.message);
+                        }} finally {{
+                            // Clear lock after a short delay
+                            setTimeout(function() {{
+                                parentWin.__otmsPdfExportInProgress = null;
+                            }}, 500);
+                        }}
+                    }})();
                     </script>
                     """,
                     height=0
-                );
+                )
+                
+                st.success("✅ PDF generated and opened in new tab!")
+                
+                # Log the export action
+                try:
+                    from security import SecurityManager
+                    SecurityManager.log_audit(
+                        None,
+                        user.get("username", "unknown"),
+                        "EXPORT",
+                        resource_type="Dashboard",
+                        resource_id=str(selected_location_id),
+                        details="Exported dashboard to PDF with custom layout",
+                        user_id=user.get("id"),
+                        location_id=selected_location_id,
+                        success=True
+                    )
+                except Exception:
+                    pass
+                    
             except Exception as e:
                 st.error(f"PDF export failed: {e}")
+                import traceback
+                st.code(traceback.format_exc())
             
     
     # Load dashboard configuration
