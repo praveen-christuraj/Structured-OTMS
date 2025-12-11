@@ -23,6 +23,7 @@ DEFAULT_FLAGS = {
     "show_view_transactions": True,
     "show_vessel_operations": True,
     "show_fso_operations": True,
+    "show_export_operations": True,
     "show_otr": True,
     "show_reporting": True,
     "show_reports": True,
@@ -139,6 +140,11 @@ def _render_page_access(sel_location_id: int, user):
             value=cfg.get("show_vessel_operations", True),
             key="ls_flag_vessel_ops",
         )
+        show_export_ops = st.toggle(
+            "📤 Export Operations",
+            value=cfg.get("show_export_operations", True),
+            key="ls_flag_export_ops",
+        )
         show_otr = st.toggle(
             "📊 OTR",
             value=cfg.get("show_otr", True),
@@ -209,6 +215,7 @@ def _render_page_access(sel_location_id: int, user):
             "show_view_transactions": bool(show_view_tx),
             "show_vessel_operations": bool(show_vessel_ops),
             "show_fso_operations": bool(show_fso),
+            "show_export_operations": bool(show_export_ops),
             "show_otr": bool(show_otr),
             "show_reporting": bool(show_reporting),
             "show_reports": bool(show_rpts),
@@ -233,6 +240,7 @@ def _render_page_access(sel_location_id: int, user):
                     "yade_transactions": bool(show_yade),
                     "otr_vessel": bool(show_vessel_ops),
                     "fso_operations": bool(show_fso),
+                    "export_operations": bool(show_export_ops),
                 })
                 full_cfg["permissions"] = perms
                 

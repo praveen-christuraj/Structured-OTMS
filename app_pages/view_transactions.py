@@ -704,9 +704,15 @@ def _inline_tank_editor(idx: int, row: Dict[str, Any], user: dict | None, locati
     # created_at for edit lock
     created_at = gv("created_at", "createdAt", "created")
     allow_edit = True
+    edit_lock_message = ""
     diff = _since(created_at)
     if diff and diff > timedelta(hours=24):
         allow_edit = False
+        hours_old = int(diff.total_seconds() / 3600)
+        edit_lock_message = (
+            f"⚠️ **Edit Locked**: This record was created {hours_old} hours ago. "
+            f"Records can only be edited within 24 hours of creation."
+        )
 
     # current values
     v_date = _as_date(gv("date", "tx_date")) or date.today()
@@ -768,6 +774,11 @@ def _inline_tank_editor(idx: int, row: Dict[str, Any], user: dict | None, locati
 
     with st.container():
         st.markdown('<div class="vt-editline vt-compact">', unsafe_allow_html=True)
+        
+        # Show edit lock warning if applicable
+        if not allow_edit and edit_lock_message:
+            st.error(edit_lock_message)
+            st.info("🔒 This record cannot be modified. You can view the details or close this editor.")
 
         # compact icon-only action bar, single row
         b1, b2, b3, _ = st.columns([0.05, 0.05, 0.05, 0.85])
@@ -1302,6 +1313,13 @@ def _render_tank_list(location_id: int, user: dict | None):
                                         location_id=location_id,
                                         reason=f"Deleted ticket {r.get('Ticket ID')}",
                                         label=str(rec_id)
+                                    )
+                                    s.delete(obj)
+                                    s.commit()
+                                else:
+                                    s.execute(
+                                        sql_text(f"DELETE FROM {table.name} WHERE {pk_col} = :id_val"),
+                                        {"id_val": rec_id}
                                     )
                                     s.commit()
                             except Exception:

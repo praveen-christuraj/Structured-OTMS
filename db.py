@@ -47,6 +47,8 @@ def _ensure_schema_updates():
                 conn.execute(text("ALTER TABLE users ADD COLUMN supervisor_code_hash VARCHAR(255)"))
             if "supervisor_code_set_at" not in cols_users:
                 conn.execute(text("ALTER TABLE users ADD COLUMN supervisor_code_set_at DATETIME"))
+            if "export_ops_access" not in cols_users:
+                conn.execute(text("ALTER TABLE users ADD COLUMN export_ops_access BOOLEAN DEFAULT 0"))
 
             cols_tanker_cal = {row[1] for row in conn.execute(text("PRAGMA table_info('tanker_calibration')")).fetchall()}
             if "tanker_id" not in cols_tanker_cal:
@@ -61,6 +63,37 @@ def _ensure_schema_updates():
                     conn.execute(text("ALTER TABLE otr_records ADD COLUMN net_rece_disp_bbls FLOAT"))
                 if "net_water_rece_disp_bbls" not in cols_otr:
                     conn.execute(text("ALTER TABLE otr_records ADD COLUMN net_water_rece_disp_bbls FLOAT"))
+            except Exception:
+                pass
+            # Ensure new export stage progress columns exist
+            try:
+                cols_exp_stage = {row[1] for row in conn.execute(text("PRAGMA table_info('export_stage_progress')")).fetchall()}
+                if "due_date" not in cols_exp_stage:
+                    conn.execute(text("ALTER TABLE export_stage_progress ADD COLUMN due_date DATE"))
+                if "status_changed_at" not in cols_exp_stage:
+                    conn.execute(text("ALTER TABLE export_stage_progress ADD COLUMN status_changed_at DATETIME"))
+                if "due_notified_at" not in cols_exp_stage:
+                    conn.execute(text("ALTER TABLE export_stage_progress ADD COLUMN due_notified_at DATETIME"))
+                if "remarks" not in cols_exp_stage:
+                    conn.execute(text("ALTER TABLE export_stage_progress ADD COLUMN remarks TEXT"))
+                if "completed_at" not in cols_exp_stage:
+                    conn.execute(text("ALTER TABLE export_stage_progress ADD COLUMN completed_at DATETIME"))
+                if "completed_by" not in cols_exp_stage:
+                    conn.execute(text("ALTER TABLE export_stage_progress ADD COLUMN completed_by VARCHAR(64)"))
+                if "completed_overdue" not in cols_exp_stage:
+                    conn.execute(text("ALTER TABLE export_stage_progress ADD COLUMN completed_overdue BOOLEAN DEFAULT 0"))
+                if "overdue_reason" not in cols_exp_stage:
+                    conn.execute(text("ALTER TABLE export_stage_progress ADD COLUMN overdue_reason TEXT"))
+            except Exception:
+                pass
+
+            # Ensure laycan columns exist on export_processes
+            try:
+                cols_export = {row[1] for row in conn.execute(text("PRAGMA table_info('export_processes')")).fetchall()}
+                if "laycan_start" not in cols_export:
+                    conn.execute(text("ALTER TABLE export_processes ADD COLUMN laycan_start DATE"))
+                if "laycan_end" not in cols_export:
+                    conn.execute(text("ALTER TABLE export_processes ADD COLUMN laycan_end DATE"))
             except Exception:
                 pass
     except Exception:

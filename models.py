@@ -18,6 +18,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Date, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
+from sqlalchemy import Float, Boolean, LargeBinary, Index, Time, Enum as SAEnum, Table, MetaData
 
 try:
     from db import engine
@@ -373,6 +374,8 @@ class User(Base):
     backup_codes = Column(String(500), nullable=True)
     supervisor_code_hash = Column(String(255), nullable=True)
     supervisor_code_set_at = Column(DateTime, nullable=True)
+    # Feature access flags
+    export_ops_access = Column(Boolean, default=False, nullable=False)
     
     # Relationship
     location = relationship("Location", back_populates="users")
@@ -969,6 +972,8 @@ class YadeVesselMappingRecord(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_by = Column(String(64), nullable=True)
     updated_at = Column(DateTime, onupdate=func.now())
+    laycan_start = Column(Date, nullable=True)
+    laycan_end = Column(Date, nullable=True)
 
     location = relationship("Location")
 
@@ -1437,6 +1442,83 @@ class SharedFile(Base):
         return f"<SharedFile(unique_id={self.unique_id}, filename='{self.filename}', size={self.size_bytes})>"
 
 
+class ExportProcess(Base):
+    __tablename__ = "export_processes"
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    location_id = Column(Integer, ForeignKey("locations.id"), nullable=False, index=True)
+    terminal_label = Column(String(100), nullable=False, index=True)
+    title = Column(String(200), nullable=False)
+    ref_no = Column(String(100), nullable=True, index=True)
+    status_overall = Column(String(50), nullable=False, default="UPCOMING")
+    current_stage_code = Column(String(50), nullable=True, index=True)
+    is_completed = Column(Boolean, default=False, nullable=False)
+    created_by = Column(String(64), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_by = Column(String(64), nullable=True)
+    updated_at = Column(DateTime, onupdate=func.now())
+    laycan_start = Column(Date, nullable=True)
+    laycan_end = Column(Date, nullable=True)
+
+    location = relationship("Location")
+    stages = relationship("ExportStageProgress", back_populates="export", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<ExportProcess id={self.id} terminal='{self.terminal_label}' title='{self.title}' status='{self.status_overall}'>"
+
+
+class ExportStageProgress(Base):
+    __tablename__ = "export_stage_progress"
+    __table_args__ = (
+        UniqueConstraint("export_id", "stage_code", name="uq_export_stage"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    export_id = Column(Integer, ForeignKey("export_processes.id"), nullable=False, index=True)
+    stage_code = Column(String(50), nullable=False, index=True)
+    status = Column(String(50), nullable=False, default="Pending")
+    mandatory_complete = Column(Boolean, default=False, nullable=False)
+    due_date = Column(Date, nullable=True)
+    status_changed_at = Column(DateTime, onupdate=func.now())
+    due_notified_at = Column(DateTime, nullable=True)
+    started_at = Column(DateTime, server_default=func.now())
+    completed_at = Column(DateTime, nullable=True)
+    completed_by = Column(String(64), nullable=True)
+    completed_overdue = Column(Boolean, default=False, nullable=False)
+    remarks = Column(Text, nullable=True)
+    overdue_reason = Column(Text, nullable=True)
+    updated_at = Column(DateTime, onupdate=func.now())
+
+    export = relationship("ExportProcess", back_populates="stages")
+    attachments = relationship("ExportAttachment", back_populates="stage", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<ExportStageProgress export_id={self.export_id} stage='{self.stage_code}' status='{self.status}'>"
+
+
+class ExportAttachment(Base):
+    __tablename__ = "export_attachments"
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    stage_id = Column(Integer, ForeignKey("export_stage_progress.id"), nullable=False, index=True)
+    filename = Column(String(255), nullable=False)
+    mime_type = Column(String(100), nullable=True)
+    size_bytes = Column(Integer, nullable=True)
+    data = Column(LargeBinary, nullable=False)
+    visibility = Column(String(20), nullable=False, default="global")
+    assigned_to_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    uploaded_by = Column(String(64), nullable=True)
+    uploaded_at = Column(DateTime, server_default=func.now())
+
+    stage = relationship("ExportStageProgress", back_populates="attachments")
+    assignee = relationship("User", foreign_keys=[assigned_to_user_id])
+
+    def __repr__(self):
+        return f"<ExportAttachment id={self.id} filename='{self.filename}' visibility='{self.visibility}'>"
+
+
 class TaskActivity(Base):
     """Timeline entries for each task"""
     __tablename__ = "task_activities"
@@ -1572,6 +1654,11 @@ Index('idx_fso_location_date', FSOOperation.location_id, FSOOperation.date)
 Index('idx_fso_vessel', FSOOperation.fso_vessel)
 Index('idx_fso_shuttle', FSOOperation.shuttle_no)
 
+# Export indexes
+Index('idx_export_process_location', ExportProcess.location_id, ExportProcess.created_at)
+Index('idx_export_process_terminal', ExportProcess.terminal_label, ExportProcess.created_at)
+Index('idx_export_stage_export', ExportStageProgress.export_id, ExportStageProgress.stage_code)
+Index('idx_export_attachment_stage', ExportAttachment.stage_id, ExportAttachment.uploaded_at)
 # ============================================================================
 # CREATE TABLES
 # ============================================================================

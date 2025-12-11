@@ -26,6 +26,14 @@ SecurityManager.SESSION_TIMEOUT_MINUTES = 30
 # Make sure DB is ready once at import
 init_db()
 
+# Streamlit page config must be the first Streamlit command
+st.set_page_config(
+    page_title="OTMS",
+    page_icon="🛢️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
 # ---- Icons for pages ----
 ICONS = {
     "Home": "🏠",
@@ -64,6 +72,8 @@ ICONS = {
     "Services": "🛠️",
     "Backup & Recovery": "💾",
     "Back Data": "📥",
+    "Export Operations": "📤",
+    "Export Customization": "🛠️",
     }
 
 ROLE_ICONS = USER_ROLE_ICONS
@@ -231,6 +241,8 @@ def get_pages(user, active_location_id):
             "Backup & Recovery",
             "Back Data",
         ]
+        if _module_exists("app_pages.export_customization") and (user or {}).get("role") == "admin-operations":
+            pages.append("Export Customization")
 
     # ---- Operational pages (role + location flags + module present) ----
     role_ok = bool(user and PermissionManager.can_access_operational_pages(user))
@@ -271,6 +283,12 @@ def get_pages(user, active_location_id):
             if allow and _module_exists(mod):
                 if title not in pages:
                     pages.append(title)
+
+    # Explicit chapter: Export Operations (requires dedicated permission + location visibility)
+    if user and PermissionManager.can_access_export_operations(user):
+        allow_export = loc_flags.get("show_export_operations", True)
+        if allow_export and _module_exists("app_pages.export_operations") and "Export Operations" not in pages:
+            pages.append("Export Operations")
 
     return pages
 
@@ -369,6 +387,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         "Manage Users",
         "MB Customization",
         "Page Customization",
+        "Export Customization",
         "Deleted Records",
         "Report Customization",
         "Backup & Recovery",
@@ -390,6 +409,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         "Convoy Status",
         "BCCR",
         "Reporting",
+        "Export Operations",
     ]
     general_pages = [
         "Login History",
@@ -446,17 +466,22 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
 
 def main():
     apply_custom_css()
-    st.set_page_config(
-        page_title="OTMS",
-        page_icon="🛢️",
-        layout="wide",
-        initial_sidebar_state="expanded",
-    )
 
     # Ensure DB + default admin user
     init_db()
     ensure_default_admin_user()
     _ensure_session_defaults()
+
+    # Query-param based routing (open chapters in new tab)
+    try:
+        params = getattr(st, "query_params", {})
+        chapter = params.get("chapter") if isinstance(params, dict) else None
+        if isinstance(chapter, (list, tuple)):
+            chapter = chapter[0] if chapter else None
+        if chapter and str(chapter).lower() in ("export", "export_ops", "export-operations"):
+            st.session_state["current_page"] = "Export Operations"
+    except Exception:
+        pass
 
     user = st.session_state.get("auth_user")
 
@@ -480,8 +505,14 @@ def main():
                 details=f"Session expired after {SecurityManager.SESSION_TIMEOUT_MINUTES} minutes of inactivity.",
                 user_id=user.get("id"),
                 location_id=user.get("location_id"),
+                ip_address=str(st.session_state.get("client_ip") or "N/A"),
                 success=False,
             )
+        except Exception:
+            pass
+        try:
+            from logger import ActionLogger
+            ActionLogger.log_session_timeout(user.get("username", "unknown"))
         except Exception:
             pass
 
@@ -696,6 +727,12 @@ def main():
     elif current_page == "Back Data":
         from app_pages.back_data import render_back_data_page
         render_back_data_page(active_location_id, user)
+    elif current_page == "Export Operations":
+        from app_pages.export_operations import render_export_operations_page
+        render_export_operations_page(active_location_id, user)
+    elif current_page == "Export Customization":
+        from app_pages.export_customization import render_export_customization_page
+        render_export_customization_page(active_location_id, user)
     # elif current_page == "FSO-Operations":
     #     from app_pages.fso_operations import render_fso_operations_page
     #     render_fso_operations_page(active_location_id, user)

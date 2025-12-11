@@ -2,6 +2,86 @@
 """
 Permission Manager for OTMS
 Controls location-based and role-based access to features
+
+=============================================================================
+ROLE DEFINITIONS AND PERMISSIONS MATRIX
+=============================================================================
+
+1. OPERATOR
+   - Can make entries, view entries, view reports & Material Balance reports
+   - CANNOT delete entries directly - needs supervisor approval
+   - If multiple supervisors exist at location, ANY ONE can approve deletion
+   - Restricted to ONLY their assigned location
+   - Cannot access other locations or management pages
+
+2. SUPERVISOR
+   - Can make entries, delete entries, view all reports
+   - Restricted to ONLY their assigned location
+   - Cannot access other locations or management pages
+   - Receives deletion approval requests from operators at their location
+   - Can approve deletion with supervisor code (local) or via task system (remote)
+
+3. MANAGER
+   - READ-ONLY role across ALL locations
+   - Can view all entries, reports, dashboards from any location
+   - CANNOT make entries, edit records, or delete anything
+   - CANNOT be assigned to tasks (not an approver)
+   - Cannot access admin pages (user management, settings, etc.)
+
+4. ADMIN-IT
+   - System administrator role
+   - Access ONLY to admin-related pages:
+     * Home, My Tasks, 2FA Settings, Manage Locations, Manage Users
+     * Audit Log, Error Monitoring, Asset Management, Deleted Records
+   - CANNOT access operational pages (tank, yade, tanker transactions)
+   - CANNOT make entries, view reports, or access operational data
+   - Receives tasks for: Password reset, User Management, System errors
+   - Handles all IT-related administrative tasks
+
+5. ADMIN-OPERATIONS
+   - Full system access - no restrictions
+   - Can access ALL pages (admin + operational)
+   - Can make entries, edit, delete at ANY location
+   - Can manage users, locations, settings, everything
+   - Receives ALL types of tasks including:
+     * Password resets (backup for Admin-IT)
+     * User management requests
+     * Application errors
+     * System alerts
+   - Ultimate authority for all operations
+
+=============================================================================
+TASK ASSIGNMENT RULES
+=============================================================================
+
+DELETE_REQUEST tasks:
+  - Assigned to: All supervisors at the requesting location
+  - Visibility: ANY supervisor at that location can approve
+  - Multi-supervisor: If >1 supervisor exists, any ONE approval completes task
+
+PASSWORD_RESET tasks:
+  - Assigned to: BOTH Admin-IT (primary) and Admin-Operations (backup)
+  - Either role can complete the password reset
+
+ERROR_ALERT tasks:
+  - System errors: Assigned to Admin-IT
+  - Application errors: Assigned to Admin-Operations
+  - Critical errors: Assigned to BOTH
+
+USER_CREATION tasks:
+  - Assigned to: BOTH Admin-IT and Admin-Operations
+
+=============================================================================
+LOCATION ACCESS RULES
+=============================================================================
+
+Admin-Operations:  ALL locations
+Admin-IT:          No location access (admin pages only)
+Manager:           ALL locations (read-only)
+Supervisor:        ONLY assigned location
+Operator:          ONLY assigned location
+
+=============================================================================
 """
 
 from typing import Dict, Optional
@@ -115,24 +195,54 @@ class PermissionManager:
         
         ADMIN-OPERATIONS: Can make entries everywhere
         ADMIN-IT: Cannot make entries (system admin only)
-        MANAGER: Cannot make entries (read-only)
-        LAGOS (HO) USERS: Can make entries everywhere (operator & supervisor)
-        SUPERVISOR/OPERATOR: Can make entries at their assigned location only
+        MANAGER: Cannot make entries (read-only for reports and viewing)
+        SUPERVISOR/OPERATOR: Can make entries
         """
         user_role = _normalize_role(user_role)
+        
         # ADMIN-OPERATIONS OVERRIDE - Can make entries everywhere
         if user_role == "admin-operations":
             return True
         
-        # Admin-IT and Manager cannot make entries
+        # Admin-IT and Manager CANNOT make entries (read-only roles)
         if user_role in ["admin-it", "manager"]:
             return False
         
-        # All other roles can make entries
+        # Supervisors and operators can make entries (user-specific HO rules handled in can_make_entries_user)
         if user_role in ["supervisor", "operator"]:
             return True
         
         return False
+
+    @staticmethod
+    def can_make_entries_user(session: Session, user: Dict, location_id: int) -> bool:
+        """
+        User-aware variant: enforces Lagos (HO) special rules.
+
+        Rules:
+        - Admin-operations: True
+        - Admin-IT, Manager: False
+        - Lagos (HO) Supervisor: True (can make/edit across all locations)
+        - Lagos (HO) Operator: False (view-only across all locations)
+        - Other Supervisor/Operator: True
+        """
+        role = _normalize_role((user or {}).get("role"))
+        if role == "admin-operations":
+            return True
+        if role in ["admin-it", "manager"]:
+            return False
+        # Lagos (HO) special-case
+        try:
+            is_ho = PermissionManager.is_lagos_ho_user(user)
+        except Exception:
+            is_ho = False
+        if is_ho:
+            if role == "supervisor":
+                return True
+            if role == "operator":
+                return False
+        # Default for supervisors/operators
+        return role in ["supervisor", "operator"]
     
     @staticmethod
     def can_delete_entries(user: Dict) -> bool:
@@ -194,6 +304,23 @@ class PermissionManager:
         """
         role = _normalize_role(user.get("role"))
         return role in ["admin-operations", "manager", "supervisor", "operator"]
+
+    @staticmethod
+    def can_access_export_operations(user: Dict) -> bool:
+        """
+        Check if user can access Export Operations chapter.
+
+        Rules:
+        - Admin-Operations: always allowed
+        - Admin-IT: not allowed (no operational access)
+        - Others: allowed only if explicit user flag `export_ops_access` is True
+        """
+        role = _normalize_role(user.get("role"))
+        if role == "admin-operations":
+            return True
+        if role == "admin-it":
+            return False
+        return bool(user.get("export_ops_access", False))
     
     @staticmethod
     def can_view_all_locations(user: Dict) -> bool:

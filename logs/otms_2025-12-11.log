@@ -1,0 +1,1881 @@
+2025-12-11 07:41:09 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:41:09 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:41:25 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:41:25 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:41:40 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:41:40 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:41:40 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:41:40 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:42:27 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:42:27 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:43:39 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:43:39 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:04 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:04 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:15 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:15 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:19 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:19 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:19 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:19 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:26 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:26 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:27 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:27 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:32 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:32 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:36 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:36 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:40 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:40 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:53 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 07:49:53 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 07:49:53 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 07:49:53 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:49:53 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:49:53 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:49:53 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:49:53 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:49:53 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 07:49:53 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 07:49:53 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 07:49:53 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 07:49:53 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 07:50:08 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 07:50:08 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 07:50:08 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 07:50:08 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:50:08 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:50:08 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:50:08 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:50:08 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:50:08 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 07:50:08 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 07:50:08 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 07:50:08 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 07:50:08 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 07:50:13 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:50:13 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:55:48 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 07:55:48 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 07:55:48 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 07:55:48 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:55:48 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:55:48 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:55:48 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:55:48 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:55:48 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 07:55:48 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 07:55:48 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 07:55:48 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 07:55:48 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 07:55:52 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 07:55:52 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 07:55:52 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 07:55:52 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:55:52 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:55:52 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:55:52 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:55:52 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:55:52 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 07:55:52 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 07:55:52 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 07:55:52 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 07:55:52 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 07:56:05 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 07:56:05 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 07:56:05 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 07:56:05 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:05 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:56:05 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:56:05 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:05 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:05 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 07:56:05 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 07:56:05 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 07:56:05 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 07:56:05 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 07:56:16 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 07:56:16 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 07:56:16 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 07:56:16 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:16 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:56:16 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:56:16 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:16 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:16 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 07:56:16 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 07:56:16 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 07:56:16 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 07:56:16 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 07:56:24 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 07:56:24 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 07:56:24 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 07:56:24 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:24 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:56:24 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:56:24 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:24 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:24 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 07:56:24 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 07:56:24 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 07:56:24 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 07:56:24 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 07:56:27 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 07:56:27 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 07:56:27 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 07:56:27 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:27 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:56:27 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:56:27 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:27 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:27 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 07:56:27 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 07:56:27 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 07:56:27 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 07:56:27 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 07:56:33 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 07:56:33 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 07:56:33 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 07:56:33 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:33 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 07:56:33 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 07:56:33 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:33 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 07:56:33 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 07:56:33 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 07:56:33 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 07:56:33 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 07:56:33 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:02:37 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:02:37 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:02:37 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:02:37 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:02:37 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:02:38 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:02:38 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:02:38 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:02:38 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:02:38 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:02:38 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:02:38 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:02:38 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:02:48 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:02:48 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:02:48 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:02:48 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:02:48 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:02:48 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:02:48 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:02:48 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:02:48 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:02:48 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:02:48 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:02:48 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:02:48 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:03:07 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:03:07 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:03:07 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:03:07 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:03:07 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:03:07 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:03:07 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:03:07 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:03:07 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:03:07 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:03:07 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:03:07 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:03:07 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:03:21 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:03:21 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:03:21 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:03:21 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:03:21 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:03:21 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:03:21 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:03:21 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:03:21 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:03:21 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:03:21 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:03:21 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:03:21 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:03:32 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:03:32 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:03:32 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:03:32 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:03:32 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:03:32 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:03:32 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:03:32 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:03:32 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:03:32 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:03:32 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:03:32 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:03:32 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:04:27 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:04:27 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:04:27 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:04:27 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:27 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:04:27 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:04:27 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:27 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:27 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:04:27 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:04:27 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:04:27 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:04:27 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:04:29 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:04:29 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:04:29 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:04:29 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:29 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:04:29 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:04:29 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:29 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:29 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:04:29 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:04:29 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:04:29 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:04:29 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:04:37 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:04:37 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:04:37 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:04:37 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:37 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:04:37 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:04:37 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:37 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:37 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:04:37 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:04:37 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:04:37 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:04:37 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:04:49 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:04:49 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:04:49 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:04:49 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:49 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:04:49 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:04:49 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:49 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:49 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:04:49 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:04:49 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:04:49 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:04:49 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:04:56 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:04:56 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:04:56 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:04:56 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:56 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:04:56 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:04:56 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:56 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:04:56 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:04:56 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:04:56 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:04:56 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:04:56 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:05:38 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:05:38 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:05:38 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:05:38 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:38 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:05:38 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:05:38 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:38 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:38 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:05:38 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:05:38 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:05:38 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:05:38 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:05:44 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:05:44 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:05:44 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:05:44 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:44 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:05:44 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:05:44 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:44 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:45 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:05:45 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:05:45 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:05:45 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:05:45 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:05:47 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:05:47 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:05:47 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:05:47 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:47 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:05:47 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:05:47 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:47 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:47 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:05:47 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:05:47 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:05:47 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:05:47 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:05:58 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:05:58 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:05:58 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:05:58 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:58 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:05:58 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:05:58 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:58 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:05:58 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:05:58 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:05:58 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:05:58 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:05:58 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:06:01 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:06:01 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:06:01 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:06:01 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:01 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:06:01 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:06:01 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:01 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:01 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:06:01 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:06:01 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:06:01 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:06:01 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:06:36 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:06:36 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:06:36 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:06:36 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:36 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:06:36 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:06:36 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:36 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:37 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:06:37 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:06:37 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:06:37 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:37 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:06:37 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:06:37 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:37 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:37 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:06:37 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:06:37 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:06:37 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:06:37 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:06:37 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:06:37 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:06:37 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:06:37 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:37 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:06:37 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:06:37 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:37 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:37 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:06:37 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:06:37 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:06:37 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:06:37 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:06:42 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:06:42 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:06:42 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:06:42 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:42 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:06:42 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:06:42 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:42 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:06:42 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:06:42 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:06:42 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:06:42 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:06:42 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:09:05 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:09:05 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:09:05 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:09:05 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:05 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:09:05 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:09:05 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:05 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:05 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:09:05 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:09:05 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:09:05 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:09:05 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:09:14 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:09:14 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:09:14 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:09:14 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:14 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:09:14 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:09:14 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:14 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:14 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:09:14 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:09:14 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:09:14 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:09:14 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:09:57 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:09:57 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:09:57 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:09:57 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:57 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:09:57 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:09:57 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:57 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:57 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:09:57 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:09:57 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:09:57 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:09:57 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:09:58 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:09:58 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:09:58 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:09:58 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:58 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:09:58 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:09:58 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:58 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:09:58 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:09:58 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:09:58 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:09:58 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:09:58 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:10:47 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:10:47 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:10:47 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:10:47 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:10:47 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:10:47 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:10:47 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:10:47 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:10:47 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:10:47 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:10:47 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:10:47 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:10:47 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:11:06 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:11:06 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:11:06 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:11:06 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:11:06 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:11:06 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:11:06 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:11:06 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:11:06 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:11:06 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:11:06 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:11:06 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:11:06 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:12:20 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:12:20 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:12:20 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:12:20 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:20 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:12:20 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:12:20 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:20 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:20 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:12:20 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:12:20 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:12:20 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:12:20 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:12:28 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:12:28 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:12:28 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:12:28 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:28 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:12:28 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:12:28 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:28 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:28 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:12:28 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:12:28 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:12:28 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:12:28 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:12:32 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:12:32 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:12:32 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:12:32 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:32 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:12:32 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:12:32 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:32 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:32 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:12:32 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:12:32 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:12:32 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:12:32 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:12:35 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:12:35 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:12:35 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:12:35 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:35 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:12:35 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:12:35 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:35 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:35 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:12:35 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:12:35 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:12:35 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:12:35 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:12:46 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:12:46 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:12:46 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:12:46 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:46 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:12:46 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:12:46 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:46 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:46 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:12:46 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:12:46 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:12:46 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:12:46 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:12:53 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:12:53 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:12:53 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:12:53 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:53 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:12:53 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:12:53 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:53 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:54 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:12:54 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:12:54 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:12:54 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:12:54 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:12:56 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:12:56 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:12:56 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:12:56 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:56 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:12:56 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:12:56 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:56 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:12:56 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:12:56 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:12:56 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:12:56 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:12:56 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:13:00 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:13:00 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:13:00 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:13:00 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:01 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:13:01 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:13:01 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:01 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:01 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:13:01 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:13:01 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:13:01 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:13:01 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:13:02 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:13:02 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:13:02 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:13:02 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:02 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:13:02 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:13:02 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:02 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:02 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:13:02 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:13:02 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:13:02 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:13:02 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:13:07 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:13:07 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:13:07 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:13:07 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:07 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:13:07 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:13:07 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:07 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:07 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:13:07 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:13:07 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:13:07 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:13:07 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:13:16 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:13:16 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:13:16 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:13:16 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:16 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:13:16 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:13:16 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:16 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:16 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:13:16 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:13:16 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:13:16 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:13:16 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:13:23 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:13:23 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:13:23 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:13:23 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:23 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:13:23 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:13:23 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:23 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:23 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:13:23 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:13:23 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:13:23 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:13:23 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:13:25 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:13:25 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:13:25 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:13:25 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:25 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:13:25 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:13:25 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:25 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:25 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:13:25 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:13:25 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:13:25 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:13:25 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:13:30 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:13:30 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:13:30 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:13:30 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:30 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:13:30 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:13:30 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:30 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:13:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:13:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:13:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:13:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:13:32 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:13:32 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:13:32 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:13:32 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:32 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:13:32 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:13:32 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:32 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:13:32 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:13:32 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:13:32 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:13:32 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:13:32 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:15:00 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:15:00 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:15:00 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:15:00 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:15:00 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:15:00 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:15:00 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:15:00 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:15:00 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:15:00 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:15:00 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:15:00 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:15:00 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:16:45 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:16:45 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:16:45 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:16:45 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:16:45 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:16:45 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:16:45 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:16:45 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:16:45 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:16:45 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:16:45 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:16:45 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:16:45 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:16:55 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:16:55 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:16:55 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:16:55 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:16:55 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:16:55 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:16:55 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:16:55 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:16:55 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:16:55 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:16:55 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:16:55 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:16:55 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:26:21 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:26:21 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:26:21 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:26:21 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:26:21 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:26:21 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:26:21 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:26:21 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:26:21 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:26:21 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:26:21 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:26:21 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:26:21 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 08:28:33 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 08:28:33 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 08:28:33 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 08:28:33 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:28:33 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 08:28:33 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 08:28:33 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:28:33 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 08:28:33 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 08:28:33 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 08:28:33 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 08:28:33 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 08:28:33 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:02:11 - OTMS - INFO - SESSION TIMEOUT: admin
+2025-12-11 09:11:30 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 09:11:30 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 09:11:30 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:11:30 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:11:30 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 09:11:30 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 09:11:30 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:11:30 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:11:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:11:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:11:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:11:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:11:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:11:59 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 09:11:59 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 09:11:59 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:11:59 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:11:59 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 09:11:59 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 09:11:59 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:11:59 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:11:59 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:11:59 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:11:59 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:11:59 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:11:59 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:12:17 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 09:12:17 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 09:12:17 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:12:17 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:12:17 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 09:12:17 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 09:12:17 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:12:17 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:12:17 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:12:17 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:12:17 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:12:17 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:12:17 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:12:20 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 09:12:20 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 09:12:20 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:12:20 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:12:20 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 09:12:20 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 09:12:20 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:12:20 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:12:20 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:12:20 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:12:20 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:12:20 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:12:20 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:15:39 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 09:15:39 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 09:15:39 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:15:39 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:15:39 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 09:15:39 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 09:15:39 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:15:39 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:15:39 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:15:39 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:15:39 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:15:39 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:15:39 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:16:08 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 09:16:08 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 09:16:08 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:16:08 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:08 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 09:16:08 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 09:16:08 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:08 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:08 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:16:08 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:16:08 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:16:08 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:16:08 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:16:11 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 09:16:11 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 09:16:11 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:16:11 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:11 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 09:16:11 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 09:16:11 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:11 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:12 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:16:12 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:16:12 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:16:12 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:16:12 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:16:15 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 09:16:15 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 09:16:15 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:16:15 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:15 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 09:16:15 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 09:16:15 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:15 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:15 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:16:15 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:16:15 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:16:15 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:16:15 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:16:18 - OTMS - INFO - Loaded 72 tables from primary database
+2025-12-11 09:16:18 - OTMS - INFO - Loaded 72 tables from flexible database
+2025-12-11 09:16:18 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:16:18 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:18 - OTMS - INFO - Reflecting table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database...
+2025-12-11 09:16:18 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_export_data_tulja_kalyani' from flex database
+2025-12-11 09:16:18 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:18 - OTMS - INFO - Retrieved 10 columns for data source 'export_utapate_terminal_export_data_tulja_kalyani'
+2025-12-11 09:16:18 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:16:18 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:16:18 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:16:18 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:16:18 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:16:21 - OTMS - INFO - Attempting to create custom table 'export_utapate_terminal_dummy' for location_id=8
+2025-12-11 09:16:21 - OTMS - INFO - Database connection verified for table 'export_utapate_terminal_dummy' creation
+2025-12-11 09:16:21 - OTMS - INFO - Table 'export_utapate_terminal_dummy' does not exist. Creating new table...
+2025-12-11 09:16:21 - OTMS - INFO - Processing 1 custom column definitions for table 'export_utapate_terminal_dummy'
+2025-12-11 09:16:21 - OTMS - INFO - Added column 'testing' (text) to table 'export_utapate_terminal_dummy'
+2025-12-11 09:16:21 - OTMS - INFO - Creating table 'export_utapate_terminal_dummy' with 8 columns in database...
+2025-12-11 09:16:21 - OTMS - INFO - ✅ Successfully created table 'export_utapate_terminal_dummy'
+2025-12-11 09:16:21 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:16:21 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:16:21 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:16:21 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:16:21 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:16:21 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:16:21 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:16:21 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:16:21 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:16:21 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:16:21 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:16:21 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:16:21 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:16:41 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:16:41 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:16:41 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:16:41 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:16:41 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:16:41 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:16:41 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:16:41 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:16:41 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:16:41 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:16:41 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:16:41 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:16:41 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:36:24 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:36:24 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:36:24 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:36:24 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:36:24 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:36:24 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:36:24 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:36:24 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:36:24 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:36:24 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:36:24 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:36:24 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:36:24 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:36:32 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:36:32 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:36:32 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:36:32 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:36:32 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:36:32 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:36:32 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:36:32 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:36:32 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:36:32 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:36:32 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:36:32 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:36:32 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:37:00 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:37:00 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:37:00 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:37:00 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:37:00 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:37:00 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:37:00 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:37:00 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:37:00 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:37:00 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:37:00 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:37:00 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:37:00 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:37:04 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:37:04 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:37:04 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:37:04 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:37:04 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:37:04 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:37:04 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:37:04 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:37:04 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:37:04 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:37:04 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:37:04 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:37:04 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:42:41 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:42:41 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:42:41 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:42:41 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:42:41 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:42:41 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:42:41 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:42:41 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:42:41 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:42:41 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:42:41 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:42:41 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:42:41 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:42:53 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:42:53 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:42:53 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:42:53 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:42:53 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:42:53 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:42:53 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:42:53 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:42:53 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:42:53 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:42:53 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:42:53 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:42:53 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:43:01 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:43:01 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:43:01 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:43:01 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:43:01 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:43:01 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:43:01 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:43:01 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:43:01 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:43:01 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:43:01 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:43:01 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:43:01 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:44:15 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:44:15 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:44:15 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:44:15 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:44:15 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:44:15 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:44:15 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:44:15 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:44:15 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:44:15 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:44:15 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:44:15 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:44:15 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:46:45 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:46:45 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:46:45 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:46:45 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:46:45 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:46:45 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:46:45 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:46:45 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:46:45 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:46:45 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:46:45 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:46:45 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:46:45 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:46:47 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:46:47 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:46:47 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:46:47 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:46:47 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:46:47 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:46:47 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:46:47 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:46:47 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:46:47 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:46:47 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:46:47 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:46:47 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:47:05 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:47:05 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:47:05 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:47:05 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:47:05 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:47:05 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:47:05 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:47:05 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:47:05 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:47:05 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:47:05 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:47:05 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:47:05 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:48:45 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:48:45 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:48:45 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:48:45 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:48:45 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:48:45 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:48:45 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:48:45 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:48:45 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:48:45 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:48:45 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:48:45 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:48:45 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:55:53 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:55:53 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:55:53 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:55:53 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:55:53 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:55:53 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:55:53 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:55:53 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:55:53 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:55:53 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:55:53 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:55:53 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:55:53 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:55:57 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:55:57 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:55:57 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:55:57 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:55:57 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:55:57 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:55:57 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:55:57 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:55:57 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:55:57 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:55:57 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:55:57 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:55:57 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 09:56:02 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:56:02 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:56:02 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:56:02 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:56:02 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:56:02 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:56:02 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:56:02 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:56:04 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 09:56:04 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 09:56:04 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 09:56:04 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 09:56:04 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 09:56:04 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 09:56:04 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 09:56:04 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 09:56:04 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 09:56:04 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 09:56:05 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 09:56:05 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 09:56:05 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 10:15:02 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 10:15:02 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 10:15:02 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 10:15:02 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 10:15:02 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 10:15:02 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 10:15:02 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 10:15:02 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 10:15:02 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 10:15:02 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 10:15:02 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 10:15:02 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 10:15:03 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 10:16:12 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 10:16:12 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 10:16:12 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 10:16:12 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 10:16:12 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 10:16:12 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 10:16:12 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 10:16:12 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 10:16:12 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 10:16:12 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 10:16:12 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 10:16:12 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 10:16:12 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 10:22:30 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 10:22:30 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 10:22:30 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 10:22:30 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 10:22:30 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 10:22:30 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 10:22:30 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 10:22:30 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 10:22:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 10:22:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 10:22:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 10:22:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 10:22:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 11:37:09 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 11:37:09 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 11:37:09 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 11:37:09 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 11:37:09 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 11:37:09 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 11:37:09 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 11:37:09 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 11:37:09 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 11:37:09 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 11:37:09 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 11:37:09 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 11:37:09 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 11:38:47 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 11:38:47 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 11:38:47 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 11:38:47 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 11:38:47 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 11:38:47 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 11:38:47 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 11:38:47 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 11:38:48 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 11:38:48 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 11:38:48 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 11:38:48 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 11:38:48 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 11:57:27 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 11:57:27 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 11:57:27 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 11:57:27 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 11:57:27 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 11:57:27 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 11:57:27 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 11:57:27 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 11:57:27 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 11:57:27 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 11:57:27 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 11:57:27 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 11:57:27 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 13:29:37 - OTMS - ERROR - Failed to progress to next stage: (sqlite3.IntegrityError) UNIQUE constraint failed: export_stage_progress.export_id, export_stage_progress.stage_code
+[SQL: INSERT INTO export_stage_progress (export_id, stage_code, status, mandatory_complete, due_date, status_changed_at, due_notified_at, completed_at, completed_by, completed_overdue, remarks, overdue_reason, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, started_at]
+[parameters: (1, 'stage_2', 'Pending', 1, None, None, None, None, None, 0, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: export_stage_progress.export_id, export_stage_progress.stage_code
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 337, in _progress_to_next_stage
+    s.commit()
+    ~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 2028, in commit
+    trans.commit(_to_root=True)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<string>", line 2, in commit
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1313, in commit
+    self._prepare_impl()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "<string>", line 2, in _prepare_impl
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 1288, in _prepare_impl
+    self.session.flush()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4352, in flush
+    self._flush(objects)
+    ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4487, in _flush
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\session.py", line 4448, in _flush
+    flush_context.execute()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+    ~~~~~~~~~~~^^^^^^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.mapper,
+        ^^^^^^^^^^^^
+        uow.states_for_mapper_hierarchy(self.mapper, False, False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        uow,
+        ^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        base_mapper,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        insert,
+        ^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+        statement,
+        params,
+        execution_options=execution_options,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1418, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Praveen\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\engine\default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: export_stage_progress.export_id, export_stage_progress.stage_code
+[SQL: INSERT INTO export_stage_progress (export_id, stage_code, status, mandatory_complete, due_date, status_changed_at, due_notified_at, completed_at, completed_by, completed_overdue, remarks, overdue_reason, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, started_at]
+[parameters: (1, 'stage_2', 'Pending', 1, None, None, None, None, None, 0, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-12-11 15:27:47 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 15:27:47 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 15:27:47 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 15:27:47 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 15:27:47 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 15:27:47 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 15:27:47 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 15:27:47 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 15:27:47 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 15:27:47 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 15:27:47 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 15:27:47 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 15:27:47 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 16:30:01 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 905, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:30:40 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 905, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:30:43 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 905, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:30:50 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 905, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:34:33 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 16:34:33 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 16:34:33 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 16:34:33 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 16:34:33 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 16:34:33 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 16:34:33 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 16:34:33 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 16:34:33 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 16:34:33 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 16:34:33 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 16:34:33 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 16:34:33 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 16:38:57 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 16:38:57 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 16:38:57 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 16:38:57 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 16:38:57 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 16:38:57 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 16:38:57 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 16:38:57 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 16:38:58 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 16:38:58 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 16:38:58 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 16:38:58 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 16:38:58 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 16:41:26 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:41:42 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:41:45 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:41:47 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:41:54 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:41:55 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:42:10 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:44:00 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1002, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 16:44:00 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 17:15:21 - OTMS - INFO - SESSION TIMEOUT: admin
+2025-12-11 20:46:01 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:17 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:26 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:30 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1002, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:30 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:34 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1002, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:34 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:36 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1002, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:36 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:37 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1002, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:42 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1002, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:42 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:47 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1002, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:46:47 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:47:04 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1002, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:47:04 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 910, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:50:29 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1086, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:50:29 - OTMS - ERROR - Failed to fetch laycan_start: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 994, in render_export_operations_page
+    if exp_record and exp_record.laycan_start:
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:50:37 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1050, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:52:48 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 20:52:48 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 20:52:48 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 20:52:48 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 20:52:48 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 20:52:48 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 20:52:48 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 20:52:48 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 20:52:48 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 20:52:48 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 20:52:48 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 20:52:48 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 20:52:48 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 20:53:10 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 20:53:10 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 20:53:10 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 20:53:10 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 20:53:10 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 20:53:10 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 20:53:10 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 20:53:10 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 20:53:10 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 20:53:10 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 20:53:10 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 20:53:10 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 20:53:10 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 20:53:17 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 20:53:17 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 20:53:17 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 20:53:17 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 20:53:17 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 20:53:17 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 20:53:17 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 20:53:17 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 20:53:17 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 20:53:17 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 20:53:17 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 20:53:17 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 20:53:17 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 20:55:57 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 20:55:57 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 20:55:57 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 20:55:57 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 20:55:57 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 20:55:57 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 20:55:57 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 20:55:57 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 20:55:57 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 20:55:57 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 20:55:57 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 20:55:57 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 20:55:57 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 20:56:38 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 20:56:38 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 20:56:38 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 20:56:38 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 20:56:38 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 20:56:38 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 20:56:38 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 20:56:38 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 20:56:38 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 20:56:38 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 20:56:38 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 20:56:38 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 20:56:38 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 20:56:42 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 20:56:42 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 20:56:42 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 20:56:42 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 20:56:42 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 20:56:42 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 20:56:42 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 20:56:42 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 20:56:42 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 20:56:42 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 20:56:42 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 20:56:42 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 20:56:42 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 20:56:57 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 20:56:57 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 20:56:57 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 20:56:57 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 20:56:57 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 20:56:57 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 20:56:57 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 20:56:57 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 20:56:57 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 20:56:57 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 20:56:57 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 20:56:57 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 20:56:57 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 20:57:01 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 20:57:01 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 20:57:01 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 20:57:01 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 20:57:01 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 20:57:01 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 20:57:01 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 20:57:01 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 20:57:01 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 20:57:01 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 20:57:01 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 20:57:01 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 20:57:01 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 20:57:03 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 20:57:03 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 20:57:03 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 20:57:03 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 20:57:03 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 20:57:03 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 20:57:03 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 20:57:03 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 20:57:03 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 20:57:03 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 20:57:03 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 20:57:03 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 20:57:03 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 20:57:13 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1050, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:57:28 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1050, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 20:59:46 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:00:09 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:02:16 - OTMS - ERROR - Failed to calculate base date for stage_3: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 224, in _recalculate_all_due_dates
+    if exp.laycan_start:
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:02:26 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:02:40 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:02:42 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:02:43 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:02:46 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:02:46 - OTMS - ERROR - Failed to calculate base date for stage_3: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 224, in _recalculate_all_due_dates
+    if exp.laycan_start:
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:03:35 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:05:30 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 21:05:30 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 21:05:30 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 21:05:30 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 21:05:30 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 21:05:30 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 21:05:30 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 21:05:30 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 21:05:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 21:05:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 21:05:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 21:05:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 21:05:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 21:07:04 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 21:07:04 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 21:07:04 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 21:07:04 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 21:07:04 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 21:07:04 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 21:07:04 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 21:07:04 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 21:07:04 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 21:07:04 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 21:07:04 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 21:07:04 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 21:07:04 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 21:08:34 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:08:44 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:08:52 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:08:54 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:08:55 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:08:59 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:09:04 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:09:05 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1107, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:09:05 - OTMS - ERROR - Failed to calculate base date for stage_3: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 224, in _recalculate_all_due_dates
+    if exp.laycan_start:
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:10:29 - OTMS - INFO - Loaded 73 tables from primary database
+2025-12-11 21:10:29 - OTMS - INFO - Loaded 73 tables from flexible database
+2025-12-11 21:10:29 - OTMS - INFO - Added 0 additional custom tables from location_config
+2025-12-11 21:10:29 - OTMS - INFO - Attempting to load custom table 'export_utapate_terminal_dummy'
+2025-12-11 21:10:29 - OTMS - INFO - Reflecting table 'export_utapate_terminal_dummy' from flex database...
+2025-12-11 21:10:29 - OTMS - INFO - Successfully created model for table 'export_utapate_terminal_dummy' from flex database
+2025-12-11 21:10:29 - OTMS - INFO - Successfully loaded custom table model for 'export_utapate_terminal_dummy'
+2025-12-11 21:10:29 - OTMS - INFO - Retrieved 8 columns for data source 'export_utapate_terminal_dummy'
+2025-12-11 21:10:30 - OTMS - INFO - Attempting to load custom table 'audit_log'
+2025-12-11 21:10:30 - OTMS - INFO - Reflecting table 'audit_log' from flex database...
+2025-12-11 21:10:30 - OTMS - INFO - Successfully created model for table 'audit_log' from flex database
+2025-12-11 21:10:30 - OTMS - INFO - Successfully loaded custom table model for 'audit_log'
+2025-12-11 21:10:30 - OTMS - INFO - Retrieved 11 columns for data source 'audit_log'
+2025-12-11 21:13:14 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:13:31 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:13:37 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:13:41 - OTMS - ERROR - Failed to calculate base date for stage_3: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 224, in _recalculate_all_due_dates
+    if exp.laycan_start:
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:13:41 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:13:52 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:13:54 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:13:56 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:13:59 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:14:04 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:14:04 - OTMS - ERROR - DEBUG: Saving laycan_start=2025-12-15 (type: <class 'datetime.date'>) for export_id=1
+2025-12-11 21:14:04 - OTMS - ERROR - DEBUG: Saving laycan_end=2025-12-16 (type: <class 'datetime.date'>) for export_id=1
+2025-12-11 21:14:04 - OTMS - ERROR - DEBUG: After flush - exp.laycan_start=2025-12-15, exp.laycan_end=2025-12-16
+2025-12-11 21:14:04 - OTMS - ERROR - Failed to calculate base date for stage_3: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 224, in _recalculate_all_due_dates
+    if exp.laycan_start:
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:17:01 - OTMS - ERROR - Failed to fetch current laycan dates: 'ExportProcess' object has no attribute 'laycan_start'
+Traceback (most recent call last):
+  File "D:\Project OTMS-Rebuild\app_pages\export_operations.py", line 1112, in render_export_operations_page
+    current_laycan_start = exp_record.laycan_start
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExportProcess' object has no attribute 'laycan_start'
+2025-12-11 21:19:15 - OTMS - ERROR - DEBUG: Saving laycan_start=2025-12-15 (type: <class 'datetime.date'>) for export_id=1
+2025-12-11 21:19:15 - OTMS - ERROR - DEBUG: Saving laycan_end=2025-12-16 (type: <class 'datetime.date'>) for export_id=1
+2025-12-11 21:19:15 - OTMS - ERROR - DEBUG: After flush - exp.laycan_start=2025-12-15, exp.laycan_end=2025-12-16

@@ -204,3 +204,37 @@ class ActionLogger:
             
         except Exception as e:
             logger.critical(f"Failed to log error with task: {e}", exc_info=True)
+    
+    @staticmethod
+    def log_login(username: str, success: bool, ip_address: Optional[str] = None, 
+                  failure_reason: Optional[str] = None):
+        """Log user login attempt"""
+        if success:
+            logger.info(f"LOGIN SUCCESS: {username} from {ip_address or 'unknown IP'}")
+        else:
+            logger.warning(
+                f"LOGIN FAILED: {username} from {ip_address or 'unknown IP'} - "
+                f"Reason: {failure_reason or 'invalid credentials'}"
+            )
+    
+    @staticmethod
+    def log_logout(username: str, ip_address: Optional[str] = None):
+        """Log user logout"""
+        logger.info(f"LOGOUT: {username} from {ip_address or 'unknown IP'}")
+    
+    @staticmethod
+    def log_session_timeout(username: str):
+        """Log session timeout"""
+        logger.info(f"SESSION TIMEOUT: {username}")
+    
+    @staticmethod
+    def log_2fa_setup(username: str, success: bool):
+        """Log 2FA setup attempt"""
+        status = "SUCCESS" if success else "FAILED"
+        logger.info(f"2FA SETUP {status}: {username}")
+    
+    @staticmethod
+    def log_2fa_verification(username: str, success: bool):
+        """Log 2FA verification attempt"""
+        status = "SUCCESS" if success else "FAILED"
+        logger.info(f"2FA VERIFY {status}: {username}")

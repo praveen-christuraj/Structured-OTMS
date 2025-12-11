@@ -736,7 +736,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
             st.caption("FSO-Operations Access: **⛔ Denied**")
             st.stop()
 
-        can_make_entries = PermissionManager.can_make_entries(s, user["role"], active_location_id)
+        can_make_entries = PermissionManager.can_make_entries_user(s, user, active_location_id)
         can_delete_direct = user["role"].lower() in ["admin-operations", "supervisor"]
         can_delete_with_approval = user["role"].lower() == "operator"
 
@@ -969,7 +969,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                         else:
                             st.error(f"**Variance:** {variance:,.2f} bbls ❌")
                     
-                    submit_btn = st.form_submit_button("💾", type="primary", use_container_width=True, help="Save Entry")
+                    submit_btn = st.form_submit_button("💾", type="primary", use_container_width=True, help="Save Entry", disabled=not can_make_entries)
                     
                     if submit_btn:
                         time_text = (entry_time_input or "").strip()
@@ -1239,7 +1239,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                             btn_col1, btn_col2 = st.columns(2)
                             
                             with btn_col1:
-                                if st.button("✏️", key=f"edit_fso_{entry_id}", help="Edit", use_container_width=True):
+                                if st.button("✏️", key=f"edit_fso_{entry_id}", help="Edit", use_container_width=True, disabled=not can_make_entries):
                                     allow_edit = True
                                     with get_session() as _lock_s:
                                         entry_obj = (
@@ -1258,8 +1258,8 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                         _st_safe_rerun()
                             
                             with btn_col2:
-                                if can_delete_direct or can_delete_with_approval:
-                                    if st.button("🗑️", key=f"delete_fso_{entry_id}", help="Delete", use_container_width=True):
+                                if (can_delete_direct or can_delete_with_approval) and can_make_entries:
+                                    if st.button("🗑️", key=f"delete_fso_{entry_id}", help="Delete", use_container_width=True, disabled=not can_make_entries):
                                         st.session_state[f"confirm_delete_fso_{entry_id}"] = True
                                         _st_safe_rerun()
                         
@@ -1324,7 +1324,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                 save_col, cancel_col = st.columns(2)
                                 
                                 with save_col:
-                                    if st.form_submit_button("💾", type="primary", use_container_width=True, help="Save Changes"):
+                                    if st.form_submit_button("💾", type="primary", use_container_width=True, help="Save Changes", disabled=not can_make_entries):
                                         time_text = (edit_time or "").strip()
                                         parsed_time = None
                                         if not time_text:
@@ -1436,7 +1436,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                 del_col1, del_col2 = st.columns(2)
 
                                 with del_col1:
-                                    if st.button("🗑️", key=f"confirm_del_{entry_id}", type="primary", use_container_width=True, help="Delete"):
+                                    if st.button("🗑️", key=f"confirm_del_{entry_id}", type="primary", use_container_width=True, help="Delete", disabled=not can_make_entries):
                                         approver_name = user.get("username", "admin")
                                         _execute_fso_delete(f"{approver_name} ({user.get('role')})")
 
@@ -1461,6 +1461,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                     approver_label = remote_task.get("approved_by") or "Supervisor"
                                     if st.button(
                                         "🗑️",
+                                        
                                         key=f"fso_remote_delete_{entry_id}",
                                         type="primary",
                                         use_container_width=True,
@@ -1481,7 +1482,7 @@ def render_fso_operations_page(active_location_id: Optional[int], user: Optional
                                     del_col1, del_col2 = st.columns(2)
 
                                     with del_col1:
-                                        if st.form_submit_button("🗑️", type="primary", use_container_width=True, help="Confirm Delete"):
+                                        if st.form_submit_button("🗑️", type="primary", use_container_width=True, help="Confirm Delete", disabled=not can_make_entries):
                                             if not supervisor_code:
                                                 st.error("Supervisor code is required.")
                                             elif not sup_username:

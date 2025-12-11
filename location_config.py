@@ -22,6 +22,7 @@ DEFAULT_CONFIG = {
         "show_view_transactions": True,
         "show_vessel_operations": True,
         "show_fso_operations": True,
+        "show_export_operations": True,
         "show_otr": True,
         "show_reporting": True,
         "show_reports": True,

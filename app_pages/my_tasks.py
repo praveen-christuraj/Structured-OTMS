@@ -45,7 +45,17 @@ def render_my_tasks_page(active_location_id, user):
     for task in tasks:
         title = task.get("title") or f"Task #{task['id']}"
         status = task.get("status", "UNKNOWN")
+        task_type = task.get("task_type", "UNKNOWN")
+        
+        # Build enhanced header with visual indicators
         header = f"[{status}] {title} (#{task['id']})"
+        
+        # For supervisors viewing deletion requests, add special indicators
+        if task_type == "DELETE_REQUEST" and user.get("role") == "supervisor" and status == "PENDING":
+            metadata = task.get("metadata", {})
+            supervisor_count = metadata.get("supervisor_count", 0)
+            if supervisor_count > 1:
+                header += f" ⚠️ Shared with {supervisor_count} supervisors"
 
         with st.expander(header, expanded=False):
             st.write(f"**Type:** {task.get('task_type')} · **Priority:** {task.get('priority')}")
@@ -53,6 +63,17 @@ def render_my_tasks_page(active_location_id, user):
                 f"**Raised by:** {task.get('raised_by')} "
                 f"({task.get('raised_by_role')}) at {task.get('raised_at')}"
             )
+            
+            # Special message for deletion requests assigned to multiple supervisors
+            if task_type == "DELETE_REQUEST" and user.get("role") == "supervisor" and status == "PENDING":
+                metadata = task.get("metadata", {})
+                supervisor_count = metadata.get("supervisor_count", 0)
+                if supervisor_count > 1:
+                    st.info(
+                        f"💬 This deletion request has been sent to **{supervisor_count} supervisors** "
+                        f"at this location. **Any ONE supervisor can approve** this request."
+                    )
+            
             if task.get("description"):
                 st.markdown(f"**Description:** {task['description']}")
             if task.get("resolution_notes"):

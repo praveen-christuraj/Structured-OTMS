@@ -134,6 +134,108 @@ def log_export_action(
     )
 
 
+def log_filter_action(
+    resource_type: str,
+    filter_criteria: Dict[str, Any],
+    record_count: int,
+    user: Optional[Dict[str, Any]] = None,
+    location_id: Optional[int] = None,
+    session = None
+):
+    """Log when user applies filters to data"""
+    user = user or st.session_state.get("auth_user")
+    location_id = location_id or st.session_state.get("active_location_id")
+    
+    filter_summary = ", ".join([f"{k}={v}" for k, v in filter_criteria.items() if v])
+    
+    ActionLogger.log_action(
+        action="FILTER",
+        resource_type=resource_type,
+        resource_id=None,
+        username=user.get("username") if user else None,
+        user_id=user.get("id") if user else None,
+        location_id=location_id,
+        details=f"Filtered {resource_type}: {filter_summary} - {record_count} results",
+        success=True,
+        session=session
+    )
+
+
+def log_search_action(
+    resource_type: str,
+    search_term: str,
+    record_count: int,
+    user: Optional[Dict[str, Any]] = None,
+    location_id: Optional[int] = None,
+    session = None
+):
+    """Log when user performs a search"""
+    user = user or st.session_state.get("auth_user")
+    location_id = location_id or st.session_state.get("active_location_id")
+    
+    ActionLogger.log_action(
+        action="SEARCH",
+        resource_type=resource_type,
+        resource_id=None,
+        username=user.get("username") if user else None,
+        user_id=user.get("id") if user else None,
+        location_id=location_id,
+        details=f"Searched {resource_type} for '{search_term}' - {record_count} results",
+        success=True,
+        session=session
+    )
+
+
+def log_select_action(
+    resource_type: str,
+    resource_id: Any,
+    resource_label: str,
+    user: Optional[Dict[str, Any]] = None,
+    location_id: Optional[int] = None,
+    session = None
+):
+    """Log when user selects a specific record for viewing/editing"""
+    user = user or st.session_state.get("auth_user")
+    location_id = location_id or st.session_state.get("active_location_id")
+    
+    ActionLogger.log_action(
+        action="SELECT",
+        resource_type=resource_type,
+        resource_id=resource_id,
+        username=user.get("username") if user else None,
+        user_id=user.get("id") if user else None,
+        location_id=location_id,
+        details=f"Selected {resource_type}: {resource_label}",
+        success=True,
+        session=session
+    )
+
+
+def log_download_action(
+    resource_type: str,
+    file_name: str,
+    file_format: str,
+    user: Optional[Dict[str, Any]] = None,
+    location_id: Optional[int] = None,
+    session = None
+):
+    """Log when user downloads a file/report"""
+    user = user or st.session_state.get("auth_user")
+    location_id = location_id or st.session_state.get("active_location_id")
+    
+    ActionLogger.log_action(
+        action="DOWNLOAD",
+        resource_type=resource_type,
+        resource_id=None,
+        username=user.get("username") if user else None,
+        user_id=user.get("id") if user else None,
+        location_id=location_id,
+        details=f"Downloaded {resource_type}: {file_name} ({file_format})",
+        success=True,
+        session=session
+    )
+
+
 def safe_transaction_operation(
     operation_func: Callable,
     operation_name: str,

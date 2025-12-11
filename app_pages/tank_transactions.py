@@ -410,7 +410,16 @@ def _render_tab_tank_entry(loc, loc_label, user):
         st.info("ℹ️ Ticket ID will be generated upon save")
 
     # Save button
-    if st.button("💾", type="primary", key="tx_save_btn", help="Save to DB"):
+    can_submit = True
+    if PermissionManager and user:
+        try:
+            with get_session() as _perm_s:
+                can_submit = PermissionManager.can_make_entries_user(_perm_s, user, loc.id)
+        except Exception:
+            can_submit = True
+    if not can_submit:
+        st.info("Your role is read-only here. Form controls are disabled.")
+    if st.button("💾", type="primary", key="tx_save_btn", help="Save to DB", disabled=not can_submit):
         errs = []
         if selected_tank_label not in tank_by_label:
             errs.append("Please select a valid tank.")
@@ -1076,6 +1085,11 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
 
     with get_session() as s:
         tdef = get_dynamic_table_def(s, loc.id, page=page_key, section=section_key)
+        try:
+            from permission_manager import PermissionManager as PM
+            can_submit = PM.can_make_entries_user(s, user or {}, loc.id)
+        except Exception:
+            can_submit = True
     columns = list(tdef.get("columns") or [])
 
     if not columns:
@@ -1124,7 +1138,9 @@ def _render_dynamic_form(loc, user, page_key: str, section_key: str, title: str)
                     st.info(f"**{label}**: {operation.upper()}({cols_used}) - Will be calculated after input")
                     row[name] = None
 
-        submitted = st.form_submit_button("💾", type="primary", help="Save Row")
+        if not can_submit:
+            st.info("Your role is read-only here. Form controls are disabled.")
+        submitted = st.form_submit_button("💾", type="primary", help="Save Row", disabled=not can_submit)
 
     if not submitted:
         return

@@ -115,7 +115,7 @@ def _guard_permissions(user: Optional[Dict[str, Any]], location_id: int, cfg: Di
                 feature_allowed = PermissionManager.can_access_feature(
                     session, location_id, "tanker_transactions", role
                 )
-                can_make_entries = PermissionManager.can_make_entries(session, role, location_id)
+                can_make_entries = PermissionManager.can_make_entries_user(session, user, location_id)
                 if not feature_allowed:
                     allowed_locations = PermissionManager.get_allowed_locations_for_feature(
                         session, "tanker_transactions"
@@ -574,9 +574,31 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
         ss.pop("tanker_tx_clear_form_flag", None)
         _clear_form_state(tanker_names)
     
+    # Check for edit lock before prefilling
+    edit_locked = False
+    edit_lock_message = ""
+    
     if ss.get("tanker_tx_prefill_data"):
         tx_data = ss.pop("tanker_tx_prefill_data")
-        _prefill_form_state(tx_data)
+        
+        # Check if edit is locked (older than 24 hours)
+        if tx_data.created_at:
+            time_since_creation = datetime.utcnow() - tx_data.created_at
+            if time_since_creation.total_seconds() > (EDIT_LOCK_HOURS * 3600):
+                edit_locked = True
+                hours_old = int(time_since_creation.total_seconds() / 3600)
+                edit_lock_message = (
+                    f"⚠️ **Edit Locked**: This record was created {hours_old} hours ago. "
+                    f"Records can only be edited within {EDIT_LOCK_HOURS} hours of creation."
+                )
+        
+        # Only prefill if not locked
+        if not edit_locked:
+            _prefill_form_state(tx_data)
+        else:
+            # Clear edit mode if locked
+            ss["tanker_form_mode"] = "new"
+            ss["tanker_edit_id"] = None
     
     mode = ss.get("tanker_form_mode", "new")
     editing_id = ss.get("tanker_edit_id")
@@ -585,6 +607,11 @@ def _render_entry_form(location: Location, can_submit: bool, tankers: List[Tanke
         st.info("Your role is read-only here. Form controls are disabled.")
 
     st.markdown("### Add / Edit Tanker Transaction")
+    
+    # Show edit lock warning if applicable
+    if edit_locked:
+        st.error(edit_lock_message)
+        st.info("🔒 You can create a new transaction instead.")
 
     if not tanker_names:
         st.warning("No tankers available for entry. Please create a tanker in Asset Management first.")

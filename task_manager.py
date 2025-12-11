@@ -172,17 +172,21 @@ class TaskManager:
             if metadata:
                 merged_meta.update(metadata)
 
+            # Create description with location info for better supervisor context
+            description_text = f"{raised_by} ({raised_by_role}) requested permission to delete {resource_label}."
+            if location_id:
+                description_text += f" Location ID: {location_id}"
+            
             task = Task(
                 title=f"Delete request • {resource_label}",
-                description=(
-                    f"{raised_by} requested permission to delete {resource_label}."
-                ),
+                description=description_text,
                 task_type=TaskType.DELETE_REQUEST.value,
                 status=TaskStatus.PENDING.value,
+                priority="NORMAL",  # Explicitly set priority
                 resource_type=resource_type,
                 resource_id=str(resource_id),
                 location_id=location_id,
-                target_role="supervisor",
+                target_role="supervisor",  # All supervisors at this location will see this
                 raised_by=raised_by,
                 raised_by_role=raised_by_role,
                 metadata_json=TaskManager._serialize_metadata(merged_meta),
@@ -669,11 +673,14 @@ class TaskManager:
                 "role": user.get("role"),
                 "reason": reason,
             }
-            task = Task(
-                title=f"Password reset • {user.get('username')}",
+            
+            # Create task for Admin-IT (primary)
+            task_it = Task(
+                title=f"[IT] Password reset • {user.get('username')}",
                 description=reason or "Password reset requested",
                 task_type=TaskType.PASSWORD_RESET.value,
                 status=TaskStatus.PENDING.value,
+                priority="HIGH",
                 target_role="admin-it",
                 resource_type="User",
                 resource_id=str(user.get("id")),
@@ -682,22 +689,53 @@ class TaskManager:
                 raised_by_role=user.get("role"),
                 metadata_json=TaskManager._serialize_metadata(metadata),
             )
-            session.add(task)
+            session.add(task_it)
             session.flush()
+            
+            # Also create task for Admin-Operations (backup)
+            task_ops = Task(
+                title=f"[OPS] Password reset • {user.get('username')}",
+                description=reason or "Password reset requested",
+                task_type=TaskType.PASSWORD_RESET.value,
+                status=TaskStatus.PENDING.value,
+                priority="HIGH",
+                target_role="admin-operations",
+                resource_type="User",
+                resource_id=str(user.get("id")),
+                location_id=None,
+                raised_by=user.get("username"),
+                raised_by_role=user.get("role"),
+                metadata_json=TaskManager._serialize_metadata(metadata),
+            )
+            session.add(task_ops)
+            session.flush()
+            
+            # Use the IT task as primary for return
+            task = task_it
+            # Add activity for both tasks
             TaskManager._add_activity(
                 session,
-                task,
+                task_it,
                 user.get("username"),
                 "CREATED",
                 reason or "Password reset requested",
             )
+            TaskManager._add_activity(
+                session,
+                task_ops,
+                user.get("username"),
+                "CREATED",
+                reason or "Password reset requested (copy for ops)",
+            )
+            
+            # Log to audit trail
             SecurityManager.log_audit(
                 session,
                 user.get("username", "unknown"),
                 "TASK_CREATE",
                 resource_type="Task",
-                resource_id=str(task.id),
-                details=f"Password reset requested for {user.get('username')}",
+                resource_id=f"{task_it.id},{task_ops.id}",
+                details=f"Password reset requested for {user.get('username')} - assigned to both Admin-IT and Admin-Operations",
             )
             session.commit()
             return TaskManager.serialize_task(task)

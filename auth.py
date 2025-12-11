@@ -115,7 +115,8 @@ class AuthManager:
             "location_id": user.location_id,
             "location": location_info,
             "must_change_password": user.must_change_password,
-            "last_activity": user.last_activity.isoformat() if user.last_activity else None
+            "last_activity": user.last_activity.isoformat() if user.last_activity else None,
+            "export_ops_access": bool(getattr(user, "export_ops_access", False)),
         }
     
     @staticmethod
@@ -130,6 +131,7 @@ class AuthManager:
         force_password_change: bool = True,
         force_2fa: bool = True,
         password_never_expires: bool = False,
+        export_ops_access: bool = False,
     ) -> Dict:
         """
         Create a new user account.
@@ -165,6 +167,7 @@ class AuthManager:
             force_password_change=force_password_change,
             force_2fa=force_2fa,
             password_never_expires=password_never_expires,
+            export_ops_access=export_ops_access,
             must_change_password=force_password_change,  # Legacy field for compatibility
             password_changed_at=None if force_password_change else datetime.utcnow()
         )

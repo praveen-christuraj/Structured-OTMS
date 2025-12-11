@@ -99,6 +99,14 @@ def _create_user_form():
                 value=True,
                 help="If enabled, user must setup 2FA on first login"
             )
+
+        st.markdown("---")
+        st.markdown("**Access Flags**")
+        export_ops_access = st.checkbox(
+            "📤 Allow Export Operations",
+            value=False,
+            help="Grant access to the Export Operations chapter"
+        )
         
         # Password expiry settings
         is_admin = raw_role in ["admin-it", "admin-operations"]
@@ -140,6 +148,7 @@ def _create_user_form():
                     force_password_change=force_password_change,
                     force_2fa=force_2fa,
                     password_never_expires=password_never_expires,
+                    export_ops_access=export_ops_access,
                 )
 
             Notifications.success_alert(
@@ -286,6 +295,40 @@ def _user_maintenance_section():
             st.error(str(ex))
 
     st.markdown("---")
+
+    # --- 1b) Export Operations access flag ---
+    st.markdown("##### 📤 Export Operations Access")
+    with get_session() as session:
+        u = session.query(User).get(selected_user.id)
+        current_flag = bool(getattr(u, "export_ops_access", False)) if u else False
+    new_flag = st.checkbox(
+        "Allow access",
+        value=current_flag,
+        help="Toggle user access to Export Operations",
+        key=f"export_access_{selected_user.id}"
+    )
+    if st.button("💾", help="Save Export Operations access"):
+        try:
+            with get_session() as session:
+                u = session.query(User).get(selected_user.id)
+                if u:
+                    u.export_ops_access = bool(new_flag)
+                    session.commit()
+            st.success("Access flag updated.")
+            actor = (st.session_state.get("auth_user") or {}).get("username", "system")
+            actor_id = (st.session_state.get("auth_user") or {}).get("id")
+            SecurityManager.log_audit(
+                None,
+                actor,
+                "UPDATE",
+                resource_type="UserAccess",
+                resource_id=str(selected_user.id),
+                details=f"Set Export Operations access = {bool(new_flag)}",
+                user_id=actor_id,
+                location_id=selected_user.location_id,
+            )
+        except Exception as ex:
+            st.error(str(ex))
 
     # --- 2) Password reset ---
     st.markdown("##### 🔐 Reset Password")

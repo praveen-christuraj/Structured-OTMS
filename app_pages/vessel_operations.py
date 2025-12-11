@@ -218,7 +218,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
     can_make_entries = True
     if PermissionManager:
         with get_session() as s:
-            can_make_entries = PermissionManager.can_make_entries(s, user["role"], active_location_id)
+            can_make_entries = PermissionManager.can_make_entries_user(s, user, active_location_id)
 
     # vessels strictly from Asset Management assignment
     with get_session() as s:
@@ -307,7 +307,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                 if op_labels == _DEFAULT_OPS:
                     st.caption("⚙️ Tip: you can add custom operation labels in master (VesselOperation). Using defaults for now.")
 
-                submit = st.form_submit_button("💾", type="primary", help="Save Entry")
+                submit = st.form_submit_button("💾", type="primary", help="Save Entry", disabled=not can_make_entries)
                 if submit:
                     if not e_shuttle.strip():
                         st.error("Shuttle No is required.")
@@ -347,7 +347,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                                 details=f"Add vessel entry: {vessel_dict.get(e_vessel_id, 'Unknown')}",
                                 user_id=user.get("id")
                             )
-                            st.success(f"Saved. ID: {rid}")
+                            st.write(f"Saved. ID: {rid}")
                             _st_safe_rerun()
                         except Exception as ex:
                             st.error(f"Save failed: {ex}")
@@ -430,11 +430,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
             with cols[9]:
                 st.write(_fmt_num(getattr(entry, "closing_water", 0.0), 0))
             with cols[10]:
-                color = "green" if (entry.net_receipt_dispatch or 0) >= 0 else "red"
-                st.markdown(
-                    f"<b><span style='color:{color};'>{_fmt_num(entry.net_receipt_dispatch, 0)}</span></b>",
-                    unsafe_allow_html=True,
-                )
+                st.write(_fmt_num(entry.net_receipt_dispatch, 0))
             with cols[11]:
                 rtxt = entry.remarks or "-"
                 short = rtxt if len(rtxt) <= 40 else (rtxt[:37] + "...")
@@ -443,7 +439,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                     unsafe_allow_html=True,
                 )
             with cols[12]:
-                if st.button("✏️", key=f"vop_edit_{entry.id}", help="Edit entry"):
+                if st.button("✏️", key=f"vop_edit_{entry.id}", help="Edit entry", disabled=not can_make_entries):
                     st.session_state[f"vop_editing_{entry.id}"] = True
                     _st_safe_rerun()
             with cols[13]:
@@ -457,7 +453,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                 if not age_ok:
                     st.button("🗑️", key=f"vop_del_{entry.id}", help="Delete disabled after 24 hours", disabled=True)
                 else:
-                    if st.button("🗑️", key=f"vop_del_{entry.id}", help="Delete entry"):
+                    if st.button("🗑️", key=f"vop_del_{entry.id}", help="Delete entry", disabled=not can_make_entries):
                         st.session_state[f"vop_deleting_{entry.id}"] = True
                         _st_safe_rerun()
 
@@ -504,7 +500,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
 
                     sc, cc = st.columns(2)
                     with sc:
-                        save = st.form_submit_button("💾", type="primary", help="Save")
+                        save = st.form_submit_button("💾", type="primary", help="Save", disabled=not can_make_entries)
                     with cc:
                         cancel = st.form_submit_button("✖️", help="Cancel")
                     if save:
@@ -546,7 +542,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                                             user_id=user.get("id")
                                         )
                                         s.commit()
-                                st.success("Updated.")
+                                st.write("Updated.")
                                 st.session_state.pop(f"vop_editing_{entry.id}", None)
                                 _st_safe_rerun()
                             except Exception as ex:
@@ -560,7 +556,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                 st.warning("Confirm delete?")
                 dc1, dc2 = st.columns(2)
                 with dc1:
-                    if st.button("🗑️", key=f"vop_del_yes_{entry.id}", type="primary", help="Yes, delete"):
+                    if st.button("🗑️", key=f"vop_del_yes_{entry.id}", type="primary", help="Yes, delete", disabled=not can_make_entries):
                         try:
                             with get_session() as s:
                                 row = s.query(VesselOpsEntry).filter(VesselOpsEntry.id == entry.id).one_or_none()
@@ -632,7 +628,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
                                                 user_id=user.get("id")
                                             )
                                             s.commit()
-                            st.success("Entry moved to Deleted Records")
+                            st.write("Entry moved to Deleted Records")
                             st.session_state.pop(f"vop_deleting_{entry.id}", None)
                             _st_safe_rerun()
                         except Exception as ex:
@@ -730,7 +726,7 @@ def render_vessel_operations_page(active_location_id: Optional[int], user: Dict)
             """
             import streamlit.components.v1 as components
             components.html(html, height=0)
-            st.success("PDF opened in a new tab.")
+            st.write("PDF opened in a new tab.")
             try:
                 SecurityManager.log_audit(
                     None,

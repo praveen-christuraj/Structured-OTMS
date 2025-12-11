@@ -94,15 +94,15 @@ class DeletionApprovalManager:
         resource_id: Any
     ) -> Optional[Dict[str, Any]]:
         """
-        Check if there's an approved remote deletion request for this resource
+        Check if there's an approved (or completed) remote deletion request for this resource
         
         Returns:
-            Task dict if approved, None otherwise
+            Task dict if approved/completed, None otherwise
         """
         return TaskManager.get_task_for_resource(
             resource_type=resource_type,
             resource_id=str(resource_id),
-            statuses=[TaskStatus.APPROVED.value]
+            statuses=[TaskStatus.APPROVED.value, TaskStatus.COMPLETED.value]
         )
     
     @staticmethod
@@ -134,9 +134,24 @@ class DeletionApprovalManager:
         """
         Create a remote deletion approval request task
         
+        The task will be visible to ALL supervisors assigned to this location.
+        ANY ONE supervisor can approve the deletion request.
+        
         Returns:
             Created or existing task dict
         """
+        # Get count of supervisors at this location for notification
+        supervisor_count = 0
+        if location_id:
+            supervisors = DeletionApprovalManager.get_location_supervisors(location_id)
+            supervisor_count = len(supervisors)
+        
+        # Add supervisor count to metadata for reference
+        if metadata is None:
+            metadata = {}
+        metadata["supervisor_count"] = supervisor_count
+        metadata["notification_sent"] = True
+        
         return TaskManager.create_delete_request(
             resource_type=resource_type,
             resource_id=resource_id,
@@ -323,12 +338,13 @@ def render_deletion_ui(
         
         # If remote approval exists, allow deletion
         if remote_approval:
-            approved_by = remote_approval.get("approved_by", "Supervisor")
-            approved_at = remote_approval.get("approved_at")
+            status = remote_approval.get("status")
+            actor_name = remote_approval.get("approved_by") or remote_approval.get("resolved_by") or "Supervisor"
+            actor_time = remote_approval.get("approved_at") or remote_approval.get("resolved_at")
             
             st.success(
-                f"✅ Remote approval granted by **{approved_by}** "
-                f"on {approved_at.strftime('%Y-%m-%d %H:%M') if approved_at else 'N/A'}"
+                f"✅ Remote approval {('granted' if status == TaskStatus.APPROVED.value else 'confirmed')} by **{actor_name}** "
+                f"on {actor_time.strftime('%Y-%m-%d %H:%M') if actor_time else 'N/A'}"
             )
             st.warning(f"⚠️ Delete **{resource_label}**?")
             
@@ -340,7 +356,7 @@ def render_deletion_ui(
                         resource_type=resource_type,
                         resource_id=resource_id,
                         resource_label=resource_label,
-                        approver_name=f"{approved_by} (remote)",
+                        approver_name=f"{actor_name} (remote)",
                         approval_method="remote",
                         delete_func=delete_func,
                         user=user,
@@ -359,7 +375,7 @@ def render_deletion_ui(
                     st.info("Deletion cancelled")
                     return False
             
-            return False
+            return None
         
         # Show pending status if exists
         if pending_approval:

@@ -849,6 +849,9 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
 
     # Prefill for edit
     voy: Optional[YadeVoyage] = None
+    edit_locked = False
+    edit_lock_message = ""
+    
     if edit_id:
         try:
             with get_session() as s:
@@ -857,17 +860,33 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
                     .filter(YadeVoyage.id == edit_id, YadeVoyage.location_id == location_id)
                     .one_or_none()
                 )
+                
+                # Check if edit is locked (older than 24 hours)
+                if voy and voy.created_at:
+                    time_since_creation = datetime.utcnow() - voy.created_at
+                    if time_since_creation.total_seconds() > (24 * 3600):  # 24 hours
+                        edit_locked = True
+                        hours_old = int(time_since_creation.total_seconds() / 3600)
+                        edit_lock_message = (
+                            f"⚠️ **Edit Locked**: This record was created {hours_old} hours ago. "
+                            f"Records can only be edited within 24 hours of creation."
+                        )
         except Exception as ex:
             _audit_error(f"Load voyage {edit_id} failed: {ex}", user, location_id)
             voy = None
 
     st.subheader("🆕 YADE Voyage Entry")
     reset_token = st.session_state.get("yade_form_reset_token", 0)
+    
     if voy:
         st.info(
             f"Editing voyage **#{voy.id}** — {voy.yade_name or 'N/A'} | "
             f"{voy.voyage_no or 'No'} on {voy.date or 'N/A'}"
         )
+    
+    # Show edit lock warning if applicable
+    if edit_locked:
+        st.error(edit_lock_message)
 
     # Live Operation selector (outside to update headings immediately)
     c_op, _ = st.columns([1, 1])
@@ -952,7 +971,25 @@ def _render_yade_form(location_id: int, loc_label: str, user: Dict[str, Any] | N
     )
 
     st.markdown("---")
-    save_all = st.button("💾", type="primary", help="Save")
+    
+    # Permissions: Lagos rules → gate save for read-only roles
+    can_submit = True
+    if PermissionManager and user:
+        try:
+            with get_session() as _perm_s:
+                can_submit = PermissionManager.can_make_entries_user(_perm_s, user, location_id)
+        except Exception:
+            can_submit = True
+
+    # Check if edit is locked before showing save button
+    save_disabled = edit_locked or (not can_submit)
+    save_help = "Save YADE Voyage"
+    if edit_locked:
+        save_help = "⚠️ Edit Locked: Record is older than 24 hours"
+    if not can_submit:
+        st.info("Your role is read-only here. Form controls are disabled.")
+    
+    save_all = st.button("💾", type="primary", help=save_help, disabled=save_disabled)
     
     # Placeholder for success message (will appear below button after save)
     success_placeholder = st.empty()
@@ -1198,6 +1235,15 @@ def _render_yade_list(location_id: int, user: Dict[str, Any] | None):
     else:
         st.caption(f"Total voyages: **{len(rows)}**")
 
+    # Permissions: gate edit/delete per Lagos rules
+    can_submit = True
+    if PermissionManager and user:
+        try:
+            with get_session() as _perm_s:
+                can_submit = PermissionManager.can_make_entries_user(_perm_s, user, location_id)
+        except Exception:
+            can_submit = True
+
     for v in rows:
         c1, c2, c3, c4, c5 = st.columns([0.6, 1.4, 1.0, 1.0, 0.8])
         with c1:
@@ -1215,18 +1261,18 @@ def _render_yade_list(location_id: int, user: Dict[str, Any] | None):
         with c5:
             ac1, ac2 = st.columns([1, 1])
             with ac1:
-                if st.button("✏️", key=f"yade_edit_{v.id}", use_container_width=True, help="Edit"):
+                if st.button("✏️", key=f"yade_edit_{v.id}", use_container_width=True, help="Edit", disabled=not can_submit):
                     st.session_state["yade_edit_id"] = v.id
                     _st_safe_rerun()
             with ac2:
-                if st.button("🗑️", key=f"yade_del_{v.id}", use_container_width=True, help="Delete"):
+                if st.button("🗑️", key=f"yade_del_{v.id}", use_container_width=True, help="Delete", disabled=not can_submit):
                     st.session_state[f"confirm_del_yade_{v.id}"] = True
 
         if st.session_state.get(f"confirm_del_yade_{v.id}"):
             st.error("Are you sure you want to delete this YADE voyage? This cannot be undone.")
             dc1, dc2 = st.columns([1, 1])
             with dc1:
-                if st.button("✅", key=f"y_del_yade_{v.id}", use_container_width=True, help="Yes, delete"):
+                if st.button("✅", key=f"y_del_yade_{v.id}", use_container_width=True, help="Yes, delete", disabled=not can_submit):
                     try:
                         with get_session() as s:
                             obj = s.query(YadeVoyage).filter(YadeVoyage.id == v.id).one_or_none()

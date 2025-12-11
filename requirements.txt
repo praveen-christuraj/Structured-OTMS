@@ -9,7 +9,7 @@ requests==2.32.3
 python-dotenv==1.0.1
 plotly==5.24.1
 protobuf==4.25.3
-googleapis-common-protos<2
+googleapis-common-protos==1.72.0
 bcrypt==4.1.2
 passlib[bcrypt]==1.7.4
 cffi==1.17.1
@@ -25,3 +25,4 @@ croniter==6.0.0
 paramiko==4.0.0
 boto3==1.41.5
 azure-storage-blob==12.22.0
+pyngrok==7.5.0
