@@ -163,6 +163,7 @@ class Location(Base):
     code = Column(String(20), unique=True, nullable=False)
     address = Column(Text)
     is_active = Column(Boolean, default=True)
+    is_head_office = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.utcnow)
     
@@ -1660,13 +1661,9 @@ Index('idx_export_process_terminal', ExportProcess.terminal_label, ExportProcess
 Index('idx_export_stage_export', ExportStageProgress.export_id, ExportStageProgress.stage_code)
 Index('idx_export_attachment_stage', ExportAttachment.stage_id, ExportAttachment.uploaded_at)
 # ============================================================================
-# CREATE TABLES
+# NOTE
 # ============================================================================
-
-if engine is not None:
-    Base.metadata.create_all(bind=engine)
-    # Avoid non-ASCII to prevent Windows console encoding issues
-    print("All database tables created successfully!")
+# Avoid side effects at import time: table creation is handled by `db.init_db()`.
 class ReportDefinition(Base):
     __tablename__ = "report_definitions"
     id = Column(Integer, primary_key=True, autoincrement=True)

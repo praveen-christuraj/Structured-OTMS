@@ -1445,6 +1445,16 @@ def render_tank_transactions_page(active_location_id, user):
 
     st.caption(f"Active Location: **{loc_label}**")
 
+    if bool(getattr(loc, "is_head_office", False)):
+        st.info(
+            "This is a **Head Office** location and does not have physical tanks/assets. "
+            "Select an operating location on **Home** to view/enter Tank Transactions."
+        )
+        if st.button("Go to Home", key="tank_tx_go_home"):
+            st.session_state["current_page"] = "Home"
+            st.rerun()
+        return
+
     tab_cfg = {
         "Tank Entry": True,
         "Meter Records": True,

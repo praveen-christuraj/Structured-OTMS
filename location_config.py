@@ -31,6 +31,7 @@ DEFAULT_CONFIG = {
         "show_convoy_status": True,
         "show_toa_yade": True,
         "show_sharing": True,
+        "show_stock_analysis": True,
     },
 
     "page_access": {
@@ -46,6 +47,7 @@ DEFAULT_CONFIG = {
         "TOA-Yade": True,
         "OTR": True,
         "BCCR": True,
+        "Stock Analysis": True,
         "Material Balance": True,
         "Reporting": True,
     },

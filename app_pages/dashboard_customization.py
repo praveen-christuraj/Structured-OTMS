@@ -810,7 +810,9 @@ def render_tank_visuals_tab(config: dict):
     location_id = st.session_state.get("active_location_id")
     if location_id:
         with get_session() as s:
-            from models import Tank
+            from models import Tank, Location
+            loc_obj = s.query(Location).get(int(location_id))
+            is_ho_location = bool(getattr(loc_obj, "is_head_office", False)) if loc_obj else False
             all_tanks = s.query(Tank).filter(
                 Tank.location_id == location_id
             ).order_by(Tank.name).all()
@@ -911,7 +913,10 @@ def render_tank_visuals_tab(config: dict):
                     })
                     st.rerun()
             else:
-                st.info("ℹ️ No tanks found for this location. Add tanks in Asset Management.")
+                if is_ho_location:
+                    st.info("ℹ️ Head Office has no tanks. Switch to an operating location to configure tank visuals.")
+                else:
+                    st.info("ℹ️ No tanks found for this location. Add tanks in Asset Management.")
     else:
         st.warning("⚠️ Please select a location first")
 

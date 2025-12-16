@@ -19,6 +19,7 @@ from app_pages.tanker_transactions import render_tanker_transactions_page
 from app_pages.vessel_operations import render_vessel_operations_page
 from app_pages.yade_vessel_mapping import render_yade_vessel_mapping_page
 from location_config import get_page_section_config  # (kept in case other pages use it)
+import os, hmac, hashlib, base64, json
 
 # Session timeout (minutes)
 SecurityManager.SESSION_TIMEOUT_MINUTES = 30
@@ -59,6 +60,8 @@ ICONS = {
     "Reporting": "📊",
     "Report Customization": "🛠️",
     "MB Customization": "🛠️",
+    "Stock Analysis": "📈",
+    "Stock Analysis Customization": "📈⚙️",
     "Settings": "⚙️",
     "View Transactions": "🗂️",
     "OTR": "📊",
@@ -167,8 +170,14 @@ def _inject_sidebar_css():
             padding-bottom: 0.4rem !important;
         }
         /* Sidebar nav buttons (minimal glass effect) */
+        /* Ensure container doesn't center buttons */
+        section[data-testid="stSidebar"] div[data-testid="stButton"] {
+            text-align: left !important;
+        }
+
         section[data-testid="stSidebar"] .stButton > button {
-            width: 100%; text-align: left; border-radius: 10px; 
+            width: 100%;
+            border-radius: 10px; 
             padding: 0.45rem 0.8rem; margin-bottom: 0.25rem;
             background: transparent !important;
             backdrop-filter: blur(10px) !important;
@@ -178,6 +187,11 @@ def _inject_sidebar_css():
             font-size: 0.90rem !important;
             transition: all 0.2s ease !important;
             box-shadow: none !important;
+            /* Force left alignment for content */
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            text-align: left !important;
         }
         section[data-testid="stSidebar"] .stButton > button:hover {
             background: rgba(255, 255, 255, 0.5) !important;
@@ -193,6 +207,11 @@ def _inject_sidebar_css():
             color: #2563eb !important;
             font-weight: 600 !important;
             box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15) !important;
+            /* Keep disabled (active) state left-aligned */
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            text-align: left !important;
         }
         /* Compact markdown spacing in sidebar */
         section[data-testid="stSidebar"] div[data-testid="stMarkdown"] { margin: 0.2rem 0 !important; }
@@ -236,6 +255,7 @@ def get_pages(user, active_location_id):
             "Page Customization",
             "Dashboard Customization",
             "MB Customization",
+            "Stock Analysis Customization",
             "Report Customization",
             "Deleted Records",
             "Backup & Recovery",
@@ -272,6 +292,7 @@ def get_pages(user, active_location_id):
         ("show_bccr",                ("BCCR",                "app_pages.bccr")),
         ("show_convoy_status",       ("Convoy Status",       "app_pages.convoy_status")),
         ("show_sharing",             ("Sharing",             "app_pages.sharing")),
+        ("show_stock_analysis",      ("Stock Analysis",      "app_pages.stock_analysis")),
     ]
 
     if role_ok:
@@ -350,6 +371,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         if not st.session_state["logout_confirm"]:
             if st.sidebar.button("🚪 Logout", key="btn_logout"):
                 st.session_state["logout_confirm"] = True
+                st.rerun()
         else:
             st.sidebar.warning("Are you sure you want to logout?")
             c1, c2 = st.sidebar.columns(2)
@@ -372,6 +394,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
 
             if c2.button("❌ No", key="btn_logout_no"):
                 st.session_state["logout_confirm"] = False
+                st.rerun()
     else:
         st.sidebar.caption("Not logged in")
 
@@ -386,6 +409,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         "Manage Locations",
         "Manage Users",
         "MB Customization",
+        "Stock Analysis Customization",
         "Page Customization",
         "Export Customization",
         "Deleted Records",
@@ -404,6 +428,7 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
         "FSO-Operations",
         "OTR",
         "Material Balance",
+        "Stock Analysis",
         "Yade Tracking",
         "Yade-Vessel Mapping",
         "Convoy Status",
@@ -434,32 +459,40 @@ def _render_sidebar_nav(pages, current_page, user, active_location_id):
             st.session_state["current_page"] = "Home"
             st.rerun()
 
-    with st.sidebar.expander("OPERATIONS", expanded=(current_page in ops_list)):
+    # OPERATIONS category
+    if ops_list:
+        st.sidebar.markdown("#### OPERATIONS")
         for p in ops_list:
             label = f"{ICONS.get(p, '📄')}  {p}"
             is_active = (p == current_page)
             btn_label = f"{'• ' if is_active else ''}{label}"
-            if st.button(btn_label, key=f"nav_{p}"):
+            if st.sidebar.button(btn_label, key=f"nav_{p}"):
                 st.session_state["current_page"] = p
                 st.rerun()
+        st.sidebar.markdown("")  # spacing
 
-    with st.sidebar.expander("GENERAL", expanded=(current_page in gen_list)):
+    # GENERAL category
+    if gen_list:
+        st.sidebar.markdown("#### GENERAL")
         for p in gen_list:
             if p == "Home":
                 continue
             label = f"{ICONS.get(p, '📄')}  {p}"
             is_active = (p == current_page)
             btn_label = f"{'• ' if is_active else ''}{label}"
-            if st.button(btn_label, key=f"nav_{p}"):
+            if st.sidebar.button(btn_label, key=f"nav_{p}"):
                 st.session_state["current_page"] = p
                 st.rerun()
+        st.sidebar.markdown("")  # spacing
 
-    with st.sidebar.expander("ADMIN", expanded=(current_page in admin_list)):
+    # ADMIN category
+    if admin_list:
+        st.sidebar.markdown("#### ADMIN")
         for p in admin_list:
             label = f"{ICONS.get(p, '📄')}  {p}"
             is_active = (p == current_page)
             btn_label = f"{'• ' if is_active else ''}{label}"
-            if st.button(btn_label, key=f"nav_{p}"):
+            if st.sidebar.button(btn_label, key=f"nav_{p}"):
                 st.session_state["current_page"] = p
                 st.rerun()
 
@@ -480,6 +513,44 @@ def main():
             chapter = chapter[0] if chapter else None
         if chapter and str(chapter).lower() in ("export", "export_ops", "export-operations"):
             st.session_state["current_page"] = "Export Operations"
+    except Exception:
+        pass
+    try:
+        params = getattr(st, "query_params", {})
+        token = params.get("auth_token") if isinstance(params, dict) else None
+        if isinstance(token, (list, tuple)):
+            token = token[0] if token else None
+        if token:
+            try:
+                p, sgn = token.split(".")
+                data = base64.urlsafe_b64decode(p + "==")
+                sig = base64.urlsafe_b64decode(sgn + "==")
+                secret = os.getenv("AUTH_TOKEN_SECRET", "otms-dev-secret").encode("utf-8")
+                exp_sig = hmac.new(secret, data, hashlib.sha256).digest()
+                ok = hmac.compare_digest(sig, exp_sig)
+                if ok:
+                    payload = json.loads(data.decode("utf-8"))
+                    from db import get_session
+                    with get_session() as s:
+                        u = s.query(User).filter(User.id == int(payload.get("uid") or 0)).one_or_none()
+                        if u:
+                            loc_info = None
+                            if u.location_id:
+                                loc = s.query(Location).filter(Location.id == u.location_id).one_or_none()
+                                if loc:
+                                    loc_info = {"id": loc.id, "name": loc.name, "code": loc.code}
+                            st.session_state["auth_user"] = {
+                                "id": u.id,
+                                "username": u.username,
+                                "full_name": u.full_name,
+                                "role": u.role,
+                                "location_id": u.location_id,
+                                "location": loc_info,
+                                "export_ops_access": bool(getattr(u, "export_ops_access", False)),
+                                "last_activity": datetime.utcnow().isoformat(),
+                            }
+            except Exception:
+                pass
     except Exception:
         pass
 
@@ -698,9 +769,16 @@ def main():
         from app_pages.reporting import render_reporting_page
         render_reporting_page(active_location_id, user)
 
+    elif current_page == "Stock Analysis":
+        from app_pages.stock_analysis import render_stock_analysis_page
+        render_stock_analysis_page(active_location_id, user)
+
     elif current_page == "Report Customization":
         from app_pages.report_customization import render_report_customization_page
         render_report_customization_page(user, active_location_id)
+    elif current_page == "Stock Analysis Customization":
+        from app_pages.stock_analysis_customization import render_stock_analysis_customization_page
+        render_stock_analysis_customization_page(user, active_location_id)
     elif current_page == "BCCR":
         from app_pages.bccr import render_bccr_page
         render_bccr_page(active_location_id, user)

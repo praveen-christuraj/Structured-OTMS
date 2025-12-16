@@ -58,7 +58,7 @@ class SecurityManager:
                 location_id: int = None, ip_address: str = None, 
                 success: bool = True):
         """
-        Log audit trail entry with LOCAL TIME
+        Log audit trail entry (stored as UTC, displayed as local in UI)
         
         Args:
             session: Database session
@@ -72,21 +72,10 @@ class SecurityManager:
             ip_address: IP address of the user
             success: Whether the action was successful (default: True)
         """
-        
-        try:
-            from timezone_utils import get_local_time
-            TIMEZONE_AVAILABLE = True
-        except ImportError:
-            TIMEZONE_AVAILABLE = False
-        
-        # Get current time in local timezone (not UTC)
-        if TIMEZONE_AVAILABLE:
-            local_time = get_local_time()
-            timestamp = local_time.replace(tzinfo=None)  # Store as naive datetime in local time
-        else:
-            # Fallback to UTC if timezone utils not available
-            from datetime import datetime
-            timestamp = datetime.utcnow()
+
+        # Store all audit timestamps as naive UTC for consistency across pages,
+        # then convert to local time only when displaying.
+        timestamp = datetime.utcnow()
         
         owns_session = False
         if session is None:

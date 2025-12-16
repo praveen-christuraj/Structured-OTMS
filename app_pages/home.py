@@ -10,6 +10,7 @@ from models import Location
 from dashboard_utils import DashboardMetrics
 from location_manager import LocationManager
 from ui_components import DashboardCard, Notifications
+from security import SecurityManager
 # Dashboard imports
 try:
     from dashboard_config import DashboardConfigManager
@@ -121,6 +122,14 @@ def render_location_dashboard(selected_location_id: int, user: dict):
     
     # Replace {location_name} placeholder
     page_title = header_cfg.get("title", "{location_name} Dashboard").replace("{location_name}", loc_name)
+    # Emphasize location name with a lighter font color suitable for the tile
+    try:
+        highlighted_title = page_title.replace(
+            loc_name,
+            f"<span style='color: rgba(255,255,255,0.98);'>{loc_name}</span>"
+        )
+    except Exception:
+        highlighted_title = page_title
     page_subtitle = header_cfg.get("subtitle", "Management Information System")
     
     # Build welcome and datetime sections
@@ -128,7 +137,12 @@ def render_location_dashboard(selected_location_id: int, user: dict):
     if header_cfg.get("show_welcome", True):
         additional_info.append(f"Welcome back, <strong>{user['username']}</strong>")
     if header_cfg.get("show_datetime", True):
-        additional_info.append(datetime.now().strftime('%A, %B %d, %Y - %I:%M %p'))
+        try:
+            from timezone_utils import get_local_time
+
+            additional_info.append(get_local_time().strftime('%A, %B %d, %Y - %I:%M %p'))
+        except Exception:
+            additional_info.append(datetime.now().strftime('%A, %B %d, %Y - %I:%M %p'))
     
     info_text = " | ".join(additional_info) if additional_info else ""
     
@@ -140,9 +154,9 @@ def render_location_dashboard(selected_location_id: int, user: dict):
         f"""
         <div style='background: linear-gradient(135deg, {gradient_start} 0%, {gradient_end} 100%); 
                     padding: 2.5rem; border-radius: 10px; margin-bottom: 1rem; color: white;'>
-            <h1 style='margin: 0; font-size: 2.5rem;'>{page_title}</h1>
-            <p style='margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1.1rem;'>{page_subtitle}</p>
-            {f"<p style='margin: 0.5rem 0 0 0; font-size: 0.95rem;'>{info_text}</p>" if info_text else ""}
+            <h1 style='margin: 0; font-size: 2.5rem; color: rgba(255,255,255,0.98);'>{highlighted_title}</h1>
+            <p style='margin: 0.5rem 0 0 0; font-size: 1.1rem; color: rgba(255,255,255,0.85);'>{page_subtitle}</p>
+            {f"<p style='margin: 0.5rem 0 0 0; font-size: 0.95rem; color: rgba(255,255,255,0.9);'>{info_text}</p>" if info_text else ""}
         </div>
         """,
         unsafe_allow_html=True
@@ -386,6 +400,21 @@ def render_home_page(active_location_id, user):
     role_lc = (role or "").lower()
     user_loc_id = (user or {}).get("location_id")
     is_admin = role_lc in ("admin-operations", "admin-it", "admin", "super-admin")
+    is_manager = role_lc == "manager"
+
+    is_ho_user = False
+    if user_loc_id:
+        try:
+            assigned_loc = next((l for l in locations if l.id == int(user_loc_id)), None)
+            if assigned_loc and bool(getattr(assigned_loc, "is_head_office", False)):
+                is_ho_user = True
+            else:
+                with get_session() as _s:
+                    assigned_loc_db = _s.query(Location).get(int(user_loc_id))
+                if assigned_loc_db and bool(getattr(assigned_loc_db, "is_head_office", False)):
+                    is_ho_user = True
+        except Exception:
+            is_ho_user = False
     
     # 2) Build label -> id mapping for the dropdown
     labels = [f"{loc.name} ({loc.code})" for loc in locations]
@@ -418,7 +447,9 @@ def render_home_page(active_location_id, user):
     # 3) Render location selector (locked for non-admins with assignment)
     st.markdown("#### Select Active Location")
     
-    if not is_admin and user_loc_id:
+    can_switch_location = bool(is_admin or is_manager or is_ho_user or not user_loc_id)
+
+    if user_loc_id and not can_switch_location:
         # Non-admin tied to a location: lock the selector to their assigned location
         if user_loc_id in id_set:
             locked_label = _label_for_location_id(user_loc_id)
@@ -442,10 +473,27 @@ def render_home_page(active_location_id, user):
             prev_id = st.session_state.get("__prev_active_location_id")
             st.session_state["active_location_id"] = selected_location_id
             if prev_id != selected_location_id:
+                try:
+                    prev_label = _label_for_location_id(prev_id) if prev_id else "None"
+                    new_label = _label_for_location_id(selected_location_id)
+                    SecurityManager.log_audit(
+                        None,
+                        (user or {}).get("username", "unknown"),
+                        "SWITCH_LOCATION",
+                        resource_type="Location",
+                        resource_id=str(selected_location_id),
+                        details=f"Switched active location from {prev_label} to {new_label}",
+                        user_id=(user or {}).get("id"),
+                        location_id=int(selected_location_id),
+                        ip_address=str(st.session_state.get("client_ip") or "N/A"),
+                        success=True,
+                    )
+                except Exception:
+                    pass
                 st.session_state["__prev_active_location_id"] = selected_location_id
                 st.rerun()
     else:
-        # Admins (or users without an assigned location): free selection
+        # Admins/managers/head office users (or users without assignment): free selection
         selected_label = st.selectbox(
             "Location",
             labels,
@@ -456,6 +504,23 @@ def render_home_page(active_location_id, user):
         prev_id = st.session_state.get("__prev_active_location_id")
         st.session_state["active_location_id"] = selected_location_id
         if prev_id != selected_location_id:
+            try:
+                prev_label = _label_for_location_id(prev_id) if prev_id else "None"
+                new_label = _label_for_location_id(selected_location_id)
+                SecurityManager.log_audit(
+                    None,
+                    (user or {}).get("username", "unknown"),
+                    "SWITCH_LOCATION",
+                    resource_type="Location",
+                    resource_id=str(selected_location_id),
+                    details=f"Switched active location from {prev_label} to {new_label}",
+                    user_id=(user or {}).get("id"),
+                    location_id=int(selected_location_id),
+                    ip_address=str(st.session_state.get("client_ip") or "N/A"),
+                    success=True,
+                )
+            except Exception:
+                pass
             st.session_state["__prev_active_location_id"] = selected_location_id
             st.rerun()
     

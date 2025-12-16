@@ -1,11 +1,26 @@
 # backup_scheduler.py
 """
-Automated backup scheduler - runs daily backups.
-Run this as a separate process or scheduled task.
+Automated backup scheduler.
+
+Runs backups based on a simple JSON config written by the app:
+    backups/auto_backup_config.json
+
+Config schema (all keys optional; sensible defaults apply):
+{
+    "enabled": true,                   # enable/disable scheduler
+    "mode": "daily",                  # "minutes" | "hours" | "daily"
+    "interval": 6,                    # used for minutes/hours modes
+    "time": "02:00"                   # HH:MM, used for daily mode
+}
+
+Run this as a separate process or Windows Task Scheduler job.
+The process watches the config file and applies changes at runtime.
 """
 
 import schedule
 import time
+import json
+from pathlib import Path
 from datetime import datetime
 from backup_manager import BackupManager
 
@@ -64,27 +79,79 @@ def run_daily_backup():
         print(f"❌ Backup failed: {e}")
 
 def main():
-    """Main scheduler loop"""
+    """Main scheduler loop with dynamic config reload"""
+    CONFIG_PATH = Path("backups") / "auto_backup_config.json"
+
+    def load_config() -> dict:
+        try:
+            if CONFIG_PATH.exists():
+                with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    return {
+                        "enabled": bool(data.get("enabled", True)),
+                        "mode": str(data.get("mode", "daily")),
+                        "interval": int(data.get("interval", 24)),
+                        "time": str(data.get("time", "02:00"))[:5],
+                    }
+        except Exception as ex:
+            print(f"⚠️  Failed to read config: {ex}")
+        return {"enabled": True, "mode": "daily", "interval": 24, "time": "02:00"}
+
+    def apply_schedule(conf: dict):
+        schedule.clear()
+        if not conf.get("enabled", True):
+            print("⏸️  Scheduler disabled by config.")
+            return
+        mode = conf.get("mode", "daily").lower()
+        interval = max(1, int(conf.get("interval", 24) or 1))
+        if mode == "minutes":
+            schedule.every(interval).minutes.do(run_daily_backup)
+            print(f"🗓️  Schedule: Every {interval} minute(s)")
+        elif mode == "hours":
+            schedule.every(interval).hours.do(run_daily_backup)
+            print(f"🗓️  Schedule: Every {interval} hour(s)")
+        else:
+            at_time = str(conf.get("time", "02:00"))[:5]
+            try:
+                # Basic HH:MM validation
+                _ = datetime.strptime(at_time, "%H:%M")
+            except ValueError:
+                at_time = "02:00"
+            schedule.every().day.at(at_time).do(run_daily_backup)
+            print(f"🗓️  Schedule: Daily at {at_time}")
+
     print("=" * 60)
     print("📅 OTMS Backup Scheduler Started")
     print("=" * 60)
-    print(f"Schedule: Daily at 02:00 AM")
     print(f"Retention: 30 days (minimum 5 backups)")
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
-    
-    # Schedule daily backup at 2 AM
-    schedule.every().day.at("02:00").do(run_daily_backup)
-    
-    # For testing: uncomment to run every 5 minutes
-    # schedule.every(5).minutes.do(run_daily_backup)
-    
+
+    # Ensure config directory exists
+    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    # Initial schedule
+    conf = load_config()
+    apply_schedule(conf)
+    last_mtime = CONFIG_PATH.stat().st_mtime if CONFIG_PATH.exists() else 0
+
     print("\n⏳ Waiting for scheduled time...")
     print("   (Press Ctrl+C to stop)\n")
-    
+
     while True:
+        # Hot-reload config if changed
+        try:
+            if CONFIG_PATH.exists():
+                mtime = CONFIG_PATH.stat().st_mtime
+                if mtime != last_mtime:
+                    print("🔁 Detected config change. Reloading schedule...")
+                    conf = load_config()
+                    apply_schedule(conf)
+                    last_mtime = mtime
+        except Exception as ex:
+            print(f"⚠️  Config watch error: {ex}")
         schedule.run_pending()
-        time.sleep(60)  # Check every minute
+        time.sleep(30)  # Check twice a minute
 
 if __name__ == "__main__":
     try:

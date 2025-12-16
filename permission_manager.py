@@ -152,15 +152,28 @@ class PermissionManager:
     @staticmethod
     def is_head_office(session: Session, location_id: int) -> bool:
         """Check if location is Head Office"""
+        try:
+            location = session.query(Location).filter(Location.id == location_id).first()
+            if location and bool(getattr(location, "is_head_office", False)):
+                return True
+        except Exception:
+            pass
+
         permissions = PermissionManager.get_location_permissions(session, location_id)
         return permissions.get("is_head_office", False)
     
     @staticmethod
     def is_lagos_ho_location(session: Session, location_id: int) -> bool:
-        """Check if a location is Lagos (HO)"""
+        """Check if a location is Head Office (legacy name kept for compatibility)."""
         location = session.query(Location).filter(Location.id == location_id).first()
         if not location:
             return False
+
+        try:
+            if bool(getattr(location, "is_head_office", False)):
+                return True
+        except Exception:
+            pass
         
         # Check if location code is LAGOS or HO or name contains "Head Office"
         code = location.code.upper()

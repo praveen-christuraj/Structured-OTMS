@@ -7,6 +7,12 @@ from security import SecurityManager
 from models import Location, AuditLog
 from ui_components import FormBuilder, TableDisplay, DashboardCard, apply_custom_css
 
+try:
+    from timezone_utils import format_local_datetime
+    _TZ_AVAILABLE = True
+except Exception:
+    _TZ_AVAILABLE = False
+
 
 def render_audit_log_page(active_location_id, user):
     """Audit trail viewer."""
@@ -31,6 +37,10 @@ def render_audit_log_page(active_location_id, user):
             st.rerun()
 
     FormBuilder.section_header("Filter Options", "Customize your audit log view")
+    if _TZ_AVAILABLE:
+        st.caption("Showing times in **Nigeria Time (WAT - UTC+1)**")
+    else:
+        st.caption("Showing times in **UTC** (install `pytz` for local time).")
     
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -89,9 +99,16 @@ def render_audit_log_page(active_location_id, user):
             loc_label = (
                 f"{loc.name} ({loc.code})" if loc else ""
             )
+            ts = log.timestamp
+            if ts and _TZ_AVAILABLE:
+                ts_display = format_local_datetime(ts, "%Y-%m-%d %H:%M:%S")
+            elif ts:
+                ts_display = ts.strftime("%Y-%m-%d %H:%M:%S UTC")
+            else:
+                ts_display = ""
             rows.append(
                 {
-                    "Time": log.timestamp,
+                    "Time": ts_display,
                     "User": log.username,
                     "Action": log.action,
                     "Resource": log.resource_type or "",

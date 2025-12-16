@@ -12,6 +12,7 @@ def _create_location_form(user):
         name = st.text_input("Location Name *", placeholder="e.g. Asemoku Jetty")
         code = st.text_input("Short Code *", placeholder="e.g. ASJ")
         address = st.text_area("Address (optional)")
+        is_head_office = st.checkbox("Head Office (no assets)", value=False)
 
         submitted = st.form_submit_button("➕", help="Create Location")
 
@@ -29,6 +30,7 @@ def _create_location_form(user):
                     name=name.strip(),
                     code=code.strip(),
                     address=address.strip() or None,
+                    is_head_office=bool(is_head_office),
                 )
 
             st.success(
@@ -45,7 +47,10 @@ def _create_location_form(user):
                 "CREATE",
                 resource_type="Location",
                 resource_id=str(loc_dict["id"]),
-                details=f"Created location {loc_dict['name']} ({loc_dict['code']}) via UI",
+                details=(
+                    f"Created location {loc_dict['name']} ({loc_dict['code']}) via UI "
+                    f"(head_office={bool(loc_dict.get('is_head_office', False))})"
+                ),
                 user_id=user_id,
                 location_id=loc_dict["id"],
             )
@@ -65,27 +70,31 @@ def _locations_table():
         return
 
     # Single structured table with action buttons
-    hdr = st.columns([0.08, 0.30, 0.12, 0.38, 0.12])
+    hdr = st.columns([0.08, 0.28, 0.14, 0.10, 0.28, 0.12])
     hdr[0].markdown("**ID**")
     hdr[1].markdown("**Name (Code)**")
-    hdr[2].markdown("**Status**")
-    hdr[3].markdown("**Address**")
-    hdr[4].markdown("**Actions**")
+    hdr[2].markdown("**Type**")
+    hdr[3].markdown("**Status**")
+    hdr[4].markdown("**Address**")
+    hdr[5].markdown("**Actions**")
 
     for loc in locations:
         row_id = f"ml_loc_{loc.id}"
-        cols = st.columns([0.08, 0.30, 0.12, 0.38, 0.12])
+        cols = st.columns([0.08, 0.28, 0.14, 0.10, 0.28, 0.12])
         with cols[0]:
             st.markdown(f"<div style='padding-top:8px;'>{loc.id}</div>", unsafe_allow_html=True)
         with cols[1]:
             st.markdown(f"<div style='padding-top:8px;'>{loc.name} ({loc.code})</div>", unsafe_allow_html=True)
         with cols[2]:
-            st.markdown(f"<div style='padding-top:8px;'>{'Active' if loc.is_active else 'Inactive'}</div>", unsafe_allow_html=True)
+            loc_type = "Head Office" if bool(getattr(loc, "is_head_office", False)) else "Operating"
+            st.markdown(f"<div style='padding-top:8px;'>{loc_type}</div>", unsafe_allow_html=True)
         with cols[3]:
+            st.markdown(f"<div style='padding-top:8px;'>{'Active' if loc.is_active else 'Inactive'}</div>", unsafe_allow_html=True)
+        with cols[4]:
             st.markdown(f"<div style='padding-top:8px;'>{(loc.address or '')[:80]}</div>", unsafe_allow_html=True)
         st.session_state.setdefault(f"{row_id}_edit_flag", False)
         st.session_state.setdefault(f"{row_id}_del_flag", False)
-        with cols[4]:
+        with cols[5]:
             if not st.session_state[f"{row_id}_del_flag"]:
                 b1, b2 = st.columns(2)
                 if b1.button("✏️", key=f"{row_id}_edit_btn", help="Edit"):
@@ -122,7 +131,7 @@ def _locations_table():
 
         if st.session_state[f"{row_id}_edit_flag"]:
             with st.expander(f"Edit {loc.name} ({loc.code})", expanded=True):
-                e_cols = st.columns([0.30, 0.20, 0.30, 0.20])
+                e_cols = st.columns([0.28, 0.16, 0.30, 0.14, 0.12])
                 with e_cols[0]:
                     new_name = st.text_input("Name", value=loc.name, key=f"{row_id}_edit_name")
                 with e_cols[1]:
@@ -131,34 +140,55 @@ def _locations_table():
                     new_addr = st.text_input("Address", value=(loc.address or ""), key=f"{row_id}_edit_addr")
                 with e_cols[3]:
                     new_active = st.checkbox("Active", value=bool(loc.is_active), key=f"{row_id}_edit_active")
+                with e_cols[4]:
+                    new_ho = st.checkbox(
+                        "Head Office",
+                        value=bool(getattr(loc, "is_head_office", False)),
+                        key=f"{row_id}_edit_ho",
+                    )
                 a1, a2 = st.columns(2)
                 if a1.button("💾 Save", key=f"{row_id}_edit_save"):
-                    try:
-                        with get_session() as session:
-                            LocationManager.update_location(
-                                session,
-                                location_id=int(loc.id),
-                                name=new_name.strip(),
-                                code=new_code.strip(),
-                                address=new_addr.strip(),
-                                is_active=bool(new_active),
+                    if bool(new_ho) and not bool(new_active):
+                        st.error("Head Office location must be Active.")
+                    else:
+                        try:
+                            old_name = getattr(loc, "name", "")
+                            old_code = getattr(loc, "code", "")
+                            old_active = bool(getattr(loc, "is_active", True))
+                            old_ho = bool(getattr(loc, "is_head_office", False))
+
+                            with get_session() as session:
+                                LocationManager.update_location(
+                                    session,
+                                    location_id=int(loc.id),
+                                    name=new_name.strip(),
+                                    code=new_code.strip(),
+                                    address=new_addr.strip(),
+                                    is_active=bool(new_active),
+                                    is_head_office=bool(new_ho),
+                                )
+                            u = st.session_state.get("auth_user", {})
+                            SecurityManager.log_audit(
+                                None,
+                                u.get("username", "system"),
+                                "UPDATE",
+                                resource_type="Location",
+                                resource_id=str(loc.id),
+                                details=(
+                                    f"Updated location {loc.id}: "
+                                    f"name='{old_name}'->'{new_name.strip()}', "
+                                    f"code='{old_code}'->'{new_code.strip()}', "
+                                    f"active={old_active}->{bool(new_active)}, "
+                                    f"head_office={old_ho}->{bool(new_ho)}"
+                                ),
+                                user_id=u.get("id"),
+                                location_id=loc.id,
                             )
-                        u = st.session_state.get("auth_user", {})
-                        SecurityManager.log_audit(
-                            None,
-                            u.get("username", "system"),
-                            "UPDATE",
-                            resource_type="Location",
-                            resource_id=str(loc.id),
-                            details=f"Updated location to {new_name} ({new_code})",
-                            user_id=u.get("id"),
-                            location_id=loc.id,
-                        )
-                        st.success("Location updated.")
-                        st.session_state[f"{row_id}_edit_flag"] = False
-                        st.rerun()
-                    except Exception as ex:
-                        st.error(str(ex))
+                            st.success("Location updated.")
+                            st.session_state[f"{row_id}_edit_flag"] = False
+                            st.rerun()
+                        except Exception as ex:
+                            st.error(str(ex))
                 if a2.button("Cancel", key=f"{row_id}_edit_cancel"):
                     st.session_state[f"{row_id}_edit_flag"] = False
 
@@ -173,4 +203,3 @@ def render_manage_locations_page(active_location_id, user):
     st.markdown("---")
 
     _locations_table()
-
