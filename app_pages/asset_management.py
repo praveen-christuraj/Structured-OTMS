@@ -116,6 +116,13 @@ def _tab_tanks(active_location_id, user):
         return
     st.caption(f"Active Location: **{loc_label}**")
 
+    if bool(getattr(loc, "is_head_office", False)):
+        st.info(
+            "This is a **Head Office** location. Tanks are not managed here. "
+            "Switch the active location to an operating terminal to add/edit tanks."
+        )
+        return
+
     # ---- Create / list tanks ----
     with get_session() as session:
         tanks = session.query(Tank).filter(Tank.location_id == loc.id).order_by(Tank.name.asc()).all()
@@ -452,6 +459,13 @@ def _tab_vessels_assign(active_location_id, user):
                     if dc2.button("❌ Cancel", key=f"n_del_vessel_{v.id}", use_container_width=True):
                         st.session_state.pop(f"confirm_del_vessel_{v.id}", None); st.rerun()
 
+    if bool(getattr(loc, "is_head_office", False)):
+        st.info(
+            "This is a **Head Office** location. Location-specific vessel assignments are disabled here. "
+            "Switch the active location to an operating terminal to assign vessels."
+        )
+        return
+
     # Assign to this location
     names = [v.name for v in vessels]; by_name = {v.name: v for v in vessels}
     selected = st.multiselect("Assign vessels to this location", names,
@@ -599,6 +613,13 @@ def _tab_fso_assign(active_location_id, user):
                             st.error(f"Failed to delete: {ex}")
                     if dc2.button("❌ Cancel", key=f"n_del_fso_{v.id}", use_container_width=True):
                         st.session_state.pop(f"confirm_del_fso_{v.id}", None); st.rerun()
+
+    if bool(getattr(loc, "is_head_office", False)):
+        st.info(
+            "This is a **Head Office** location. Location-specific FSO assignments are disabled here. "
+            "Switch the active location to an operating terminal to assign FSOs."
+        )
+        return
 
     names = [v.name for v in fsos]; by_name = {v.name: v for v in fsos}
     selected = st.multiselect("Assign FSOs to this location", names,

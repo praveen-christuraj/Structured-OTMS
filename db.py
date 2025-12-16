@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -42,6 +43,14 @@ def _ensure_schema_updates():
 
     try:
         with engine.begin() as conn:
+            # Locations: Head Office flag
+            try:
+                cols_locations = {row[1] for row in conn.execute(text("PRAGMA table_info('locations')")).fetchall()}
+                if "is_head_office" not in cols_locations:
+                    conn.execute(text("ALTER TABLE locations ADD COLUMN is_head_office BOOLEAN DEFAULT 0"))
+            except Exception:
+                pass
+
             cols_users = {row[1] for row in conn.execute(text("PRAGMA table_info('users')")).fetchall()}
             if "supervisor_code_hash" not in cols_users:
                 conn.execute(text("ALTER TABLE users ADD COLUMN supervisor_code_hash VARCHAR(255)"))
@@ -94,6 +103,25 @@ def _ensure_schema_updates():
                     conn.execute(text("ALTER TABLE export_processes ADD COLUMN laycan_start DATE"))
                 if "laycan_end" not in cols_export:
                     conn.execute(text("ALTER TABLE export_processes ADD COLUMN laycan_end DATE"))
+            except Exception:
+                pass
+
+            # Normalize legacy audit_log timestamps (older builds stored local WAT as naive)
+            try:
+                max_ts_val = conn.execute(text("SELECT MAX(timestamp) FROM audit_log")).scalar()
+                max_ts = None
+                if isinstance(max_ts_val, datetime):
+                    max_ts = max_ts_val
+                elif isinstance(max_ts_val, str) and max_ts_val.strip():
+                    s = max_ts_val.strip().replace("T", " ")
+                    try:
+                        max_ts = datetime.fromisoformat(s)
+                    except Exception:
+                        max_ts = None
+
+                # If newest audit timestamp is ahead of UTC "now", assume it was stored in local WAT (UTC+1)
+                if max_ts and (max_ts - datetime.utcnow()) > timedelta(minutes=30):
+                    conn.execute(text("UPDATE audit_log SET timestamp = datetime(timestamp, '-1 hour')"))
             except Exception:
                 pass
     except Exception:

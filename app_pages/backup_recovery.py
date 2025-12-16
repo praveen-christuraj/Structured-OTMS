@@ -5,7 +5,17 @@ from db import get_session
 from ui import header
 from security import SecurityManager
 from backup_manager import BackupManager
+from pathlib import Path
+import json
 from location_manager import LocationManager
+from typing import Any
+
+def _st_safe_rerun() -> None:
+    """Attempt a safe rerun; if fragment-scoped rerun error occurs, set a flag."""
+    try:
+        st.rerun()
+    except Exception:
+        st.session_state["__request_full_rerun__"] = True
 
 def render_backup_recovery_page(active_location_id, user):
     role = (user or {}).get("role", "")
@@ -17,7 +27,7 @@ def render_backup_recovery_page(active_location_id, user):
     header("Backup & Recovery")
     st.markdown("### Database Backup & Recovery Management")
 
-    tab1, tab2, tab3 = st.tabs(["🗄️ Backups", "🗄️ Create Backup", "📤 Export Location"])
+    tab1, tab2, tab3, tab4 = st.tabs(["🗄️ Backups", "🗄️ Create Backup", "📤 Export Location", "⚙️ Auto Backup"])
 
     with tab1:
         st.markdown("#### Available Backups")
@@ -103,7 +113,7 @@ def render_backup_recovery_page(active_location_id, user):
                             if st.button("🗑️", key="br_delete_backup_btn_step1", help="Delete Backup"):
                                 st.session_state.delete_backup_step = 1
                                 st.session_state.delete_backup_pending = backup_ts
-                                st.rerun()
+                                _st_safe_rerun()
                         elif st.session_state.delete_backup_step == 1:
                             st.warning("⚠️ Are you sure you want to delete this backup?")
                             st.caption("This action cannot be undone")
@@ -128,7 +138,7 @@ def render_backup_recovery_page(active_location_id, user):
                                             st.success(f"Backup deleted: {st.session_state.delete_backup_pending}")
                                             st.session_state.delete_backup_step = 0
                                             st.session_state.delete_backup_pending = None
-                                            st.rerun()
+                                            _st_safe_rerun()
                                         except Exception as ex:
                                             st.error(f"Failed to delete: {ex}")
                                     else:
@@ -138,7 +148,7 @@ def render_backup_recovery_page(active_location_id, user):
                                     st.session_state.delete_backup_step = 0
                                     st.session_state.delete_backup_pending = None
                                     st.info("Deletion cancelled")
-                                    st.rerun()
+                                    _st_safe_rerun()
                 st.markdown("---")
                 st.markdown("#### Cleanup Old Backups")
                 cleanup_col1, cleanup_col2 = st.columns(2)
@@ -151,7 +161,7 @@ def render_backup_recovery_page(active_location_id, user):
                             result = BackupManager.cleanup_old_backups(days=days, keep_minimum=keep_min)
                             st.success(f"Cleanup complete. Deleted: {result['deleted']}, Kept: {result['kept']}")
                             if result["deleted"] > 0:
-                                st.rerun()
+                                _st_safe_rerun()
                         except Exception as ex:
                             st.error(f"Cleanup failed: {ex}")
             else:
@@ -181,7 +191,7 @@ def render_backup_recovery_page(active_location_id, user):
                             user_id=user.get("id"),
                             location_id=user.get("location_id"),
                         )
-                    st.rerun()
+                    _st_safe_rerun()
                 except Exception as ex:
                     st.error(f"Backup creation failed: {ex}")
         st.markdown("---")
@@ -240,3 +250,84 @@ def render_backup_recovery_page(active_location_id, user):
                 st.warning("No locations found.")
         except Exception as ex:
             st.error(f"Failed to load locations: {ex}")
+
+    with tab4:
+        st.markdown("#### Automatic Backup Settings")
+        st.caption("Enable automatic backups and choose a schedule. A background scheduler process reads this configuration and runs backups accordingly.")
+
+        CONFIG_PATH = Path("backups") / "auto_backup_config.json"
+
+        # Load current config or defaults
+        def _load_auto_conf() -> dict:
+            try:
+                if CONFIG_PATH.exists():
+                    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        return {
+                            "enabled": bool(data.get("enabled", True)),
+                            "mode": str(data.get("mode", "daily")),
+                            "interval": int(data.get("interval", 24)),
+                            "time": str(data.get("time", "02:00"))[:5],
+                        }
+            except Exception:
+                pass
+            return {"enabled": False, "mode": "daily", "interval": 24, "time": "02:00"}
+
+        def _save_auto_conf(conf: dict):
+            CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                json.dump(conf, f, indent=2)
+
+        conf = _load_auto_conf()
+
+        # UI Controls
+        enabled = st.checkbox("Enable automatic backups", value=conf.get("enabled", False), key="br_auto_enabled")
+
+        mode = st.radio(
+            "Schedule mode",
+            options=["Every N minutes", "Every N hours", "Daily at time"],
+            index={"minutes":0, "hours":1, "daily":2}.get(conf.get("mode", "daily"), 2),
+            horizontal=True,
+        )
+
+        col_a, col_b = st.columns([0.5, 0.5])
+        with col_a:
+            if mode == "Every N minutes":
+                interval = st.number_input("Minutes", min_value=1, value=int(conf.get("interval", 30)), step=1)
+                new_conf = {"enabled": enabled, "mode": "minutes", "interval": int(interval), "time": conf.get("time", "02:00")}
+            elif mode == "Every N hours":
+                interval = st.number_input("Hours", min_value=1, value=int(conf.get("interval", 6)), step=1)
+                new_conf = {"enabled": enabled, "mode": "hours", "interval": int(interval), "time": conf.get("time", "02:00")}
+            else:
+                # Daily at time
+                try:
+                    default_time = conf.get("time", "02:00")
+                    hh, mm = map(int, str(default_time)[:5].split(":"))
+                except Exception:
+                    hh, mm = 2, 0
+                hour = st.number_input("Hour (24h)", min_value=0, max_value=23, value=hh, step=1)
+                minute = st.number_input("Minute", min_value=0, max_value=59, value=mm, step=1)
+                new_conf = {"enabled": enabled, "mode": "daily", "interval": conf.get("interval", 24), "time": f"{int(hour):02d}:{int(minute):02d}"}
+
+        with col_b:
+            st.markdown("""
+            - Minutes/Hours are useful for testing and frequent backups.
+            - Daily at time is recommended for production (e.g., 02:00).
+            - The scheduler process watches this file for changes.
+            """)
+
+        save_col, run_col = st.columns([0.3, 0.7])
+        with save_col:
+            if st.button("💾 Save Settings", type="primary"):
+                try:
+                    _save_auto_conf(new_conf)
+                    st.success("Automatic backup settings saved.")
+                except Exception as ex:
+                    st.error(f"Failed to save settings: {ex}")
+        with run_col:
+            st.info("To run the scheduler, start `backup_scheduler.py` separately or configure a Windows Task Scheduler job.")
+            st.code("python backup_scheduler.py", language="bat")
+
+        # Show current effective config
+        st.markdown("##### Current Configuration")
+        st.json(new_conf)

@@ -87,7 +87,7 @@ def get_user_reports(user: dict, location_id: int = None):
         return result
 
 
-def render_filter_inputs(filter_configs: list, location_id: int) -> dict:
+def render_filter_inputs(filter_configs: list, location_id: int, key_prefix: str = "filter") -> dict:
     """
     Render filter input widgets based on report configuration.
     
@@ -102,14 +102,13 @@ def render_filter_inputs(filter_configs: list, location_id: int) -> dict:
     
     FormBuilder.section_header("🔍 Report Filters")
     
-    # Date range filter (optional) so users can widen to all dates if needed
-    apply_date = st.checkbox("Filter by date range", value=True, key="filter_apply_date")
+    apply_date = st.checkbox("Filter by date range", value=True, key=f"{key_prefix}_apply_date")
     if apply_date:
         col1, col2 = st.columns(2)
         with col1:
             start_date = FormBuilder.date_field(
                 "Start Date",
-                "filter_start_date",
+                f"{key_prefix}_start_date",
                 required=True,
                 default_date=date.today() - timedelta(days=180)
             )
@@ -118,7 +117,7 @@ def render_filter_inputs(filter_configs: list, location_id: int) -> dict:
         with col2:
             end_date = FormBuilder.date_field(
                 "End Date",
-                "filter_end_date",
+                f"{key_prefix}_end_date",
                 required=True,
                 default_date=date.today()
             )
@@ -148,38 +147,38 @@ def render_filter_inputs(filter_configs: list, location_id: int) -> dict:
         
         # Render appropriate input widget
         if filter_type == 'date':
-            filters[field] = st.date_input(label, key=f"filter_{field}", max_value=date.today())
+            filters[field] = st.date_input(label, key=f"{key_prefix}_{field}", max_value=date.today())
         
         elif filter_type == 'numeric':
             if operator == 'between':
                 col1, col2 = st.columns(2)
                 with col1:
-                    min_val = st.number_input(f"{label} (Min)", key=f"filter_{field}_min")
+                    min_val = st.number_input(f"{label} (Min)", key=f"{key_prefix}_{field}_min")
                 with col2:
-                    max_val = st.number_input(f"{label} (Max)", key=f"filter_{field}_max")
+                    max_val = st.number_input(f"{label} (Max)", key=f"{key_prefix}_{field}_max")
                 filters[field] = [min_val, max_val]
             else:
-                filters[field] = st.number_input(label, key=f"filter_{field}")
+                filters[field] = st.number_input(label, key=f"{key_prefix}_{field}")
         
         elif filter_type == 'select':
             options = filter_config.get('options', [])
-            filters[field] = st.selectbox(label, options, key=f"filter_{field}")
+            filters[field] = st.selectbox(label, options, key=f"{key_prefix}_{field}")
         
         elif filter_type == 'multiselect':
             options = filter_config.get('options', [])
-            filters[field] = st.multiselect(label, options, key=f"filter_{field}")
+            filters[field] = st.multiselect(label, options, key=f"{key_prefix}_{field}")
         
         elif filter_type == 'tank':
             # Load tanks for the location
             with get_session() as session:
                 tanks = session.query(Tank).filter(Tank.location_id == location_id).all()
                 tank_names = [t.name for t in tanks]
-                selected_tank = st.selectbox(label, ['All'] + tank_names, key=f"filter_{field}")
+                selected_tank = st.selectbox(label, ['All'] + tank_names, key=f"{key_prefix}_{field}")
                 if selected_tank != 'All':
                     filters[field] = selected_tank
         
         else:
-            filters[field] = st.text_input(label, key=f"filter_{field}")
+            filters[field] = st.text_input(label, key=f"{key_prefix}_{field}")
     
     return filters
 
@@ -246,9 +245,8 @@ def render_reporting_page(active_location_id: int, user: dict):
     # Get report configuration
     config = selected_report['config']
     
-    # Render filters directly above table
     filter_configs = config.get('filters', [])
-    user_filters = render_filter_inputs(filter_configs, active_location_id)
+    user_filters = render_filter_inputs(filter_configs, active_location_id, key_prefix=f"report_{selected_report.get('slug') or selected_report.get('id')}")
     
     # Auto-generate and display report
     try:

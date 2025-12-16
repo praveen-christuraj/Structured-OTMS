@@ -15,7 +15,8 @@ class LocationManager:
         session: Session,
         name: str,
         code: str,
-        address: Optional[str] = None
+        address: Optional[str] = None,
+        is_head_office: bool = False,
     ) -> Dict:
         """
         Create a new location.
@@ -33,11 +34,18 @@ class LocationManager:
             if existing.code == code:
                 raise ValueError(f"Location code '{code}' already exists")
         
+        if bool(is_head_office):
+            try:
+                session.query(Location).update({Location.is_head_office: False})
+            except Exception:
+                pass
+
         location = Location(
             name=name,
             code=code.upper(),
             address=address,
-            is_active=True
+            is_active=True,
+            is_head_office=bool(is_head_office),
         )
         
         session.add(location)
@@ -49,7 +57,8 @@ class LocationManager:
             "name": location.name,
             "code": location.code,
             "address": location.address,
-            "is_active": location.is_active
+            "is_active": location.is_active,
+            "is_head_office": bool(getattr(location, "is_head_office", False)),
         }
     
     @staticmethod
@@ -72,7 +81,8 @@ class LocationManager:
         name: Optional[str] = None,
         code: Optional[str] = None,
         address: Optional[str] = None,
-        is_active: Optional[bool] = None
+        is_active: Optional[bool] = None,
+        is_head_office: Optional[bool] = None,
     ) -> Dict:
         """
         Update location details.
@@ -91,6 +101,21 @@ class LocationManager:
             location.address = address
         if is_active is not None:
             location.is_active = is_active
+            if not bool(is_active):
+                try:
+                    location.is_head_office = False
+                except Exception:
+                    pass
+
+        if is_head_office is not None:
+            try:
+                if bool(is_head_office):
+                    session.query(Location).filter(Location.id != location_id).update({Location.is_head_office: False})
+                    location.is_head_office = True
+                else:
+                    location.is_head_office = False
+            except Exception:
+                pass
         
         session.commit()
         
@@ -100,7 +125,8 @@ class LocationManager:
             "name": location.name,
             "code": location.code,
             "address": location.address,
-            "is_active": location.is_active
+            "is_active": location.is_active,
+            "is_head_office": bool(getattr(location, "is_head_office", False)),
         }
     
     @staticmethod
@@ -114,6 +140,10 @@ class LocationManager:
             raise ValueError(f"Location ID {location_id} not found")
         
         location.is_active = False
+        try:
+            location.is_head_office = False
+        except Exception:
+            pass
         session.commit()
     
     @staticmethod

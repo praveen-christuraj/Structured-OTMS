@@ -26,3 +26,6 @@ paramiko==4.0.0
 boto3==1.41.5
 azure-storage-blob==12.22.0
 pyngrok==7.5.0
+fastapi==0.124.4
+uvicorn[standard]==0.38.0
+PyJWT==2.10.1

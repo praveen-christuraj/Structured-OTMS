@@ -2,6 +2,11 @@ import streamlit as st
 import streamlit.components.v1 as components
 from typing import Optional, Dict, List, Any
 from datetime import date
+import os
+import hmac
+import hashlib
+import base64
+import json
 
 from db import get_session, get_flex_session
 from models import get_custom_table_model
@@ -10,6 +15,24 @@ from security import SecurityManager
 from location_config import get_page_section_config
 from task_manager import TaskManager
 from logger import log_error
+
+
+def _audit_action(user: Optional[Dict], action: str, resource_type: str, resource_id: Optional[str], details: str = "") -> None:
+    try:
+        with get_session() as s:
+            SecurityManager.log_audit(
+                s,
+                (user or {}).get("username", "system"),
+                action,
+                resource_type=resource_type,
+                resource_id=str(resource_id) if resource_id is not None else None,
+                details=details,
+                user_id=(user or {}).get("id"),
+                location_id=0,
+                ip_address=str(st.session_state.get("client_ip") or "N/A"),
+            )
+    except Exception as ex:
+        log_error(f"Failed to log audit action '{action}' on {resource_type} {resource_id}: {ex}", exc_info=True)
 
 
 def _guard_access(user: Optional[Dict]) -> bool:
@@ -46,6 +69,42 @@ def _slug(s: str) -> str:
     while "__" in r:
         r = r.replace("__", "_")
     return r.strip("_")
+
+
+def _get_stage_progress(export_id: int, stage_code: str):
+    """Get stage progress record"""
+    try:
+        from models import ExportStageProgress
+        with get_session() as s:
+            r = s.query(ExportStageProgress).filter(ExportStageProgress.export_id == int(export_id)).filter(ExportStageProgress.stage_code == str(stage_code)).one_or_none()
+            return r
+    except Exception:
+        return None
+
+
+def _get_export_attachments(export_id: int) -> List[Dict[str, Any]]:
+    """Get all attachments for a shipment across all stages"""
+    try:
+        from models import ExportStageProgress, ExportAttachment
+        with get_session() as s:
+            stages = s.query(ExportStageProgress).filter(ExportStageProgress.export_id == int(export_id)).all()
+            attachments = []
+            for stage in stages:
+                for att in stage.attachments:
+                    attachments.append({
+                        "id": att.id,
+                        "filename": att.filename,
+                        "mime_type": att.mime_type,
+                        "size_bytes": att.size_bytes,
+                        "uploaded_by": att.uploaded_by,
+                        "uploaded_at": att.uploaded_at,
+                        "stage_code": stage.stage_code,
+                        "visibility": att.visibility,
+                        "data": att.data
+                    })
+            return attachments
+    except Exception:
+        return []
 
 
 def render_export_operations_page(active_location_id: Optional[int], user: Optional[Dict]):
@@ -511,6 +570,239 @@ def render_export_operations_page(active_location_id: Optional[int], user: Optio
                 log_error(f"Failed to create error task: {task_ex}", exc_info=True)
             return False
     
+    def _render_shipment_detail_view(export_id: int, shipment_data: Dict[str, Any], stages: List[Dict[str, Any]]):
+        """Render detailed shipment view with documents"""
+        try:
+            try:
+                _audit_action(st.session_state.get("auth_user"), "VIEW", "ExportProcess", export_id, "Viewed export shipment detail view")
+            except Exception:
+                pass
+            st.markdown(f"## 🚢 {shipment_data.get('title')}")
+            
+            # Determine current pending stage and due date
+            pending_status_display = "Completed"
+            is_completed = shipment_data.get('is_completed')
+            
+            if not is_completed:
+                pending_stage_name = "None"
+                pending_due_date = None
+                
+                # Find the first non-completed stage
+                for s_def in stages:
+                    s_code = s_def.get("code")
+                    comp_statuses = list(s_def.get("completion_statuses") or ["Completed"])
+                    
+                    p_row = _get_stage_progress(int(export_id), s_code)
+                    p_status = getattr(p_row, "status", "Pending") if p_row else "Pending"
+                    
+                    if p_status not in comp_statuses:
+                        pending_stage_name = s_def.get("name")
+                        pending_due_date = getattr(p_row, "due_date", None)
+                        break
+                
+                if pending_stage_name != "None":
+                    date_str = pending_due_date.strftime('%d/%m/%Y') if pending_due_date else "No due date"
+                    pending_status_display = f"Pending: {pending_stage_name} (Due: {date_str})"
+                else:
+                    # Fallback if all stages seem complete but overall flag isn't set
+                    pending_status_display = "All Stages Completed"
+            
+            # Shipment metadata
+            col1, col2, col3 = st.columns(3)
+            
+            # Helper to create glass-card metric
+            def _glass_metric(label, value, icon=""):
+                return f"""
+                <div style="
+                    background: rgba(255, 255, 255, 0.6);
+                    backdrop-filter: blur(8px);
+                    border: 1px solid rgba(255, 255, 255, 0.4);
+                    border-radius: 12px;
+                    padding: 12px 16px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+                    margin-bottom: 10px;
+                    min-height: 80px;
+                ">
+                    <div style="font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">{label}</div>
+                    <div style="font-size: 16px; color: #111827; font-weight: 700; word-wrap: break-word;">{icon} {value}</div>
+                </div>
+                """
+
+            with col1:
+                st.markdown(_glass_metric("Reference No", shipment_data.get('ref_no') or 'N/A', "🔖"), unsafe_allow_html=True)
+            with col2:
+                st.markdown(_glass_metric("Current Status", pending_status_display, "📊"), unsafe_allow_html=True)
+            with col3:
+                created = shipment_data.get('created_at')
+                c_val = created.strftime('%d/%m/%Y') if created else 'N/A'
+                st.markdown(_glass_metric("Created", c_val, "📅"), unsafe_allow_html=True)
+            
+            # Laycan information if available
+            if shipment_data.get('laycan_start') or shipment_data.get('laycan_end'):
+                st.markdown("**Laycan Period:**")
+                lc1, lc2 = st.columns(2)
+                with lc1:
+                    if shipment_data.get('laycan_start'):
+                        st.info(f"Start: {shipment_data['laycan_start'].strftime('%d/%m/%Y')}")
+                with lc2:
+                    if shipment_data.get('laycan_end'):
+                        st.info(f"End: {shipment_data['laycan_end'].strftime('%d/%m/%Y')}")
+            
+            st.markdown("---")
+            
+            # Process route map
+            st.markdown("### 📋 Process Route Map")
+            try:
+                stage_codes = [s.get("code") for s in stages]
+                comp_map = {s.get("code"): list(s.get("completion_statuses") or ["Completed"]) for s in stages}
+                status_items = []
+                for sc in stage_codes:
+                    row = _get_stage_progress(int(export_id), sc)
+                    if not row:
+                        status = "Not Started"
+                        date_info = ""
+                    else:
+                        rs = getattr(row, "status", "Pending") or "Pending"
+                        status = "Completed" if rs in comp_map.get(sc, ["Completed"]) else rs
+                        completed_at = getattr(row, "completed_at", None)
+                        due_date = getattr(row, "due_date", None)
+                        
+                        if status == "Completed" and completed_at:
+                            date_info = f"✅ {completed_at.strftime('%d/%m/%Y')}"
+                        elif status != "Completed" and due_date:
+                            date_info = f"📅 Due: {due_date.strftime('%d/%m/%Y')}"
+                        else:
+                            date_info = ""
+                    
+                    status_items.append({
+                        "code": sc,
+                        "name": (next((sd.get("name") for sd in stages if sd.get("code") == sc), sc) or sc),
+                        "status": status,
+                        "date_info": date_info
+                    })
+                
+                def _color(s):
+                    ss = (s or "").lower()
+                    if ss == "completed":
+                        return "#16a34a"
+                    if ss in ["in progress", "approved"]:
+                        return "#2563eb"
+                    if ss in ["pending", "not started"]:
+                        return "#6b7280"
+                    return "#6b7280"
+                
+                html = "<div style='margin:20px 0;'>"
+                for i, it in enumerate(status_items):
+                    date_html = f"<div style='font-size:10px;opacity:.85;margin-top:2px;'>{it['date_info']}</div>" if it['date_info'] else ""
+                    
+                    # Apply glassy effect: translucent background + blur + border
+                    # Font size reduced: name=11px, status=10px, date=10px
+                    # Colors adjusted for readability on glassy background
+                    bg_color = _color(it['status'])
+                    # We use a semi-transparent version of the color for the background to enable glass effect
+                    # But since _color returns hex, we'll keep it solid for the 'card' look but add shadow/border
+                    # To make it "glassy", we can use a lighter background with the color as a border/accent
+                    
+                    # Modern Card Style (Glass-like)
+                    # - Background: solid color but with gradient or transparency if supported, here using solid for contrast
+                    # - Box-shadow for depth
+                    # - Border-radius
+                    
+                    html += (
+                        f"<div style='display:inline-block;padding:8px 12px;margin:4px;border-radius:8px;"
+                        f"background:{bg_color};color:#fff;min-width:100px;text-align:center;"
+                        f"box-shadow: 0 4px 6px rgba(0,0,0,0.1);border: 1px solid rgba(255,255,255,0.2);backdrop-filter: blur(4px);'>"
+                        f"<div style='font-weight:600;font-size:11px;'>{it['name']}</div>"
+                        f"<div style='font-size:10px;opacity:.9;margin-top:2px;'>{it['status']}</div>"
+                        f"{date_html}"
+                        f"</div>"
+                    )
+                    if i < len(status_items) - 1:
+                        html += "<span style='margin:0 4px;color:#64748b;font-size:14px;'>→</span>"
+                html += "</div>"
+                st.markdown(html, unsafe_allow_html=True)
+            except Exception as ex:
+                st.error(f"Unable to load route map: {str(ex)}")
+            
+            st.markdown("---")
+            
+            # Stage details
+            st.markdown("### 📊 Stage Details")
+            for stage_def in stages:
+                stage_code = stage_def.get("code")
+                stage_name = stage_def.get("name")
+                
+                progress_row = _get_stage_progress(int(export_id), stage_code)
+                current_status = getattr(progress_row, "status", "Pending") if progress_row else "Pending"
+                
+                comp_list = list(stage_def.get("completion_statuses") or ["Completed"])
+                is_completed = (current_status in comp_list)
+                
+                if is_completed:
+                    icon = "✅"
+                elif current_status == "In Progress":
+                    icon = "🔵"
+                else:
+                    icon = "⚪"
+                
+                with st.expander(f"{icon} {stage_name} - {current_status}", expanded=False):
+                    if progress_row:
+                        st.write(f"**Status:** {current_status}")
+                        if getattr(progress_row, "due_date", None):
+                            st.write(f"**Due Date:** {progress_row.due_date.strftime('%d/%m/%Y')}")
+                        if getattr(progress_row, "completed_at", None):
+                            st.write(f"**Completed:** {progress_row.completed_at.strftime('%d/%m/%Y %H:%M')}")
+                        if getattr(progress_row, "remarks", None):
+                            st.write(f"**Remarks:** {progress_row.remarks}")
+                    else:
+                        st.info("Stage not started")
+            
+            st.markdown("---")
+            
+            # Documents section
+            st.markdown("### 📎 Attached Documents")
+            attachments = _get_export_attachments(export_id)
+            
+            if attachments:
+                st.write(f"**Total Documents: {len(attachments)}**")
+                st.markdown("")
+                for att in attachments:
+                    col1, col2, col3, col4 = st.columns([3, 2, 2, 1])
+                    with col1:
+                        st.write(f"📄 **{att['filename']}**")
+                    with col2:
+                        st.caption(f"Stage: {att['stage_code']}")
+                    with col3:
+                        size_kb = att['size_bytes'] / 1024 if att['size_bytes'] else 0
+                        st.caption(f"Size: {size_kb:.1f} KB")
+                    with col4:
+                        if att.get('data'):
+                            import base64
+                            b64 = base64.b64encode(att['data']).decode('utf-8')
+                            mime = att['mime_type'] or 'application/octet-stream'
+                            view_html = f"<a href=\"data:{mime};base64,{b64}\" target=\"_blank\" style=\"text-decoration:none;font-weight:600;\">👁️ View</a>"
+                            st.markdown(view_html, unsafe_allow_html=True)
+                    # Optional inline preview for images/PDFs
+                    if (att.get('mime_type') or '').startswith(('application/pdf', 'image/')):
+                        with st.expander(f"👁️ Preview {att.get('filename')}"):
+                            try:
+                                if (att.get('mime_type') or '').startswith('image/'):
+                                    st.image(att['data'], caption=att.get('filename'))
+                                elif att.get('mime_type') == 'application/pdf':
+                                    import base64
+                                    base64_pdf = base64.b64encode(att['data']).decode('utf-8')
+                                    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
+                                    st.markdown(pdf_display, unsafe_allow_html=True)
+                            except Exception as preview_ex:
+                                st.error(f"Unable to preview: {str(preview_ex)}")
+                st.markdown("---")
+            else:
+                st.info("No documents attached to this shipment yet.")
+                
+        except Exception as e:
+            st.error(f"Error displaying shipment details: {str(e)}")
+            log_error(f"Failed to render shipment detail view: {e}", exc_info=True)
+
     # Load pipeline configuration
     cfg = _load_pipeline_cfg(int(loc_id or 0), term)
     stages = list(cfg.get("stages") or [])
@@ -628,11 +920,13 @@ def render_export_operations_page(active_location_id: Optional[int], user: Optio
                             return "#6b7280"
                         return "#6b7280"
                     
-                    html = "<div style=\"margin:15px 0;\">"
+                    html = "<div style='margin:15px 0;'>"
+                    
                     for i, it in enumerate(status_items):
                         date_html = f"<div style=\"font-size:11px;opacity:.85;margin-top:4px;\">{it['date_info']}</div>" if it['date_info'] else ""
                         note_html = f"<div style=\"font-size:11px;font-weight:600;opacity:.95;margin-top:2px;\">{it['due_note']}</div>" if it.get("due_note") else ""
                         glow = "box-shadow:0 0 10px #ef4444,0 0 20px #ef4444;" if it.get("overdue") else ""
+                        
                         html += (
                             f"<div style=\"display:inline-block;padding:12px 16px;margin:6px;border-radius:12px;background:{_color(it['status'])};color:#fff;{glow}min-width:120px;text-align:center;\">"
                             f"<div style=\"font-weight:700;font-size:13px;\">{it['name']}</div>"
@@ -641,10 +935,20 @@ def render_export_operations_page(active_location_id: Optional[int], user: Optio
                             f"{note_html}"
                             f"</div>"
                         )
+                        
                         if i < len(status_items) - 1:
                             html += "<span style=\"margin:0 6px;color:#64748b;font-size:18px;\">→</span>"
                     html += "</div>"
                     st.markdown(html, unsafe_allow_html=True)
+
+                    if st.button("📋 View Full Details", key=f"dash_view_{export_id}"):
+                        _audit_action(user, "VIEW", "ExportProcess", export_id, "Opened export shipment detail from dashboard")
+                        full_exp = _get_export(0, export_id)
+                        if full_exp:
+                            _render_shipment_detail_view(export_id, full_exp, stages)
+                        else:
+                            st.error("Could not load details")
+
                 except Exception as ex:
                     st.error(f"Unable to load route map: {str(ex)}")
                 
